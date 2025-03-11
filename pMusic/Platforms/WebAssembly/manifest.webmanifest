@@ -1,0 +1,10 @@
+{
+  "background_color": "#ffffff",
+  "description": "pMusic",
+  "display": "standalone",
+  "name": "pMusic",
+  "short_name": "pMusic",
+  "start_url": "/index.html",
+  "theme_color": "#ffffff",
+  "scope": "/"
+}
