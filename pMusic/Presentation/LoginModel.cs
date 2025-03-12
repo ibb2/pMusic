@@ -4,6 +4,7 @@ using System.Web;
 using System.Xml.Linq;
 using Windows.Security.Credentials;
 using Windows.System;
+using KeySharp;
 
 namespace pMusic.Presentation;
 
@@ -21,51 +22,52 @@ public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, I
         var clientIdentifier = "";
         try
         {
-            var vault = new PasswordVault();
-            var credential = vault.Retrieve("pMusic", "cIdentifier");
-            clientIdentifier = credential.Password;
+            clientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
         }
         catch (Exception ex)
         {
             // Initial Setup create the Client Identifier and store for later use
             var guid = Guid.NewGuid().ToString();
             clientIdentifier = guid;
-            // var vault = new PasswordVault();
-            // var credential = new PasswordCredential("pMusic", "cIdentifier", guid);
-            // vault.Add(credential);
+            Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", guid);
         }
 
         var plexPinUri = new Uri("https://plex.tv/api/v2/pins");
-        
+
         var contents = new FormUrlEncodedContent([
             new KeyValuePair<string, string>("strong", "true"),
             new KeyValuePair<string, string>("X-Plex-Product", "pMusic"),
             new KeyValuePair<string, string>("X-Plex-Client-Identifier", clientIdentifier)
         ]);
-        
+
         var results = await httpClient.PostAsync(plexPinUri, contents);
-        var pinid = "";
+
+        var id = "";
         var code = "";
+
         if (results.IsSuccessStatusCode)
         {
-            Console.WriteLine("Successfully generated pin");
             var responseBody = results.Content.ReadAsStringAsync().Result;
             var incomingXml = XElement.Parse(responseBody);
-            Console.WriteLine(incomingXml.Attribute("id"));
-            pinid = incomingXml.Attribute("id").ToString();
-            code = incomingXml.Attribute("code").ToString();
-            Console.WriteLine(incomingXml.Attribute("code"));
+
+            id = incomingXml.Attribute("id").ToString().Split('"')[1];
+            code = incomingXml.Attribute("code").ToString().Split('"')[1];
+
+            Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", id);
+            Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", code);
+
+            Console.WriteLine("Successfully generated pin");
         }
         else
         {
             Console.WriteLine("Failed to get generated pin");
         }
-        
+
         // Navigate to Plex.tv to authenticate
         var queryParams = new Dictionary<string, string>
         {
             { "clientID", clientIdentifier },
-            { "code", code.Split('"')[1] },
+            { "code", code },
             // { "forwardUrl", "https://localhost" },
             { "context[device][product]", "pMusic" } // Flattened for URL encoding
         };
@@ -78,44 +80,40 @@ public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, I
             {
                 keyValuePairs.Add($"{HttpUtility.UrlEncode(item.Key)}={HttpUtility.UrlEncode(item.Value)}");
             }
+
             return string.Join("&", keyValuePairs);
         }
-
-        string queryString = string.Join("&", queryParams
-            .Select(kvp => $"{WebUtility.UrlEncode(kvp.Key)}={WebUtility.UrlEncode(kvp.Value)}"));
-
-        string finalUrl = $"https://app.plex.tv/auth#?{queryString}";
 
         var encodedValues = EncodeFormUrlEncoded(queryParams);
 
         var authAppUrl = new Uri(
-        "https://app.plex.tv/auth#?" + encodedValues)
-        ;
-        
-        Console.WriteLine($"Encoded Url {authAppUrl}");
-        
+                "https://app.plex.tv/auth#?" + encodedValues)
+            ;
+
         await Launcher.LaunchUriAsync(authAppUrl);
 
         var isPinPolling = true;
-        String? authToken = null;
+        string? authToken = null;
+
         do
         {
-            var pcontents = new FormUrlEncodedContent([
-                new KeyValuePair<string, string>("code", code.Split('"')[1]),
-                new KeyValuePair<string, string>("X-Plex-Client-Identifier", clientIdentifier)
-            ]);
-            var plexPinPoll = new Uri($"https://plex.tv/api/v2/pins/{pinid.Split('"')[1]}??code={code.Split('"')[1]}&X-Plex-Client-Identifier={clientIdentifier}");
-            var presults = await httpClient.GetStringAsync(plexPinPoll);
-            var pinIncomingResults = XElement.Parse(presults);
-            Console.WriteLine($"Working {presults} {pinIncomingResults.Attribute("authToken").ToString().Split('"')[1].Length}");
-            if (pinIncomingResults.Attribute("authToken").ToString().Split('"')[1].Length != 0)
+            var plexPinPoll =
+                new Uri(
+                    $"https://plex.tv/api/v2/pins/{id}?code={Uri.EscapeDataString(code)}&X-Plex-Client-Identifier={Uri.EscapeDataString(clientIdentifier)}");
+            var pinResults = await httpClient.GetStringAsync(plexPinPoll);
+            var pinIncomingResults = XElement.Parse(pinResults);
+            var parsedToken = pinIncomingResults.Attribute("authToken").ToString().Split('"')[1];
+            if (parsedToken.Length != 0 || !parsedToken.IsNullOrEmpty())
             {
-                authToken = pinIncomingResults.Attribute("authToken").ToString();
-                Console.WriteLine("Successfully Authenticated");
+                authToken = parsedToken;
+                Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", authToken);
                 isPinPolling = false;
-            }
+                Console.WriteLine("Successfully Authenticated");
+            } else {
             Console.WriteLine("Waiting");
-        } while (isPinPolling);
+            }
+        } while (isPinPolling && authToken == null);
+
         Console.WriteLine($"Successfully Authenticated {authToken.Split('"')[1]}");
 
         // var success = await Authentication.LoginAsync(Dispatcher);
@@ -124,7 +122,4 @@ public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, I
         //     await Navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
         // }
     }
-
-
-
 }
