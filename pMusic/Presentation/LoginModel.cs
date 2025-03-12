@@ -114,9 +114,9 @@ public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, I
             }
         } while (isPinPolling && authToken == null);
 
-        Console.WriteLine($"Successfully Authenticated {authToken.Split('"')[1]}");
+        Console.WriteLine($"Redirecting");
 
-        await Navigator.NavigateViewModelAsync<MainModel>(this);
+        await Navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
         // var success = await Authentication.LoginAsync(Dispatcher);
         // if (success)
         // {
