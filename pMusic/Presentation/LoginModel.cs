@@ -116,6 +116,7 @@ public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, I
 
         Console.WriteLine($"Successfully Authenticated {authToken.Split('"')[1]}");
 
+        await Navigator.NavigateViewModelAsync<MainModel>(this);
         // var success = await Authentication.LoginAsync(Dispatcher);
         // if (success)
         // {
