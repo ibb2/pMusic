@@ -1,3 +1,4 @@
+using KeySharp;
 using Uno.Resizetizer;
 
 namespace pMusic;
@@ -96,9 +97,19 @@ public partial class App : Application
         Host = await builder.NavigateAsync<Shell>
             (initialNavigate: async (services, navigator) =>
             {
-                var auth = services.GetRequiredService<IAuthenticationService>();
-                var authenticated = await auth.RefreshAsync();
-                if (authenticated)
+                string? authToken = null;
+
+                try
+                {
+                    authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+                }
+                catch (Exception ex)
+                {
+                    authToken = null;
+                }
+                // var auth = services.GetRequiredService<IAuthenticationService>();
+                // var authenticated = await auth.RefreshAsync();
+                if (!authToken.IsNullOrEmpty())
                 {
                     await navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.Nested);
                 }

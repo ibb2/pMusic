@@ -1,3 +1,5 @@
+using KeySharp;
+
 namespace pMusic.Presentation;
 
 public partial record MainModel
@@ -29,7 +31,23 @@ public partial record MainModel
 
     public async ValueTask Logout(CancellationToken token)
     {
-        await _authentication.LogoutAsync(token);
+
+        string? authToken = null;
+
+        try
+        {
+            authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+        }
+        catch (Exception ex)
+        {
+            authToken = null;
+        }
+
+        Console.WriteLine($"Auth Token {authToken}");
+        if (!authToken.IsNullOrEmpty()) Keyring.DeletePassword("com.ib.pmusic", "pMusic","authToken");
+        Console.WriteLine("Logged out Successfully");
+        await _navigator.NavigateViewModelAsync<LoginModel>(this);
+        // await _authentication.LogoutAsync(token);
     }
 
     private IAuthenticationService _authentication;
