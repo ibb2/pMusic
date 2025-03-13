@@ -50,5 +50,8 @@
       ThemeService;
     </UnoFeatures>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="KeySharp" />
+  </ItemGroup>
 
 </Project>

@@ -23,7 +23,7 @@
           VerticalAlignment="Center"
           Width="200"
           Spacing="16">
-      <Button Content="Login"
+      <Button Content="Login with Plex"
           Command="{Binding Login}"
           HorizontalAlignment="Stretch" />
     </StackPanel>
