@@ -15,7 +15,7 @@ public sealed partial class MainPage : Page
             var selectedTag = selectedItem.Tag.ToString();
             var pageType = selectedTag switch
             {
-                "main" => typeof(MainPage),
+                "home" => typeof(HomePage),
                 "second" => typeof(SecondPage),
                 // Map other tags to their respective pages
                 _ => null
