@@ -10,37 +10,37 @@
   <ScrollViewer>
     <Grid utu:SafeArea.Insets="VisibleBounds">
 
-        <NavigationView uen:Region.Attached="true">
+        <NavigationView uen:Region.Attached="true" SelectionChanged="NavigationView_OnSelectionChanged">
             <NavigationView.IsSettingsVisible>False</NavigationView.IsSettingsVisible>
             <NavigationView.IsBackButtonVisible>Collapsed</NavigationView.IsBackButtonVisible>
             <!-- <NavigationView.PaneDisplayMode>Left</NavigationView.PaneDisplayMode> -->
 
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="Products"
-                                         uen:Region.Name="Products" />
-                <NavigationViewItem Content="Deals"
-                                         uen:Region.Name="Deals" />
-                <NavigationViewItem Content="Profile"
-                                         uen:Region.Name="Profile" />
+                <NavigationViewItem Content="MainPage" Tag="main" Icon="Home"/>
+                <NavigationViewItem Content="SecondPage" Tag="second" Icon="Document"/>                <!-- <NavigationViewItem Content="Products" -->
+                <!--                          uen:Region.Name="Products" /> -->
+                <!-- <NavigationViewItem Content="Deals" -->
+                <!--                          uen:Region.Name="Deals" /> -->
+                <!-- <NavigationViewItem Content="Profile" -->
+                <!--                          uen:Region.Name="Profile" /> -->
             </NavigationView.MenuItems>
 
-            <Grid uen:Region.Attached="True" uen:Region.Navigator="Visibility">
-                <StackPanel uen:Region.Name="Products"
-                            Visibility="Visible">
-                    <TextBlock Text="Products Page" />
-                </StackPanel>
-                <StackPanel uen:Region.Name="Deals"
-                            Visibility="Collapsed">
-                    <TextBlock Text="Deals Page" />
-                </StackPanel>
-                <StackPanel uen:Region.Name="Profile"
-                            Visibility="Collapsed">
-                    <TextBlock Text="Profile Page" />
-                </StackPanel>
-            </Grid>
-        </NavigationView>
-
-        <!-- <StackPanel -->
+            <!-- <Grid uen:Region.Attached="True" uen:Region.Navigator="Visibility"> -->
+            <!--     <StackPanel uen:Region.Name="Products" -->
+            <!--                 Visibility="Visible"> -->
+            <!--         <TextBlock Text="Products Page" /> -->
+            <!--     </StackPanel> -->
+            <!--     <StackPanel uen:Region.Name="Deals" -->
+            <!--                 Visibility="Collapsed"> -->
+            <!--         <TextBlock Text="Deals Page" /> -->
+            <!--     </StackPanel> -->
+            <!--     <StackPanel uen:Region.Name="Profile" -->
+            <!--                 Visibility="Collapsed"> -->
+            <!--         <TextBlock Text="Profile Page" /> -->
+            <!--     </StackPanel> -->
+            <!-- </Grid> -->
+            <Frame x:Name="ContentFrame"/>
+        </NavigationView><!-- <StackPanel -->
       <!--       HorizontalAlignment="Center" -->
       <!--       VerticalAlignment="Center" -->
       <!--       Spacing="16"> -->
