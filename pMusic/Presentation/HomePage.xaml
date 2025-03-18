@@ -7,5 +7,8 @@
       xmlns:um="using:Uno.Material"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-            <TextBlock Text="Home Page" />
+    <StackPanel>
+        <TextBlock Text="Home Page" />
+        <local:ArtistPage />
+    </StackPanel>
 </Page>
