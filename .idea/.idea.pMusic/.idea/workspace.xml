@@ -12,7 +12,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="" />
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/App.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/App.xaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -174,7 +182,11 @@
       <workItem from="1742182130927" duration="5334000" />
       <workItem from="1742191338220" duration="3421000" />
       <workItem from="1742218568979" duration="13067000" />
-      <workItem from="1742284120366" duration="7380000" />
+      <workItem from="1742284120366" duration="7468000" />
+      <workItem from="1742301236484" duration="3122000" />
+      <workItem from="1742306188809" duration="42000" />
+      <workItem from="1742346039454" duration="842000" />
+      <workItem from="1742355691917" duration="16649000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -344,7 +356,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742301040110</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Added Keysharp and LukeHagar PlexApi nuget packages.">
+      <option name="closed" value="true" />
+      <created>1742365335700</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1742365335700</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -386,7 +406,27 @@
     <MESSAGE value="Basic 2 pane navigation added.&#10;&#10;Controls region visibility to navigation between sections." />
     <MESSAGE value="Frame navigation implemented." />
     <MESSAGE value="Added Home and Artist pages." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added Home and Artist pages." />
+    <MESSAGE value="Added Keysharp and LukeHagar PlexApi nuget packages." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Keysharp and LukeHagar PlexApi nuget packages." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/pMusic/Helpers/Plex.cs</url>
+          <line>40</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" containingFunctionPresentation="Method 'GetArtists'">
+            <startOffsets>
+              <option value="1657" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1693" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
