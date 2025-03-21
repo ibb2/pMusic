@@ -1,10 +1,13 @@
-﻿namespace pMusic.Presentation;
+﻿using pMusic.Services.Navigation;
+
+namespace pMusic.Presentation;
 
 public sealed partial class MainPage : Page
 {
     public MainPage()
     {
         this.InitializeComponent();
+        FrameNavigation.Frame = ContentFrame;
     }
 
     private void NavigationView_OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -28,4 +31,6 @@ public sealed partial class MainPage : Page
         }
         
     }
+    
+    public Frame RootContentFrame => ContentFrame;
 }

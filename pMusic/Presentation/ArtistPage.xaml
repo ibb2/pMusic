@@ -13,7 +13,7 @@
         <ui:FeedView Source="{Binding Artists}">
             <ui:FeedView.ValueTemplate>
                 <DataTemplate>
-                    <ListView ItemsSource="{Binding Data}">
+                    <ListView ItemsSource="{Binding Data}" SelectionMode="Single" x:Name="ArtistList">
 
                         <ListView.Header>
                             <Button Content="Refresh" Command="{Binding Refresh}" />
@@ -24,10 +24,10 @@
                                 <!-- <Image Source="{Binding Thumbnail}"></Image> -->
                                 <StackPanel Orientation="Horizontal" Spacing="5">
                                     <TextBlock Text="{Binding Title}" />
+                                    <Button Content="Go to Artist's Album Page" Click="GoToAlbumPage_ItemClick"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
-
                     </ListView>
                 </DataTemplate>
             </ui:FeedView.ValueTemplate>
@@ -47,6 +47,5 @@
                 </DataTemplate>
             </ui:FeedView.NoneTemplate>
         </ui:FeedView>
-        <Button Command="{Binding GetServersDetails}" Content="Get Server Lists"/>
     </StackPanel>
 </Page>

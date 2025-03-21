@@ -13,13 +13,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pMusic/Models/ArtistAlbum.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pMusic/Presentation/AlbumModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pMusic/Presentation/AlbumPage.xaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pMusic/Presentation/AlbumPage.xaml.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pMusic/Services/Navigation/FrameNavigation.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/App.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/App.xaml.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/pMusic.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/pMusic.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,8 +66,6 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/App.xaml.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Models/Artist.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/pMusic/bin/Debug/net9.0-browserwasm/wwwroot/_framework/dotnet.js.map" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/2280f6b68568823fe54b6fb0be31b9cbce4c9aa7882ea9482c7f66bc84f4930/ExecutionContext.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/251bdbb2b7c766dbfd75216ff1bad2ff2346c96dea9f5bd853ec21ca7b555e/ThreadPoolWorkQueue.cs" root0="FORCE_HIGHLIGHTING" />
@@ -70,7 +73,9 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/2b16872d2b1f6be4c2f1fbf5d48f15647e49fba3695ca37e6b12eed7c6c29d3b/AsyncValueTaskMethodBuilder.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/34427b5f823f5f5f6c1479ce0848525cc8aba460de6f8e24c854838d8fd8d/ThreadPoolWorkQueue.AutoreleasePool.OSX.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/6879dfc6efd075615a9b4e1673eeee2fd1a137ea8af218f14be0e44fb2383148/PasswordVault.others.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/7a6425a7c863f151611fdd8bb93a9d7c63b825cb/pMusic.Presentation.AlbumModel.Bindable.g.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a6f52f75db0c77bb83f322fb52f52cef9cff6cdafbb94dfec214bab243d18/Task.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/bf3ec3a4586bb22e2579e623ef9275a2efcecb806f225434621bef3d86fd95/UIElement.Pointers.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/d59696d33e2ab1374e20e379a5a6a62c0ba30c0c68d4d44a14a886b46ad7c27/AsyncCommand.SubCommand.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/e5ace92664429b8b34b68b587316fb211811b58aeb53422b43cecca2ad2bdaf3/AsyncTaskMethodBuilderT.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/ea179f92c0546c29af19371af030198fe42a695/pMusic.Presentation.LoginModel.Bindable.g.cs" root0="FORCE_HIGHLIGHTING" />
@@ -100,7 +105,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Run",
+    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Debug",
     "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
     "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -187,6 +192,14 @@
       <workItem from="1742306188809" duration="42000" />
       <workItem from="1742346039454" duration="842000" />
       <workItem from="1742355691917" duration="16649000" />
+      <workItem from="1742383303550" duration="2118000" />
+      <workItem from="1742444823980" duration="5075000" />
+      <workItem from="1742450465993" duration="920000" />
+      <workItem from="1742461620915" duration="3675000" />
+      <workItem from="1742466296269" duration="4882000" />
+      <workItem from="1742515736392" duration="9930000" />
+      <workItem from="1742539871613" duration="1914000" />
+      <workItem from="1742541821686" duration="5949000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -413,17 +426,56 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Helpers/Plex.cs</url>
-          <line>40</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" containingFunctionPresentation="Method 'GetArtists'">
+          <url>file://$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs</url>
+          <line>16</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" containingFunctionPresentation="Method 'GoToAlbumPage_ItemClick'">
             <startOffsets>
-              <option value="1657" />
+              <option value="415" />
             </startOffsets>
             <endOffsets>
-              <option value="1693" />
+              <option value="467" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="8" />
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/pMusic/Presentation/AlbumModel.cs</url>
+          <line>14</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/AlbumModel.cs" containingFunctionPresentation="Property 'CurrentArtist'">
+            <startOffsets>
+              <option value="321" />
+            </startOffsets>
+            <endOffsets>
+              <option value="346" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/pMusic/Presentation/AlbumModel.cs</url>
+          <line>23</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/AlbumModel.cs" containingFunctionPresentation="Method 'SetArtistAsync'">
+            <startOffsets>
+              <option value="500" />
+            </startOffsets>
+            <endOffsets>
+              <option value="545" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/pMusic/Presentation/AlbumPage.xaml.cs</url>
+          <line>19</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/AlbumPage.xaml.cs" containingFunctionPresentation="Method 'OnNavigatedTo'">
+            <startOffsets>
+              <option value="491" />
+            </startOffsets>
+            <endOffsets>
+              <option value="550" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="23" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

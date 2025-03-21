@@ -130,7 +130,9 @@ public partial class App : Application
             new ViewMap(ViewModel: typeof(ShellModel)),
             new ViewMap<LoginPage, LoginModel>(),
             new ViewMap<MainPage, MainModel>(),
-            new DataViewMap<SecondPage, SecondModel, Entity>()
+            new DataViewMap<SecondPage, SecondModel, Entity>(),
+            new ViewMap<ArtistPage, ArtistModel>(),
+            new DataViewMap<AlbumPage, AlbumModel, Artist>()
         );
 
         routes.Register(
@@ -140,6 +142,8 @@ public partial class App : Application
                     new("Login", View: views.FindByViewModel<LoginModel>()),
                     new("Main", View: views.FindByViewModel<MainModel>(), IsDefault: true),
                     new("Second", View: views.FindByViewModel<SecondModel>()),
+                    new("Artist", View: views.FindByViewModel<ArtistModel>()),
+                    new ("Album", View: views.FindByViewModel<AlbumModel>()),
                 ]
             )
         );
