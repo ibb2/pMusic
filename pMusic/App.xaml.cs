@@ -87,6 +87,8 @@ public partial class App : Application
                     services.AddTransient<ArtistModel>();
                     services.AddTransient<ArtistViewModel>();
                     services.AddTransient<AlbumModel>();
+                    services.AddTransient<TrackModel>();
+                    services.AddTransient<TrackViewModel>();
                     services.AddTransient<AlbumViewModel>();
                     services.AddTransient<IArtistService, ArtistService>();
                 })

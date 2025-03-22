@@ -1,4 +1,5 @@
 using pMusic.Services;
+using pMusic.Services.Navigation;
 
 namespace pMusic.Presentation;
 
@@ -17,5 +18,12 @@ public sealed partial class AlbumPage: Page
         
         // Assuming DataContext is set to an instance of AlbumModel
         await ((AlbumViewModel)DataContext).Model.SetArtistAsync(artist);
+    }
+    
+    public void GoToTrackListClick(object sender, RoutedEventArgs e)
+    {
+        var album = ((Button)sender).DataContext as Album;
+        FrameNavigation.NavigateTo(typeof(TrackPage), parameter: album);
+        var i = 1;
     }
 }

@@ -20,7 +20,7 @@
         <ui:FeedView Source="{Binding Albums}">
             <ui:FeedView.ValueTemplate>
                 <DataTemplate>
-                    <ListView ItemsSource="{Binding Data}">
+                    <ListView ItemsSource="{Binding Data}" SelectionMode="Single">
 
                         <ListView.Header>
                             <Button Content="Refresh" Command="{Binding Refresh}" />
@@ -31,7 +31,7 @@
                                 <!-- <Image Source="{Binding Thumbnail}"></Image> -->
                                 <StackPanel Orientation="Horizontal" Spacing="5">
                                     <TextBlock Text="{Binding Title}" />
-                                    <!-- <Button Click="{Binding Details}" Content="Go to Artist" /> -->
+                                    <Button Click="GoToTrackListClick" Content="Go to Track List" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>

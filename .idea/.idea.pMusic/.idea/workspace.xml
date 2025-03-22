@@ -12,16 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pMusic/Models/Album.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/App.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/App.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/AlbumModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/AlbumModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/AlbumPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/AlbumPage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/AlbumPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/AlbumPage.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" afterDir="false" />
-    </list>
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -125,7 +116,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected=".NET Launch Settings Profile.pMusic (Desktop)">
+  <component name="RunManager" selected="Android.pMusic">
     <configuration name="pMusic: win-arm64" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="win-arm64.pubxml" pubxml_path="$PROJECT_DIR$/pMusic/Properties/PublishProfiles/win-arm64.pubxml" uuid_high="-1411009619043201322" uuid_low="-7242066600533007251" />
       <method v="2" />
@@ -204,7 +195,7 @@
       <workItem from="1742539871613" duration="1914000" />
       <workItem from="1742541821686" duration="6013000" />
       <workItem from="1742568740012" duration="2808000" />
-      <workItem from="1742615365897" duration="6592000" />
+      <workItem from="1742615365897" duration="6758000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -390,7 +381,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742556935940</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Fetching albums works.">
+      <option name="closed" value="true" />
+      <created>1742622408450</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1742622408450</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -434,7 +433,8 @@
     <MESSAGE value="Added Home and Artist pages." />
     <MESSAGE value="Added Keysharp and LukeHagar PlexApi nuget packages." />
     <MESSAGE value="Navigating to Album page works, able to pass Artist obj." />
-    <option name="LAST_COMMIT_MESSAGE" value="Navigating to Album page works, able to pass Artist obj." />
+    <MESSAGE value="Fetching albums works." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fetching albums works." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
