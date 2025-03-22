@@ -7,5 +7,7 @@
   -->
   <ItemGroup>
     <PackageVersion Include="KeySharp" Version="1.0.5" />
+    <PackageVersion Include="LukeHagar.PlexAPI.SDK" Version="0.14.2" />
+    <PackageVersion Include="Uno.WinUI" Version="5.6.81" />
   </ItemGroup>
 </Project>

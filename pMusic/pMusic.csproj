@@ -52,6 +52,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="KeySharp" />
+    <PackageReference Include="LukeHagar.PlexAPI.SDK" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\State\" />
   </ItemGroup>
 
 </Project>

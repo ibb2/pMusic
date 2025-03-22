@@ -16,7 +16,7 @@
             <!-- <NavigationView.PaneDisplayMode>Left</NavigationView.PaneDisplayMode> -->
 
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="MainPage" Tag="main" Icon="Home"/>
+                <NavigationViewItem Content="HomePage" Tag="home" Icon="Home"/>
                 <NavigationViewItem Content="SecondPage" Tag="second" Icon="Document"/>                <!-- <NavigationViewItem Content="Products" -->
                 <!--                          uen:Region.Name="Products" /> -->
                 <!-- <NavigationViewItem Content="Deals" -->

@@ -1,4 +1,6 @@
 using KeySharp;
+using pMusic.Helpers;
+using pMusic.Services;
 using Uno.Resizetizer;
 
 namespace pMusic;
@@ -15,7 +17,7 @@ public partial class App : Application
     }
 
     protected Window? MainWindow { get; private set; }
-    protected IHost? Host { get; private set; }
+    public IHost? Host { get; private set; }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
@@ -32,9 +34,7 @@ public partial class App : Application
                     // Configure log levels for different categories of logging
                     logBuilder
                         .SetMinimumLevel(
-                            context.HostingEnvironment.IsDevelopment() ?
-                                LogLevel.Information :
-                                LogLevel.Warning)
+                            context.HostingEnvironment.IsDevelopment() ? LogLevel.Information : LogLevel.Warning)
 
                         // Default filters for core Uno Platform namespaces
                         .CoreLogLevel(LogLevel.Warning);
@@ -55,7 +55,6 @@ public partial class App : Application
                     //logBuilder.HotReloadCoreLogLevel(LogLevel.Information);
                     //// Debug JS interop
                     //logBuilder.WebAssemblyLogLevel(LogLevel.Debug);
-
                 }, enableUnoLogging: true)
                 .UseSerilog(consoleLoggingEnabled: true, fileLoggingEnabled: true)
                 .UseConfiguration(configure: configBuilder =>
@@ -78,12 +77,20 @@ public partial class App : Application
                     .AddSingleton<IWeatherCache, WeatherCache>()
                     .AddRefitClient<IApiClient>(context))
                 .UseAuthentication(auth =>
-    auth.AddWeb(name: "WebAuthentication")
+                    auth.AddWeb(name: "WebAuthentication")
                 )
                 .ConfigureServices((context, services) =>
                 {
                     // TODO: Register your services
                     //services.AddSingleton<IMyService, MyService>();
+                    services.AddHttpClient<Plex>(client => { client.BaseAddress = new Uri("https://plex.tv/"); });
+                    services.AddTransient<ArtistModel>();
+                    services.AddTransient<ArtistViewModel>();
+                    services.AddTransient<AlbumModel>();
+                    services.AddTransient<TrackModel>();
+                    services.AddTransient<TrackViewModel>();
+                    services.AddTransient<AlbumViewModel>();
+                    services.AddTransient<IArtistService, ArtistService>();
                 })
                 .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
             );
@@ -95,29 +102,30 @@ public partial class App : Application
         MainWindow.SetWindowIcon();
 
         Host = await builder.NavigateAsync<Shell>
-            (initialNavigate: async (services, navigator) =>
-            {
-                string? authToken = null;
+        (initialNavigate: async (services, navigator) =>
+        {
+            string? authToken = null;
 
-                try
-                {
-                    authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
-                }
-                catch (Exception ex)
-                {
-                    authToken = null;
-                }
-                // var auth = services.GetRequiredService<IAuthenticationService>();
-                // var authenticated = await auth.RefreshAsync();
-                if (!authToken.IsNullOrEmpty())
-                {
-                    await navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.Nested);
-                }
-                else
-                {
-                    await navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.Nested);
-                }
-            });
+            try
+            {
+                authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+            }
+            catch (Exception ex)
+            {
+                authToken = null;
+            }
+
+            // var auth = services.GetRequiredService<IAuthenticationService>();
+            // var authenticated = await auth.RefreshAsync();
+            if (!authToken.IsNullOrEmpty())
+            {
+                await navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.Nested);
+            }
+            else
+            {
+                await navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.Nested);
+            }
+        });
     }
 
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)
@@ -126,16 +134,20 @@ public partial class App : Application
             new ViewMap(ViewModel: typeof(ShellModel)),
             new ViewMap<LoginPage, LoginModel>(),
             new ViewMap<MainPage, MainModel>(),
-            new DataViewMap<SecondPage, SecondModel, Entity>()
+            new DataViewMap<SecondPage, SecondModel, Entity>(),
+            new ViewMap<ArtistPage, ArtistModel>(),
+            new DataViewMap<AlbumPage, AlbumModel, Artist>()
         );
 
         routes.Register(
             new RouteMap("", View: views.FindByViewModel<ShellModel>(),
                 Nested:
                 [
-                    new ("Login", View: views.FindByViewModel<LoginModel>()),
-                    new ("Main", View: views.FindByViewModel<MainModel>(), IsDefault:true),
-                    new ("Second", View: views.FindByViewModel<SecondModel>()),
+                    new("Login", View: views.FindByViewModel<LoginModel>()),
+                    new("Main", View: views.FindByViewModel<MainModel>(), IsDefault: true),
+                    new("Second", View: views.FindByViewModel<SecondModel>()),
+                    new("Artist", View: views.FindByViewModel<ArtistModel>()),
+                    new ("Album", View: views.FindByViewModel<AlbumModel>()),
                 ]
             )
         );
