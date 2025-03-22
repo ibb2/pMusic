@@ -86,6 +86,8 @@ public partial class App : Application
                     services.AddHttpClient<Plex>(client => { client.BaseAddress = new Uri("https://plex.tv/"); });
                     services.AddTransient<ArtistModel>();
                     services.AddTransient<ArtistViewModel>();
+                    services.AddTransient<AlbumModel>();
+                    services.AddTransient<AlbumViewModel>();
                     services.AddTransient<IArtistService, ArtistService>();
                 })
                 .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)

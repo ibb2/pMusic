@@ -17,10 +17,11 @@ public partial record Artist(
     string Thumb = "",
     string AddedAt = "",
     string UpdatedAt = "",
-    Image Image = null,
-    UltraBlurColors Ubc = null,
-    Genre[] Genres = null,
-    Country Country = null
+    int LibraryKey = 0,
+    Image? Image = null,
+    UltraBlurColors? Ubc = null,
+    Genre[]? Genres = null,
+    Country? Country = null
 );
 
 public record Image
@@ -52,19 +53,32 @@ public record Country
 public interface IArtistService
 {
     ValueTask<IImmutableList<Artist>> GetArtistsAsync(CancellationToken ct, Plex plex);
+    ValueTask<IImmutableList<Album>> GetArtistAlbums(CancellationToken ct, Plex plex, int libraryId, string artistKey);
 }
 
 public class ArtistService : IArtistService
 {
+    
+    public static string? ServerUri { get; set; }
 
     public async ValueTask<IImmutableList<Artist>> GetArtistsAsync(CancellationToken ct, Plex plex)
     {
         await Task.Delay(TimeSpan.FromSeconds(1), ct);
 
-        var serverUri =  await plex.GetServerCapabilitiesAsync();
-        var artists = await plex.GetArtists(serverUri);
+        ServerUri =  await plex.GetServerCapabilitiesAsync();
+        var artists = await plex.GetArtists(ServerUri);
 
         return artists;
+    }
+
+    public async ValueTask<IImmutableList<Album>> GetArtistAlbums(CancellationToken ct, Plex plex, int libraryId, string artistKey)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(1), ct);
+
+        var albums = await plex.GetArtistAlbums(ServerUri!, libraryId, artistKey);
+
+        var temp = ImmutableArray<Album>.Empty;
+        return albums;
     }
     
 }

@@ -8,66 +8,53 @@
       xmlns:ui="clr-namespace:Uno.Extensions.Reactive.UI;assembly=Uno.Extensions.Reactive.UI"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-    <Page.DataContext>
-        <local:AlbumViewModel />
-    </Page.DataContext>
+    <!-- <Page.DataContext> -->
+    <!--     <local:AlbumViewModel /> -->
+    <!-- </Page.DataContext> -->
     <StackPanel>
-        <TextBlock Text="{Binding Title}" />
         <TextBlock>
             <Run Text="Artist Name: " />
             <Run Text="{Binding CurrentArtist.Title, Mode=OneWay}" />
-            <Run Text=" Is working" />
-
         </TextBlock>
-        <TextBlock Text="{Binding CurrentArtist.Title}" />
-        <ui:FeedView Source="{Binding CurrentArtist.Title}">
+
+        <ui:FeedView Source="{Binding Albums}">
             <ui:FeedView.ValueTemplate>
                 <DataTemplate>
-                    <TextBlock>
-                        <Run Text="Current Artist Name: " />
-                        <Run Text="{Binding Title}" />
-                    </TextBlock>
+                    <ListView ItemsSource="{Binding Data}">
+
+                        <ListView.Header>
+                            <Button Content="Refresh" Command="{Binding Refresh}" />
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <!-- <Image Source="{Binding Thumbnail}"></Image> -->
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <TextBlock Text="{Binding Title}" />
+                                    <!-- <Button Click="{Binding Details}" Content="Go to Artist" /> -->
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                    </ListView>
                 </DataTemplate>
             </ui:FeedView.ValueTemplate>
+            <ui:FeedView.ProgressTemplate>
+                <DataTemplate>
+                    <ProgressRing />
+                </DataTemplate>
+            </ui:FeedView.ProgressTemplate>
+            <ui:FeedView.ErrorTemplate>
+                <DataTemplate>
+                    <TextBlock Text="Error" />
+                </DataTemplate>
+            </ui:FeedView.ErrorTemplate>
+            <ui:FeedView.NoneTemplate>
+                <DataTemplate>
+                    <TextBlock Text="No Results" />
+                    <Button Content="Refresh" Command="{Binding Refresh}" />
+                </DataTemplate>
+            </ui:FeedView.NoneTemplate>
         </ui:FeedView>
-
-        <!-- <ui:FeedView Source="{Binding Artists}"> -->
-        <!--     <ui:FeedView.ValueTemplate> -->
-        <!--         <DataTemplate> -->
-        <!--             <ListView ItemsSource="{Binding Data}"> -->
-        <!-- -->
-        <!--                 <ListView.Header> -->
-        <!--                     <Button Content="Refresh" Command="{Binding Refresh}" /> -->
-        <!--                 </ListView.Header> -->
-        <!-- -->
-        <!--                 <ListView.ItemTemplate> -->
-        <!--                     <DataTemplate> -->
-        <!--                         ~1~ <Image Source="{Binding Thumbnail}"></Image> @1@ -->
-        <!--                         <StackPanel Orientation="Horizontal" Spacing="5"> -->
-        <!--                             <TextBlock Text="{Binding Title}" /> -->
-        <!--                             ~1~ <Button Click="{Binding Details}" Content="Go to Artist" /> @1@ -->
-        <!--                         </StackPanel> -->
-        <!--                     </DataTemplate> -->
-        <!--                 </ListView.ItemTemplate> -->
-        <!-- -->
-        <!--             </ListView> -->
-        <!--         </DataTemplate> -->
-        <!--     </ui:FeedView.ValueTemplate> -->
-        <!--     <ui:FeedView.ProgressTemplate> -->
-        <!--         <DataTemplate> -->
-        <!--             <ProgressRing /> -->
-        <!--         </DataTemplate> -->
-        <!--     </ui:FeedView.ProgressTemplate> -->
-        <!--     <ui:FeedView.ErrorTemplate> -->
-        <!--         <DataTemplate> -->
-        <!--             <TextBlock Text="Error" /> -->
-        <!--         </DataTemplate> -->
-        <!--     </ui:FeedView.ErrorTemplate> -->
-        <!--     <ui:FeedView.NoneTemplate> -->
-        <!--         <DataTemplate> -->
-        <!--             <TextBlock Text="No Results" /> -->
-        <!--         </DataTemplate> -->
-        <!--     </ui:FeedView.NoneTemplate> -->
-        <!-- </ui:FeedView> -->
     </StackPanel>
 </Page>
