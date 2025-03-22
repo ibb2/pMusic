@@ -3,6 +3,7 @@ using KeySharp;
 using LukeHagar.PlexAPI.SDK;
 using pMusic.Services;
 using Image = pMusic.Services.Image;
+using Media = pMusic.Models.Media;
 
 namespace pMusic.Helpers;
 
@@ -54,7 +55,6 @@ public class Plex
 
     public async ValueTask<IImmutableList<Album>> GetArtistAlbums(string uri, int libraryId, string artistKey)
     {
-
         var albumUri =
             uri + "/library/sections/" + libraryId + "/all?artist.id=" + artistKey +
             "&type=9&"; // "includeGuids={include_guids}&{filter}"
@@ -63,16 +63,96 @@ public class Plex
         var albums = ParseAlbums(XElement.Parse(albumXml));
 
         return albums.ToImmutableList();
-
     }
 
+    public async ValueTask<IImmutableList<Track>> GetTrackList(string uri, string albumKey)
+    {
+        var trackUri = uri + "/library/metadata/" + albumKey + "/children";
+        var trackXml = await httpClient.GetStringAsync(trackUri);
+
+        var tracks = ParseTracks(XElement.Parse(trackXml)).ToImmutableList();
+        var empty = ImmutableList<Track>.Empty;
+        
+        return tracks;
+    }
+
+    public static List<Track> ParseTracks(XElement mediaContainer)
+    {
+        if (mediaContainer == null) return new List<Track>();
+
+        var items = mediaContainer.Elements("Track").Select(
+            track => new Track(
+                RatingKey: track.Attribute("ratingKey")?.Value ?? "",
+                Key: track.Attribute("key")?.Value ?? "",
+                ParentRatingKey: track.Attribute("parentRatingKey")?.Value ?? "",
+                GrandparentRatingKey: track.Attribute("grandparentRatingKey")?.Value ?? "",
+                Guid: track.Attribute("guid")?.Value ?? "",
+                ParentGuid: track.Attribute("parentGuid")?.Value ?? "",
+                GrandparentGuid: track.Attribute("grandparentGuid")?.Value ?? "",
+                ParentStudio: track.Attribute("parentStudio")?.Value ?? "",
+                Type: track.Attribute("type")?.Value ?? "",
+                Title: track.Attribute("title")?.Value ?? "",
+                GrandparentKey: track.Attribute("grandparentKey")?.Value ?? "",
+                ParentKey: track.Attribute("parentKey")?.Value ?? "",
+                GrandparentTitle: track.Attribute("grandparentTitle")?.Value ?? "",
+                ParentTitle: track.Attribute("parentTitle")?.Value ?? "",
+                Summary: track.Attribute("summary")?.Value ?? "",
+                Index: int.Parse(track.Attribute("index")?.Value ?? "0"),
+                ParentIndex: int.Parse(track.Attribute("parentIndex")?.Value ?? "0"),
+                RatingCount: int.Parse(track.Attribute("ratingCount")?.Value ?? "0"),
+                ParentYear: int.Parse(track.Attribute("parentYear")?.Value! ?? "0"),
+                Thumb: track.Attribute("thumb")?.Value ?? "",
+                Art: track.Attribute("art")?.Value ?? "",
+                ParentThumb: track.Attribute("parentThumb")?.Value ?? "",
+                GrandparentThumb: track.Attribute("grandparentThumb")?.Value ?? "",
+                GrandparentArt: track.Attribute("grandparentArt")?.Value ?? "",
+                Duration: int.Parse(track.Attribute("duration")?.Value ?? "0"),
+                AddedAt: int.Parse(track.Attribute("addedAt")?.Value ?? "0"),
+                UpdatedAt: int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
+                MusicAnalysisVersion: int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
+                Media: ParseMedia(track.Element("Media")!)
+            )
+        ).ToList();
+
+        return items;
+    }
+
+    private static Media ParseMedia(XElement mediaElement)
+    {
+        if (mediaElement == null) return null;
+
+        return new Media(
+            Id: mediaElement.Attribute("id")?.Value ?? "",
+            Duration: int.Parse(mediaElement.Attribute("duration")?.Value ?? "0"),
+            Bitrate: int.Parse(mediaElement.Attribute("bitrate")?.Value ?? "0"),
+            AudioChannels: double.Parse(mediaElement.Attribute("audioChannels")?.Value ?? "0"),
+            AudioCodec: mediaElement.Attribute("audioCodec")?.Value ?? "",
+            Container: mediaElement.Attribute("container")?.Value ?? "",
+            Part: ParsePart(mediaElement.Element("Part"))
+        );
+    }
+
+    private static Part ParsePart(XElement partElement)
+    {
+        if (partElement == null) return null;
+
+        return new Part(
+            Id: partElement.Attribute("id")?.Value ?? "",
+            Key: partElement.Attribute("key")?.Value ?? "",
+            Duration: int.Parse(partElement.Attribute("duration")?.Value ?? "0"),
+            File: partElement.Attribute("file")?.Value ?? "",
+            Size: long.Parse(partElement.Attribute("size")?.Value ?? "0"),
+            Container: partElement.Attribute("container")?.Value ?? ""
+        );
+    }
+    
     public static List<Album> ParseAlbums(XElement mediaContainer)
     {
         if (mediaContainer == null) return new List<Album>();
 
         var directory1 = mediaContainer.Element("Directory");
 
-        var items =  mediaContainer.Elements("Directory").Select(
+        var items = mediaContainer.Elements("Directory").Select(
             directory => new Album(
                 RatingKey: directory.Attribute("ratingKey")?.Value ?? "",
                 Key: directory.Attribute("key")?.Value ?? "",
@@ -110,24 +190,24 @@ public class Plex
         return mediaContainer.Elements("Directory")
             .Select(directory => new Artist
             (
-                RatingKey : directory.Attribute("ratingKey")?.Value ?? "",
-                Key : directory.Attribute("key")?.Value ?? "",
-                Guid : directory.Attribute("guid")?.Value ?? "",
-                Type : directory.Attribute("type")?.Value ?? "",
-                Title : directory.Attribute("title")?.Value ?? "",
-                Index : directory.Attribute("index")?.Value ?? "",
-                UserRating : directory.Attribute("userRating")?.Value ?? "",
-                ViewCount : directory.Attribute("viewCount")?.Value ?? "",
-                SkipCount : directory.Attribute("skipCount")?.Value ?? "",
-                LastViewedAt : directory.Attribute("lastViewedAt")?.Value ?? "",
-                LastRatedAt : directory.Attribute("lastRatedAt")?.Value ?? "",
-                Thumb : directory.Attribute("thumb")?.Value ?? "",
-                AddedAt : directory.Attribute("addedAt")?.Value ?? "",
-                UpdatedAt : directory.Attribute("updatedAt")?.Value ?? "",
+                RatingKey: directory.Attribute("ratingKey")?.Value ?? "",
+                Key: directory.Attribute("key")?.Value ?? "",
+                Guid: directory.Attribute("guid")?.Value ?? "",
+                Type: directory.Attribute("type")?.Value ?? "",
+                Title: directory.Attribute("title")?.Value ?? "",
+                Index: directory.Attribute("index")?.Value ?? "",
+                UserRating: directory.Attribute("userRating")?.Value ?? "",
+                ViewCount: directory.Attribute("viewCount")?.Value ?? "",
+                SkipCount: directory.Attribute("skipCount")?.Value ?? "",
+                LastViewedAt: directory.Attribute("lastViewedAt")?.Value ?? "",
+                LastRatedAt: directory.Attribute("lastRatedAt")?.Value ?? "",
+                Thumb: directory.Attribute("thumb")?.Value ?? "",
+                AddedAt: directory.Attribute("addedAt")?.Value ?? "",
+                UpdatedAt: directory.Attribute("updatedAt")?.Value ?? "",
                 LibraryKey: libKey,
 
                 // Parse Image
-                Image : directory.Element("Image") != null
+                Image: directory.Element("Image") != null
                     ? new Image
                     {
                         Alt = directory.Element("Image")?.Attribute("alt")?.Value,
@@ -137,7 +217,7 @@ public class Plex
                     : null,
 
                 // Parse UltraBlurColors
-                Ubc : directory.Element("UltraBlurColors") != null
+                Ubc: directory.Element("UltraBlurColors") != null
                     ? new UltraBlurColors
                     {
                         TopLeft = directory.Element("UltraBlurColors")?.Attribute("topLeft")?.Value,
@@ -148,12 +228,12 @@ public class Plex
                     : null,
 
                 // Parse Genres
-                Genres : directory.Elements("Genre")
+                Genres: directory.Elements("Genre")
                     .Select(genre => new Genre { Tag = genre.Attribute("tag")?.Value })
                     .ToArray(),
 
                 // Parse Country
-                Country : directory.Element("Country") != null
+                Country: directory.Element("Country") != null
                     ? new Country { Tag = directory.Element("Country")?.Attribute("tag")?.Value }
                     : null
             )).ToList();

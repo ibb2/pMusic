@@ -6,7 +6,7 @@ public sealed partial class TrackPage: Page
     public TrackPage()
     {
         this.InitializeComponent();
-        this.DataContext = (Application.Current as App).Host.Services.GetRequiredService<TrackViewModel>();
+        this.DataContext = (Application.Current as App)?.Host?.Services.GetRequiredService<TrackViewModel>();
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)

@@ -17,44 +17,44 @@
             <Run Text="{Binding CurrentAlbum.Title, Mode=OneWay}" />
         </TextBlock>
 
-        <!-- <ui:FeedView Source="{Binding Albums}"> -->
-        <!--     <ui:FeedView.ValueTemplate> -->
-        <!--         <DataTemplate> -->
-        <!--             <ListView ItemsSource="{Binding Data}"> -->
-        <!-- -->
-        <!--                 <ListView.Header> -->
-        <!--                     <Button Content="Refresh" Command="{Binding Refresh}" /> -->
-        <!--                 </ListView.Header> -->
-        <!-- -->
-        <!--                 <ListView.ItemTemplate> -->
-        <!--                     <DataTemplate> -->
-        <!--                         ~1~ <Image Source="{Binding Thumbnail}"></Image> @1@ -->
-        <!--                         <StackPanel Orientation="Horizontal" Spacing="5"> -->
-        <!--                             <TextBlock Text="{Binding Title}" /> -->
-        <!--                             ~1~ <Button Click="{Binding Details}" Content="Go to Artist" /> @1@ -->
-        <!--                         </StackPanel> -->
-        <!--                     </DataTemplate> -->
-        <!--                 </ListView.ItemTemplate> -->
-        <!-- -->
-        <!--             </ListView> -->
-        <!--         </DataTemplate> -->
-        <!--     </ui:FeedView.ValueTemplate> -->
-        <!--     <ui:FeedView.ProgressTemplate> -->
-        <!--         <DataTemplate> -->
-        <!--             <ProgressRing /> -->
-        <!--         </DataTemplate> -->
-        <!--     </ui:FeedView.ProgressTemplate> -->
-        <!--     <ui:FeedView.ErrorTemplate> -->
-        <!--         <DataTemplate> -->
-        <!--             <TextBlock Text="Error" /> -->
-        <!--         </DataTemplate> -->
-        <!--     </ui:FeedView.ErrorTemplate> -->
-        <!--     <ui:FeedView.NoneTemplate> -->
-        <!--         <DataTemplate> -->
-        <!--             <TextBlock Text="No Results" /> -->
-        <!--             <Button Content="Refresh" Command="{Binding Refresh}" /> -->
-        <!--         </DataTemplate> -->
-        <!--     </ui:FeedView.NoneTemplate> -->
-        <!-- </ui:FeedView> -->
+        <ui:FeedView Source="{Binding Tracks}">
+            <ui:FeedView.ValueTemplate>
+                <DataTemplate>
+                    <ListView ItemsSource="{Binding Data}">
+
+                        <ListView.Header>
+                            <Button Content="Refresh" Command="{Binding Refresh}" />
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <!-- <Image Source="{Binding Thumbnail}"></Image> -->
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <TextBlock Text="{Binding Title}" />
+                                    <!-- <Button Click="{Binding Details}" Content="Go to Artist" /> -->
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                    </ListView>
+                </DataTemplate>
+            </ui:FeedView.ValueTemplate>
+            <ui:FeedView.ProgressTemplate>
+                <DataTemplate>
+                    <ProgressRing />
+                </DataTemplate>
+            </ui:FeedView.ProgressTemplate>
+            <ui:FeedView.ErrorTemplate>
+                <DataTemplate>
+                    <TextBlock Text="Error" />
+                </DataTemplate>
+            </ui:FeedView.ErrorTemplate>
+            <ui:FeedView.NoneTemplate>
+                <DataTemplate>
+                    <TextBlock Text="No Results" />
+                    <Button Content="Refresh" Command="{Binding Refresh}" />
+                </DataTemplate>
+            </ui:FeedView.NoneTemplate>
+        </ui:FeedView>
     </StackPanel>
 </Page>
