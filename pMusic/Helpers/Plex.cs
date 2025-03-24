@@ -9,7 +9,7 @@ namespace pMusic.Helpers;
 
 public class Plex
 {
-    private readonly HttpClient httpClient;
+    public readonly HttpClient httpClient;
     private readonly string _plexClientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
     private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
 

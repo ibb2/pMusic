@@ -84,13 +84,15 @@ public partial class App : Application
                     // TODO: Register your services
                     //services.AddSingleton<IMyService, MyService>();
                     services.AddHttpClient<Plex>(client => { client.BaseAddress = new Uri("https://plex.tv/"); });
+                    services.AddHttpClient<AudioPlayer>(client => { client.BaseAddress = new Uri("https://plex.tv/"); });
+                    services.AddTransient<AudioPlayer>();
+                    services.AddTransient<IArtistService, ArtistService>();
                     services.AddTransient<ArtistModel>();
                     services.AddTransient<ArtistViewModel>();
                     services.AddTransient<AlbumModel>();
                     services.AddTransient<TrackModel>();
                     services.AddTransient<TrackViewModel>();
                     services.AddTransient<AlbumViewModel>();
-                    services.AddTransient<IArtistService, ArtistService>();
                 })
                 .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
             );
