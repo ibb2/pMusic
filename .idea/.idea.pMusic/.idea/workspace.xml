@@ -13,13 +13,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pMusic/Models/Track.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/TrackModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/TrackModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/TrackPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/TrackPage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/TrackPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/TrackPage.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,7 +26,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="adding-plex-artists" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -104,26 +98,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Debug",
-    "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
-    "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "XThreadsFramesViewSplitterKey": "0.501002",
-    "git-widget-placeholder": "adding-plex-artists",
-    "macOS.pMusic.executor": "Debug",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "RiderNuGetOptionsPageId",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.pMusic (Desktop).executor&quot;: &quot;Run&quot;,
+    &quot;Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic&quot;: &quot;Ibrahim’s iPhone&quot;,
+    &quot;DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider&quot;: &quot;Device&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.501002&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;macOS.pMusic.executor&quot;: &quot;Debug&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;RiderNuGetOptionsPageId&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
-  <component name="RunManager" selected=".NET Launch Settings Profile.pMusic (Desktop)">
+}</component>
+  <component name="RunManager" selected="Android.pMusic">
     <configuration name="pMusic: win-arm64" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="win-arm64.pubxml" pubxml_path="$PROJECT_DIR$/pMusic/Properties/PublishProfiles/win-arm64.pubxml" uuid_high="-1411009619043201322" uuid_low="-7242066600533007251" />
       <method v="2" />
@@ -204,7 +198,8 @@
       <workItem from="1742568740012" duration="2808000" />
       <workItem from="1742615365897" duration="6758000" />
       <workItem from="1742625762838" duration="3205000" />
-      <workItem from="1742635163970" duration="4651000" />
+      <workItem from="1742635163970" duration="5669000" />
+      <workItem from="1742728042523" duration="20000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -406,7 +401,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742627468945</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Tracklist for albums working.">
+      <option name="closed" value="true" />
+      <created>1742640996183</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1742640996183</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -427,7 +430,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Crude version of Login with Plex working." />
     <MESSAGE value="Install CredentialManager, replacing platform.uno's implementation.&#10;&#10;Re-enables the viability of using desktop for Macos." />
     <MESSAGE value="Cleaned up Plex Oauth flow, and switched to C# GCM." />
     <MESSAGE value="Using KeySharp to store login related information. Cleaned up flow." />
@@ -452,26 +454,8 @@
     <MESSAGE value="Navigating to Album page works, able to pass Artist obj." />
     <MESSAGE value="Fetching albums works." />
     <MESSAGE value="Navigation to track page working." />
-    <option name="LAST_COMMIT_MESSAGE" value="Navigation to track page working." />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Helpers/Plex.cs</url>
-          <line>72</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" containingFunctionPresentation="Method 'GetTrackList'">
-            <startOffsets>
-              <option value="2937" />
-            </startOffsets>
-            <endOffsets>
-              <option value="3006" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="38" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Tracklist for albums working." />
+    <option name="LAST_COMMIT_MESSAGE" value="Tracklist for albums working." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
