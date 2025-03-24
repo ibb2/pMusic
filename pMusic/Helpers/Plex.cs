@@ -12,6 +12,7 @@ public class Plex
     public readonly HttpClient httpClient;
     private readonly string _plexClientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
     private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+    private static readonly PlexAPI _plexApi = new PlexAPI(Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken"));
 
     public Plex(HttpClient httpClient)
     {
@@ -21,9 +22,6 @@ public class Plex
 
     public async ValueTask<String> GetServerCapabilitiesAsync()
     {
-        // var sdk = new PlexAPI(accessToken: _plexToken);
-        //
-        // var res = await sdk.Server.GetServerListAsync();
         var uri = "https://plex.tv/api/v2/resources?" + "X-Plex-Client-Identifier=" + _plexClientIdentifier +
                   "&X-Plex-Token=" + _plexToken;
         var serversXmlRes = await httpClient.GetStringAsync(uri);
@@ -74,6 +72,24 @@ public class Plex
         var empty = ImmutableList<Track>.Empty;
         
         return tracks;
+    }
+
+    public async ValueTask UpdateTrackProgress(string ratingKey, int progress)
+    {
+        var res = await _plexApi.Media.UpdatePlayProgressAsync(
+            key: ratingKey,
+            time: progress,
+            state: "played"
+        );
+        
+        Console.WriteLine($"Update Play Progress Response: {res}");
+    }
+
+    public async ValueTask MarkTrackAsPlayed(double ratingKey)
+    {
+        var res = await _plexApi.Media.MarkPlayedAsync(key: ratingKey);
+        Console.WriteLine($"Mark Played Response: {res}");
+
     }
 
     public static List<Track> ParseTracks(XElement mediaContainer)

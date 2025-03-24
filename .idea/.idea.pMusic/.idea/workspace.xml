@@ -13,14 +13,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/App.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/App.xaml.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/TrackModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/TrackModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/TrackPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/TrackPage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/TrackPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/TrackPage.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,26 +100,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Debug",
-    "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
-    "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "XThreadsFramesViewSplitterKey": "0.501002",
-    "git-widget-placeholder": "play-music",
-    "iOS.pMusic.executor": "Run",
-    "macOS.pMusic.executor": "Debug",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "AppleSettingsPageId",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.pMusic (Desktop).executor&quot;: &quot;Debug&quot;,
+    &quot;Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic&quot;: &quot;Ibrahim’s iPhone&quot;,
+    &quot;DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider&quot;: &quot;Device&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.501002&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;play-music&quot;,
+    &quot;iOS.pMusic.executor&quot;: &quot;Run&quot;,
+    &quot;macOS.pMusic.executor&quot;: &quot;Debug&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;AppleSettingsPageId&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Launch Settings Profile.pMusic (Desktop)">
     <configuration name="pMusic: win-arm64" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="win-arm64.pubxml" pubxml_path="$PROJECT_DIR$/pMusic/Properties/PublishProfiles/win-arm64.pubxml" uuid_high="-1411009619043201322" uuid_low="-7242066600533007251" />
@@ -213,7 +207,8 @@
       <workItem from="1742784591415" duration="405000" />
       <workItem from="1742785005964" duration="116000" />
       <workItem from="1742785141709" duration="26000" />
-      <workItem from="1742785178717" duration="16408000" />
+      <workItem from="1742785178717" duration="17287000" />
+      <workItem from="1742811888063" duration="308000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -486,25 +481,6 @@
     <MESSAGE value="Installed the audio library SoundFlow." />
     <MESSAGE value="Removed mobile and catalyst from targeted frameworks." />
     <option name="LAST_COMMIT_MESSAGE" value="Removed mobile and catalyst from targeted frameworks." />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs</url>
-          <line>32</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" containingFunctionPresentation="Method 'PlayAudio'">
-            <startOffsets>
-              <option value="1048" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1120" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="14" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
