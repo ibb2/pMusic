@@ -13,6 +13,59 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_activity_activity.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_annotation_annotation_experimental.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_appcompat_appcompat.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_appcompat_appcompat_resources.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_arch_core_core_runtime.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_asynclayoutinflater_asynclayoutinflater.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_browser_browser.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_cardview_cardview.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_constraintlayout_constraintlayout.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_coordinatorlayout_coordinatorlayout.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_core_core.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_core_core_ktx.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_core_core_splashscreen.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_cursoradapter_cursoradapter.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_customview_customview.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_customview_customview_poolingcontainer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_documentfile_documentfile.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_drawerlayout_drawerlayout.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_dynamicanimation_dynamicanimation.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_emoji2_emoji2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_emoji2_emoji2_views_helper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_fragment_fragment.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_interpolator_interpolator.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_legacy_legacy_support_core_ui.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_legacy_legacy_support_core_utils.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_legacy_legacy_support_v4.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_lifecycle_lifecycle_livedata_core.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_lifecycle_lifecycle_process.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_lifecycle_lifecycle_runtime_android.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_lifecycle_lifecycle_viewmodel_android.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_lifecycle_lifecycle_viewmodel_savedstate.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_loader_loader.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_localbroadcastmanager_localbroadcastmanager.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_media_media.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_print_print.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_profileinstaller_profileinstaller.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_recyclerview_recyclerview.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_savedstate_savedstate.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_slidingpanelayout_slidingpanelayout.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_startup_startup_runtime.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_swiperefreshlayout_swiperefreshlayout.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_tracing_tracing.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_transition_transition.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_vectordrawable_vectordrawable.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_vectordrawable_vectordrawable_animated.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_versionedparcelable_versionedparcelable.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_viewpager2_viewpager2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_viewpager_viewpager.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_window_extensions_core_core.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/androidx_window_window.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/libraries/com_google_android_material_material.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/projectSettingsUpdater.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/projectSettingsUpdater.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -93,31 +146,31 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="2u9z7sW84j4m0K5OgRUoysZaNI5" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Launch Settings Profile.pMusic (Desktop).executor&quot;: &quot;Run&quot;,
-    &quot;Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic&quot;: &quot;Ibrahim’s iPhone&quot;,
-    &quot;DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider&quot;: &quot;Device&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.501002&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;macOS.pMusic.executor&quot;: &quot;Debug&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;RiderNuGetOptionsPageId&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Run",
+    "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
+    "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "XThreadsFramesViewSplitterKey": "0.501002",
+    "git-widget-placeholder": "play-music",
+    "iOS.pMusic.executor": "Run",
+    "macOS.pMusic.executor": "Debug",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "AppleSettingsPageId",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="Android.pMusic">
+}]]></component>
+  <component name="RunManager" selected=".NET Launch Settings Profile.pMusic (Desktop)">
     <configuration name="pMusic: win-arm64" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="win-arm64.pubxml" pubxml_path="$PROJECT_DIR$/pMusic/Properties/PublishProfiles/win-arm64.pubxml" uuid_high="-1411009619043201322" uuid_low="-7242066600533007251" />
       <method v="2" />
@@ -200,6 +253,11 @@
       <workItem from="1742625762838" duration="3205000" />
       <workItem from="1742635163970" duration="5669000" />
       <workItem from="1742728042523" duration="20000" />
+      <workItem from="1742782139710" duration="2340000" />
+      <workItem from="1742784591415" duration="405000" />
+      <workItem from="1742785005964" duration="116000" />
+      <workItem from="1742785141709" duration="26000" />
+      <workItem from="1742785178717" duration="129000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -409,7 +467,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742640996183</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Installed the audio library SoundFlow.">
+      <option name="closed" value="true" />
+      <created>1742782294658</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1742782294658</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -430,7 +496,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Install CredentialManager, replacing platform.uno's implementation.&#10;&#10;Re-enables the viability of using desktop for Macos." />
     <MESSAGE value="Cleaned up Plex Oauth flow, and switched to C# GCM." />
     <MESSAGE value="Using KeySharp to store login related information. Cleaned up flow." />
     <MESSAGE value="Logout button works. App starts on Login page when unauthenticated." />
@@ -455,7 +520,27 @@
     <MESSAGE value="Fetching albums works." />
     <MESSAGE value="Navigation to track page working." />
     <MESSAGE value="Tracklist for albums working." />
-    <option name="LAST_COMMIT_MESSAGE" value="Tracklist for albums working." />
+    <MESSAGE value="Installed the audio library SoundFlow." />
+    <option name="LAST_COMMIT_MESSAGE" value="Installed the audio library SoundFlow." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/pMusic/Helpers/Plex.cs</url>
+          <line>37</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" containingFunctionPresentation="Method 'GetArtists'">
+            <startOffsets>
+              <option value="1408" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1448" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
