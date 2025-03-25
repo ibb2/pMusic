@@ -11,7 +11,7 @@ public class AudioPlayer
 {
     public readonly Plex? Plex;
 
-    private static AudioEngine _audioEngine;
+    private static AudioEngine? _audioEngine;
     public readonly HttpClient httpClient;
     private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
 
@@ -32,7 +32,7 @@ public class AudioPlayer
             _playback = new Playback(plex: Plex, uri: baseUri, mixer: Mixer.Master );
 
             // Initialize the audio engine with the MiniAudio backend.
-            _audioEngine = new MiniAudioEngine(44100, Capability.Playback);
+            if (_audioEngine is null) _audioEngine = new MiniAudioEngine(44100, Capability.Playback);
 
             using var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();

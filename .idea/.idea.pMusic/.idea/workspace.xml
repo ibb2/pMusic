@@ -12,11 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pMusic/Helpers/Playback.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" afterDir="false" />
-    </list>
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -100,26 +96,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Run",
-    "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
-    "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "XThreadsFramesViewSplitterKey": "0.501002",
-    "git-widget-placeholder": "play-music",
-    "iOS.pMusic.executor": "Run",
-    "macOS.pMusic.executor": "Debug",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "AppleSettingsPageId",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.pMusic (Desktop).executor&quot;: &quot;Run&quot;,
+    &quot;Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic&quot;: &quot;Ibrahim’s iPhone&quot;,
+    &quot;DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider&quot;: &quot;Device&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.501002&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;play-music&quot;,
+    &quot;iOS.pMusic.executor&quot;: &quot;Run&quot;,
+    &quot;macOS.pMusic.executor&quot;: &quot;Debug&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;AppleSettingsPageId&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Launch Settings Profile.pMusic (Desktop)">
     <configuration name="pMusic: win-arm64" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="win-arm64.pubxml" pubxml_path="$PROJECT_DIR$/pMusic/Properties/PublishProfiles/win-arm64.pubxml" uuid_high="-1411009619043201322" uuid_low="-7242066600533007251" />
@@ -212,6 +208,7 @@
       <workItem from="1742820719967" duration="9124000" />
       <workItem from="1742875033827" duration="2602000" />
       <workItem from="1742907999745" duration="5110000" />
+      <workItem from="1742916112476" duration="4810000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -461,7 +458,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742912466157</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="Play pause working.">
+      <option name="closed" value="true" />
+      <created>1742920932861</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1742920932862</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -482,7 +487,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Navigating back to home screen works." />
     <MESSAGE value="Added Plex SDK nuget package." />
     <MESSAGE value="Basic layout scaffolded" />
     <MESSAGE value="Displaying Artist information." />
@@ -507,7 +511,8 @@
     <MESSAGE value="Added functions to handle updating track progress and play status." />
     <MESSAGE value="unable to get now playing working." />
     <MESSAGE value="Playing music now reflects in &quot;Now Playing&quot; of plex dashboard." />
-    <option name="LAST_COMMIT_MESSAGE" value="Playing music now reflects in &quot;Now Playing&quot; of plex dashboard." />
+    <MESSAGE value="Play pause working." />
+    <option name="LAST_COMMIT_MESSAGE" value="Play pause working." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -520,10 +525,23 @@
               <option value="4593" />
             </startOffsets>
             <endOffsets>
-              <option value="4820" />
+              <option value="4749" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs</url>
+          <line>57</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" containingFunctionPresentation="Method 'PlayAudio'">
+            <startOffsets>
+              <option value="2223" />
+            </startOffsets>
+            <endOffsets>
+              <option value="2319" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
