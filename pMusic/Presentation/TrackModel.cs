@@ -28,7 +28,7 @@ public partial record TrackModel(IArtistService ArtistService, AudioPlayer Audio
         var authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
         var baseUri = ArtistService.GetServerUri();
         var uri = baseUri + selectedTrack.Media.Part.Key;
-        AudioPlayer.PlayAudio(uri);
+        AudioPlayer.PlayAudio(uri: uri, baseUri:baseUri, ratingKey: selectedTrack.RatingKey, key: selectedTrack.Key);
     }
 
     public void PauseTrack()

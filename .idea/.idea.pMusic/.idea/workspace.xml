@@ -14,7 +14,9 @@
   <component name="ChangeListManager">
     <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/TrackModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/TrackModel.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,15 +58,14 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/ArtistService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/pMusic/bin/Debug/net9.0-browserwasm/wwwroot/_framework/dotnet.js.map" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/72103d949a424ae4bf3dfad3841dc7dc20200/52/aabe2f27/SoundPlayer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/1bf5f37487584a9b8cedd4392242b8e8c603d2d1bf433512b4ea8783749afc/Feed.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/2280f6b68568823fe54b6fb0be31b9cbce4c9aa7882ea9482c7f66bc84f4930/ExecutionContext.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/251bdbb2b7c766dbfd75216ff1bad2ff2346c96dea9f5bd853ec21ca7b555e/ThreadPoolWorkQueue.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/271b8d2d9d94e13a469269f46758864f64ad438c3174f74d4a591af6410e96b/Future.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/2b16872d2b1f6be4c2f1fbf5d48f15647e49fba3695ca37e6b12eed7c6c29d3b/AsyncValueTaskMethodBuilder.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/34427b5f823f5f5f6c1479ce0848525cc8aba460de6f8e24c854838d8fd8d/ThreadPoolWorkQueue.AutoreleasePool.OSX.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/4743f513c7ddc8411223a46f0ca426ed929391acebcff993721dff2f0c6b34/ThrowHelper.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/48214bd4236ec42895861f8feeea8244bfa92214c14e92d52b50f1f0d6ed/XContainer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/6879dfc6efd075615a9b4e1673eeee2fd1a137ea8af218f14be0e44fb2383148/PasswordVault.others.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/6fbeedd88e6fd4f4799b2713358e82dae2d49abd9b5c2176e012e8843e33ba/AttachedProperty.cs" root0="FORCE_HIGHLIGHTING" />
@@ -100,26 +101,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Launch Settings Profile.pMusic (Desktop).executor&quot;: &quot;Debug&quot;,
-    &quot;Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic&quot;: &quot;Ibrahim’s iPhone&quot;,
-    &quot;DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider&quot;: &quot;Device&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.501002&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;play-music&quot;,
-    &quot;iOS.pMusic.executor&quot;: &quot;Run&quot;,
-    &quot;macOS.pMusic.executor&quot;: &quot;Debug&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;AppleSettingsPageId&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Debug",
+    "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
+    "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "XThreadsFramesViewSplitterKey": "0.501002",
+    "git-widget-placeholder": "play-music",
+    "iOS.pMusic.executor": "Run",
+    "macOS.pMusic.executor": "Debug",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "AppleSettingsPageId",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Launch Settings Profile.pMusic (Desktop)">
     <configuration name="pMusic: win-arm64" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="win-arm64.pubxml" pubxml_path="$PROJECT_DIR$/pMusic/Properties/PublishProfiles/win-arm64.pubxml" uuid_high="-1411009619043201322" uuid_low="-7242066600533007251" />
@@ -208,7 +209,9 @@
       <workItem from="1742785005964" duration="116000" />
       <workItem from="1742785141709" duration="26000" />
       <workItem from="1742785178717" duration="17287000" />
-      <workItem from="1742811888063" duration="308000" />
+      <workItem from="1742811888063" duration="434000" />
+      <workItem from="1742820719967" duration="9124000" />
+      <workItem from="1742875033827" duration="2406000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -434,7 +437,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742785453224</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="Added functions to handle updating track progress and play status.">
+      <option name="closed" value="true" />
+      <created>1742812312945</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1742812312945</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -455,7 +466,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Using KeySharp to store login related information. Cleaned up flow." />
     <MESSAGE value="Logout button works. App starts on Login page when unauthenticated." />
     <MESSAGE value="Redirect user to homepage and renamed login button." />
     <MESSAGE value="Navigating back to home screen works." />
@@ -480,7 +490,8 @@
     <MESSAGE value="Tracklist for albums working." />
     <MESSAGE value="Installed the audio library SoundFlow." />
     <MESSAGE value="Removed mobile and catalyst from targeted frameworks." />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed mobile and catalyst from targeted frameworks." />
+    <MESSAGE value="Added functions to handle updating track progress and play status." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added functions to handle updating track progress and play status." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
