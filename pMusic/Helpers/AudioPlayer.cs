@@ -57,7 +57,7 @@ public class AudioPlayer
 
             await Plex.CreateSession(uri: baseUri, key: key, ratingKey: ratingKey, duration: (Decimal)Player.Duration * 1000);
 
-            while (Player.State is PlaybackState.Playing) 
+            while (Player.State is not PlaybackState.Stopped)
             {
                 await UpdateProgress(baseUri, ratingKey, key);
             }
@@ -89,7 +89,8 @@ public class AudioPlayer
             Console.WriteLine($"Rounded Track Progess {formattedTime}");
             await Task.Delay(1000);
             // await Plex.UpdateTrackProgress(ratingKey: ratingKey, progress: Player.Time);
-            await Plex.UpdateSession(uri: uri, key: key, state: "playing", ratingKey: ratingKey,  formattedTime, duration:duration);
+            var state = Player.State == PlaybackState.Playing ? "playing" : "paused";
+            await Plex.UpdateSession(uri: uri, key: key, state: state, ratingKey: ratingKey,  formattedTime, duration:duration);
         }
     }
 

@@ -104,7 +104,8 @@ public class Plex
     public async ValueTask CreateSession(string uri, string key, string ratingKey, Decimal duration)
     {
 
-        var timelineUri = "192-168-50-58.1362f9412e8f48b7a8d1d03e7b44a1e2.plex.direct:32400" + "/:/timeline?type=music&key=" + key +"&state=playing&ratingKey=" + ratingKey + "&time=0&playbackTime=0&duration=" + duration ;
+        var cleanedDecimal = Decimal.Round(duration, MidpointRounding.ToZero);
+        var timelineUri = "https://192-168-50-58.1362f9412e8f48b7a8d1d03e7b44a1e2.plex.direct:32400" + "/:/timeline?type=music&key=" + key +"&state=playing&ratingKey=" + ratingKey + "&time=0&playbackTime=0&duration=" + cleanedDecimal ;
         await httpClient.GetAsync(timelineUri);
         // var request = new HttpRequestMessage(HttpMethod.Put, timelineUri);
         // request.Headers.Add("Accept", "application/json");
@@ -113,7 +114,8 @@ public class Plex
 
     public async ValueTask UpdateSession(string uri, string key, string state, string ratingKey, Decimal time, Decimal duration)
     {
-        var timelineUri = "192-168-50-58.1362f9412e8f48b7a8d1d03e7b44a1e2.plex.direct:32400" + "/:/timeline?type=music&key=" + key +"&state=" + state +"&ratingKey=" + ratingKey + "&time="+time+"&playbackTime="+time+"&duration=" + duration;
+        var cleanedDecimal = Decimal.Round(duration, MidpointRounding.ToZero);
+        var timelineUri = "192-168-50-58.1362f9412e8f48b7a8d1d03e7b44a1e2.plex.direct:32400" + "/:/timeline?type=music&key=" + key +"&state=" + state +"&ratingKey=" + ratingKey + "&time="+time+"&playbackTime="+time+"&duration=" + cleanedDecimal;
         await httpClient.GetAsync(timelineUri);
         // var request = new HttpRequestMessage(HttpMethod.Put, timelineUri);
         // request.Headers.Add("Accept", "application/json");

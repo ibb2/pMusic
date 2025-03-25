@@ -16,7 +16,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/TrackModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/TrackModel.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +102,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Debug",
+    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Run",
     "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
     "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -211,7 +210,8 @@
       <workItem from="1742785178717" duration="17287000" />
       <workItem from="1742811888063" duration="434000" />
       <workItem from="1742820719967" duration="9124000" />
-      <workItem from="1742875033827" duration="2406000" />
+      <workItem from="1742875033827" duration="2602000" />
+      <workItem from="1742907999745" duration="3448000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -445,7 +445,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742812312945</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="unable to get now playing working.">
+      <option name="closed" value="true" />
+      <created>1742877608394</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1742877608394</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -466,7 +474,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Logout button works. App starts on Login page when unauthenticated." />
     <MESSAGE value="Redirect user to homepage and renamed login button." />
     <MESSAGE value="Navigating back to home screen works." />
     <MESSAGE value="Added Plex SDK nuget package." />
@@ -491,7 +498,27 @@
     <MESSAGE value="Installed the audio library SoundFlow." />
     <MESSAGE value="Removed mobile and catalyst from targeted frameworks." />
     <MESSAGE value="Added functions to handle updating track progress and play status." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added functions to handle updating track progress and play status." />
+    <MESSAGE value="unable to get now playing working." />
+    <option name="LAST_COMMIT_MESSAGE" value="unable to get now playing working." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/pMusic/Helpers/Plex.cs</url>
+          <line>107</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" containingFunctionPresentation="Method 'CreateSession'">
+            <startOffsets>
+              <option value="4593" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4820" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
