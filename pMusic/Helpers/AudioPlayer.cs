@@ -11,7 +11,7 @@ public class AudioPlayer
 {
     public readonly Plex? Plex;
 
-    // private static readonly AudioEngine Engine = new MiniAudioEngine(44100, Capability.Playback);
+    private static AudioEngine _audioEngine;
     public readonly HttpClient httpClient;
     private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
 
@@ -23,20 +23,20 @@ public class AudioPlayer
     }
 
     public SoundPlayer? Player { get; set; }
+    private Playback _playback;
 
     public async Task PlayAudio(string uri, string baseUri, string ratingKey, string key)
     {
         try
         {
-            // Replace "your-audio-stream-url" with the actual URL of an audio stream (e.g., an internet radio station).
-            // var stream = await httpClient.GetStreamAsync("");
+            _playback = new Playback(plex: Plex, uri: baseUri, mixer: Mixer.Master );
 
             // Initialize the audio engine with the MiniAudio backend.
-            using var audioEngine = new MiniAudioEngine(44100, Capability.Playback);
+            _audioEngine = new MiniAudioEngine(44100, Capability.Playback);
 
             using var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            using var httpStream = await response.Content.ReadAsStreamAsync();
+            await using var httpStream = await response.Content.ReadAsStreamAsync();
 
             // Copy to MemoryStream
             var memoryStream = new MemoryStream();
@@ -54,22 +54,8 @@ public class AudioPlayer
 
             // Start playback.
             Player.Play();
-
-            await Plex.CreateSession(uri: baseUri, key: key, ratingKey: ratingKey, duration: (Decimal)Player.Duration * 1000);
-
-            while (Player.State is not PlaybackState.Stopped)
-            {
-                await UpdateProgress(baseUri, ratingKey, key);
-            }
-
-            // Stop playback.
-            Player.Stop();
-            await Plex.UpdateSession(baseUri, key, "paused", ratingKey, (Decimal)Player.Time * 1000, (Decimal)Player.Duration * 1000);
-            if (Decimal.Round((Decimal)Player.Time) / (Decimal)Player.Duration * 100 > 90)
-                await TrackCompleted(ratingKey);
-
-            // Remove the player from the mixer.
-            Mixer.Master.RemoveComponent(Player);
+            var decimalRoundedAndMills = Decimal.Round((Decimal)Player.Duration * 1000, MidpointRounding.ToZero);
+            _playback.StartPlayback(player: Player, key: key, ratingKey: ratingKey, decimalRoundedAndMills);
         }
         catch (Exception ex)
         {
@@ -77,30 +63,15 @@ public class AudioPlayer
         }
     }
 
-    public async ValueTask UpdateProgress(string uri, string key, string ratingKey)
-    {
-        var duration = (decimal)Player.Duration;
-        Console.WriteLine($"Duration {duration}");
-
-        for (int i = 0; i < Decimal.Round(duration); i++)
-        {
-            Console.WriteLine($"Track Progress {Player.Time}");
-            var formattedTime = Decimal.Round((Decimal)Player.Time, MidpointRounding.ToZero) * 1000;
-            Console.WriteLine($"Rounded Track Progess {formattedTime}");
-            await Task.Delay(1000);
-            // await Plex.UpdateTrackProgress(ratingKey: ratingKey, progress: Player.Time);
-            var state = Player.State == PlaybackState.Playing ? "playing" : "paused";
-            await Plex.UpdateSession(uri: uri, key: key, state: state, ratingKey: ratingKey,  formattedTime, duration:duration);
-        }
-    }
-
-    public void PauseAudio()
+    public async ValueTask PauseAudio()
     {
         Player?.Pause();
+        await _playback.PausePlayback();
     }
 
-    public async ValueTask TrackCompleted(string ratingKey)
+    public async ValueTask Stop()
     {
-        await Plex.MarkTrackAsPlayed(double.Parse(ratingKey));
+        Player?.Stop();
+        await _playback.StopPlayback();
     }
 }

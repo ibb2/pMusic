@@ -13,9 +13,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/pMusic/Helpers/Playback.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -211,7 +211,7 @@
       <workItem from="1742811888063" duration="434000" />
       <workItem from="1742820719967" duration="9124000" />
       <workItem from="1742875033827" duration="2602000" />
-      <workItem from="1742907999745" duration="3448000" />
+      <workItem from="1742907999745" duration="5110000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -453,7 +453,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742877608394</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Playing music now reflects in &quot;Now Playing&quot; of plex dashboard.">
+      <option name="closed" value="true" />
+      <created>1742912466157</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1742912466157</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -474,7 +482,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Redirect user to homepage and renamed login button." />
     <MESSAGE value="Navigating back to home screen works." />
     <MESSAGE value="Added Plex SDK nuget package." />
     <MESSAGE value="Basic layout scaffolded" />
@@ -499,7 +506,8 @@
     <MESSAGE value="Removed mobile and catalyst from targeted frameworks." />
     <MESSAGE value="Added functions to handle updating track progress and play status." />
     <MESSAGE value="unable to get now playing working." />
-    <option name="LAST_COMMIT_MESSAGE" value="unable to get now playing working." />
+    <MESSAGE value="Playing music now reflects in &quot;Now Playing&quot; of plex dashboard." />
+    <option name="LAST_COMMIT_MESSAGE" value="Playing music now reflects in &quot;Now Playing&quot; of plex dashboard." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
