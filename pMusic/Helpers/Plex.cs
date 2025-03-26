@@ -9,21 +9,28 @@ namespace pMusic.Helpers;
 
 public class Plex
 {
-    private readonly HttpClient httpClient;
+    public readonly HttpClient httpClient;
     private readonly string _plexClientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
     private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+    private static readonly string _plexSessionIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+    private static readonly string _plexProduct = "pMusic"; 
+    private static readonly string _plexDeviceName = "Desktop"; 
+    private static readonly string _plexPlatform = "Desktop"; 
+    private static readonly PlexAPI _plexApi = new PlexAPI(Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken"));
 
     public Plex(HttpClient httpClient)
     {
         this.httpClient = httpClient;
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Token", _plexToken);
+        this.httpClient.DefaultRequestHeaders.Add("X-Plex-Client-Identifier", _plexClientIdentifier);
+        this.httpClient.DefaultRequestHeaders.Add("X-Plex-Session-Identifier", _plexSessionIdentifier);
+        this.httpClient.DefaultRequestHeaders.Add("X-Plex-Product", _plexProduct);
+        this.httpClient.DefaultRequestHeaders.Add("X-Plex-Device-Name", _plexDeviceName);
+        this.httpClient.DefaultRequestHeaders.Add("X-Plex-Platform", _plexPlatform);
     }
 
     public async ValueTask<String> GetServerCapabilitiesAsync()
     {
-        // var sdk = new PlexAPI(accessToken: _plexToken);
-        //
-        // var res = await sdk.Server.GetServerListAsync();
         var uri = "https://plex.tv/api/v2/resources?" + "X-Plex-Client-Identifier=" + _plexClientIdentifier +
                   "&X-Plex-Token=" + _plexToken;
         var serversXmlRes = await httpClient.GetStringAsync(uri);
@@ -74,6 +81,45 @@ public class Plex
         var empty = ImmutableList<Track>.Empty;
         
         return tracks;
+    }
+
+    public async ValueTask UpdateTrackProgress(string ratingKey, float progress)
+    {
+        var res = await _plexApi.Media.UpdatePlayProgressAsync(
+            key: ratingKey,
+            time: progress,
+            state: "played"
+        );
+        
+        Console.WriteLine($"Update Play Progress Response: {res}");
+    }
+
+    public async ValueTask MarkTrackAsPlayed(double ratingKey)
+    {
+        var res = await _plexApi.Media.MarkPlayedAsync(key: ratingKey);
+        Console.WriteLine($"Mark Played Response: {res}");
+
+    }
+
+    public async ValueTask CreateSession(string uri, string key, string ratingKey, Decimal duration)
+    {
+
+        var cleanedDecimal = Decimal.Round(duration, MidpointRounding.ToZero);
+        var timelineUri = uri + "/:/timeline?type=music&key=" + key +"&state=playing&ratingKey=" + ratingKey + "&time=0&playbackTime=0&duration=" + cleanedDecimal ;
+        await httpClient.GetAsync(timelineUri);
+        // var request = new HttpRequestMessage(HttpMethod.Put, timelineUri);
+        // request.Headers.Add("Accept", "application/json");
+        // var res = await httpClient.SendAsync(request);
+    }
+
+    public async ValueTask UpdateSession(string uri, string key, string state, string ratingKey, Decimal time, Decimal duration)
+    {
+        var cleanedDecimal = Decimal.Round(duration, MidpointRounding.ToZero);
+        var timelineUri = uri + "/:/timeline?type=music&key=" + key +"&state=" + state +"&ratingKey=" + ratingKey + "&time="+time+"&playbackTime="+time+"&duration=" + cleanedDecimal;
+        await httpClient.GetAsync(timelineUri);
+        // var request = new HttpRequestMessage(HttpMethod.Put, timelineUri);
+        // request.Headers.Add("Accept", "application/json");
+        // var res = await httpClient.SendAsync(request);
     }
 
     public static List<Track> ParseTracks(XElement mediaContainer)

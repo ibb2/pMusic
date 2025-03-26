@@ -55,6 +55,7 @@ public interface IArtistService
     ValueTask<IImmutableList<Artist>> GetArtistsAsync(CancellationToken ct, Plex plex);
     ValueTask<IImmutableList<Album>> GetArtistAlbums(CancellationToken ct, Plex plex, int libraryId, string artistKey);
     ValueTask<IImmutableList<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey);
+    string GetServerUri();
 
 }
 
@@ -91,6 +92,11 @@ public class ArtistService : IArtistService
 
         var temp = ImmutableArray<Album>.Empty;
         return albums;
+    }
+
+    public string GetServerUri()
+    {
+        return ServerUri;
     }
     
 }
