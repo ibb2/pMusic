@@ -5,10 +5,22 @@
       xmlns:uen="using:Uno.Extensions.Navigation.UI"
       xmlns:utu="using:Uno.Toolkit.UI"
       xmlns:um="using:Uno.Material"
+      xmlns:ui="clr-namespace:Uno.Extensions.Reactive.UI;assembly=Uno.Extensions.Reactive.UI"
+      xmlns:converters="clr-namespace:pMusic.Converters"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-  <ScrollViewer>
-    <Grid utu:SafeArea.Insets="VisibleBounds">
+    <Page.Resources>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:BoolToPlayPauseSymbolConverter x:Key="BoolToPlayPauseSymbolConverter" />
+    </Page.Resources>
+
+    <Grid>
+      <Grid.RowDefinitions>
+          <RowDefinition Height="4*"></RowDefinition>
+          <RowDefinition Height="*"></RowDefinition>
+      </Grid.RowDefinitions>
+
+      <Grid utu:SafeArea.Insets="VisibleBounds">
 
         <NavigationView uen:Region.Attached="true" SelectionChanged="NavigationView_OnSelectionChanged">
             <NavigationView.IsSettingsVisible>False</NavigationView.IsSettingsVisible>
@@ -25,33 +37,29 @@
                 <!--                          uen:Region.Name="Profile" /> -->
             </NavigationView.MenuItems>
 
-            <!-- <Grid uen:Region.Attached="True" uen:Region.Navigator="Visibility"> -->
-            <!--     <StackPanel uen:Region.Name="Products" -->
-            <!--                 Visibility="Visible"> -->
-            <!--         <TextBlock Text="Products Page" /> -->
-            <!--     </StackPanel> -->
-            <!--     <StackPanel uen:Region.Name="Deals" -->
-            <!--                 Visibility="Collapsed"> -->
-            <!--         <TextBlock Text="Deals Page" /> -->
-            <!--     </StackPanel> -->
-            <!--     <StackPanel uen:Region.Name="Profile" -->
-            <!--                 Visibility="Collapsed"> -->
-            <!--         <TextBlock Text="Profile Page" /> -->
-            <!--     </StackPanel> -->
-            <!-- </Grid> -->
             <Frame x:Name="ContentFrame"/>
-        </NavigationView><!-- <StackPanel -->
-      <!--       HorizontalAlignment="Center" -->
-      <!--       VerticalAlignment="Center" -->
-      <!--       Spacing="16"> -->
-      <!--   <TextBox Text="{Binding Name, Mode=TwoWay}" -->
-      <!--       PlaceholderText="Enter your name:" /> -->
-      <!--   <Button Content="Go to Second Page" -->
-      <!--       AutomationProperties.AutomationId="SecondPageButton" -->
-      <!--       Command="{Binding GoToSecond}" /> -->
-      <!--   <Button Content="Logout" -->
-      <!--       Command="{Binding Logout}" /> -->
-      <!-- </StackPanel> -->
+        </NavigationView>
     </Grid>
-  </ScrollViewer>
+
+        <Grid Grid.Row="1" Visibility="{Binding IsAudioPlayer, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
+              Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <StackPanel>
+            <TextBlock>
+                <Run Text="Audio playing"/>
+                <Run Text="{Binding IsPlaying}"/>
+            </TextBlock>
+            <!-- <TextBlock> -->
+            <!--     <Run Text="Audio player"/> -->
+            <!--     <Run Text="{Binding IsPlaybackVisible}"/> -->
+            <!-- </TextBlock> -->
+                </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="12" Padding="16">
+                <!-- Play/Pause Button -->
+                <Button Command="{Binding TogglePlayPause}">
+                    <SymbolIcon Symbol="{Binding IsPlaying, Converter={StaticResource BoolToPlayPauseSymbolConverter}, Mode=OneWay}"
+                                Width="24" Height="24"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+  </Grid>
 </Page>

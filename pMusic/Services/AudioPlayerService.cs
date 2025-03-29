@@ -10,16 +10,17 @@ namespace pMusic.Helpers;
 public interface IAudioPlayerService
 {
     public IState<bool> IsPlaying { get; }
-    public IState<SoundPlayer> AudioPlayer { get; }
+    public IState<SoundPlayer?> AudioPlayer { get; }
     ValueTask PlayAudio(string uri, string baseUri, string ratingKey, string key);
     ValueTask PauseAudio();
+    ValueTask ResumeAudio();
     ValueTask Stop();
 }
 
 public class AudioPlayerService: IAudioPlayerService
 {
     private readonly IState<bool> _isPlaying;
-    private readonly IState<SoundPlayer> _player;
+    private readonly IState<SoundPlayer?> _player;
     private readonly Plex _plex;
     private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
     
@@ -36,9 +37,9 @@ public class AudioPlayerService: IAudioPlayerService
     }
 
     public IState<bool> IsPlaying => _isPlaying;
-    public IState<SoundPlayer> AudioPlayer => _player;
+    public IState<SoundPlayer?> AudioPlayer => _player;
     
-    public SoundPlayer Player { get; set; }
+    public SoundPlayer? Player { get; set; }
     
 
 
@@ -86,7 +87,6 @@ public class AudioPlayerService: IAudioPlayerService
     public async ValueTask PauseAudio()
     {
         Player?.Pause();
-        await _player.UpdateAsync(_ => Player);
         await _isPlaying.UpdateAsync(_ => false);
         await _playback.PausePlayback();
     }
@@ -94,7 +94,6 @@ public class AudioPlayerService: IAudioPlayerService
     public async ValueTask Stop()
     {
         Player?.Stop();
-        await _player.UpdateAsync(_ => Player);
         await _isPlaying.UpdateAsync(_ => false);
         await _playback.StopPlayback();
     }

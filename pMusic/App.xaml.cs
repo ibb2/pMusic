@@ -88,7 +88,7 @@ public partial class App : Application
                         var client = clientFactory.CreateClient(); // or use a named client if needed
                         return new Plex(client);
                     });
-                    services.AddTransient<IAudioPlayerService, AudioPlayerService>();
+                    services.AddSingleton<IAudioPlayerService, AudioPlayerService>();
                     services.AddTransient<IArtistService, ArtistService>();
                     services.AddTransient<ArtistModel>();
                     services.AddTransient<ArtistViewModel>();
@@ -96,6 +96,8 @@ public partial class App : Application
                     services.AddTransient<AlbumViewModel>();
                     services.AddTransient<TrackModel>();
                     services.AddTransient<TrackViewModel>();
+                    services.AddTransient<MainModel>();
+                    services.AddTransient<MainViewModel>();
                 })
                 .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
             );

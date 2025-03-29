@@ -36,7 +36,7 @@ public class Playback
     public async ValueTask UnPausePlayback()
     {
         _timer.Change(0, 1000);
-        await UpdateTimeline("paused");
+        await UpdateTimeline("playing");
     }
 
     public async ValueTask PausePlayback()
