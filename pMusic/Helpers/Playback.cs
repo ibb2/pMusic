@@ -13,15 +13,20 @@ public class Playback
     private decimal _duration;
     private Timer _timer;
     private SoundPlayer _player;
+    private readonly IState<SoundPlayer> _soundPlayerState;
+    private readonly IState<double> _currentTimeState;
 
-    public Playback(Plex plex, string uri, Mixer mixer)
+    public Playback(Plex plex, string uri, Mixer mixer, IState<SoundPlayer> soundPlayerState, IState<double> currentTimeState)
     {
         _plex = plex;
         _baseUri = uri;
         _mixer = mixer;
+        _soundPlayerState = soundPlayerState;
+        _currentTimeState = currentTimeState;
     }
 
-    public void StartPlayback(SoundPlayer player, string key, string ratingKey, decimal duration)
+    public void StartPlayback(SoundPlayer player, string key, string ratingKey, decimal duration,
+        IState<SoundPlayer> state, IState<double> playbackPosition)
     {
         _player = player;
         _key = key;
@@ -29,8 +34,22 @@ public class Playback
         _duration = duration;
 
         _timer = new Timer(async _ =>
-            await UpdateTimeline("playing"), null, 0, 1000
+            {
+                await UpdateTimeline("playing");
+                await state.UpdateAsync(_ => player);
+                var val = await state;
+                await _soundPlayerState.UpdateAsync( _ => val);
+                await playbackPosition.UpdateAsync(_ => (double)Decimal.Round((decimal)player.Time, 2)); // Update the playbackPosition state
+                Console.Write($"Current time {player.Time}");
+
+            }, null, 0, 1000
         );
+    }
+    
+    public async ValueTask UnPausePlayback()
+    {
+        _timer.Change(0, 1000);
+        await UpdateTimeline("playing");
     }
 
     public async ValueTask PausePlayback()

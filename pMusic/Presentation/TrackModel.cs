@@ -4,7 +4,7 @@ using pMusic.Services;
 
 namespace pMusic.Presentation;
 
-public partial record TrackModel(IArtistService ArtistService, AudioPlayer AudioPlayer, Plex Plex)
+public partial record TrackModel(IArtistService ArtistService, IAudioPlayerService AudioPlayerService, Plex Plex)
 {
     public string Title { get; set; }
 
@@ -28,11 +28,11 @@ public partial record TrackModel(IArtistService ArtistService, AudioPlayer Audio
         var authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
         var baseUri = ArtistService.GetServerUri();
         var uri = baseUri + selectedTrack.Media.Part.Key;
-        AudioPlayer.PlayAudio(uri: uri, baseUri:baseUri, ratingKey: selectedTrack.RatingKey, key: selectedTrack.Key);
+        AudioPlayerService.PlayAudio(uri: uri, baseUri:baseUri, ratingKey: selectedTrack.RatingKey, key: selectedTrack.Key);
     }
 
     public void PauseTrack()
     {
-        AudioPlayer.PauseAudio();
+        AudioPlayerService.PauseAudio();
     }
 }

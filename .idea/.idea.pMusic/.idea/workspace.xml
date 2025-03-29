@@ -12,7 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="" />
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Progressbar is working." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -53,8 +53,23 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/App.xaml" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/App.xaml.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/App.xaml.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Playback.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Playback.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Plex.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainModel.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/TrackModel.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/TrackPage.xaml" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/pMusic/bin/Debug/net9.0-browserwasm/wwwroot/_framework/dotnet.js.map" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/72103d949a424ae4bf3dfad3841dc7dc20200/52/aabe2f27/SoundPlayer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/0541629a13be879eb18d6ad28b4e2a623584e8/pMusic.Presentation.MainModel.Bindable.g.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/1bf5f37487584a9b8cedd4392242b8e8c603d2d1bf433512b4ea8783749afc/Feed.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/2280f6b68568823fe54b6fb0be31b9cbce4c9aa7882ea9482c7f66bc84f4930/ExecutionContext.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/251bdbb2b7c766dbfd75216ff1bad2ff2346c96dea9f5bd853ec21ca7b555e/ThreadPoolWorkQueue.cs" root0="FORCE_HIGHLIGHTING" />
@@ -64,6 +79,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/48214bd4236ec42895861f8feeea8244bfa92214c14e92d52b50f1f0d6ed/XContainer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/6879dfc6efd075615a9b4e1673eeee2fd1a137ea8af218f14be0e44fb2383148/PasswordVault.others.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/6fbeedd88e6fd4f4799b2713358e82dae2d49abd9b5c2176e012e8843e33ba/AttachedProperty.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/72e2015f6576c96241d1421c64465977c0dad6b6f881eb2205aaa1483f4f/Frame.partial.mux.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/7a6425a7c863f151611fdd8bb93a9d7c63b825cb/pMusic.Presentation.AlbumModel.Bindable.g.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/8139e0a123d64f22db0e0f691e01ffa022c27d23c539e17cc3c0b430ceb9/Feed.T.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a1d44cd4fbac97f89425e15ed68d933c8e5188912f4d8d7d3f2b73aa8ca51d/Delegate.CoreCLR.cs" root0="FORCE_HIGHLIGHTING" />
@@ -74,6 +90,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/e5ace92664429b8b34b68b587316fb211811b58aeb53422b43cecca2ad2bdaf3/AsyncTaskMethodBuilderT.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/ea179f92c0546c29af19371af030198fe42a695/pMusic.Presentation.LoginModel.Bindable.g.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/ed6d3cfce28a908e474af54c42b83e78339f233df99419dd2cce16aa8c2d7a0/AsyncValueTaskMethodBuilderT.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/fc2027f7e776fc105cddb56b1a25eeb3895b3ae6f3aac854d786e63bd01f75e2/CallSiteFactory.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="InvalidFacetManager">
     <ignored-facets>
@@ -96,26 +113,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Launch Settings Profile.pMusic (Desktop).executor&quot;: &quot;Run&quot;,
-    &quot;Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic&quot;: &quot;Ibrahim’s iPhone&quot;,
-    &quot;DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider&quot;: &quot;Device&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.501002&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;play-music&quot;,
-    &quot;iOS.pMusic.executor&quot;: &quot;Run&quot;,
-    &quot;macOS.pMusic.executor&quot;: &quot;Debug&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;AppleSettingsPageId&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Run",
+    "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
+    "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "XThreadsFramesViewSplitterKey": "0.501002",
+    "git-widget-placeholder": "add-media-controls",
+    "iOS.pMusic.executor": "Run",
+    "macOS.pMusic.executor": "Debug",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "AppleSettingsPageId",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Launch Settings Profile.pMusic (Desktop)">
     <configuration name="pMusic: win-arm64" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="win-arm64.pubxml" pubxml_path="$PROJECT_DIR$/pMusic/Properties/PublishProfiles/win-arm64.pubxml" uuid_high="-1411009619043201322" uuid_low="-7242066600533007251" />
@@ -466,7 +483,47 @@
       <option name="project" value="LOCAL" />
       <updated>1742920932862</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="Changed AudioPlayer.cs to AudioPlayerService.cs.">
+      <option name="closed" value="true" />
+      <created>1743228540715</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1743228540715</updated>
+    </task>
+    <task id="LOCAL-00034" summary="Play and pause button working.">
+      <option name="closed" value="true" />
+      <created>1743245128112</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1743245128112</updated>
+    </task>
+    <task id="LOCAL-00035" summary="Added remaining playback controls.">
+      <option name="closed" value="true" />
+      <created>1743245707001</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1743245707001</updated>
+    </task>
+    <task id="LOCAL-00036" summary="Made bottom control section static height.">
+      <option name="closed" value="true" />
+      <created>1743245789539</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1743245789539</updated>
+    </task>
+    <task id="LOCAL-00037" summary="Progressbar is working.">
+      <option name="closed" value="true" />
+      <created>1743261612862</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1743261612862</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -487,11 +544,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Added Plex SDK nuget package." />
-    <MESSAGE value="Basic layout scaffolded" />
-    <MESSAGE value="Displaying Artist information." />
-    <MESSAGE value="Removed Writelines." />
-    <MESSAGE value="Got Basic navigation bar on the left working." />
     <MESSAGE value="Siderbar functional." />
     <MESSAGE value="Installed another plex api package." />
     <MESSAGE value="Added plex api as singleton." />
@@ -512,36 +564,28 @@
     <MESSAGE value="unable to get now playing working." />
     <MESSAGE value="Playing music now reflects in &quot;Now Playing&quot; of plex dashboard." />
     <MESSAGE value="Play pause working." />
-    <option name="LAST_COMMIT_MESSAGE" value="Play pause working." />
+    <MESSAGE value="Changed AudioPlayer.cs to AudioPlayerService.cs." />
+    <MESSAGE value="Play and pause button working." />
+    <MESSAGE value="Added remaining playback controls." />
+    <MESSAGE value="Made bottom control section static height." />
+    <MESSAGE value="Progressbar is working." />
+    <option name="LAST_COMMIT_MESSAGE" value="Progressbar is working." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Helpers/Plex.cs</url>
-          <line>107</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" containingFunctionPresentation="Method 'CreateSession'">
+          <url>file://$PROJECT_DIR$/pMusic/Presentation/MainModel.cs</url>
+          <line>62</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" containingFunctionPresentation="Property 'SoundPlayer'">
             <startOffsets>
-              <option value="4593" />
+              <option value="1887" />
             </startOffsets>
             <endOffsets>
-              <option value="4749" />
+              <option value="1911" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs</url>
-          <line>57</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/AudioPlayer.cs" containingFunctionPresentation="Method 'PlayAudio'">
-            <startOffsets>
-              <option value="2223" />
-            </startOffsets>
-            <endOffsets>
-              <option value="2319" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="6" />
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

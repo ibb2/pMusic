@@ -5,53 +5,82 @@
       xmlns:uen="using:Uno.Extensions.Navigation.UI"
       xmlns:utu="using:Uno.Toolkit.UI"
       xmlns:um="using:Uno.Material"
+      xmlns:ui="clr-namespace:Uno.Extensions.Reactive.UI;assembly=Uno.Extensions.Reactive.UI"
+      xmlns:converters="clr-namespace:pMusic.Converters"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-  <ScrollViewer>
-    <Grid utu:SafeArea.Insets="VisibleBounds">
+    <Page.Resources>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:BoolToPlayPauseSymbolConverter x:Key="BoolToPlayPauseSymbolConverter" />
+    </Page.Resources>
 
-        <NavigationView uen:Region.Attached="true" SelectionChanged="NavigationView_OnSelectionChanged">
-            <NavigationView.IsSettingsVisible>False</NavigationView.IsSettingsVisible>
-            <NavigationView.IsBackButtonVisible>Collapsed</NavigationView.IsBackButtonVisible>
-            <!-- <NavigationView.PaneDisplayMode>Left</NavigationView.PaneDisplayMode> -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="200"></RowDefinition>
+        </Grid.RowDefinitions>
 
-            <NavigationView.MenuItems>
-                <NavigationViewItem Content="HomePage" Tag="home" Icon="Home"/>
-                <NavigationViewItem Content="SecondPage" Tag="second" Icon="Document"/>                <!-- <NavigationViewItem Content="Products" -->
-                <!--                          uen:Region.Name="Products" /> -->
-                <!-- <NavigationViewItem Content="Deals" -->
-                <!--                          uen:Region.Name="Deals" /> -->
-                <!-- <NavigationViewItem Content="Profile" -->
-                <!--                          uen:Region.Name="Profile" /> -->
-            </NavigationView.MenuItems>
+        <Grid utu:SafeArea.Insets="VisibleBounds">
 
-            <!-- <Grid uen:Region.Attached="True" uen:Region.Navigator="Visibility"> -->
-            <!--     <StackPanel uen:Region.Name="Products" -->
-            <!--                 Visibility="Visible"> -->
-            <!--         <TextBlock Text="Products Page" /> -->
-            <!--     </StackPanel> -->
-            <!--     <StackPanel uen:Region.Name="Deals" -->
-            <!--                 Visibility="Collapsed"> -->
-            <!--         <TextBlock Text="Deals Page" /> -->
-            <!--     </StackPanel> -->
-            <!--     <StackPanel uen:Region.Name="Profile" -->
-            <!--                 Visibility="Collapsed"> -->
-            <!--         <TextBlock Text="Profile Page" /> -->
-            <!--     </StackPanel> -->
-            <!-- </Grid> -->
-            <Frame x:Name="ContentFrame"/>
-        </NavigationView><!-- <StackPanel -->
-      <!--       HorizontalAlignment="Center" -->
-      <!--       VerticalAlignment="Center" -->
-      <!--       Spacing="16"> -->
-      <!--   <TextBox Text="{Binding Name, Mode=TwoWay}" -->
-      <!--       PlaceholderText="Enter your name:" /> -->
-      <!--   <Button Content="Go to Second Page" -->
-      <!--       AutomationProperties.AutomationId="SecondPageButton" -->
-      <!--       Command="{Binding GoToSecond}" /> -->
-      <!--   <Button Content="Logout" -->
-      <!--       Command="{Binding Logout}" /> -->
-      <!-- </StackPanel> -->
-    </Grid>
-  </ScrollViewer>
+            <NavigationView uen:Region.Attached="true" SelectionChanged="NavigationView_OnSelectionChanged">
+                <NavigationView.IsSettingsVisible>False</NavigationView.IsSettingsVisible>
+                <NavigationView.IsBackButtonVisible>Collapsed</NavigationView.IsBackButtonVisible>
+                <!-- <NavigationView.PaneDisplayMode>Left</NavigationView.PaneDisplayMode> -->
+
+                <NavigationView.MenuItems>
+                    <NavigationViewItem Content="HomePage" Tag="home" Icon="Home" />
+                    <NavigationViewItem Content="SecondPage" Tag="second" Icon="Document" />
+                    <!-- <NavigationViewItem Content="Products" -->
+                    <!--                          uen:Region.Name="Products" /> -->
+                    <!-- <NavigationViewItem Content="Deals" -->
+                    <!--                          uen:Region.Name="Deals" /> -->
+                    <!-- <NavigationViewItem Content="Profile" -->
+                    <!--                          uen:Region.Name="Profile" /> -->
+                </NavigationView.MenuItems>
+
+                <Frame x:Name="ContentFrame" />
+            </NavigationView>
+        </Grid>
+
+        <StackPanel Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <StackPanel>
+                <TextBlock>
+                    <Run Text="Audio playing: " />
+                    <!-- Add .Value to access the actual boolean state -->
+                    <Run Text="{Binding IsAudioCurrentlyPlaying.Value}" />
+                </TextBlock>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="12" Padding="16">
+                <!-- Previous Button -->
+                <Button Command="{Binding PreviousCommand}">
+                    <SymbolIcon Symbol="Previous" Width="24" Height="24" />
+                </Button>
+
+                <!-- Play/Pause Button (Fixed binding) -->
+                <Button Command="{Binding TogglePlayPause}">
+                    <SymbolIcon
+                        Symbol="{Binding IsAudioCurrentlyPlaying.Value, Converter={StaticResource BoolToPlayPauseSymbolConverter}, Mode=OneWay}"
+                        Width="24"
+                        Height="24" />
+                </Button>
+
+                <!-- Next Button -->
+                <Button Command="{Binding NextCommand}">
+                    <SymbolIcon Symbol="Next" Width="24" Height="24" />
+                </Button>
+            </StackPanel>
+            <TextBlock>
+                <Run Text="Song details" />
+                <Run Text="{Binding SoundPlayer.Duration}" />
+                <Run Text=":" />
+                <Run Text="{Binding CurrentPlaybackTime.Value}" />
+            </TextBlock>
+            <ProgressBar Minimum="0"
+                         Maximum="{Binding SoundPlayer.Duration}"
+                         Value="{Binding CurrentPlaybackTime.Value}"
+                         Height="8"
+                         Margin="0,12,0,0"/>
+        </StackPanel>    </Grid>
 </Page>

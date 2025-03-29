@@ -7,7 +7,9 @@ public sealed partial class MainPage : Page
     public MainPage()
     {
         this.InitializeComponent();
+        this.DataContext = (Application.Current as App)?.Host?.Services.GetRequiredService<MainViewModel>();
         FrameNavigation.Frame = ContentFrame;
+
     }
 
     private void NavigationView_OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

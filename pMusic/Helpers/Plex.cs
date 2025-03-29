@@ -122,6 +122,19 @@ public class Plex
         // var res = await httpClient.SendAsync(request);
     }
 
+    public async ValueTask<MemoryStream> GetPlaybackStreamUrl(string uri)
+    {
+        var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+        response.EnsureSuccessStatusCode();
+        var httpStream = await response.Content.ReadAsStreamAsync();
+
+        // Copy to MemoryStream
+        var memoryStream = new MemoryStream();
+        await httpStream.CopyToAsync(memoryStream);
+
+        return memoryStream;
+    }
+
     public static List<Track> ParseTracks(XElement mediaContainer)
     {
         if (mediaContainer == null) return new List<Track>();
