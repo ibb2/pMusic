@@ -12,14 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Made bottom control section static height.">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Converters/BoolToPlayPauseSymbolConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Converters/BoolToPlayPauseSymbolConverter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Playback.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Playback.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Services/AudioPlayerService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Services/AudioPlayerService.cs" afterDir="false" />
-    </list>
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Progressbar is working." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -71,6 +64,7 @@
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/TrackModel.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/TrackPage.xaml" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/pMusic/bin/Debug/net9.0-browserwasm/wwwroot/_framework/dotnet.js.map" root0="FORCE_HIGHLIGHTING" />
@@ -521,7 +515,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743245789539</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="Progressbar is working.">
+      <option name="closed" value="true" />
+      <created>1743261612862</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1743261612862</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -542,7 +544,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Got Basic navigation bar on the left working." />
     <MESSAGE value="Siderbar functional." />
     <MESSAGE value="Installed another plex api package." />
     <MESSAGE value="Added plex api as singleton." />
@@ -567,7 +568,8 @@
     <MESSAGE value="Play and pause button working." />
     <MESSAGE value="Added remaining playback controls." />
     <MESSAGE value="Made bottom control section static height." />
-    <option name="LAST_COMMIT_MESSAGE" value="Made bottom control section static height." />
+    <MESSAGE value="Progressbar is working." />
+    <option name="LAST_COMMIT_MESSAGE" value="Progressbar is working." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
