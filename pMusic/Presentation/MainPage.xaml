@@ -15,51 +15,59 @@
     </Page.Resources>
 
     <Grid>
-      <Grid.RowDefinitions>
-          <RowDefinition Height="4*"></RowDefinition>
-          <RowDefinition Height="*"></RowDefinition>
-      </Grid.RowDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10*"></RowDefinition>
+            <RowDefinition Height="4*"></RowDefinition>
+        </Grid.RowDefinitions>
 
-      <Grid utu:SafeArea.Insets="VisibleBounds">
+        <Grid utu:SafeArea.Insets="VisibleBounds">
 
-        <NavigationView uen:Region.Attached="true" SelectionChanged="NavigationView_OnSelectionChanged">
-            <NavigationView.IsSettingsVisible>False</NavigationView.IsSettingsVisible>
-            <NavigationView.IsBackButtonVisible>Collapsed</NavigationView.IsBackButtonVisible>
-            <!-- <NavigationView.PaneDisplayMode>Left</NavigationView.PaneDisplayMode> -->
+            <NavigationView uen:Region.Attached="true" SelectionChanged="NavigationView_OnSelectionChanged">
+                <NavigationView.IsSettingsVisible>False</NavigationView.IsSettingsVisible>
+                <NavigationView.IsBackButtonVisible>Collapsed</NavigationView.IsBackButtonVisible>
+                <!-- <NavigationView.PaneDisplayMode>Left</NavigationView.PaneDisplayMode> -->
 
-            <NavigationView.MenuItems>
-                <NavigationViewItem Content="HomePage" Tag="home" Icon="Home"/>
-                <NavigationViewItem Content="SecondPage" Tag="second" Icon="Document"/>                <!-- <NavigationViewItem Content="Products" -->
-                <!--                          uen:Region.Name="Products" /> -->
-                <!-- <NavigationViewItem Content="Deals" -->
-                <!--                          uen:Region.Name="Deals" /> -->
-                <!-- <NavigationViewItem Content="Profile" -->
-                <!--                          uen:Region.Name="Profile" /> -->
-            </NavigationView.MenuItems>
+                <NavigationView.MenuItems>
+                    <NavigationViewItem Content="HomePage" Tag="home" Icon="Home" />
+                    <NavigationViewItem Content="SecondPage" Tag="second" Icon="Document" />
+                    <!-- <NavigationViewItem Content="Products" -->
+                    <!--                          uen:Region.Name="Products" /> -->
+                    <!-- <NavigationViewItem Content="Deals" -->
+                    <!--                          uen:Region.Name="Deals" /> -->
+                    <!-- <NavigationViewItem Content="Profile" -->
+                    <!--                          uen:Region.Name="Profile" /> -->
+                </NavigationView.MenuItems>
 
-            <Frame x:Name="ContentFrame"/>
-        </NavigationView>
-    </Grid>
+                <Frame x:Name="ContentFrame" />
+            </NavigationView>
+        </Grid>
 
-        <Grid Grid.Row="1" Visibility="{Binding IsAudioPlayer, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
-              Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel Grid.Row="1"
+              Visibility="{Binding IsAudioPlayer, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
+               HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
-            <TextBlock>
-                <Run Text="Audio playing"/>
-                <Run Text="{Binding IsPlaying}"/>
-            </TextBlock>
-            <!-- <TextBlock> -->
-            <!--     <Run Text="Audio player"/> -->
-            <!--     <Run Text="{Binding IsPlaybackVisible}"/> -->
-            <!-- </TextBlock> -->
-                </StackPanel>
+                <TextBlock>
+                    <Run Text="Audio playing" />
+                    <Run Text="{Binding IsPlaying}" />
+                </TextBlock>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="12" Padding="16">
                 <!-- Play/Pause Button -->
                 <Button Command="{Binding TogglePlayPause}">
-                    <SymbolIcon Symbol="{Binding IsPlaying, Converter={StaticResource BoolToPlayPauseSymbolConverter}, Mode=OneWay}"
-                                Width="24" Height="24"/>
+                    <SymbolIcon Symbol="Previous"
+                                Width="24" Height="24" />
+                </Button>
+                <Button Command="{Binding TogglePlayPause}">
+                    <SymbolIcon
+                        Symbol="{Binding IsPlaying, Converter={StaticResource BoolToPlayPauseSymbolConverter}, Mode=OneWay}"
+                        Width="24" Height="24" />
+                </Button>
+                <Button Command="{Binding TogglePlayPause}">
+                    <SymbolIcon Symbol="Next"
+                                Width="24" Height="24" />
                 </Button>
             </StackPanel>
-        </Grid>
-  </Grid>
+            <ProgressBar />
+        </StackPanel>
+    </Grid>
 </Page>

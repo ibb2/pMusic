@@ -12,16 +12,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Changed AudioPlayer.cs to AudioPlayerService.cs.">
-      <change afterPath="$PROJECT_DIR$/pMusic/Converters/BoolToPlayPauseSymbolConverter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pMusic/Converters/NullToVisibilityConverter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/App.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/App.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Playback.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Playback.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" afterDir="false" />
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Play and pause button working.">
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Services/AudioPlayerService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Services/AudioPlayerService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,7 +112,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Debug",
+    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Run",
     "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
     "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -496,7 +488,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743228540715</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="Play and pause button working.">
+      <option name="closed" value="true" />
+      <created>1743245128112</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1743245128112</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -517,7 +517,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Basic layout scaffolded" />
     <MESSAGE value="Displaying Artist information." />
     <MESSAGE value="Removed Writelines." />
     <MESSAGE value="Got Basic navigation bar on the left working." />
@@ -542,26 +541,8 @@
     <MESSAGE value="Playing music now reflects in &quot;Now Playing&quot; of plex dashboard." />
     <MESSAGE value="Play pause working." />
     <MESSAGE value="Changed AudioPlayer.cs to AudioPlayerService.cs." />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed AudioPlayer.cs to AudioPlayerService.cs." />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Presentation/MainModel.cs</url>
-          <line>62</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" containingFunctionPresentation="Method 'TogglePlayPause'">
-            <startOffsets>
-              <option value="1771" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1800" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Play and pause button working." />
+    <option name="LAST_COMMIT_MESSAGE" value="Play and pause button working." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
