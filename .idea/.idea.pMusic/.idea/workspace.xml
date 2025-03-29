@@ -12,8 +12,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Added remaining playback controls.">
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Made bottom control section static height.">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Converters/BoolToPlayPauseSymbolConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Converters/BoolToPlayPauseSymbolConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Playback.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Playback.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Services/AudioPlayerService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Services/AudioPlayerService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,14 +64,18 @@
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/App.xaml.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/App.xaml.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Playback.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Playback.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Plex.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainModel.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/TrackModel.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/TrackPage.xaml" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/pMusic/bin/Debug/net9.0-browserwasm/wwwroot/_framework/dotnet.js.map" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/72103d949a424ae4bf3dfad3841dc7dc20200/52/aabe2f27/SoundPlayer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/0541629a13be879eb18d6ad28b4e2a623584e8/pMusic.Presentation.MainModel.Bindable.g.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/1bf5f37487584a9b8cedd4392242b8e8c603d2d1bf433512b4ea8783749afc/Feed.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/2280f6b68568823fe54b6fb0be31b9cbce4c9aa7882ea9482c7f66bc84f4930/ExecutionContext.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/251bdbb2b7c766dbfd75216ff1bad2ff2346c96dea9f5bd853ec21ca7b555e/ThreadPoolWorkQueue.cs" root0="FORCE_HIGHLIGHTING" />
@@ -504,7 +513,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743245707001</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Made bottom control section static height.">
+      <option name="closed" value="true" />
+      <created>1743245789539</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1743245789539</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -525,7 +542,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Removed Writelines." />
     <MESSAGE value="Got Basic navigation bar on the left working." />
     <MESSAGE value="Siderbar functional." />
     <MESSAGE value="Installed another plex api package." />
@@ -550,7 +566,27 @@
     <MESSAGE value="Changed AudioPlayer.cs to AudioPlayerService.cs." />
     <MESSAGE value="Play and pause button working." />
     <MESSAGE value="Added remaining playback controls." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added remaining playback controls." />
+    <MESSAGE value="Made bottom control section static height." />
+    <option name="LAST_COMMIT_MESSAGE" value="Made bottom control section static height." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/pMusic/Presentation/MainModel.cs</url>
+          <line>62</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" containingFunctionPresentation="Property 'SoundPlayer'">
+            <startOffsets>
+              <option value="1887" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1911" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

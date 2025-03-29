@@ -9,8 +9,9 @@ namespace pMusic.Helpers;
 
 public interface IAudioPlayerService
 {
-    public IState<bool> IsPlaying { get; }
-    public IState<SoundPlayer?> AudioPlayer { get; }
+    public IState<bool> IsAudioCurrentlyPlaying { get; }
+    public IState<SoundPlayer> SoundPlayer { get; }
+    public IState<double> PlaybackPosition { get; }
     ValueTask PlayAudio(string uri, string baseUri, string ratingKey, string key);
     ValueTask PauseAudio();
     ValueTask ResumeAudio();
@@ -20,7 +21,8 @@ public interface IAudioPlayerService
 public class AudioPlayerService: IAudioPlayerService
 {
     private readonly IState<bool> _isPlaying;
-    private readonly IState<SoundPlayer?> _player;
+    private readonly IState<SoundPlayer> _soundPlayer;
+    private readonly IState<double> _playbackPosition;
     private readonly Plex _plex;
     private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
     
@@ -34,12 +36,15 @@ public class AudioPlayerService: IAudioPlayerService
 
         // Initialize the state with default value (false = not playing)
         _isPlaying = State<bool>.Value(this, () => false);
+        _soundPlayer = State<SoundPlayer>.Empty(this);
+        _playbackPosition = State<double>.Value(this, () => 0.0); // Initialize playback position
     }
 
-    public IState<bool> IsPlaying => _isPlaying;
-    public IState<SoundPlayer?> AudioPlayer => _player;
+    public IState<bool> IsAudioCurrentlyPlaying => _isPlaying;
+    public IState<SoundPlayer> SoundPlayer => _soundPlayer;
+    public IState<double> PlaybackPosition => _playbackPosition; // Expose the playback position
     
-    public SoundPlayer? Player { get; set; }
+    public SoundPlayer Player { get; set; }
     
 
 
@@ -47,8 +52,8 @@ public class AudioPlayerService: IAudioPlayerService
     {
         try
         {
-            _playback = new Playback(plex: _plex, uri: baseUri, mixer: Mixer.Master);
-
+            _playback = new Playback(plex: _plex, uri: baseUri, mixer: Mixer.Master, _soundPlayer, _playbackPosition);
+            
             // Initialize the audio engine with the MiniAudio backend.
             if (_audioEngine is null) _audioEngine = new MiniAudioEngine(44100, Capability.Playback);
 
@@ -63,12 +68,12 @@ public class AudioPlayerService: IAudioPlayerService
 
             // Add the player to the master mixer.
             Mixer.Master.AddComponent(Player);
-
             // Start playback.
             Player.Play();
             await _isPlaying.UpdateAsync(_ => true);
+            await _soundPlayer.UpdateAsync(_ => Player);
             var decimalRoundedAndMills = Decimal.Round((Decimal)Player.Duration * 1000, MidpointRounding.ToZero);
-            _playback.StartPlayback(player: Player, key: key, ratingKey: ratingKey, decimalRoundedAndMills);
+            _playback.StartPlayback(player: Player, key: key, ratingKey: ratingKey, decimalRoundedAndMills, _soundPlayer, _playbackPosition);
         }
         catch (Exception ex)
         {
@@ -79,7 +84,7 @@ public class AudioPlayerService: IAudioPlayerService
     public async ValueTask ResumeAudio()
     {
         Player?.Play();
-        await _player.UpdateAsync(_ => Player);
+        await _soundPlayer.UpdateAsync(_ => Player);
         await _isPlaying.UpdateAsync(_ => true);
         await _playback.UnPausePlayback();
     }
@@ -87,6 +92,7 @@ public class AudioPlayerService: IAudioPlayerService
     public async ValueTask PauseAudio()
     {
         Player?.Pause();
+        await _soundPlayer.UpdateAsync(_ => Player);
         await _isPlaying.UpdateAsync(_ => false);
         await _playback.PausePlayback();
     }
@@ -94,6 +100,7 @@ public class AudioPlayerService: IAudioPlayerService
     public async ValueTask Stop()
     {
         Player?.Stop();
+        await _soundPlayer.UpdateAsync(_ => Player);
         await _isPlaying.UpdateAsync(_ => false);
         await _playback.StopPlayback();
     }

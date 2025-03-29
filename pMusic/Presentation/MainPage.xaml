@@ -43,31 +43,44 @@
         </Grid>
 
         <StackPanel Grid.Row="1"
-              Visibility="{Binding IsAudioPlayer, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
-               HorizontalAlignment="Center" VerticalAlignment="Center">
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
             <StackPanel>
                 <TextBlock>
-                    <Run Text="Audio playing" />
-                    <Run Text="{Binding IsPlaying}" />
+                    <Run Text="Audio playing: " />
+                    <!-- Add .Value to access the actual boolean state -->
+                    <Run Text="{Binding IsAudioCurrentlyPlaying.Value}" />
                 </TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="12" Padding="16">
-                <!-- Play/Pause Button -->
-                <Button Command="{Binding TogglePlayPause}">
-                    <SymbolIcon Symbol="Previous"
-                                Width="24" Height="24" />
+                <!-- Previous Button -->
+                <Button Command="{Binding PreviousCommand}">
+                    <SymbolIcon Symbol="Previous" Width="24" Height="24" />
                 </Button>
+
+                <!-- Play/Pause Button (Fixed binding) -->
                 <Button Command="{Binding TogglePlayPause}">
                     <SymbolIcon
-                        Symbol="{Binding IsPlaying, Converter={StaticResource BoolToPlayPauseSymbolConverter}, Mode=OneWay}"
-                        Width="24" Height="24" />
+                        Symbol="{Binding IsAudioCurrentlyPlaying.Value, Converter={StaticResource BoolToPlayPauseSymbolConverter}, Mode=OneWay}"
+                        Width="24"
+                        Height="24" />
                 </Button>
-                <Button Command="{Binding TogglePlayPause}">
-                    <SymbolIcon Symbol="Next"
-                                Width="24" Height="24" />
+
+                <!-- Next Button -->
+                <Button Command="{Binding NextCommand}">
+                    <SymbolIcon Symbol="Next" Width="24" Height="24" />
                 </Button>
             </StackPanel>
-            <ProgressBar />
-        </StackPanel>
-    </Grid>
+            <TextBlock>
+                <Run Text="Song details" />
+                <Run Text="{Binding SoundPlayer.Duration}" />
+                <Run Text=":" />
+                <Run Text="{Binding CurrentPlaybackTime.Value}" />
+            </TextBlock>
+            <ProgressBar Minimum="0"
+                         Maximum="{Binding SoundPlayer.Duration}"
+                         Value="{Binding CurrentPlaybackTime.Value}"
+                         Height="8"
+                         Margin="0,12,0,0"/>
+        </StackPanel>    </Grid>
 </Page>

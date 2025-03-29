@@ -23,6 +23,7 @@ public partial record MainModel
         Title = "Main";
         Title += $" - {localizer["ApplicationName"]}";
         Title += $" - {appInfo?.Value?.Environment}";
+        CurrentPlaybackTime = _audioPlayer.PlaybackPosition; // Get the playback position state
     }
 
     public string? Title { get; }
@@ -56,17 +57,23 @@ public partial record MainModel
         // await _authentication.LogoutAsync(token);
     }
     
-    public IState<bool> IsPlaying => _audioPlayer.IsPlaying;
 
+    public IState<bool> IsAudioCurrentlyPlaying => _audioPlayer.IsAudioCurrentlyPlaying;
+    
+    public IState<SoundPlayer> SoundPlayer => _audioPlayer.SoundPlayer;
+    
+    public IState<double> CurrentPlaybackTime { get; } // Expose the playback time state
+    
+    
     public async ValueTask TogglePlayPause()
     {
-        if (IsPlaying.Value().Result)
+        if (IsAudioCurrentlyPlaying.Value().Result)
         {
-            await IsPlaying.UpdateAsync(_ => false);
+            await IsAudioCurrentlyPlaying.UpdateAsync(_ => false);
             await _audioPlayer.PauseAudio();
         }
         else {
-            await IsPlaying.UpdateAsync(_ => true);
+            await IsAudioCurrentlyPlaying.UpdateAsync(_ => true);
             await _audioPlayer.ResumeAudio();
         }
     }
