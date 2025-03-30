@@ -98,6 +98,9 @@ public partial class App : Application
                     services.AddTransient<TrackViewModel>();
                     services.AddTransient<MainModel>();
                     services.AddTransient<MainViewModel>();
+                    services.AddTransient<HomeModel>();
+                    services.AddTransient<HomeViewModel>();
+                    
                 })
                 .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
             );

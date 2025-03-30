@@ -1,3 +1,5 @@
+using Microsoft.UI.Xaml.Media.Imaging;
+
 namespace pMusic.Models;
 
 public partial record Album(
@@ -9,6 +11,7 @@ public partial record Album(
     string Studio,
     string Type,
     string Title,
+    string Artist,
     string ParentKey,
     string ParentTitle,
     string Summary,
@@ -16,7 +19,7 @@ public partial record Album(
     double Rating,
     int LastViewedAt,
     string Year,
-    string Thumb, 
+    BitmapImage? Thumb, 
     string Art,
     string ParentThumb,
     DateTime OriginallyAvailableAt,
