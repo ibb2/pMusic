@@ -1,5 +1,6 @@
 using KeySharp;
 using pMusic.Helpers;
+using pMusic.Services.Navigation;
 using SoundFlow.Components;
 using SoundFlow.Enums;
 
@@ -30,11 +31,15 @@ public partial record MainModel
 
     public IState<string> Name => State<string>.Value(this, () => string.Empty);
 
-    public async Task GoToSecond()
-    {
-        var name = await Name;
-        await _navigator.NavigateViewModelAsync<SecondModel>(this, data: new Entity(name!));
-    }
+    // public async Task GoToSecond()
+    // {
+    //     var name = await Name;
+    //     // await _navigator.NavigateViewModelAsync<SecondModel>(this, data: new Entity(name!));
+    //     Console.WriteLine("Navigating");
+    //     
+    //     FrameNavigation.NavigateTo(typeof(SecondPage), Name);
+    //     Console.WriteLine("Navigated");
+    // }
 
     public async ValueTask Logout(CancellationToken token)
     {

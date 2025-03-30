@@ -12,7 +12,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Progressbar is working." />
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -24,7 +29,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="adding-plex-artists" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -53,20 +58,11 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/App.xaml" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/App.xaml.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/App.xaml.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Playback.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Playback.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Plex.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainModel.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/TrackModel.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/TrackPage.xaml" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/AudioPlayerService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/pMusic/bin/Debug/net9.0-browserwasm/wwwroot/_framework/dotnet.js.map" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/72103d949a424ae4bf3dfad3841dc7dc20200/52/aabe2f27/SoundPlayer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/0541629a13be879eb18d6ad28b4e2a623584e8/pMusic.Presentation.MainModel.Bindable.g.cs" root0="FORCE_HIGHLIGHTING" />
@@ -115,13 +111,13 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Run",
+    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Debug",
     "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
     "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "XThreadsFramesViewSplitterKey": "0.501002",
-    "git-widget-placeholder": "add-media-controls",
+    "git-widget-placeholder": "starting-to-design-the-ui",
     "iOS.pMusic.executor": "Run",
     "macOS.pMusic.executor": "Debug",
     "node.js.detected.package.eslint": "true",
@@ -226,6 +222,7 @@
       <workItem from="1742875033827" duration="2602000" />
       <workItem from="1742907999745" duration="5110000" />
       <workItem from="1742916112476" duration="4810000" />
+      <workItem from="1743300388809" duration="6593000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -576,16 +573,16 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/pMusic/Presentation/MainModel.cs</url>
-          <line>62</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" containingFunctionPresentation="Property 'SoundPlayer'">
+          <line>35</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" containingFunctionPresentation="Method 'GoToSecond'">
             <startOffsets>
-              <option value="1887" />
+              <option value="1017" />
             </startOffsets>
             <endOffsets>
-              <option value="1911" />
+              <option value="1039" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="14" />
+          <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

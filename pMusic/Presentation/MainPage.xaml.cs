@@ -9,7 +9,6 @@ public sealed partial class MainPage : Page
         this.InitializeComponent();
         this.DataContext = (Application.Current as App)?.Host?.Services.GetRequiredService<MainViewModel>();
         FrameNavigation.Frame = ContentFrame;
-
     }
 
     private void NavigationView_OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -32,6 +31,15 @@ public sealed partial class MainPage : Page
             }
         }
         
+    }
+    
+    private void GoToSecond(object sender, RoutedEventArgs e)
+    {
+        // var name = await Name;
+        // await _navigator.NavigateViewModelAsync<SecondModel>(this, data: new Entity(name!));
+        Console.WriteLine("Navigating");
+        FrameNavigation.NavigateTo(typeof(SecondPage), Name);
+        Console.WriteLine("Navigated");
     }
     
     public Frame RootContentFrame => ContentFrame;
