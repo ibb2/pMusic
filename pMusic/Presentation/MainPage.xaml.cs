@@ -33,14 +33,10 @@ public sealed partial class MainPage : Page
         
     }
     
-    private void GoToSecond(object sender, RoutedEventArgs e)
-    {
-        // var name = await Name;
-        // await _navigator.NavigateViewModelAsync<SecondModel>(this, data: new Entity(name!));
-        Console.WriteLine("Navigating");
+    private void GoToSecond(object sender, RoutedEventArgs e) => 
         FrameNavigation.NavigateTo(typeof(SecondPage), Name);
-        Console.WriteLine("Navigated");
-    }
+
+    private void GoToHome(object sender, RoutedEventArgs e) => FrameNavigation.NavigateTo(typeof(HomePage));
     
     public Frame RootContentFrame => ContentFrame;
 }

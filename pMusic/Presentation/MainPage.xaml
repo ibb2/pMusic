@@ -21,15 +21,19 @@
             <RowDefinition Height="200"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" utu:SafeArea.Insets="VisibleBounds">
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <StackPanel >
-                <Button Click="GoToSecond" Tag="Home">
+            <StackPanel Background="MistyRose" BorderBrush="DarkGray" CornerRadius="15" Padding="10">
+                <TextBlock Text="Your Library"></TextBlock>
+                <Button Click="GoToHome" Tag="Home">
                     <SymbolIcon Symbol="Home"></SymbolIcon>
+                </Button>
+                <Button Click="GoToSecond" Tag="Home">
+                    <SymbolIcon Symbol="Bookmarks"></SymbolIcon>
                 </Button>
             </StackPanel>
 
@@ -48,7 +52,7 @@
             <!--     </NavigationView.MenuItems> -->
             <!-- -->
             <!--     ~1~ Content Area @1@ -->
-            <Frame Grid.Column="1" x:Name="ContentFrame" uen:Region.Attached="True" uen:Region.Navigator="Frame"/>
+            <Frame Grid.Column="1" x:Name="ContentFrame" uen:Region.Attached="True" uen:Region.Navigator="Frame" />
             <!-- </NavigationView> -->
         </Grid>
 
