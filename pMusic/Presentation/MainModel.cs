@@ -1,5 +1,6 @@
 using KeySharp;
 using pMusic.Helpers;
+using pMusic.Services;
 using pMusic.Services.Navigation;
 using SoundFlow.Components;
 using SoundFlow.Enums;
@@ -11,13 +12,20 @@ public partial record MainModel
     private INavigator _navigator;
     private IAudioPlayerService _audioPlayer;
 
+    public IArtistService ArtistService;
+    public Plex Plex;
+
     public MainModel(
         IAudioPlayerService audioPlayerService,
+        IArtistService artistService,
+        Plex plex,
         IStringLocalizer localizer,
         IOptions<AppConfig> appInfo,
         IAuthenticationService authentication,
         INavigator navigator)
     {
+        ArtistService = artistService;
+        Plex = plex;
         _audioPlayer = audioPlayerService;
         _navigator = navigator;
         _authentication = authentication;
@@ -62,6 +70,7 @@ public partial record MainModel
         // await _authentication.LogoutAsync(token);
     }
     
+    public IListFeed<Playlist> Playlists => ListFeed.Async(ct => ArtistService.GetPlaylists(ct, Plex));
 
     public IState<bool> IsAudioCurrentlyPlaying => _audioPlayer.IsAudioCurrentlyPlaying;
     
@@ -82,6 +91,7 @@ public partial record MainModel
             await _audioPlayer.ResumeAudio();
         }
     }
+    
 
 
     private IAuthenticationService _authentication;

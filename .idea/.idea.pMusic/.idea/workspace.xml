@@ -12,15 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Trying to get main frame corners to round.">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" afterDir="false" />
-    </list>
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -61,13 +53,11 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Plex.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/pMusic/Platforms/Desktop/Program.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainModel.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/ArtistService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/pMusic/bin/Debug/net9.0-browserwasm/wwwroot/_framework/dotnet.js.map" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/72103d949a424ae4bf3dfad3841dc7dc20200/52/aabe2f27/SoundPlayer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/0541629a13be879eb18d6ad28b4e2a623584e8/pMusic.Presentation.MainModel.Bindable.g.cs" root0="FORCE_HIGHLIGHTING" />
@@ -116,27 +106,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.pMusic (Desktop).executor": "Debug",
-    "Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic": "Ibrahim’s iPhone",
-    "DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider": "Device",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "XThreadsFramesViewSplitterKey": "0.501002",
-    "git-widget-placeholder": "starting-to-design-the-ui",
-    "iOS.pMusic.executor": "Run",
-    "macOS.pMusic.executor": "Debug",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "AppleSettingsPageId",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.pMusic (Desktop).executor&quot;: &quot;Run&quot;,
+    &quot;Device#class com.jetbrains.rider.run.multiPlatform.ios.devices.IOSConnectedDeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider#iOS: pMusic&quot;: &quot;Ibrahim’s iPhone&quot;,
+    &quot;DeviceKind#com.jetbrains.rider.run.multiPlatform.ios.devices.IOSDevicesProvider&quot;: &quot;Device&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.501002&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;add-recents-to-sidebar&quot;,
+    &quot;iOS.pMusic.executor&quot;: &quot;Run&quot;,
+    &quot;macOS.pMusic.executor&quot;: &quot;Debug&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;AppleSettingsPageId&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
-  <component name="RunManager" selected=".NET Launch Settings Profile.pMusic (Desktop)">
+}</component>
+  <component name="RunManager" selected="Android.pMusic">
     <configuration name="pMusic: win-arm64" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="win-arm64.pubxml" pubxml_path="$PROJECT_DIR$/pMusic/Properties/PublishProfiles/win-arm64.pubxml" uuid_high="-1411009619043201322" uuid_low="-7242066600533007251" />
       <method v="2" />
@@ -229,7 +219,6 @@
       <workItem from="1742875033827" duration="2602000" />
       <workItem from="1742907999745" duration="5110000" />
       <workItem from="1742916112476" duration="4810000" />
-      <workItem from="1743300388809" duration="17560000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -527,39 +516,23 @@
       <option name="project" value="LOCAL" />
       <updated>1743261612862</updated>
     </task>
-    <task id="LOCAL-00038" summary="Able to use custom navigation view.">
+    <task id="LOCAL-00038" summary="Able to get music playlists from plex.">
       <option name="closed" value="true" />
-      <created>1743308921084</created>
+      <created>1743328453413</created>
       <option name="number" value="00038" />
       <option name="presentableId" value="LOCAL-00038" />
       <option name="project" value="LOCAL" />
-      <updated>1743308921084</updated>
+      <updated>1743328453413</updated>
     </task>
-    <task id="LOCAL-00039" summary="Crude styling of sidebar. Made to look defined.">
+    <task id="LOCAL-00039" summary="Playlists are displayed in the sidebar.">
       <option name="closed" value="true" />
-      <created>1743309957773</created>
+      <created>1743328759577</created>
       <option name="number" value="00039" />
       <option name="presentableId" value="LOCAL-00039" />
       <option name="project" value="LOCAL" />
-      <updated>1743309957773</updated>
+      <updated>1743328759577</updated>
     </task>
-    <task id="LOCAL-00040" summary="Default view color set.">
-      <option name="closed" value="true" />
-      <created>1743310116485</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1743310116485</updated>
-    </task>
-    <task id="LOCAL-00041" summary="Trying to get main frame corners to round.">
-      <option name="closed" value="true" />
-      <created>1743310460457</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1743310460457</updated>
-    </task>
-    <option name="localTasksCounter" value="42" />
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -580,6 +553,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+    <MESSAGE value="Added plex api as singleton." />
+    <MESSAGE value="Buggy with ArtistPage.xaml not reliably navigating." />
     <MESSAGE value="Default to artist page.&#10;&#10;Navigation broken. Navigating away and back to Artist page does not work." />
     <MESSAGE value="Dummy commit." />
     <MESSAGE value="Basic 2 pane navigation added.&#10;&#10;Controls region visibility to navigation between sections." />
@@ -601,40 +576,38 @@
     <MESSAGE value="Added remaining playback controls." />
     <MESSAGE value="Made bottom control section static height." />
     <MESSAGE value="Progressbar is working." />
-    <MESSAGE value="Able to use custom navigation view." />
-    <MESSAGE value="Crude styling of sidebar. Made to look defined." />
-    <MESSAGE value="Default view color set." />
-    <MESSAGE value="Trying to get main frame corners to round." />
-    <option name="LAST_COMMIT_MESSAGE" value="Trying to get main frame corners to round." />
+    <MESSAGE value="Able to get music playlists from plex." />
+    <MESSAGE value="Playlists are displayed in the sidebar." />
+    <option name="LAST_COMMIT_MESSAGE" value="Playlists are displayed in the sidebar." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/pMusic/Presentation/MainModel.cs</url>
-          <line>35</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" containingFunctionPresentation="Method 'GoToSecond'">
+          <line>70</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/MainModel.cs" containingFunctionPresentation="Method 'Logout'">
             <startOffsets>
-              <option value="1026" />
+              <option value="2159" />
             </startOffsets>
             <endOffsets>
-              <option value="1048" />
+              <option value="2160" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="15" />
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs</url>
-          <line>16</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" containingFunctionPresentation="Method 'GoToAlbumPage_ItemClick'">
+          <url>file://$PROJECT_DIR$/pMusic/Helpers/Plex.cs</url>
+          <line>140</line>
+          <properties documentPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" containingFunctionPresentation="Method 'GetPlaylists'">
             <startOffsets>
-              <option value="418" />
+              <option value="6248" />
             </startOffsets>
             <endOffsets>
-              <option value="456" />
+              <option value="6319" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="19" />
+          <option name="timeStamp" value="20" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

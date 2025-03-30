@@ -27,15 +27,77 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Background="MistyRose" BorderBrush="DarkGray" CornerRadius="15" Padding="10">
+            <Grid BorderBrush="DarkGray" CornerRadius="15" Padding="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+
                 <TextBlock Text="Your Library"></TextBlock>
-                <Button Click="GoToHome" Tag="Home">
+                <Button Grid.Row="1" Click="GoToHome" Tag="Home">
                     <SymbolIcon Symbol="Home"></SymbolIcon>
                 </Button>
-                <Button Click="GoToSecond" Tag="Home">
+                <Button Grid.Row="2" Click="GoToSecond" Tag="Home">
                     <SymbolIcon Symbol="Bookmarks"></SymbolIcon>
                 </Button>
-            </StackPanel>
+
+                <ui:FeedView Grid.Row="3" Source="{Binding Playlists}" Padding="0">
+                    <ui:FeedView.ValueTemplate>
+                        <DataTemplate DataContext="Playlists">
+                            <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
+                            <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
+                                <ListView ItemsSource="{Binding Data}" x:Name="ArtistList" IsItemClickEnabled="True">
+
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="Margin" Value="0 10"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+
+                                    <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Height="Auto" Margin="20 10"
+                                                        Padding="0 20">
+                                            </StackPanel>
+                                        </ItemsPanelTemplate>
+                                    </ListView.ItemsPanel>
+
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Grid CornerRadius="5">
+                                                    <Image Source="/Assets/Images/no-playlist-cover.png" Width="50"></Image>
+                                                    <Image Source="{Binding Composite}" Width="50"></Image>
+                                                </Grid>
+                                                <TextBlock Padding="5,0,0,0" Text="{Binding Title}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </ScrollViewer>
+                        </DataTemplate>
+                    </ui:FeedView.ValueTemplate>
+                    <ui:FeedView.ProgressTemplate>
+                        <DataTemplate>
+                            <ProgressRing />
+                        </DataTemplate>
+                    </ui:FeedView.ProgressTemplate>
+                    <ui:FeedView.ErrorTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="Error" />
+                        </DataTemplate>
+                    </ui:FeedView.ErrorTemplate>
+                    <ui:FeedView.NoneTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="No Results" />
+                        </DataTemplate>
+                    </ui:FeedView.NoneTemplate>
+                </ui:FeedView>
+            </Grid>
 
             <!-- <NavigationView Style="{StaticResource NavigationViewStyle}" x:Name="NavView" -->
             <!--                 IsBackButtonVisible="Collapsed" -->
@@ -53,15 +115,15 @@
             <!-- -->
             <!--     ~1~ Content Area @1@ -->
             <!-- </NavigationView> -->
-            <Frame Grid.Column="1" Background="Snow" CornerRadius="50" x:Name="ContentFrame" uen:Region.Attached="True" uen:Region.Navigator="Frame" />
+            <Frame Grid.Column="1" Background="Snow" CornerRadius="50" x:Name="ContentFrame" uen:Region.Attached="True"
+                   uen:Region.Navigator="Frame" />
         </Grid>
 
         <StackPanel Grid.Row="1"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     CornerRadius="15"
-                    Padding="30"
-                    >
+                    Padding="30">
             <StackPanel>
                 <TextBlock>
                     <Run Text="Audio playing: " />
