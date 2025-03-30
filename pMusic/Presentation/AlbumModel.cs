@@ -22,7 +22,7 @@ public partial record AlbumModel(IArtistService ArtistService, Plex Plex)
     // public IListFeed<Album> Albums => ListFeed.Async<Album>(async ct => await ArtistService.GetArtistAlbums(ct, Plex, Artist.LibraryKey, Artist.RatingKey));
     public IListFeed<Album> Albums => CurrentArtist.SelectAsync(async (artist, ct) =>
     {
-        var artistsAlbums =  await ArtistService.GetArtistAlbums(ct, Plex, artist.LibraryKey, artist.RatingKey);
+        var artistsAlbums =  await ArtistService.GetArtistAlbums(ct, Plex, artist.LibraryKey, artist.RatingKey, artist.Title);
         return artistsAlbums;
     }).AsListFeed();
 }

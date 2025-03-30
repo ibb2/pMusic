@@ -54,9 +54,10 @@ public record Country
 public interface IArtistService
 {
     ValueTask<IImmutableList<Artist>> GetArtistsAsync(CancellationToken ct, Plex plex);
-    ValueTask<IImmutableList<Album>> GetArtistAlbums(CancellationToken ct, Plex plex, int libraryId, string artistKey);
+    ValueTask<IImmutableList<Album>> GetArtistAlbums(CancellationToken ct, Plex plex, int libraryId, string artistKey, string artistTitle);
     ValueTask<IImmutableList<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey);
     ValueTask<IImmutableList<Playlist>> GetPlaylists(CancellationToken ct, Plex plex);
+    ValueTask<IImmutableList<Album>> GetAllAlbums(CancellationToken ct, Plex plex);
     string GetServerUri();
 
 }
@@ -75,11 +76,11 @@ public class ArtistService : IArtistService
         return artists;
     }
 
-    public async ValueTask<IImmutableList<Album>> GetArtistAlbums(CancellationToken ct, Plex plex, int libraryId, string artistKey)
+    public async ValueTask<IImmutableList<Album>> GetArtistAlbums(CancellationToken ct, Plex plex, int libraryId, string artistKey, string artistTitle)
     {
         await Task.Delay(TimeSpan.FromSeconds(1), ct);
 
-        var albums = await plex.GetArtistAlbums(ServerUri!, libraryId, artistKey);
+        var albums = await plex.GetArtistAlbums(ServerUri!, libraryId, artistKey, artistTitle);
 
         var temp = ImmutableArray<Album>.Empty;
         return albums;
@@ -105,6 +106,16 @@ public class ArtistService : IArtistService
 
         return playlists;
     }
+
+    public async ValueTask<IImmutableList<Album>> GetAllAlbums(CancellationToken ct, Plex plex)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(1), ct);
+
+        var albums = await plex.GetAllAlbums(ServerUri);
+
+        return albums;
+    }
+
 
     public string GetServerUri()
     {

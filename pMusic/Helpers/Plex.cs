@@ -61,14 +61,14 @@ public class Plex
         return artists.ToImmutableList();
     }
 
-    public async ValueTask<IImmutableList<Album>> GetArtistAlbums(string uri, int libraryId, string artistKey)
+    public async ValueTask<IImmutableList<Album>> GetArtistAlbums(string uri, int libraryId, string artistKey, string artist)
     {
         var albumUri =
             uri + "/library/sections/" + libraryId + "/all?artist.id=" + artistKey +
             "&type=9&"; // "includeGuids={include_guids}&{filter}"
         var albumXml = await httpClient.GetStringAsync(albumUri);
 
-        var albums = ParseAlbums(XElement.Parse(albumXml));
+        var albums = ParseAlbums(XElement.Parse(albumXml), uri, artist);
 
         return albums.ToImmutableList();
     }
@@ -142,6 +142,21 @@ public class Plex
         var playlists = ParsePlaylists(XElement.Parse(playlistsXml), uri);
 
         return playlists.ToImmutableList();
+    }
+
+    public async ValueTask<IImmutableList<Album>> GetAllAlbums(string uri)
+    {
+        var artists = await GetArtists(uri);
+
+        var albums = new List<Album>();
+        
+        foreach (Artist artist in artists)
+        {
+           var album = await GetArtistAlbums(uri, artist.LibraryKey, artist.RatingKey, artist.Title);
+           albums.AddRange(album);
+        }
+
+        return albums.ToImmutableList();
     }
 
     public List<Playlist> ParsePlaylists(XElement? mediaContainer, string uri)
@@ -243,7 +258,7 @@ public class Plex
         );
     }
     
-    public static List<Album> ParseAlbums(XElement mediaContainer)
+    public List<Album> ParseAlbums(XElement mediaContainer, string uri, string artist)
     {
         if (mediaContainer == null) return new List<Album>();
 
@@ -259,6 +274,7 @@ public class Plex
                 Studio: directory.Attribute("studio")?.Value ?? "",
                 Type: directory.Attribute("type")?.Value ?? "",
                 Title: directory.Attribute("title")?.Value ?? "",
+                Artist: artist,
                 ParentKey: directory.Attribute("parentKey")?.Value ?? "",
                 ParentTitle: directory.Attribute("parentTitle")?.Value ?? "",
                 Summary: directory.Attribute("summary")?.Value ?? "",
@@ -266,7 +282,8 @@ public class Plex
                 Rating: double.Parse(directory.Attribute("rating")?.Value ?? "0"),
                 LastViewedAt: int.Parse(directory.Attribute("lastViewedAt")?.Value ?? "0"),
                 Year: directory.Attribute("year")?.Value ?? "",
-                Thumb: directory.Attribute("thumb")?.Value ?? "",
+                Thumb: directory.Attribute("thumb")?.Value != null ? new BitmapImage(
+                    new Uri($"{uri}{directory.Attribute("thumb")?.Value}?X-Plex-Token={_plexToken}")) : null,
                 Art: directory.Attribute("art")?.Value ?? "",
                 ParentThumb: directory.Attribute("parentThumb")?.Value ?? "0",
                 OriginallyAvailableAt: DateTime.Parse(directory.Attribute("originallyAvailableAt")!.Value),
