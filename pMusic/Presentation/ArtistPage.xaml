@@ -8,27 +8,37 @@
       xmlns:ui="clr-namespace:Uno.Extensions.Reactive.UI;assembly=Uno.Extensions.Reactive.UI"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-    <StackPanel>
-        <TextBlock Text="tile" />
-        <ui:FeedView Source="{Binding Artists}">
+    <Grid Padding="0 30 0 0" CornerRadius="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Your Albums"></TextBlock>
+        <ui:FeedView Source="{Binding Artists}" Padding="0">
             <ui:FeedView.ValueTemplate>
-                <DataTemplate>
-                    <ListView ItemsSource="{Binding Data}" SelectionMode="Single" x:Name="ArtistList">
+                <DataTemplate DataContext="Artists">
+                    <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
+                    <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
+                        <ListView ItemsSource="{Binding Data}" x:Name="ArtistList" IsItemClickEnabled="True"  ItemClick="GoToAlbumPage_ItemClick">
 
-                        <ListView.Header>
-                            <Button Content="Refresh" Command="{Binding Refresh}" />
-                        </ListView.Header>
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                              <StackPanel Orientation="Horizontal" Height="Auto" Margin="20 0" Padding="0 20" CornerRadius="15"></StackPanel>
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
 
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <!-- <Image Source="{Binding Thumbnail}"></Image> -->
-                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                    <TextBlock Text="{Binding Title}" />
-                                    <Button Content="Go to Artist's Album Page" Click="GoToAlbumPage_ItemClick"/>
+                                <StackPanel  Margin="0, 0, 10, 0">
+                                    <StackPanel CornerRadius="15" Margin="0, 0, 0, 5">
+                                    <Image Source="{Binding Thumb}" Width="150"></Image>
+                                        </StackPanel>
+                                    <TextBlock Padding="5,0,0,0" Text="{Binding Title}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+                        </ScrollViewer>
                 </DataTemplate>
             </ui:FeedView.ValueTemplate>
             <ui:FeedView.ProgressTemplate>
@@ -47,5 +57,5 @@
                 </DataTemplate>
             </ui:FeedView.NoneTemplate>
         </ui:FeedView>
-    </StackPanel>
+    </Grid>
 </Page>

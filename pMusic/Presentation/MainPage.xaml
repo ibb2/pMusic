@@ -1,4 +1,4 @@
-﻿<Page x:Class="pMusic.Presentation.MainPage"
+<Page x:Class="pMusic.Presentation.MainPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:pMusic.Presentation"
@@ -12,6 +12,7 @@
     <Page.Resources>
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <converters:BoolToPlayPauseSymbolConverter x:Key="BoolToPlayPauseSymbolConverter" />
+        <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#FF0078D7" />
     </Page.Resources>
 
     <Grid>
@@ -20,31 +21,47 @@
             <RowDefinition Height="200"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Grid utu:SafeArea.Insets="VisibleBounds">
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
 
-            <NavigationView uen:Region.Attached="true" SelectionChanged="NavigationView_OnSelectionChanged">
-                <NavigationView.IsSettingsVisible>False</NavigationView.IsSettingsVisible>
-                <NavigationView.IsBackButtonVisible>Collapsed</NavigationView.IsBackButtonVisible>
-                <!-- <NavigationView.PaneDisplayMode>Left</NavigationView.PaneDisplayMode> -->
+            <StackPanel Background="MistyRose" BorderBrush="DarkGray" CornerRadius="15" Padding="10">
+                <TextBlock Text="Your Library"></TextBlock>
+                <Button Click="GoToHome" Tag="Home">
+                    <SymbolIcon Symbol="Home"></SymbolIcon>
+                </Button>
+                <Button Click="GoToSecond" Tag="Home">
+                    <SymbolIcon Symbol="Bookmarks"></SymbolIcon>
+                </Button>
+            </StackPanel>
 
-                <NavigationView.MenuItems>
-                    <NavigationViewItem Content="HomePage" Tag="home" Icon="Home" />
-                    <NavigationViewItem Content="SecondPage" Tag="second" Icon="Document" />
-                    <!-- <NavigationViewItem Content="Products" -->
-                    <!--                          uen:Region.Name="Products" /> -->
-                    <!-- <NavigationViewItem Content="Deals" -->
-                    <!--                          uen:Region.Name="Deals" /> -->
-                    <!-- <NavigationViewItem Content="Profile" -->
-                    <!--                          uen:Region.Name="Profile" /> -->
-                </NavigationView.MenuItems>
-
-                <Frame x:Name="ContentFrame" />
-            </NavigationView>
+            <!-- <NavigationView Style="{StaticResource NavigationViewStyle}" x:Name="NavView" -->
+            <!--                 IsBackButtonVisible="Collapsed" -->
+            <!--                 IsPaneToggleButtonVisible="True" -->
+            <!--                 PaneDisplayMode="Left" -->
+            <!--                 OpenPaneLength="200" -->
+            <!--                 CompactPaneLength="100" -->
+            <!--                 uen:Region.Attached="True"> -->
+            <!--     ~1~ Sidebar Items @1@ -->
+            <!--     <NavigationView.MenuItems> -->
+            <!--         <NavigationViewItem Content="Home" Icon="Home" Tag="HomePage" uen:Region.Name="HomePage"/> -->
+            <!--         ~1~ <NavigationViewItem Content="Library" Icon="MusicNote" Tag="LibraryPage" uen:Region.Name="LibraryPage"/> @1@ -->
+            <!--         <NavigationViewItem Content="Search" Icon="Find" Tag="SearchPage" uen:Region.Name="SearchPage"/> -->
+            <!--     </NavigationView.MenuItems> -->
+            <!-- -->
+            <!--     ~1~ Content Area @1@ -->
+            <!-- </NavigationView> -->
+            <Frame Grid.Column="1" Background="Snow" CornerRadius="50" x:Name="ContentFrame" uen:Region.Attached="True" uen:Region.Navigator="Frame" />
         </Grid>
 
         <StackPanel Grid.Row="1"
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
+                    VerticalAlignment="Center"
+                    CornerRadius="15"
+                    Padding="30"
+                    >
             <StackPanel>
                 <TextBlock>
                     <Run Text="Audio playing: " />
@@ -59,7 +76,7 @@
                 </Button>
 
                 <!-- Play/Pause Button (Fixed binding) -->
-                <Button Command="{Binding TogglePlayPause}">
+                <Button Style="{StaticResource AccentButtonStyle}" Command="{Binding TogglePlayPause}">
                     <SymbolIcon
                         Symbol="{Binding IsAudioCurrentlyPlaying.Value, Converter={StaticResource BoolToPlayPauseSymbolConverter}, Mode=OneWay}"
                         Width="24"
@@ -81,6 +98,7 @@
                          Maximum="{Binding SoundPlayer.Duration}"
                          Value="{Binding CurrentPlaybackTime.Value}"
                          Height="8"
-                         Margin="0,12,0,0"/>
-        </StackPanel>    </Grid>
+                         Margin="0,12,0,0" />
+        </StackPanel>
+    </Grid>
 </Page>

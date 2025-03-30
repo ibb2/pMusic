@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using KeySharp;
 using LukeHagar.PlexAPI.SDK;
+using Microsoft.UI.Xaml.Media.Imaging;
 using pMusic.Services;
 using Image = pMusic.Services.Image;
 using Media = pMusic.Models.Media;
@@ -54,7 +55,7 @@ public class Plex
 
         var artistUri = uri + "/library/sections/" + lib.Key + "/all";
         var artistsDetailsXml = await httpClient.GetStringAsync(artistUri);
-        var artists = ParseArtists(XElement.Parse(artistsDetailsXml), lib.Key);
+        var artists = ParseArtists(XElement.Parse(artistsDetailsXml), lib.Key, uri);
         var i = 1;
 
         return artists.ToImmutableList();
@@ -242,7 +243,7 @@ public class Plex
         return items;
     }
 
-    public static List<Artist> ParseArtists(XElement mediaContainer, int libKey)
+    public List<Artist> ParseArtists(XElement mediaContainer, int libKey, string uri)
     {
         if (mediaContainer == null) return new List<Artist>();
 
@@ -260,7 +261,8 @@ public class Plex
                 SkipCount: directory.Attribute("skipCount")?.Value ?? "",
                 LastViewedAt: directory.Attribute("lastViewedAt")?.Value ?? "",
                 LastRatedAt: directory.Attribute("lastRatedAt")?.Value ?? "",
-                Thumb: directory.Attribute("thumb")?.Value ?? "",
+                // Thumb: uri + directory.Attribute("thumb")?.Value ?? "",
+                Thumb: new BitmapImage(new Uri($"{uri}{directory.Attribute("thumb").Value}/?X-Plex-Token={_plexToken}" )),
                 AddedAt: directory.Attribute("addedAt")?.Value ?? "",
                 UpdatedAt: directory.Attribute("updatedAt")?.Value ?? "",
                 LibraryKey: libKey,
