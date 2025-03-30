@@ -27,16 +27,23 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Background="MistyRose" BorderBrush="DarkGray" CornerRadius="15" Padding="10">
+            <Grid BorderBrush="DarkGray" CornerRadius="15" Padding="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+
                 <TextBlock Text="Your Library"></TextBlock>
-                <Button Click="GoToHome" Tag="Home">
+                <Button Grid.Row="1" Click="GoToHome" Tag="Home">
                     <SymbolIcon Symbol="Home"></SymbolIcon>
                 </Button>
-                <Button Click="GoToSecond" Tag="Home">
+                <Button Grid.Row="2" Click="GoToSecond" Tag="Home">
                     <SymbolIcon Symbol="Bookmarks"></SymbolIcon>
                 </Button>
 
-                <ui:FeedView Source="{Binding Playlists}" Padding="0">
+                <ui:FeedView Grid.Row="3" Source="{Binding Playlists}" Padding="0">
                     <ui:FeedView.ValueTemplate>
                         <DataTemplate DataContext="Playlists">
                             <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
@@ -45,7 +52,7 @@
 
                                     <ListView.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" Height="Auto" Margin="20 0"
+                                            <StackPanel Height="Auto" Margin="20 0"
                                                         Padding="0 20" CornerRadius="15">
                                             </StackPanel>
                                         </ItemsPanelTemplate>
@@ -53,10 +60,10 @@
 
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Margin="0, 0, 10, 0">
-                                                <!-- <StackPanel CornerRadius="15" Margin="0, 0, 0, 5"> -->
-                                                <!-- <Image Source="{Binding Thumb}" Width="150"></Image> -->
-                                                <!-- </StackPanel> -->
+                                            <StackPanel Orientation="Horizontal" Margin="0, 0, 10, 0">
+                                                <StackPanel CornerRadius="5" Margin="0, 0, 0, 10">
+                                                <Image Source="{Binding Composite}" Width="50"></Image>
+                                                </StackPanel>
                                                 <TextBlock Padding="5,0,0,0" Text="{Binding Title}" />
                                             </StackPanel>
                                         </DataTemplate>
@@ -81,7 +88,7 @@
                         </DataTemplate>
                     </ui:FeedView.NoneTemplate>
                 </ui:FeedView>
-            </StackPanel>
+            </Grid>
 
             <!-- <NavigationView Style="{StaticResource NavigationViewStyle}" x:Name="NavView" -->
             <!--                 IsBackButtonVisible="Collapsed" -->
