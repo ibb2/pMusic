@@ -52,13 +52,16 @@
             <!--     </NavigationView.MenuItems> -->
             <!-- -->
             <!--     ~1~ Content Area @1@ -->
-            <Frame Grid.Column="1" x:Name="ContentFrame" uen:Region.Attached="True" uen:Region.Navigator="Frame" />
             <!-- </NavigationView> -->
+            <Frame Grid.Column="1" Background="Snow" x:Name="ContentFrame" uen:Region.Attached="True" uen:Region.Navigator="Frame" />
         </Grid>
 
         <StackPanel Grid.Row="1"
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
+                    VerticalAlignment="Center"
+                    CornerRadius="15"
+                    Padding="30"
+                    >
             <StackPanel>
                 <TextBlock>
                     <Run Text="Audio playing: " />
