@@ -1,4 +1,4 @@
-﻿<Page x:Class="pMusic.Presentation.HomePage"
+<Page CornerRadius="50" x:Class="pMusic.Presentation.HomePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:pMusic.Presentation"
@@ -7,8 +7,8 @@
       xmlns:um="using:Uno.Material"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-    <StackPanel>
-        <TextBlock Text="Home Page" />
+    <StackPanel Padding="30" CornerRadius="50">
+        <TextBlock Text="Home" />
         <local:ArtistPage />
     </StackPanel>
 </Page>

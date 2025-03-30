@@ -53,7 +53,7 @@
             <!-- -->
             <!--     ~1~ Content Area @1@ -->
             <!-- </NavigationView> -->
-            <Frame Grid.Column="1" Background="Snow" x:Name="ContentFrame" uen:Region.Attached="True" uen:Region.Navigator="Frame" />
+            <Frame Grid.Column="1" Background="Snow" CornerRadius="50" x:Name="ContentFrame" uen:Region.Attached="True" uen:Region.Navigator="Frame" />
         </Grid>
 
         <StackPanel Grid.Row="1"

@@ -8,8 +8,7 @@
       xmlns:ui="clr-namespace:Uno.Extensions.Reactive.UI;assembly=Uno.Extensions.Reactive.UI"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-    <StackPanel>
-        <TextBlock Text="tile" />
+    <StackPanel Padding="30" CornerRadius="15">
         <ui:FeedView Source="{Binding Artists}">
             <ui:FeedView.ValueTemplate>
                 <DataTemplate>

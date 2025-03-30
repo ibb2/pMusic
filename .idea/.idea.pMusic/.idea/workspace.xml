@@ -12,10 +12,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Able to use custom navigation view.">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/MainPage.xaml.cs" afterDir="false" />
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Default view color set.">
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -224,7 +222,7 @@
       <workItem from="1742875033827" duration="2602000" />
       <workItem from="1742907999745" duration="5110000" />
       <workItem from="1742916112476" duration="4810000" />
-      <workItem from="1743300388809" duration="7818000" />
+      <workItem from="1743300388809" duration="8141000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -530,7 +528,23 @@
       <option name="project" value="LOCAL" />
       <updated>1743308921084</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="Crude styling of sidebar. Made to look defined.">
+      <option name="closed" value="true" />
+      <created>1743309957773</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1743309957773</updated>
+    </task>
+    <task id="LOCAL-00040" summary="Default view color set.">
+      <option name="closed" value="true" />
+      <created>1743310116485</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1743310116485</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -551,8 +565,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Installed another plex api package." />
-    <MESSAGE value="Added plex api as singleton." />
     <MESSAGE value="Buggy with ArtistPage.xaml not reliably navigating." />
     <MESSAGE value="Default to artist page.&#10;&#10;Navigation broken. Navigating away and back to Artist page does not work." />
     <MESSAGE value="Dummy commit." />
@@ -576,7 +588,9 @@
     <MESSAGE value="Made bottom control section static height." />
     <MESSAGE value="Progressbar is working." />
     <MESSAGE value="Able to use custom navigation view." />
-    <option name="LAST_COMMIT_MESSAGE" value="Able to use custom navigation view." />
+    <MESSAGE value="Crude styling of sidebar. Made to look defined." />
+    <MESSAGE value="Default view color set." />
+    <option name="LAST_COMMIT_MESSAGE" value="Default view color set." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
