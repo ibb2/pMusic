@@ -35,6 +35,52 @@
                 <Button Click="GoToSecond" Tag="Home">
                     <SymbolIcon Symbol="Bookmarks"></SymbolIcon>
                 </Button>
+
+                <ui:FeedView Source="{Binding Playlists}" Padding="0">
+                    <ui:FeedView.ValueTemplate>
+                        <DataTemplate DataContext="Playlists">
+                            <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
+                            <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
+                                <ListView ItemsSource="{Binding Data}" x:Name="ArtistList" IsItemClickEnabled="True">
+
+                                    <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Height="Auto" Margin="20 0"
+                                                        Padding="0 20" CornerRadius="15">
+                                            </StackPanel>
+                                        </ItemsPanelTemplate>
+                                    </ListView.ItemsPanel>
+
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0, 0, 10, 0">
+                                                <!-- <StackPanel CornerRadius="15" Margin="0, 0, 0, 5"> -->
+                                                <!-- <Image Source="{Binding Thumb}" Width="150"></Image> -->
+                                                <!-- </StackPanel> -->
+                                                <TextBlock Padding="5,0,0,0" Text="{Binding Title}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </ScrollViewer>
+                        </DataTemplate>
+                    </ui:FeedView.ValueTemplate>
+                    <ui:FeedView.ProgressTemplate>
+                        <DataTemplate>
+                            <ProgressRing />
+                        </DataTemplate>
+                    </ui:FeedView.ProgressTemplate>
+                    <ui:FeedView.ErrorTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="Error" />
+                        </DataTemplate>
+                    </ui:FeedView.ErrorTemplate>
+                    <ui:FeedView.NoneTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="No Results" />
+                        </DataTemplate>
+                    </ui:FeedView.NoneTemplate>
+                </ui:FeedView>
             </StackPanel>
 
             <!-- <NavigationView Style="{StaticResource NavigationViewStyle}" x:Name="NavView" -->
@@ -53,15 +99,15 @@
             <!-- -->
             <!--     ~1~ Content Area @1@ -->
             <!-- </NavigationView> -->
-            <Frame Grid.Column="1" Background="Snow" CornerRadius="50" x:Name="ContentFrame" uen:Region.Attached="True" uen:Region.Navigator="Frame" />
+            <Frame Grid.Column="1" Background="Snow" CornerRadius="50" x:Name="ContentFrame" uen:Region.Attached="True"
+                   uen:Region.Navigator="Frame" />
         </Grid>
 
         <StackPanel Grid.Row="1"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     CornerRadius="15"
-                    Padding="30"
-                    >
+                    Padding="30">
             <StackPanel>
                 <TextBlock>
                     <Run Text="Audio playing: " />

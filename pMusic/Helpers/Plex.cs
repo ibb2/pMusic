@@ -136,6 +136,43 @@ public class Plex
         return memoryStream;
     }
 
+    public async ValueTask<IImmutableList<Playlist>> GetPlaylists(string uri)
+    {
+        var playlistsXml = await httpClient.GetStringAsync(uri + "/playlists");
+        var playlists = ParsePlaylists(XElement.Parse(playlistsXml), uri);
+
+        return playlists.ToImmutableList();
+    }
+
+    public List<Playlist> ParsePlaylists(XElement? mediaContainer, string uri)
+    {
+        if (mediaContainer is null) return new List<Playlist>();
+
+        var items = mediaContainer.Elements("Playlist").Where(playlist => playlist.Attribute("playlistType").Value == "audio").Select(playlist =>
+            new Playlist(
+                RatingKey: playlist.Attribute("ratingKey")?.Value ?? "",
+                Key: playlist.Attribute("key")?.Value ?? "",
+                Guid: playlist.Attribute("guid")?.Value ?? "",
+                Type: playlist.Attribute("type")?.Value ?? "",
+                Title: playlist.Attribute("title")?.Value ?? "",
+                Summary: playlist.Attribute("summary")?.Value ?? "",
+                Smart: int.Parse(playlist.Attribute("smart")?.Value ?? "0"),
+                PlaylistType: playlist.Attribute("playlistType")?.Value ?? "",
+                Composite: new BitmapImage(
+                    new Uri($"{uri}{playlist.Attribute("composite")?.Value}?X-Plex-Token={_plexToken}")),
+                Icon: playlist.Attribute("icon")?.Value ?? "",
+                ViewCount: int.Parse(playlist.Attribute("viewCount")?.Value ?? "0"),
+                LastViewedAt: DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(playlist.Attribute("lastViewedAt")?.Value)).LocalDateTime,
+                Duration: int.Parse(playlist.Attribute("duration")?.Value ?? "0"),
+                LeafCount: int.Parse(playlist.Attribute("leafCount")?.Value ?? "0"),
+                AddedAt: DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(playlist.Attribute("addedAt")?.Value)).LocalDateTime,
+                UpdatedAt: DateTimeOffset.FromUnixTimeMilliseconds( long.Parse(playlist.Attribute("updatedAt")?.Value ?? "")).LocalDateTime
+            )
+        ).ToList();
+
+        return items;
+    }
+
     public static List<Track> ParseTracks(XElement mediaContainer)
     {
         if (mediaContainer == null) return new List<Track>();
