@@ -52,18 +52,19 @@
 
                                     <ListView.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <StackPanel Height="Auto" Margin="20 0"
-                                                        Padding="0 20" CornerRadius="15">
+                                            <StackPanel Height="Auto" Margin="20 10"
+                                                        Padding="0 20">
                                             </StackPanel>
                                         </ItemsPanelTemplate>
                                     </ListView.ItemsPanel>
 
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Margin="0, 0, 10, 0">
-                                                <StackPanel CornerRadius="5" Margin="0, 0, 0, 10">
-                                                <Image Source="{Binding Composite}" Width="50"></Image>
-                                                </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Grid CornerRadius="5">
+                                                    <Image Source="/Assets/Images/no-playlist-cover.png" Width="50"></Image>
+                                                    <Image Source="{Binding Composite}" Width="50"></Image>
+                                                </Grid>
                                                 <TextBlock Padding="5,0,0,0" Text="{Binding Title}" />
                                             </StackPanel>
                                         </DataTemplate>

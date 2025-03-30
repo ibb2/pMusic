@@ -158,8 +158,8 @@ public class Plex
                 Summary: playlist.Attribute("summary")?.Value ?? "",
                 Smart: int.Parse(playlist.Attribute("smart")?.Value ?? "0"),
                 PlaylistType: playlist.Attribute("playlistType")?.Value ?? "",
-                Composite: new BitmapImage(
-                    new Uri($"{uri}{playlist.Attribute("composite")?.Value}?X-Plex-Token={_plexToken}")),
+                Composite: playlist.Attribute("composite")?.Value != null ? new BitmapImage(
+                    new Uri($"{uri}{playlist.Attribute("composite")?.Value}?X-Plex-Token={_plexToken}")) : null,
                 Icon: playlist.Attribute("icon")?.Value ?? "",
                 ViewCount: int.Parse(playlist.Attribute("viewCount")?.Value ?? "0"),
                 LastViewedAt: DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(playlist.Attribute("lastViewedAt")?.Value)).LocalDateTime,
