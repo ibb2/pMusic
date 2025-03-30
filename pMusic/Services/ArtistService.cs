@@ -1,3 +1,4 @@
+using Microsoft.UI.Xaml.Media.Imaging;
 using pMusic.Helpers;
 
 namespace pMusic.Services;
@@ -14,7 +15,7 @@ public partial record Artist(
     string SkipCount = "",
     string LastViewedAt = "",
     string LastRatedAt = "",
-    string Thumb = "",
+    BitmapImage? Thumb = null,
     string AddedAt = "",
     string UpdatedAt = "",
     int LibraryKey = 0,

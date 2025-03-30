@@ -7,8 +7,8 @@
       xmlns:um="using:Uno.Material"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-    <StackPanel Padding="30" CornerRadius="50">
+    <Grid Padding="30" CornerRadius="50">
         <TextBlock Text="Home" />
         <local:ArtistPage />
-    </StackPanel>
+    </Grid>
 </Page>

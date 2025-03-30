@@ -12,9 +12,9 @@ public sealed partial class ArtistPage : Page
         this.DataContext = (Application.Current as App)?.Host?.Services.GetRequiredService<ArtistViewModel>();
     }
     
-    public void GoToAlbumPage_ItemClick(object sender, RoutedEventArgs e)
+    public void GoToAlbumPage_ItemClick(object sender, ItemClickEventArgs e)
     {
-        var artist = ((Button)sender).DataContext as Artist;
+        var artist =  e.ClickedItem as Artist;
         FrameNavigation.NavigateTo(typeof(AlbumPage), parameter: artist);
         var i = 1;
     }
