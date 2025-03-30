@@ -12,16 +12,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/App.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/App.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Helpers/Plex.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Models/Album.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Models/Album.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/AlbumModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/AlbumModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomeModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomeModel.cs" afterDir="false" />
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Added recently played albums.">
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -542,7 +535,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743328759577</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="Added recently played albums.">
+      <option name="closed" value="true" />
+      <created>1743343054705</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1743343054705</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -563,7 +564,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Added plex api as singleton." />
     <MESSAGE value="Buggy with ArtistPage.xaml not reliably navigating." />
     <MESSAGE value="Default to artist page.&#10;&#10;Navigation broken. Navigating away and back to Artist page does not work." />
     <MESSAGE value="Dummy commit." />
@@ -588,7 +588,8 @@
     <MESSAGE value="Progressbar is working." />
     <MESSAGE value="Able to get music playlists from plex." />
     <MESSAGE value="Playlists are displayed in the sidebar." />
-    <option name="LAST_COMMIT_MESSAGE" value="Playlists are displayed in the sidebar." />
+    <MESSAGE value="Added recently played albums." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added recently played albums." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
