@@ -50,6 +50,14 @@
                             <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
                                 <ListView ItemsSource="{Binding Data}" x:Name="ArtistList" IsItemClickEnabled="True">
 
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="Margin" Value="0 10"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+
                                     <ListView.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel Height="Auto" Margin="20 10"
