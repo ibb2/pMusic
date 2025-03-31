@@ -26,6 +26,14 @@
                             <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
                             <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Hidden" PointerWheelChanged="MyScrollViewer_PointerWheelChanged">
                             <ListView ItemsSource="{Binding Data}" x:Name="RecentAlbums" IsItemClickEnabled="True" ItemClick="GoToTrackPage">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Margin" Value="0 16 20 0 "/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+
                                 <ListView.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Horizontal" Height="Auto" Padding="0 20"
@@ -36,7 +44,7 @@
 
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Margin="0 0 20 0">
+                                        <StackPanel>
                                             <StackPanel CornerRadius="15" Margin="0, 0, 0, 12">
                                                 <Image Source="{Binding Thumb}" Width="150"></Image>
                                             </StackPanel>
