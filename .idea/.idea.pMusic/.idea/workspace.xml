@@ -12,10 +12,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Added recently played albums.">
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Added playlists to the homepage.">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomeModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomeModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -545,7 +543,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743343054705</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="Added playlists to the homepage.">
+      <option name="closed" value="true" />
+      <created>1743390259503</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1743390259503</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -566,7 +572,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Buggy with ArtistPage.xaml not reliably navigating." />
     <MESSAGE value="Default to artist page.&#10;&#10;Navigation broken. Navigating away and back to Artist page does not work." />
     <MESSAGE value="Dummy commit." />
     <MESSAGE value="Basic 2 pane navigation added.&#10;&#10;Controls region visibility to navigation between sections." />
@@ -591,7 +596,8 @@
     <MESSAGE value="Able to get music playlists from plex." />
     <MESSAGE value="Playlists are displayed in the sidebar." />
     <MESSAGE value="Added recently played albums." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added recently played albums." />
+    <MESSAGE value="Added playlists to the homepage." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added playlists to the homepage." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

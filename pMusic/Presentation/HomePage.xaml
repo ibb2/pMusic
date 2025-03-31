@@ -16,10 +16,10 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
-            <TextBlock Text="Home" />
-            <local:ArtistPage Grid.Row="1" Margin="0 0 0 72" />
 
-            <Grid Grid.Row="2" Margin="0 0 0 72">
+            <TextBlock Text="Good Afternoon" Margin="0 0 0 48" />
+
+            <Grid Grid.Row="1" Margin="0 0 0 72">
                 <TextBlock Text="Recently Played"></TextBlock>
                 <mvux:FeedView Source="{Binding RecentlyPlayedAlbums}" Padding="0">
                     <mvux:FeedView.ValueTemplate>
@@ -77,6 +77,8 @@
                     </mvux:FeedView.NoneTemplate>
                 </mvux:FeedView>
             </Grid>
+
+            <local:ArtistPage Grid.Row="2" Margin="0 0 0 72" />
 
             <Grid Grid.Row="3">
                 <TextBlock Text="Your Playlists"></TextBlock>
