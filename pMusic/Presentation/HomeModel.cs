@@ -17,4 +17,5 @@ public partial record HomeModel
 
     public IListFeed<Album> RecentlyPlayedAlbums => ListFeed.Async(async ct => (await ArtistService.GetAllAlbums(ct, Plex)).OrderByDescending(a => a.LastViewedAt).ToImmutableList());
 
+    public IListFeed<Playlist> Playlists => ListFeed.Async(async ct => await ArtistService.GetPlaylists(ct, Plex));
 }
