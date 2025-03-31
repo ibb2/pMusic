@@ -12,7 +12,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Added recently played albums.">
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml.cs" afterDir="false" />
     </list>
@@ -27,7 +30,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="add-recently-played-to-homepage" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -117,7 +120,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "XThreadsFramesViewSplitterKey": "0.501002",
-    "git-widget-placeholder": "add-recently-played-to-homepage",
+    "git-widget-placeholder": "master",
     "iOS.pMusic.executor": "Run",
     "macOS.pMusic.executor": "Debug",
     "node.js.detected.package.eslint": "true",
@@ -222,6 +225,7 @@
       <workItem from="1742875033827" duration="2602000" />
       <workItem from="1742907999745" duration="5110000" />
       <workItem from="1742916112476" duration="4810000" />
+      <workItem from="1743381990382" duration="3277000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -606,45 +610,6 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Services/ArtistService.cs</url>
-          <line>113</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" containingFunctionPresentation="Method 'GetAllAlbums'">
-            <startOffsets>
-              <option value="3211" />
-            </startOffsets>
-            <endOffsets>
-              <option value="3259" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="24" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Services/ArtistService.cs</url>
-          <line>115</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" containingFunctionPresentation="Method 'GetAllAlbums'">
-            <startOffsets>
-              <option value="3269" />
-            </startOffsets>
-            <endOffsets>
-              <option value="3283" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="25" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Presentation/HomeModel.cs</url>
-          <line>17</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/HomeModel.cs" containingFunctionPresentation="Property 'RecentlyPlayedAlbums'">
-            <startOffsets>
-              <option value="364" />
-            </startOffsets>
-            <endOffsets>
-              <option value="493" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="26" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

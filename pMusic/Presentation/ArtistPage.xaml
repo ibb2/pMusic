@@ -18,7 +18,7 @@
             <ui:FeedView.ValueTemplate>
                 <DataTemplate DataContext="Artists">
                     <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
-                    <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
+                    <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Hidden" PointerWheelChanged="MyScrollViewer_PointerWheelChanged">
                         <ListView ItemsSource="{Binding Data}" x:Name="ArtistList" IsItemClickEnabled="True"  ItemClick="GoToAlbumPage_ItemClick">
 
                         <ListView.ItemsPanel>

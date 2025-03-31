@@ -24,7 +24,7 @@
                     <mvux:FeedView.ValueTemplate>
                         <DataTemplate>
                             <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
-                            <ScrollViewer HorizontalScrollMode="Enabled" HorizontalScrollBarVisibility="Auto">
+                            <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Hidden" PointerWheelChanged="MyScrollViewer_PointerWheelChanged">
                             <ListView ItemsSource="{Binding Data}" x:Name="RecentAlbums" IsItemClickEnabled="True" ItemClick="GoToTrackPage">
                                 <ListView.ItemsPanel>
                                     <ItemsPanelTemplate>
