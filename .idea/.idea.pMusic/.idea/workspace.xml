@@ -12,10 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Added playlists to the homepage.">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.pMusic/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" afterDir="false" />
-    </list>
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Reordered the lists." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,11 +53,8 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Helpers/Plex.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/pMusic/Platforms/Desktop/Program.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainModel.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/MainPage.xaml" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Services/ArtistService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/ibrahim/Developer/Code/pMusic/pMusic/Presentation/HomePage.xaml" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/pMusic/bin/Debug/net9.0-browserwasm/wwwroot/_framework/dotnet.js.map" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/72103d949a424ae4bf3dfad3841dc7dc20200/52/aabe2f27/SoundPlayer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/0541629a13be879eb18d6ad28b4e2a623584e8/pMusic.Presentation.MainModel.Bindable.g.cs" root0="FORCE_HIGHLIGHTING" />
@@ -551,7 +545,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743390259503</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="Reordered the lists.">
+      <option name="closed" value="true" />
+      <created>1743391493244</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1743391493244</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -572,7 +574,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Default to artist page.&#10;&#10;Navigation broken. Navigating away and back to Artist page does not work." />
     <MESSAGE value="Dummy commit." />
     <MESSAGE value="Basic 2 pane navigation added.&#10;&#10;Controls region visibility to navigation between sections." />
     <MESSAGE value="Frame navigation implemented." />
@@ -597,7 +598,8 @@
     <MESSAGE value="Playlists are displayed in the sidebar." />
     <MESSAGE value="Added recently played albums." />
     <MESSAGE value="Added playlists to the homepage." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added playlists to the homepage." />
+    <MESSAGE value="Reordered the lists." />
+    <option name="LAST_COMMIT_MESSAGE" value="Reordered the lists." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
