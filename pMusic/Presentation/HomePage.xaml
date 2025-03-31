@@ -14,46 +14,111 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
-            <TextBlock Text="Home" />
-            <local:ArtistPage Grid.Row="1" Margin="0 0 0 72"/>
 
-            <Grid Grid.Row="2">
+            <TextBlock Text="Good Afternoon" Margin="0 0 0 48" />
+
+            <Grid Grid.Row="1" Margin="0 0 0 72">
                 <TextBlock Text="Recently Played"></TextBlock>
                 <mvux:FeedView Source="{Binding RecentlyPlayedAlbums}" Padding="0">
                     <mvux:FeedView.ValueTemplate>
                         <DataTemplate>
                             <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
-                            <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Hidden" PointerWheelChanged="MyScrollViewer_PointerWheelChanged">
-                            <ListView ItemsSource="{Binding Data}" x:Name="RecentAlbums" IsItemClickEnabled="True" ItemClick="GoToTrackPage">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="Margin" Value="0 16 20 0 "/>
-                                        <Setter Property="BorderThickness" Value="0"/>
-                                    </Style>
-                                </ListView.ItemContainerStyle>
+                            <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Hidden"
+                                          PointerWheelChanged="MyScrollViewer_PointerWheelChanged">
+                                <ListView ItemsSource="{Binding Data}" x:Name="RecentAlbums" IsItemClickEnabled="True"
+                                          ItemClick="GoToTrackPage">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="Padding" Value="0" />
+                                            <Setter Property="Margin" Value="0 16 20 0 " />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
 
-                                <ListView.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" Height="Auto" Padding="0 20"
-                                                    CornerRadius="15">
-                                        </StackPanel>
-                                    </ItemsPanelTemplate>
-                                </ListView.ItemsPanel>
-
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-                                            <StackPanel CornerRadius="15" Margin="0, 0, 0, 12">
-                                                <Image Source="{Binding Thumb}" Width="150"></Image>
+                                    <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Height="Auto" Padding="0 20"
+                                                        CornerRadius="15">
                                             </StackPanel>
-                                            <TextBlock Padding="5,0,0,8" Text="{Binding Title}" />
-                                            <TextBlock Padding="5,0,0,0" Text="{Binding Artist}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
+                                        </ItemsPanelTemplate>
+                                    </ListView.ItemsPanel>
+
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <StackPanel CornerRadius="15" Margin="0, 0, 0, 12">
+                                                    <Image Source="{Binding Thumb}" Width="150"></Image>
+                                                </StackPanel>
+                                                <TextBlock Padding="5,0,0,8" Text="{Binding Title}" />
+                                                <TextBlock Padding="5,0,0,0" Text="{Binding Artist}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </ScrollViewer>
+                        </DataTemplate>
+                    </mvux:FeedView.ValueTemplate>
+                    <mvux:FeedView.ProgressTemplate>
+                        <DataTemplate>
+                            <ProgressRing />
+                        </DataTemplate>
+                    </mvux:FeedView.ProgressTemplate>
+                    <mvux:FeedView.ErrorTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="Error" />
+                        </DataTemplate>
+                    </mvux:FeedView.ErrorTemplate>
+                    <mvux:FeedView.NoneTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="No Results" />
+                        </DataTemplate>
+                    </mvux:FeedView.NoneTemplate>
+                </mvux:FeedView>
+            </Grid>
+
+            <local:ArtistPage Grid.Row="2" Margin="0 0 0 72" />
+
+            <Grid Grid.Row="3">
+                <TextBlock Text="Your Playlists"></TextBlock>
+                <mvux:FeedView Source="{Binding Playlists}" Padding="0">
+                    <mvux:FeedView.ValueTemplate>
+                        <DataTemplate>
+                            <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
+                            <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Hidden"
+                                          PointerWheelChanged="MyScrollViewer_PointerWheelChanged">
+                                <ListView ItemsSource="{Binding Data}" x:Name="RecentAlbums" IsItemClickEnabled="True"
+                                          ItemClick="GoToTrackPage">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="Padding" Value="0" />
+                                            <Setter Property="Margin" Value="0 16 20 0 " />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+
+                                    <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Height="Auto" Padding="0 20"
+                                                        CornerRadius="15">
+                                            </StackPanel>
+                                        </ItemsPanelTemplate>
+                                    </ListView.ItemsPanel>
+
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <Grid CornerRadius="15" Margin="0, 0, 0, 12">
+                                                    <Image Source="/Assets/Images/no-playlist-cover.png" Width="150"></Image>
+                                                    <Image Source="{Binding Composite}" Width="150"></Image>
+                                                </Grid>
+                                                <TextBlock Padding="5,0,0,8" Text="{Binding Title}" />
+                                                <TextBlock Padding="5,0,0,0" Text="{Binding Artist}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
                             </ScrollViewer>
                         </DataTemplate>
                     </mvux:FeedView.ValueTemplate>

@@ -21,13 +21,13 @@
                     <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Hidden" PointerWheelChanged="MyScrollViewer_PointerWheelChanged">
                         <ListView ItemsSource="{Binding Data}" x:Name="ArtistList" SelectionMode="None" IsItemClickEnabled="True"  ItemClick="GoToAlbumPage_ItemClick">
 
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="Padding" Value="0"/>
-                                    <Setter Property="Margin" Value="0 16 20 0 "/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                </Style>
-                            </ListView.ItemContainerStyle>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0 16 20 0 "/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
 
                         <ListView.ItemsPanel>
                             <ItemsPanelTemplate>
