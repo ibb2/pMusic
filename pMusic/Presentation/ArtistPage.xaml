@@ -18,19 +18,27 @@
             <ui:FeedView.ValueTemplate>
                 <DataTemplate DataContext="Artists">
                     <!-- <Button Content="Refresh" Command="{Binding Refresh}" /> -->
-                    <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
-                        <ListView ItemsSource="{Binding Data}" x:Name="ArtistList" IsItemClickEnabled="True"  ItemClick="GoToAlbumPage_ItemClick">
+                    <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Hidden" PointerWheelChanged="MyScrollViewer_PointerWheelChanged">
+                        <ListView ItemsSource="{Binding Data}" x:Name="ArtistList" SelectionMode="None" IsItemClickEnabled="True"  ItemClick="GoToAlbumPage_ItemClick">
+
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Margin" Value="0 16 20 0 "/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
 
                         <ListView.ItemsPanel>
                             <ItemsPanelTemplate>
-                              <StackPanel Orientation="Horizontal" Height="Auto" Margin="20 0" Padding="0 20" CornerRadius="15"></StackPanel>
+                              <StackPanel Orientation="Horizontal" Height="Auto" Padding="0 20" CornerRadius="15"></StackPanel>
                             </ItemsPanelTemplate>
                         </ListView.ItemsPanel>
 
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel  Margin="0, 0, 10, 0">
-                                    <StackPanel CornerRadius="15" Margin="0, 0, 0, 5">
+                                <StackPanel>
+                                    <StackPanel CornerRadius="15" Margin="0, 0, 0, 12">
                                     <Image Source="{Binding Thumb}" Width="150"></Image>
                                         </StackPanel>
                                     <TextBlock Padding="5,0,0,0" Text="{Binding Title}" />

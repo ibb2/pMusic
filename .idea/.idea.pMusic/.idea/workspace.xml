@@ -12,9 +12,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Added recently played albums.">
+    <list default="true" id="a1aa7a3e-a15f-4fba-ab97-8f973b455c53" name="Changes" comment="Horizontal scroll works. Scrollbar hidden, Natural Scrolling, and Vertical scroll not hijacked.">
+      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/ArtistPage.xaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/pMusic/Presentation/HomePage.xaml.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +117,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "XThreadsFramesViewSplitterKey": "0.501002",
-    "git-widget-placeholder": "add-recently-played-to-homepage",
+    "git-widget-placeholder": "fix-horizontal-scroll-issues",
     "iOS.pMusic.executor": "Run",
     "macOS.pMusic.executor": "Debug",
     "node.js.detected.package.eslint": "true",
@@ -222,6 +222,7 @@
       <workItem from="1742875033827" duration="2602000" />
       <workItem from="1742907999745" duration="5110000" />
       <workItem from="1742916112476" duration="4810000" />
+      <workItem from="1743381990382" duration="3596000" />
     </task>
     <task id="LOCAL-00001" summary="Crude version of Login with Plex working.">
       <option name="closed" value="true" />
@@ -543,7 +544,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743343054705</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="Horizontal scroll works. Scrollbar hidden, Natural Scrolling, and Vertical scroll not hijacked.">
+      <option name="closed" value="true" />
+      <created>1743385340109</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1743385340109</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -564,7 +573,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="Buggy with ArtistPage.xaml not reliably navigating." />
     <MESSAGE value="Default to artist page.&#10;&#10;Navigation broken. Navigating away and back to Artist page does not work." />
     <MESSAGE value="Dummy commit." />
     <MESSAGE value="Basic 2 pane navigation added.&#10;&#10;Controls region visibility to navigation between sections." />
@@ -589,7 +597,8 @@
     <MESSAGE value="Able to get music playlists from plex." />
     <MESSAGE value="Playlists are displayed in the sidebar." />
     <MESSAGE value="Added recently played albums." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added recently played albums." />
+    <MESSAGE value="Horizontal scroll works. Scrollbar hidden, Natural Scrolling, and Vertical scroll not hijacked." />
+    <option name="LAST_COMMIT_MESSAGE" value="Horizontal scroll works. Scrollbar hidden, Natural Scrolling, and Vertical scroll not hijacked." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -606,45 +615,6 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Services/ArtistService.cs</url>
-          <line>113</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" containingFunctionPresentation="Method 'GetAllAlbums'">
-            <startOffsets>
-              <option value="3211" />
-            </startOffsets>
-            <endOffsets>
-              <option value="3259" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="24" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Services/ArtistService.cs</url>
-          <line>115</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Services/ArtistService.cs" containingFunctionPresentation="Method 'GetAllAlbums'">
-            <startOffsets>
-              <option value="3269" />
-            </startOffsets>
-            <endOffsets>
-              <option value="3283" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="25" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/pMusic/Presentation/HomeModel.cs</url>
-          <line>17</line>
-          <properties documentPath="$PROJECT_DIR$/pMusic/Presentation/HomeModel.cs" containingFunctionPresentation="Property 'RecentlyPlayedAlbums'">
-            <startOffsets>
-              <option value="364" />
-            </startOffsets>
-            <endOffsets>
-              <option value="493" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="26" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
