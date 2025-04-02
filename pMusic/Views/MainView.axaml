@@ -1,14 +1,18 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        Width="800"
-        Height="400"
-        x:Class="pMusic.MainWindow"
-        Title="pMusic"
-        Background="Black">
-    <Window.Styles>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:pMusic.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="pMusic.Views.MainView"
+             x:DataType="vm:MainViewModel">
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <vm:MainViewModel />
+  </Design.DataContext>
+    
+    <UserControl.Styles>
         <Style Selector="Button.Home">
             <Setter Property="CornerRadius">100</Setter>
             <Setter Property="Height">40</Setter>
@@ -19,8 +23,8 @@
             <Setter Property="Height">40</Setter>
             <Setter Property="Width">40</Setter>
         </Style>
-    </Window.Styles>
-    <Grid RowDefinitions="Auto, *, Auto">
+    </UserControl.Styles>
+ <Grid RowDefinitions="Auto, *, Auto">
         <Grid ColumnDefinitions="Auto, *, Auto" Margin="0, 8 0 2">
             <StackPanel Orientation="Horizontal">
                 <Button Content="{LucideIconContent Kind=ChevronLeft}" Background="Transparent" Foreground="Gray"></Button>
@@ -35,8 +39,21 @@
                 <TextBox Grid.Column="1" Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <Button Content="{LucideIconContent Kind=Bell}" Width="40" Height="40" Background="Azure" Margin="0 0 8 0" CornerRadius=" 100" />
-                <Button Width="40" Height="40" Background="Azure" Margin="0 0 8 0" CornerRadius=" 100" />
+                <Button Content="{LucideIconContent Kind=Bell}" Width="40" Height="40" Background="Azure"
+                        Margin="0 0 8 0" CornerRadius=" 100" />
+                <Button Content="{LucideIconContent Kind=User}" Width="40" Height="40" Background="Azure"
+                        Margin="0 0 8 0" CornerRadius=" 100">
+                    <Button.Flyout>
+                        <Flyout>
+                            <TextBlock>Login</TextBlock> <!-- Or Account -->
+                            <!-- Profile -->
+                            <!-- Support -->
+                            <!-- Private Session -->
+                            <!-- Settings -->
+                            <!-- Log out -->
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="250, 4, *">
@@ -58,7 +75,7 @@
                             <Button>
                                 <StackPanel Orientation="Horizontal">
                                     <Border ClipToBounds="True" CornerRadius="5" Margin="0 0 8 0">
-                                        <Image Source="Assets/Images/blank_playlist.png" Width="40"></Image>
+                                        <Image Source="/Assets/Images/blank_playlist.png" Width="40"></Image>
                                     </Border>
                                     <StackPanel Spacing="4">
                                         <TextBlock>Liked Songs</TextBlock>
@@ -75,7 +92,7 @@
                             <Button>
                                 <StackPanel Orientation="Horizontal">
                                     <Border ClipToBounds="True" CornerRadius="5" Margin="0 0 8 0">
-                                        <Image Source="Assets/Images/blank_playlist.png" Width="40"></Image>
+                                        <Image Source="/Assets/Images/blank_playlist.png" Width="40"></Image>
                                     </Border>
                                     <StackPanel Spacing="4">
                                         <TextBlock>Liked Songs</TextBlock>
@@ -103,57 +120,60 @@
                     <UniformGrid Columns="2" Rows="4" Width="300">
                         <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
                                 <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
                             </StackPanel>
                         </Border>
                         <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
                                 <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
                             </StackPanel>
                         </Border>
                         <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
                                 <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
                             </StackPanel>
                         </Border>
                         <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
                                 <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
                             </StackPanel>
                         </Border>
                         <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
                                 <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
                             </StackPanel>
                         </Border>
                         <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
-                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                            </StackPanel>
-                        </Border> <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
                                 <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
                             </StackPanel>
                         </Border>
                         <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
                                 <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
                             </StackPanel>
                         </Border>
                     </UniformGrid>
                     <StackPanel Orientation="Horizontal" Margin="10 0">
                         <!-- New Releases / Recently Added? -->
-                    </StackPanel><StackPanel Orientation="Horizontal" Margin="10 0">
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="10 0">
                         <!-- Uniquely Yours -->
-                    </StackPanel><StackPanel Orientation="Horizontal" Margin="10 0">
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="10 0">
                         <!-- Recently Added -->
                     </StackPanel>
                 </StackPanel>
@@ -200,4 +220,6 @@
             </Border>
         </Grid>
     </Grid>
-</Window>
+
+  <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
+</UserControl>
