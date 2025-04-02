@@ -2,59 +2,88 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         Width="800"
         Height="400"
         x:Class="pMusic.MainWindow"
         Title="pMusic">
-    <Grid RowDefinitions="*, Auto">
-        <Grid ColumnDefinitions="200, 4, *">
+    <Window.Styles>
+        <Style Selector="Button.Home">
+            <Setter Property="CornerRadius">100</Setter>
+            <Setter Property="Height">40</Setter>
+            <Setter Property="Width">40</Setter>
+        </Style>
+        <Style Selector="StackPanel.SidePanel">
+            <!-- <Setter Property="">100</Setter> -->
+            <Setter Property="Height">40</Setter>
+            <Setter Property="Width">40</Setter>
+        </Style>
+    </Window.Styles>
+    <Grid RowDefinitions="Auto, *, Auto">
+        <Grid HorizontalAlignment="Center" ColumnDefinitions="*, *">
+            <Button Classes="Home" Content="{LucideIconContent Kind=House}" HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            </Button>
+            <TextBox Grid.Column="1" Padding="8">Search for your musics'</TextBox>
+        </Grid>
+        <Grid Grid.Row="1" ColumnDefinitions="200, 1, *">
             <!-- Sidebar -->
-            <StackPanel Grid.Column="0" Background="#1E1E1E">
-                <TextBlock Text="Your Library" Foreground="White" FontSize="18" />
-                <Button Content="Liked Songs" Background="Transparent" Foreground="#FFDD33" />
-                <Button Content="Playlists" Background="Transparent" Foreground="White" />
-                <Button Content="Podcasts" Background="Transparent" Foreground="White" />
-                <Button Content="Albums" Background="Transparent" Foreground="White" />
-            </StackPanel>
+            <Border CornerRadius="4" Background="Gainsboro"
+                    BorderBrush="Black"
+                    BorderThickness="2"
+                    Padding="8" Margin="8">
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Your Library" Foreground="White" FontSize="18" />
+                    <Button Content="Liked Songs" Background="Transparent" Foreground="#FFDD33" />
+                    <Button Content="Playlists" Background="Transparent" Foreground="White" />
+                    <Button Content="Podcasts" Background="Transparent" Foreground="White" />
+                    <Button Content="Albums" Background="Transparent" Foreground="White" />
+                </StackPanel>
+            </Border>
             <GridSplitter Grid.Column="1" Grid.Row="0" Background="Black" ResizeDirection="Columns" />
             <!-- Main Content -->
-            <StackPanel Grid.Column="2">
-                <TextBlock Text="New Release from Gunna" Foreground="#FFDD33" FontSize="16" />
-                <StackPanel Orientation="Horizontal" Margin="10 0">
-                    <!-- <Image Source="album_cover.png" Width="100" Height="100"/> -->
-                    <StackPanel Margin="10 0">
-                        <TextBlock Text="5 Star (feat. Gunna)" Foreground="White" FontSize="20" />
-                        <Button Content="▶ Play" Background="#FFDD33" Foreground="Black" />
+            <Border Grid.Column="2" BorderBrush="Black" CornerRadius="4" Background="Gainsboro"
+                    BorderThickness="2"
+                    Padding="8" Margin="8">
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="New Release from Gunna" Foreground="#FFDD33" FontSize="16" />
+                    <StackPanel Orientation="Horizontal" Margin="10 0">
+                        <!-- <Image Source="album_cover.png" Width="100" Height="100"/> -->
+                        <StackPanel Margin="10 0">
+                            <TextBlock Text="5 Star (feat. Gunna)" Foreground="White" FontSize="20" />
+                            <Button Content="▶ Play" Background="#FFDD33" Foreground="Black" />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
-            </StackPanel>
-
-            <!-- Bottom Music Player -->
-
+            </Border>
         </Grid>
-        <Grid Grid.Row="1" Background="#181818" Height="70">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="1*" />
-            </Grid.ColumnDefinitions>
+        
+        <Grid Grid.Row="2" Height="70">
+            <!-- Bottom Music Player -->
+            <Border CornerRadius="4" Background="Gainsboro"
+                    BorderBrush="Black"
+                    BorderThickness="2"
+                    Padding="8" Margin="8">
+            <StackPanel>
+                <TextBlock Grid.Column="0" Foreground="White" VerticalAlignment="Center" Margin="10">Now Playing: Dumb Dumber</TextBlock>
 
-            <TextBlock Grid.Column="0" Foreground="White" VerticalAlignment="Center" Margin="10">Now Playing: Dumb Dumber</TextBlock>
-
-            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Button Content="{LucideIconContent Kind=Rewind, Size=30, StrokeWidth=1.5}" Background="Transparent" Foreground="White">
-                    </Button>
-                    <Button Content="{LucideIconContent Kind=Play, Size=30, StrokeWidth=1.5}" Background="#FFDD33" Width="40" Height="40" HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                    </Button>
-                    <Button Content="{LucideIconContent Kind=FastForward, Size=30, StrokeWidth=1.5}" Background="Transparent" Foreground="White">
-                    </Button>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Button Content="{LucideIconContent Kind=Rewind, Size=30, StrokeWidth=1.5}"
+                                Background="Transparent" Foreground="White">
+                        </Button>
+                        <Button Content="{LucideIconContent Kind=Play, Size=30, StrokeWidth=1.5}" Background="#FFDD33"
+                                Width="40" Height="40" HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                        </Button>
+                        <Button Content="{LucideIconContent Kind=FastForward, Size=30, StrokeWidth=1.5}"
+                                Background="Transparent" Foreground="White">
+                        </Button>
+                    </StackPanel>
+                    <ProgressBar Grid.Column="2" Minimum="0" Maximum="100" Value="35" Height="5" />
                 </StackPanel>
-                <ProgressBar Grid.Column="2" Minimum="0" Maximum="100" Value="35" Height="5" />
             </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </Window>
