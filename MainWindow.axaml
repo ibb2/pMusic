@@ -21,16 +21,18 @@
         </Style>
     </Window.Styles>
     <Grid RowDefinitions="Auto, *, Auto">
-        <Grid  ColumnDefinitions="Auto, *" Margin="0, 8 0 2">
+        <Grid ColumnDefinitions="Auto, *" Margin="0, 8 0 2">
             <StackPanel Orientation="Horizontal">
                 <Button Content="{LucideIconContent Kind=ChevronLeft}" Background="Transparent" Foreground="Gray"></Button>
                 <Button Content="{LucideIconContent Kind=ChevronRight}" Background="Transparent" Foreground="Gray"></Button>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Background="{DynamicResource AccentButtonBackground}" Foreground="{DynamicResource AccentButtonForeground}" Classes="Home" Content="{LucideIconContent Kind=House}" HorizontalAlignment="Center"
-                    VerticalAlignment="Center" Margin=" 4 0 ">
-            </Button>
-            <TextBox Grid.Column="1" Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
+                <Button Background="{DynamicResource AccentButtonBackground}"
+                        Foreground="{DynamicResource AccentButtonForeground}" Classes="Home"
+                        Content="{LucideIconContent Kind=House}" HorizontalAlignment="Center"
+                        VerticalAlignment="Center" Margin=" 4 0 ">
+                </Button>
+                <TextBox Grid.Column="1" Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="250, 4, *">
@@ -92,13 +94,63 @@
                     BorderThickness="2"
                     Padding="8" Margin="0 4 8 2">
                 <StackPanel Grid.Column="2">
-                    <TextBlock Text="New Release from Gunna" Foreground="#FFDD33" FontSize="16" />
+                    <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
+                    <!-- Recently Played -->
+                    <UniformGrid Columns="2" Rows="4" Width="300">
+                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                            </StackPanel>
+                        </Border> <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="Assets/Images/blank_playlist.png" Width="30"></Image>
+                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
                     <StackPanel Orientation="Horizontal" Margin="10 0">
-                        <!-- <Image Source="album_cover.png" Width="100" Height="100"/> -->
-                        <StackPanel Margin="10 0">
-                            <TextBlock Text="5 Star (feat. Gunna)" Foreground="White" FontSize="20" />
-                            <Button Content="▶ Play" Background="#FFDD33" Foreground="Black" />
-                        </StackPanel>
+                        <!-- New Releases / Recently Added? -->
+                    </StackPanel><StackPanel Orientation="Horizontal" Margin="10 0">
+                        <!-- Uniquely Yours -->
+                    </StackPanel><StackPanel Orientation="Horizontal" Margin="10 0">
+                        <!-- Recently Added -->
                     </StackPanel>
                 </StackPanel>
             </Border>
