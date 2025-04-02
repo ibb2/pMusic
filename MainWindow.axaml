@@ -6,7 +6,8 @@
         Width="800"
         Height="400"
         x:Class="pMusic.MainWindow"
-        Title="pMusic">
+        Title="pMusic"
+        Background="Black">
     <Window.Styles>
         <Style Selector="Button.Home">
             <Setter Property="CornerRadius">100</Setter>
@@ -31,7 +32,7 @@
             <Border CornerRadius="4" Background="Gainsboro"
                     BorderBrush="Black"
                     BorderThickness="2"
-                    Padding="8" Margin="8">
+                    Padding="8" Margin="8 4 0 2">
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Your Library" Foreground="White" FontSize="18" />
                     <Button Content="Liked Songs" Background="Transparent" Foreground="#FFDD33" />
@@ -44,7 +45,7 @@
             <!-- Main Content -->
             <Border Grid.Column="2" BorderBrush="Black" CornerRadius="4" Background="Gainsboro"
                     BorderThickness="2"
-                    Padding="8" Margin="8">
+                    Padding="8" Margin="0 4 8 2">
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="New Release from Gunna" Foreground="#FFDD33" FontSize="16" />
                     <StackPanel Orientation="Horizontal" Margin="10 0">
@@ -58,31 +59,42 @@
             </Border>
         </Grid>
         
-        <Grid Grid.Row="2" Height="70">
+        <Grid Grid.Row="2" Height="70" >
             <!-- Bottom Music Player -->
             <Border CornerRadius="4" Background="Gainsboro"
                     BorderBrush="Black"
                     BorderThickness="2"
-                    Padding="8" Margin="8">
-            <StackPanel>
-                <TextBlock Grid.Column="0" Foreground="White" VerticalAlignment="Center" Margin="10">Now Playing: Dumb Dumber</TextBlock>
-
-                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Button Content="{LucideIconContent Kind=Rewind, Size=30, StrokeWidth=1.5}"
-                                Background="Transparent" Foreground="White">
+                    Padding="8" Margin="8 0 8 4">
+            <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border CornerRadius="5" ClipToBounds="True">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="50" ClipToBounds="True"/>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Foreground="Black" VerticalAlignment="Center" Margin="8 4">Inamorata</TextBlock>
+                        <TextBlock Foreground="Black" VerticalAlignment="Center" Margin="8 4">Mareux</TextBlock>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="4">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4">
+                        <Button Content="{LucideIconContent Kind=Rewind, Size=20, StrokeWidth=1.7}"
+                                Background="Transparent">
                         </Button>
-                        <Button Content="{LucideIconContent Kind=Play, Size=30, StrokeWidth=1.5}" Background="#FFDD33"
+                        <Button Content="{LucideIconContent Kind=Play, Size=20, StrokeWidth=1.5}"
                                 Width="40" Height="40" HorizontalAlignment="Center"
+                                Classes="Home"
                                 VerticalAlignment="Center">
                         </Button>
-                        <Button Content="{LucideIconContent Kind=FastForward, Size=30, StrokeWidth=1.5}"
-                                Background="Transparent" Foreground="White">
+                        <Button Content="{LucideIconContent Kind=FastForward, Size=20, StrokeWidth=1.5}"
+                                Background="Transparent" >
                         </Button>
                     </StackPanel>
-                    <ProgressBar Grid.Column="2" Minimum="0" Maximum="100" Value="35" Height="5" />
+                    <ProgressBar Minimum="0" Maximum="100" Value="35" Height="5" />
                 </StackPanel>
-            </StackPanel>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                    <ProgressBar  Minimum="0" Maximum="100" Value="35" Height="5" />
+                </StackPanel>
+            </Grid>
             </Border>
         </Grid>
     </Grid>
