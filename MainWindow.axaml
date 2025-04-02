@@ -21,11 +21,17 @@
         </Style>
     </Window.Styles>
     <Grid RowDefinitions="Auto, *, Auto">
-        <Grid HorizontalAlignment="Center" ColumnDefinitions="*, *">
-            <Button Classes="Home" Content="{LucideIconContent Kind=House}" HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
+        <Grid  ColumnDefinitions="Auto, *" Margin="0, 8 0 2">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="{LucideIconContent Kind=ChevronLeft}" Background="Transparent" Foreground="Gray"></Button>
+                <Button Content="{LucideIconContent Kind=ChevronRight}" Background="Transparent" Foreground="Gray"></Button>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Background="{DynamicResource AccentButtonBackground}" Foreground="{DynamicResource AccentButtonForeground}" Classes="Home" Content="{LucideIconContent Kind=House}" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Margin=" 4 0 ">
             </Button>
-            <TextBox Grid.Column="1" Padding="8">Search for your musics'</TextBox>
+            <TextBox Grid.Column="1" Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
+            </StackPanel>
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="250, 4, *">
             <!-- Sidebar -->
