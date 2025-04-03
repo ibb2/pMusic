@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace pMusic;
+namespace pMusic.Views;
 
 public partial class MainWindow : Window
 {
