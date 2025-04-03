@@ -22,5 +22,6 @@
         <PackageReference Include="CommunityToolkit.Mvvm"/>
         <PackageReference Include="KeySharp" />
         <PackageReference Include="Lucide.Avalonia" />
+        <PackageReference Include="LukeHagar.PlexAPI.SDK" />
     </ItemGroup>
 </Project>

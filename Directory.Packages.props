@@ -17,6 +17,7 @@
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageVersion Include="KeySharp" Version="1.0.5" />
     <PackageVersion Include="Lucide.Avalonia" Version="0.1.17" />
+    <PackageVersion Include="LukeHagar.PlexAPI.SDK" Version="0.14.4" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.1" />
   </ItemGroup>
 </Project>
