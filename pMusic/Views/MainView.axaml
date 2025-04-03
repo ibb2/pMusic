@@ -6,12 +6,12 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.MainView"
              x:DataType="vm:MainViewModel">
-  <Design.DataContext>
-    <!-- This only sets the DataContext for the previewer in an IDE,
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-    <vm:MainViewModel />
-  </Design.DataContext>
-    
+        <vm:MainViewModel />
+    </Design.DataContext>
+
     <UserControl.Styles>
         <Style Selector="Button.Home">
             <Setter Property="CornerRadius">100</Setter>
@@ -24,7 +24,7 @@
             <Setter Property="Width">40</Setter>
         </Style>
     </UserControl.Styles>
- <Grid RowDefinitions="Auto, *, Auto">
+    <Grid RowDefinitions="Auto, *, Auto">
         <Grid ColumnDefinitions="Auto, *, Auto" Margin="0, 8 0 2">
             <StackPanel Orientation="Horizontal">
                 <Button Content="{LucideIconContent Kind=ChevronLeft}" Background="Transparent" Foreground="Gray"></Button>
@@ -41,16 +41,22 @@
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <Button Content="{LucideIconContent Kind=Bell}" Width="40" Height="40" Background="Azure"
                         Margin="0 0 8 0" CornerRadius=" 100" />
-                <Button Content="{LucideIconContent Kind=User}" Width="40" Height="40" Background="Azure"
-                        Margin="0 0 8 0" CornerRadius=" 100">
+                <Button Width="40" Height="40" Margin="0 0 8 0" Padding="0" CornerRadius="100">
+                    <Border ClipToBounds="True" CornerRadius="100">
+                    <Image Source="{Binding ThumbnailUrl}" Width="100" >
+                    </Image>
+                    </Border>
                     <Button.Flyout>
                         <Flyout>
-                            <TextBlock>Login</TextBlock> <!-- Or Account -->
+                            <StackPanel>
+                            <Button Click="Login" IsVisible="{Binding IsLoggedInTrue}">Login</Button> <!-- Or Account -->
+                            <Button IsVisible="{Binding IsLoggedIn}">Log out</Button>
                             <!-- Profile -->
                             <!-- Support -->
                             <!-- Private Session -->
                             <!-- Settings -->
                             <!-- Log out -->
+                            </StackPanel>
                         </Flyout>
                     </Button.Flyout>
                 </Button>
@@ -179,7 +185,6 @@
                 </StackPanel>
             </Border>
         </Grid>
-
         <Grid Grid.Row="2" Height="70">
             <!-- Bottom Music Player -->
             <Border CornerRadius="4" Background="Gainsboro"
@@ -221,5 +226,5 @@
         </Grid>
     </Grid>
 
-  <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
+    <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
 </UserControl>

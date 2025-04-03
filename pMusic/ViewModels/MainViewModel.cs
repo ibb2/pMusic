@@ -1,8 +1,63 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using System.Xml.Linq;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using KeySharp;
+using pMusic.Services;
 
 namespace pMusic.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    private readonly Plex _plex;
+    
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
+    [ObservableProperty] private bool _isLoggedIn = !string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+    [ObservableProperty] private bool _isLoggedInTrue = string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+    [ObservableProperty] private Bitmap _thumbnailUrl;
+
+    public MainViewModel(Plex plex)
+    {
+        _plex = plex;
+    }
+    
+    public void CheckLoginStatus()
+    {
+        string? authToken = null;
+
+        try
+        {
+            authToken = Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken");
+        }
+        catch (Exception ex)
+        {
+            authToken = null;
+        }
+
+        // var auth = services.GetRequiredService<IAuthenticationService>();
+        // var authenticated = await auth.RefreshAsync();
+        if (!string.IsNullOrEmpty(authToken))
+        {
+            IsLoggedIn = true;
+        }
+        else
+        {
+            IsLoggedIn = false;
+        }
+    }
+
+    public async Task GetUserInfo()
+    {
+        ThumbnailUrl = await _plex.GetUserProfilePicture();
+        Console.WriteLine($"thumbnail url {ThumbnailUrl}");
+    }
 }
