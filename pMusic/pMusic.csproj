@@ -23,5 +23,9 @@
         <PackageReference Include="KeySharp" />
         <PackageReference Include="Lucide.Avalonia" />
         <PackageReference Include="LukeHagar.PlexAPI.SDK" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+        <PackageReference Include="Microsoft.Extensions.Http" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" />
+        <PackageReference Include="System.Net.Http" />
     </ItemGroup>
 </Project>
