@@ -5,18 +5,31 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KeySharp;
+using pMusic.Services;
 
 namespace pMusic.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    private readonly Plex _plex;
+    
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
     [ObservableProperty] private bool _isLoggedIn = !string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
     [ObservableProperty] private bool _isLoggedInTrue = string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+    [ObservableProperty] private Bitmap _thumbnailUrl;
 
+    public MainViewModel(Plex plex)
+    {
+        _plex = plex;
+    }
+    
     public void CheckLoginStatus()
     {
         string? authToken = null;
@@ -40,5 +53,11 @@ public partial class MainViewModel : ViewModelBase
         {
             IsLoggedIn = false;
         }
+    }
+
+    public async Task GetUserInfo()
+    {
+        ThumbnailUrl = await _plex.GetUserProfilePicture();
+        Console.WriteLine($"thumbnail url {ThumbnailUrl}");
     }
 }

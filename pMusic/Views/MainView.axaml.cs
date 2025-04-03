@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using KeySharp;
+using pMusic.ViewModels;
 
 namespace pMusic.Views;
 
@@ -15,6 +16,7 @@ public partial class MainView : UserControl
     public MainView()
     {
         InitializeComponent();
+        this.Loaded += MainWindow_Loaded;
     }
 
     private static readonly HttpClient HttpClient = new()
@@ -126,6 +128,8 @@ public partial class MainView : UserControl
             } while (isPinPolling && authToken == null);
 
             Console.WriteLine($"Redirecting");
+            var vm = this.DataContext as MainViewModel;
+            await vm?.GetUserInfo()!;
 
             // await Navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
             // var success = await Authentication.LoginAsync(Dispatcher);
@@ -137,6 +141,15 @@ public partial class MainView : UserControl
         catch (Exception ex)
         {
             throw; // TODO handle exception
+        }
+    }
+    
+    private void MainWindow_Loaded(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel viewModel)
+        {
+            // Fire and forget
+            _ = viewModel.GetUserInfo();
         }
     }
 }

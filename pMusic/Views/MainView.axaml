@@ -41,8 +41,11 @@
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <Button Content="{LucideIconContent Kind=Bell}" Width="40" Height="40" Background="Azure"
                         Margin="0 0 8 0" CornerRadius=" 100" />
-                <Button Content="{Binding IsLoggedIn}" Width="40" Height="40" Background="Azure"
-                        Margin="0 0 8 0" CornerRadius=" 100">
+                <Button Width="40" Height="40" Margin="0 0 8 0" Padding="0" CornerRadius="100">
+                    <Border ClipToBounds="True" CornerRadius="100">
+                    <Image Source="{Binding ThumbnailUrl}" Width="100" >
+                    </Image>
+                    </Border>
                     <Button.Flyout>
                         <Flyout>
                             <StackPanel>

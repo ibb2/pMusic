@@ -2,6 +2,7 @@ using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using pMusic.Services;
 using pMusic.ViewModels;
+using pMusic.Views;
 
 namespace pMusic.DI;
 
@@ -11,5 +12,6 @@ public static class ServiceCollectionExtensions
     {
         collection.AddHttpClient<Plex>();
         collection.AddTransient<MainViewModel>();
+        collection.AddTransient<MainWindow>();
     }
 }

@@ -9,8 +9,14 @@ using System.Xml.Linq;
 using Avalonia.Media.Imaging;
 using KeySharp;
 using LukeHagar.PlexAPI.SDK;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 using pMusic.Models;
+using Country = pMusic.Models.Country;
+using Genre = pMusic.Models.Genre;
+using Image = pMusic.Models.Image;
 using Media = pMusic.Models.Media;
+using Part = pMusic.Models.Part;
+using UltraBlurColors = pMusic.Models.UltraBlurColors;
 
 
 namespace pMusic.Services;
@@ -27,7 +33,7 @@ public class Plex
     private static readonly string _plexProduct = "pMusic";
     private static readonly string _plexDeviceName = "Desktop";
     private static readonly string _plexPlatform = "Desktop";
-    private static readonly PlexAPI _plexApi = new PlexAPI(Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken"));
+    private static readonly PlexAPI _plexApi = new PlexAPI(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
 
     public Plex(HttpClient httpClient)
     {
@@ -38,6 +44,25 @@ public class Plex
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Product", _plexProduct);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Device-Name", _plexDeviceName);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Platform", _plexPlatform);
+    }
+
+    // public async ValueTask<Bitmap> GetUserAccount(string uri)
+    // {
+    //     
+    // }
+
+    public async ValueTask<Bitmap> GetUserProfilePicture()
+    {
+        var url = "https://plex.tv/api/v2/user";
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("X-Plex-Token", _plexToken);
+
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var userDataXml = await response.Content.ReadAsStringAsync();
+        var thumbnail = await  GetBitmapImage(XElement.Parse(userDataXml).Attribute("thumb")?.Value);
+        return thumbnail;
     }
 
     public async ValueTask<String> GetServerCapabilitiesAsync()
