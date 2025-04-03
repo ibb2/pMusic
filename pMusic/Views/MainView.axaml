@@ -45,12 +45,15 @@
                         Margin="0 0 8 0" CornerRadius=" 100">
                     <Button.Flyout>
                         <Flyout>
-                            <Button Click="Login">Login</Button> <!-- Or Account -->
+                            <StackPanel>
+                            <Button Click="Login" IsVisible="{Binding IsLoggedInTrue}">Login</Button> <!-- Or Account -->
+                            <Button IsVisible="{Binding IsLoggedIn}">Log out</Button>
                             <!-- Profile -->
                             <!-- Support -->
                             <!-- Private Session -->
                             <!-- Settings -->
                             <!-- Log out -->
+                            </StackPanel>
                         </Flyout>
                     </Button.Flyout>
                 </Button>

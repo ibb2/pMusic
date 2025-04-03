@@ -15,6 +15,7 @@ public partial class MainViewModel : ViewModelBase
 {
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
     [ObservableProperty] private bool _isLoggedIn = !string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+    [ObservableProperty] private bool _isLoggedInTrue = string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
 
     public void CheckLoginStatus()
     {
@@ -40,6 +41,4 @@ public partial class MainViewModel : ViewModelBase
             IsLoggedIn = false;
         }
     }
-        
-
 }
