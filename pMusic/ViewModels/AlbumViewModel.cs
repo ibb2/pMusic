@@ -1,6 +1,14 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace pMusic.ViewModels;
 
-public class AlbumViewModel: ViewModelBase
+public partial class AlbumViewModel: ViewModelBase
 {
-    public string Title { get; } = "Album";
+    [ObservableProperty]
+    public string _title = "Album";
+
+    public AlbumViewModel()
+    {
+        
+    }
 }

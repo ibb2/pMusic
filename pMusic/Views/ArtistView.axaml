@@ -12,7 +12,7 @@
         <vm:AlbumViewModel />
     </Design.DataContext>
     <StackPanel>
-        <TextBlock> Welcome to Avalonia Artist Page!</TextBlock>
+        <TextBlock Text="{Binding Title}"></TextBlock>
         <Button Content="Go To Track Page" HorizontalAlignment="Stretch" Command="{Binding GoToTrack}" Height="50"></Button>
     </StackPanel>
 </UserControl>

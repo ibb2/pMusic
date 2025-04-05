@@ -11,5 +11,5 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:TrackViewModel />
     </Design.DataContext>
-    Welcome to Avalonia Track Page!
+    <TextBlock Text="{Binding Title}"></TextBlock>
 </UserControl>

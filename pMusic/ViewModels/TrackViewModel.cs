@@ -1,6 +1,9 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace pMusic.ViewModels;
 
-public class TrackViewModel: ViewModelBase
+public partial class TrackViewModel: ViewModelBase
 {
-    public string Title { get; } = "Track";
+    [ObservableProperty]
+    public string _title = "Track Title";
 }
