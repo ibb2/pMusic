@@ -2,6 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -53,7 +54,7 @@ public class HomeViewModel : ViewModelBase
                 Albums.Add(album);
             }
         });
-
-        var i = 1;
+        
+        albums = albums.OrderBy(album => album.Title).ToImmutableList();
     }
 }

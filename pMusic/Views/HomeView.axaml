@@ -68,7 +68,8 @@
             <StackPanel Grid.Row="1" Margin="0 0 0 60" Spacing="24">
                 <TextBlock>Recently Played</TextBlock>
                 <!-- New Releases / Recently Added? -->
-                <ListBox ItemsSource="{Binding Albums}">
+                <ListBox ItemsSource="{Binding Albums}" SelectionMode="Single"
+                         ScrollViewer.HorizontalScrollBarVisibility="Hidden">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal"></StackPanel>
@@ -76,11 +77,37 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Title}"></TextBox>
+                            <Border CornerRadius="15" ClipToBounds="True">
+                                <StackPanel>
+                                    <Border CornerRadius="15" ClipToBounds="True">
+                                        <Grid Margin="0, 0, 0, 12">
+                                            <Border CornerRadius="15" ClipToBounds="True">
+                                                <Image Source="/Assets/Images/blank_playlist.png" Width="150" />
+                                            </Border>
+                                            <Border CornerRadius="15" ClipToBounds="True">
+                                                <Image Source="{Binding Thumb}" Width="150" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Padding="5,0,0,8" Text="{Binding Title}" />
+                                    <TextBlock Padding="5,0,0,0" Text="{Binding Artist}" />
+                                </StackPanel>
+                            </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
+                    <ItemsControl.Styles>
+                        <Style>
+                            <Setter Property="ContentPresenter.Background" Value="Transparent" />
+                            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                            <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Style>
+                    </ItemsControl.Styles>
                 </ListBox>
-                    
+
                 <!-- <ScrollViewer HorizontalScrollBarVisibility="Hidden"> -->
                 <!--     <StackPanel Orientation="Horizontal" Spacing="24"> -->
                 <!--         <StackPanel Spacing="8"> -->
@@ -209,7 +236,7 @@
                 <!-- Recently Added -->
                 <TextBlock>Uniqely Yours</TextBlock>
                 <!-- New Releases / Recently Added? -->
-                
+
                 <ScrollViewer HorizontalScrollBarVisibility="Hidden">
                     <StackPanel Orientation="Horizontal" Spacing="24">
                         <StackPanel Spacing="8">
