@@ -18,8 +18,7 @@ public abstract partial class ViewModelBase : ObservableObject
     public void GoToAlbum() => Navigation.GoToView<AlbumViewModel>(vm => vm.Title = "Hello");
     
     [RelayCommand]
-    public void GoToArtist() => Navigation.GoToView<AlbumViewModel>(vm => vm.Title = "Updated Artist Title");
-    
+    public void GoToArtist() => Navigation.GoToView<ArtistViewModel>(vm => vm.Title = "Updated Artist Title");
     [RelayCommand]
     public void GoToTrack() => Navigation.GoToView<TrackViewModel>(vm => vm.Title = "Updated Track Title");
     
