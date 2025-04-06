@@ -11,6 +11,20 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:HomeViewModel />
     </Design.DataContext>
+    <UserControl.Styles>
+        <Style>
+            <Setter Property="ContentPresenter.Background" Value="Transparent" />
+            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                <Setter Property="CornerRadius" Value="24" />
+            </Style>
+            <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
+                <Setter Property="CornerRadius" Value="24" />
+            </Style>
+            <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                <Setter Property="Background" Value="Transparent"></Setter>
+            </Style>
+        </Style>
+    </UserControl.Styles>
     <ScrollViewer IsScrollChainingEnabled="True">
         <Grid Grid.RowDefinitions="*, *, *, *">
             <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
