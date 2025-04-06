@@ -17,9 +17,10 @@ public class HomeViewModel : ViewModelBase
     private IMusic _music;
     private Plex _plex;
 
-    public ObservableCollection<Album> Albums { get; set; } = new ();
-    public ObservableCollection<Album> RecentlyAddedAlbums { get; set; } = new ();
-    public ObservableCollection<Playlist> Playlists { get; set; } = new ();
+    public ObservableCollection<Album> Albums { get; set; } = new();
+    public ObservableCollection<Album> TopEight { get; set; } = new();
+    public ObservableCollection<Album> RecentlyAddedAlbums { get; set; } = new();
+    public ObservableCollection<Playlist> Playlists { get; set; } = new();
 
     public HomeViewModel(IMusic music, Plex plex)
     {
@@ -55,9 +56,16 @@ public class HomeViewModel : ViewModelBase
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
             Albums.Clear();
+            var count = 0;
             foreach (var recentlyViewedAlbum in recentlyViewedAlbums)
             {
                 Albums.Add(recentlyViewedAlbum);
+                if (count < 8)
+                {
+                    TopEight.Add(recentlyViewedAlbum);
+                }
+
+                count++;
             }
 
             foreach (var recentlyAddedAlbum in recentlyAddedAlbums)
@@ -65,12 +73,12 @@ public class HomeViewModel : ViewModelBase
                 RecentlyAddedAlbums.Add(recentlyAddedAlbum);
             }
         });
-    }    
-    
+    }
+
     public async Task LoadPlaylistsAsync(CancellationToken ct)
     {
         var playlists = await _music.GetPlaylists(ct, _plex);
-        
+
         // Update on UI thread
         await Dispatcher.UIThread.InvokeAsync(() =>
         {

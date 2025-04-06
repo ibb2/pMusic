@@ -28,56 +28,35 @@
         <Grid Grid.RowDefinitions="*, *, *, *">
             <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
             <!-- Recently Played -->
-            <UniformGrid Grid.Row="0" Columns="2" Rows="4" Width="300" Margin="0 32">
-                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Image Source="/Assets/Images/blank_playlist.png" Width="30" />
-                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                    </StackPanel>
-                </Border>
-                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Image Source="/Assets/Images/blank_playlist.png" Width="30" />
-                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                    </StackPanel>
-                </Border>
-                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Image Source="/Assets/Images/blank_playlist.png" Width="30" />
-                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                    </StackPanel>
-                </Border>
-                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Image Source="/Assets/Images/blank_playlist.png" Width="30" />
-                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                    </StackPanel>
-                </Border>
-                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Image Source="/Assets/Images/blank_playlist.png" Width="30" />
-                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                    </StackPanel>
-                </Border>
-                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Image Source="/Assets/Images/blank_playlist.png" Width="30" />
-                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                    </StackPanel>
-                </Border>
-                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Image Source="/Assets/Images/blank_playlist.png" Width="30" />
-                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                    </StackPanel>
-                </Border>
-                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Image Source="/Assets/Images/blank_playlist.png" Width="30" />
-                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                    </StackPanel>
-                </Border>
-            </UniformGrid>
+            <ListBox Grid.Row="0" Margin="0 32" ItemsSource="{Binding TopEight}" HorizontalAlignment="Center"
+                     SelectionMode="Single"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="5" ClipToBounds="True"
+                                Background="{DynamicResource AccentButtonBackground}" Width="150">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Grid>
+                                    <Image Source="/Assets/Images/blank_playlist.png" Width="50" Height="50"
+                                           Stretch="UniformToFill" />
+                                    <Image Source="{Binding Thumb}" Width="50" Height="50" Stretch="UniformToFill" />
+                                </Grid>
+                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center"></TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ItemsControl.Styles>
+                    <Style>
+                        <Setter Property="ContentPresenter.Background" Value="Transparent" />
+                    </Style>
+                </ItemsControl.Styles>
+            </ListBox>
             <StackPanel Grid.Row="1" Margin="0 0 0 60" Spacing="24">
                 <TextBlock>Recently Played</TextBlock>
                 <!-- New Releases / Recently Added? -->
