@@ -13,6 +13,10 @@
     </Design.DataContext>
     <UserControl.Styles>
         <Style>
+            <Style Selector="TextBlock.h2">
+                <Setter Property="FontSize" Value="22"></Setter>
+                <Setter Property="FontWeight" Value="SemiBold"></Setter>
+            </Style>
             <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
                 <Setter Property="CornerRadius" Value="8" />
             </Style>
@@ -58,7 +62,7 @@
                 </ItemsControl.Styles>
             </ListBox>
             <StackPanel Grid.Row="1" Margin="0 0 0 60" Spacing="24">
-                <TextBlock>Recently Played</TextBlock>
+                <TextBlock Classes="h2">Recently Played</TextBlock>
                 <!-- New Releases / Recently Added? -->
                 <ListBox ItemsSource="{Binding Albums}" SelectionMode="Single"
                          ScrollViewer.HorizontalScrollBarVisibility="Hidden">
@@ -96,7 +100,7 @@
                 <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
             </StackPanel>
             <StackPanel Grid.Row="2" Margin="0 0 0 60" Spacing="24">
-                <TextBlock>Recently Added</TextBlock>
+                <TextBlock Classes="h2">Recently Added</TextBlock>
                 <!-- New Releases / Recently Added? -->
                 <ListBox ItemsSource="{Binding RecentlyAddedAlbums}" SelectionMode="Single"
                          ScrollViewer.HorizontalScrollBarVisibility="Hidden">
@@ -134,7 +138,7 @@
             </StackPanel>
             <StackPanel Grid.Row="3" Margin="0 0 0 60" Spacing="24">
                 <!-- Recently Added -->
-                <TextBlock>Uniqely Yours</TextBlock>
+                <TextBlock Classes="h2">Uniqely Yours</TextBlock>
                 <!-- New Releases / Recently Added? -->
                 <ScrollViewer HorizontalScrollBarVisibility="Hidden">
                     <ListBox ItemsSource="{Binding Playlists}" SelectionMode="Single"
