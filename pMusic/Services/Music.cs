@@ -22,8 +22,7 @@ public interface IMusic
 public class Music : IMusic
 {
     
-    public static string? ServerUri { get; set; } 
-
+    public string? ServerUri { get; set; }
     // public async ValueTask<ObservableCollection<Artist>> GetArtistsAsync(CancellationToken ct, Plex plex)
     // {
     //     await Task.Delay(TimeSpan.FromSeconds(1), ct);
