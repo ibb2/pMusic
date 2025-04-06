@@ -17,7 +17,8 @@ public class HomeViewModel : ViewModelBase
     private IMusic _music;
     private Plex _plex;
 
-    public ObservableCollection<Album> Albums { get; set; } = new();
+    public ObservableCollection<Album> Albums { get; set; } = new ();
+    public ObservableCollection<Album> RecentlyAddedAlbums { get; set; } = new ();
 
     public HomeViewModel(IMusic music, Plex plex)
     {
@@ -45,16 +46,22 @@ public class HomeViewModel : ViewModelBase
     {
         var albums = await _music.GetAllAlbums(ct, _plex);
 
+        var recentlyViewedAlbums = albums.OrderByDescending(a => a.LastViewedAt).ToImmutableList();
+        var recentlyAddedAlbums = albums.OrderByDescending(a => a.AddedAt).ToImmutableList();
+
         // Update on UI thread
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
             Albums.Clear();
-            foreach (var album in albums)
+            foreach (var recentlyViewedAlbum in recentlyViewedAlbums)
             {
-                Albums.Add(album);
+                Albums.Add(recentlyViewedAlbum);
+            }
+
+            foreach (var recentlyAddedAlbum in recentlyAddedAlbums)
+            {
+                RecentlyAddedAlbums.Add(recentlyAddedAlbum);
             }
         });
-        
-        albums = albums.OrderBy(album => album.Title).ToImmutableList();
     }
 }

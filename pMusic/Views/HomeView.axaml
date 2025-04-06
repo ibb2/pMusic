@@ -77,14 +77,14 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border CornerRadius="15" ClipToBounds="True">
+                            <Border CornerRadius="4" ClipToBounds="True">
                                 <StackPanel>
-                                    <Border CornerRadius="15" ClipToBounds="True">
+                                    <Border CornerRadius="4" ClipToBounds="True">
                                         <Grid Margin="0, 0, 0, 12">
-                                            <Border CornerRadius="15" ClipToBounds="True">
+                                            <Border CornerRadius="4" ClipToBounds="True">
                                                 <Image Source="/Assets/Images/blank_playlist.png" Width="150" />
                                             </Border>
-                                            <Border CornerRadius="15" ClipToBounds="True">
+                                            <Border CornerRadius="4" ClipToBounds="True">
                                                 <Image Source="{Binding Thumb}" Width="150" />
                                             </Border>
                                         </Grid>
@@ -99,136 +99,56 @@
                         <Style>
                             <Setter Property="ContentPresenter.Background" Value="Transparent" />
                             <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="CornerRadius" Value="6" />
                             </Style>
                             <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
-                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="CornerRadius" Value="6" />
                             </Style>
                         </Style>
                     </ItemsControl.Styles>
                 </ListBox>
-
-                <!-- <ScrollViewer HorizontalScrollBarVisibility="Hidden"> -->
-                <!--     <StackPanel Orientation="Horizontal" Spacing="24"> -->
-                <!--         <StackPanel Spacing="8"> -->
-                <!--             <Border CornerRadius="10" ClipToBounds="True"> -->
-                <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image> -->
-                <!--             </Border> -->
-                <!--             <TextBlock>RapCavier</TextBlock> -->
-                <!--         </StackPanel> -->
-                <!--         <StackPanel Spacing="8"> -->
-                <!--             <Border CornerRadius="10" ClipToBounds="True"> -->
-                <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image> -->
-                <!--             </Border> -->
-                <!--             <TextBlock>RapCavier</TextBlock> -->
-                <!--         </StackPanel> -->
-                <!--         <StackPanel Spacing="8"> -->
-                <!--             <Border CornerRadius="10" ClipToBounds="True"> -->
-                <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image> -->
-                <!--             </Border> -->
-                <!--             <TextBlock>RapCavier</TextBlock> -->
-                <!--         </StackPanel> -->
-                <!--         <StackPanel Spacing="8"> -->
-                <!--             <Border CornerRadius="10" ClipToBounds="True"> -->
-                <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image> -->
-                <!--             </Border> -->
-                <!--             <TextBlock>RapCavier</TextBlock> -->
-                <!--         </StackPanel> -->
-                <!--         <StackPanel Spacing="8"> -->
-                <!--             <Border CornerRadius="10" ClipToBounds="True"> -->
-                <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image> -->
-                <!--             </Border> -->
-                <!--             <TextBlock>RapCavier</TextBlock> -->
-                <!--         </StackPanel> -->
-                <!--         <StackPanel Spacing="8"> -->
-                <!--             <Border CornerRadius="10" ClipToBounds="True"> -->
-                <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image> -->
-                <!--             </Border> -->
-                <!--             <TextBlock>RapCavier</TextBlock> -->
-                <!--         </StackPanel> -->
-                <!--         <StackPanel Spacing="8"> -->
-                <!--             <Border CornerRadius="10" ClipToBounds="True"> -->
-                <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image> -->
-                <!--             </Border> -->
-                <!--             <TextBlock>RapCavier</TextBlock> -->
-                <!--         </StackPanel> -->
-                <!--         <StackPanel Spacing="8"> -->
-                <!--             <Border CornerRadius="10" ClipToBounds="True"> -->
-                <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image> -->
-                <!--             </Border> -->
-                <!--             <TextBlock>RapCavier</TextBlock> -->
-                <!--         </StackPanel> -->
-                <!--         <StackPanel Spacing="8"> -->
-                <!--             <Border CornerRadius="10" ClipToBounds="True"> -->
-                <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image> -->
-                <!--             </Border> -->
-                <!--             <TextBlock>RapCavier</TextBlock> -->
-                <!--         </StackPanel> -->
-                <!--     </StackPanel> -->
-                <!-- </ScrollViewer> -->
                 <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
             </StackPanel>
             <StackPanel Grid.Row="2" Margin="0 0 0 60" Spacing="24">
-                <!-- Uniquely Yours -->
                 <TextBlock>Recently Added</TextBlock>
                 <!-- New Releases / Recently Added? -->
                 <ScrollViewer HorizontalScrollBarVisibility="Hidden">
-                    <StackPanel Orientation="Horizontal" Spacing="24">
-                        <StackPanel Spacing="8">
-                            <Border CornerRadius="10" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
-                            </Border>
-                            <TextBlock>RapCavier</TextBlock>
-                        </StackPanel>
-                        <StackPanel Spacing="8">
-                            <Border CornerRadius="10" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
-                            </Border>
-                            <TextBlock>RapCavier</TextBlock>
-                        </StackPanel>
-                        <StackPanel Spacing="8">
-                            <Border CornerRadius="10" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
-                            </Border>
-                            <TextBlock>RapCavier</TextBlock>
-                        </StackPanel>
-                        <StackPanel Spacing="8">
-                            <Border CornerRadius="10" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
-                            </Border>
-                            <TextBlock>RapCavier</TextBlock>
-                        </StackPanel>
-                        <StackPanel Spacing="8">
-                            <Border CornerRadius="10" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
-                            </Border>
-                            <TextBlock>RapCavier</TextBlock>
-                        </StackPanel>
-                        <StackPanel Spacing="8">
-                            <Border CornerRadius="10" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
-                            </Border>
-                            <TextBlock>RapCavier</TextBlock>
-                        </StackPanel>
-                        <StackPanel Spacing="8">
-                            <Border CornerRadius="10" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
-                            </Border>
-                            <TextBlock>RapCavier</TextBlock>
-                        </StackPanel>
-                        <StackPanel Spacing="8">
-                            <Border CornerRadius="10" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
-                            </Border>
-                            <TextBlock>RapCavier</TextBlock>
-                        </StackPanel>
-                        <StackPanel Spacing="8">
-                            <Border CornerRadius="10" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
-                            </Border>
-                            <TextBlock>RapCavier</TextBlock>
-                        </StackPanel>
-                    </StackPanel>
+                    <ListBox ItemsSource="{Binding RecentlyAddedAlbums}" SelectionMode="Single"
+                             ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"></StackPanel>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                    <StackPanel>
+                                        <Grid Margin="0, 0, 0, 12">
+                                            <Border Width="175" Height="175" CornerRadius="24" ClipToBounds="True">
+                                                <Rectangle RadiusX="24" RadiusY="24">
+                                                    <Rectangle.Fill>
+                                                        <ImageBrush Source="{Binding Thumb}" Stretch="UniformToFill" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+                                            </Border>
+                                        </Grid>
+                                        <TextBlock Padding="5,0,0,8" Text="{Binding Title}" />
+                                        <TextBlock Padding="5,0,0,0" Text="{Binding Artist}" />
+                                    </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ItemsControl.Styles>
+                            <Style>
+                                <Setter Property="ContentPresenter.Background" Value="Transparent" />
+                                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                                    <Setter Property="CornerRadius" Value="24" />
+                                </Style>
+                                <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
+                                    <Setter Property="CornerRadius" Value="24" />
+                                </Style>
+                            </Style>
+                        </ItemsControl.Styles>
+                    </ListBox>
                 </ScrollViewer>
                 <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
             </StackPanel>
