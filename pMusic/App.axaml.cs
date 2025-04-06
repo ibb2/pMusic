@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
@@ -5,6 +6,7 @@ using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Markup.Xaml;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using pMusic.DI;
 using pMusic.Services;
@@ -13,8 +15,11 @@ using pMusic.Views;
 
 namespace pMusic;
 
-public partial class App : Application
+public class App : Application
 {
+
+    public static ServiceProvider? ServiceProvider { get; set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -33,6 +38,19 @@ public partial class App : Application
 
             // Creates a ServiceProvider containing services from the provided IServiceCollection
             var services = collection.BuildServiceProvider();
+            ServiceProvider = services;
+            
+            Ioc.Default.ConfigureServices(services);
+            
+            var music = services.GetService<IMusic>();
+            var plex = services.GetService<Plex>();
+            var homeVM = services.GetService<HomeViewModel>();
+
+            Console.WriteLine($"IMusic resolved: {music != null}");
+            Console.WriteLine($"Plex resolved: {plex != null}");
+            Console.WriteLine($"HomeViewModel resolved: {homeVM != null}");
+
+
 
             var vm = services.GetRequiredService<MainViewModel>();
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

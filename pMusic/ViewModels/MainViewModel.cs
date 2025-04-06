@@ -31,10 +31,10 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _isLoading;
     
     [ObservableProperty] private ViewModelBase _currentPage;
-    private readonly HomeViewModel _homeView = new();
-    private readonly ArtistViewModel _artistView = new ();
-    private readonly AlbumViewModel _albumView = new ();
-    private readonly TrackViewModel _trackView = new ();
+    // private readonly HomeViewModel _homeView = new();
+    // private readonly ArtistViewModel _artistView = new ();
+    // private readonly AlbumViewModel _albumView = new ();
+    // private readonly TrackViewModel _trackView = new ();
 
     public MainViewModel(Plex plex)
     {

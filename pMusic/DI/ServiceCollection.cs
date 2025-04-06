@@ -12,8 +12,12 @@ public static class ServiceCollectionExtensions
     public static void AddCommonServices(this IServiceCollection collection)
     {
         collection.AddHttpClient<Plex>();
+        collection.AddTransient<IMusic, Music>();
         collection.AddTransient<MainViewModel>();
+        collection.AddTransient<Demo>();
+        collection.AddTransient<HomeViewModel>();
         collection.AddTransient<MainWindow>();
+        collection.AddTransient<HomeView>();
         collection.AddSingleton<Navigation>();
     }
 }
