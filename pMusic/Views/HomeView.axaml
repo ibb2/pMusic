@@ -1,0 +1,261 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="clr-namespace:pMusic.ViewModels"
+             x:Class="pMusic.Views.HomeView"
+             x:DataType="vm:HomeViewModel">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:HomeViewModel />
+    </Design.DataContext>
+    <ScrollViewer IsScrollChainingEnabled="True">
+        <Grid Grid.RowDefinitions="*, *, *, *">
+            <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
+            <!-- Recently Played -->
+            <UniformGrid Grid.Row="0" Columns="2" Rows="4" Width="300" Margin="0 32">
+                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
+                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
+                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
+                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
+                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
+                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
+                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
+                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
+                        <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+            <StackPanel Grid.Row="1" Margin="0 0 0 60" Spacing="24">
+                <TextBlock>Recently Played</TextBlock>
+                <!-- New Releases / Recently Added? -->
+                <ScrollViewer HorizontalScrollBarVisibility="Hidden">
+                    <StackPanel Orientation="Horizontal" Spacing="24">
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+                <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
+            </StackPanel>
+            <StackPanel Grid.Row="2" Margin="0 0 0 60" Spacing="24">
+                <!-- Uniquely Yours -->
+                <TextBlock>Recently Added</TextBlock>
+                <!-- New Releases / Recently Added? -->
+                <ScrollViewer HorizontalScrollBarVisibility="Hidden">
+                    <StackPanel Orientation="Horizontal" Spacing="24">
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+                <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
+            </StackPanel>
+            <StackPanel Grid.Row="3" Margin="0 0 0 60" Spacing="24">
+                <!-- Recently Added -->
+                <TextBlock>Uniqely Yours</TextBlock>
+                <!-- New Releases / Recently Added? -->
+                <ScrollViewer HorizontalScrollBarVisibility="Hidden">
+                    <StackPanel Orientation="Horizontal" Spacing="24">
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Border CornerRadius="10" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="100"></Image>
+                            </Border>
+                            <TextBlock>RapCavier</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+                <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

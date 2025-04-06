@@ -1,0 +1,124 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="clr-namespace:pMusic.ViewModels"
+             x:Class="pMusic.Views.AlbumView"
+             x:DataType="vm:AlbumViewModel">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:AlbumViewModel />
+    </Design.DataContext>
+    <ScrollViewer>
+        <Grid RowDefinitions="Auto, Auto, *">
+            <Grid ColumnDefinitions="Auto, *">
+                <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
+                    <Image Source="/Assets/Images/blank_playlist.png"></Image>
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock>Album</TextBlock>
+                    <TextBlock Text="{Binding AlbumTitle}"></TextBlock>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border CornerRadius="1000" Margin="0 0 24 0" ClipToBounds="True">
+                            <Image Source="/Assets/Images/blank_playlist.png" Width="30" Height="30">
+                                <Image.Stretch></Image.Stretch>
+                            </Image>
+                        </Border>
+                        <TextBlock Text="{Binding AlbumArtist}"></TextBlock>
+                        <TextBlock Text="{Binding AlbumReleaseDate}"></TextBlock>
+                        <TextBlock Text="{Binding AlbumTrackLength}"></TextBlock>
+                        <TextBlock Text="{Binding AlbumDuration}"></TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="{LucideIconContent Play}" Height="50" Width="50" CornerRadius="1000"></Button>
+                    <Button Content="{LucideIconContent Shuffle}" Height="50" Width="50" CornerRadius="1000"></Button>
+                    <Button Content="{LucideIconContent CirclePlus}" Height="50" Width="50" CornerRadius="1000"></Button>
+                    <Button Content="{LucideIconContent Download}" Height="50" Width="50" CornerRadius="1000"></Button>
+                </StackPanel>
+                <TextBlock Grid.Column="1">
+                    List
+                    <Button Content="{LucideIconContent List}"></Button>
+                </TextBlock>
+            </Grid>
+            <StackPanel Grid.Row="2" HorizontalAlignment="Stretch" Spacing="16">
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <TextBlock>1</TextBlock>
+                    <StackPanel>
+                        <TextBlock>POP OUT</TextBlock>
+                        <TextBlock>Playboi Carti</TextBlock>
+                    </StackPanel>
+                    <TextBlock>3,000,000</TextBlock>
+                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
+                    </Button>
+                    <TextBlock>2:41</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <TextBlock>1</TextBlock>
+                    <StackPanel>
+                        <TextBlock>POP OUT</TextBlock>
+                        <TextBlock>Playboi Carti</TextBlock>
+                    </StackPanel>
+                    <TextBlock>3,000,000</TextBlock>
+                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
+                    </Button>
+                    <TextBlock>2:41</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <TextBlock>1</TextBlock>
+                    <StackPanel>
+                        <TextBlock>POP OUT</TextBlock>
+                        <TextBlock>Playboi Carti</TextBlock>
+                    </StackPanel>
+                    <TextBlock>3,000,000</TextBlock>
+                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
+                    </Button>
+                    <TextBlock>2:41</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <TextBlock>1</TextBlock>
+                    <StackPanel>
+                        <TextBlock>POP OUT</TextBlock>
+                        <TextBlock>Playboi Carti</TextBlock>
+                    </StackPanel>
+                    <TextBlock>3,000,000</TextBlock>
+                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
+                    </Button>
+                    <TextBlock>2:41</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <TextBlock>1</TextBlock>
+                    <StackPanel>
+                        <TextBlock>POP OUT</TextBlock>
+                        <TextBlock>Playboi Carti</TextBlock>
+                    </StackPanel>
+                    <TextBlock>3,000,000</TextBlock>
+                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
+                    </Button>
+                    <TextBlock>2:41</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <TextBlock>1</TextBlock>
+                    <StackPanel>
+                        <TextBlock>POP OUT</TextBlock>
+                        <TextBlock>Playboi Carti</TextBlock>
+                    </StackPanel>
+                    <TextBlock>3,000,000</TextBlock>
+                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
+                    </Button>
+                    <TextBlock>2:41</TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

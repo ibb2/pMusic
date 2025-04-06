@@ -3,6 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
+             xmlns:local="clr-namespace:pMusic.Interface"
+             xmlns:views="clr-namespace:pMusic.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -120,69 +122,22 @@
             <Border Grid.Column="2" BorderBrush="Black" CornerRadius="4" Background="Gainsboro"
                     BorderThickness="2"
                     Padding="8" Margin="0 4 8 2">
-                <StackPanel Grid.Column="2">
-                    <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
-                    <!-- Recently Played -->
-                    <UniformGrid Columns="2" Rows="4" Width="300">
-                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
-                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
-                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
-                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
-                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
-                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
-                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
-                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <Border CornerRadius="5" ClipToBounds="True" Background="Azure" Width="130">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="30"></Image>
-                                <TextBlock VerticalAlignment="Center">Liked Songs</TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </UniformGrid>
-                    <StackPanel Orientation="Horizontal" Margin="10 0">
-                        <!-- New Releases / Recently Added? -->
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="10 0">
-                        <!-- Uniquely Yours -->
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="10 0">
-                        <!-- Recently Added -->
-                    </StackPanel>
-                </StackPanel>
+                <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
+                    <ContentControl.DataTemplates>
+                        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+                            <views:HomeView />
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:AlbumViewModel}">
+                            <views:AlbumView />
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:ArtistViewModel}">
+                            <views:ArtistView />
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:TrackViewModel}">
+                            <views:TrackView />
+                        </DataTemplate>
+                    </ContentControl.DataTemplates>
+                </UserControl>
             </Border>
         </Grid>
         <Grid Grid.Row="2" Height="70">

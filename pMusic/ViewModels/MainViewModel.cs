@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using System.Windows.Input;
 using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -11,7 +12,9 @@ using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using KeySharp;
+using pMusic.Interface;
 using pMusic.Services;
 
 namespace pMusic.ViewModels;
@@ -24,6 +27,14 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _isLoggedIn = !string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
     [ObservableProperty] private bool _isLoggedInTrue = string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
     [ObservableProperty] private Bitmap _thumbnailUrl;
+
+    [ObservableProperty] private bool _isLoading;
+    
+    [ObservableProperty] private ViewModelBase _currentPage;
+    private readonly HomeViewModel _homeView = new();
+    private readonly ArtistViewModel _artistView = new ();
+    private readonly AlbumViewModel _albumView = new ();
+    private readonly TrackViewModel _trackView = new ();
 
     public MainViewModel(Plex plex)
     {
