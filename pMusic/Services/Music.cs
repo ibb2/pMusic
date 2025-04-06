@@ -12,16 +12,14 @@ public interface IMusic
 {
     // ValueTask<ObservableCollection<Artist>> GetArtistsAsync(CancellationToken ct, Plex plex);
     // ValueTask<ObservableCollection<Album>> GetArtistAlbums(CancellationToken ct, Plex plex, int libraryId, string artistKey, string artistTitle);
-    // ValueTask<ObservableCollection<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey);
+    ValueTask<IImmutableList<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey);
     ValueTask<ImmutableList<Playlist>> GetPlaylists(CancellationToken ct, Plex plex);
     ValueTask<IImmutableList<Album>> GetAllAlbums(CancellationToken ct, Plex plex);
     string GetServerUri();
-
 }
 
 public class Music : IMusic
 {
-    
     public string? ServerUri { get; set; }
     // public async ValueTask<ObservableCollection<Artist>> GetArtistsAsync(CancellationToken ct, Plex plex)
     // {
@@ -42,24 +40,24 @@ public class Music : IMusic
     //     return albums;
     // }    
     //
-    // public async ValueTask<ObservableCollection<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey)
-    // {
-    //     await Task.Delay(TimeSpan.FromSeconds(1), ct);
-    //
-    //     var albums = await plex.GetTrackList(ServerUri!, artistKey);
-    //
-    //     var temp = ImmutableArray<Album>.Empty;
-    //     return albums;
-    // }
+    public async ValueTask<IImmutableList<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(1), ct);
+
+        var albums = await plex.GetTrackList(ServerUri!, artistKey);
+
+        var temp = ImmutableArray<Album>.Empty;
+        return albums;
+    }
 
     public async ValueTask<ImmutableList<Playlist>> GetPlaylists(CancellationToken ct, Plex plex)
     {
         await Task.Delay(TimeSpan.FromSeconds(1), ct);
-    
-        ServerUri =  await plex.GetServerCapabilitiesAsync();
-    
+
+        ServerUri = await plex.GetServerCapabilitiesAsync();
+
         var playlists = await plex.GetPlaylists(ServerUri!);
-    
+
         return playlists.ToImmutableList();
     }
 
@@ -71,7 +69,7 @@ public class Music : IMusic
         var albums = await plex.GetAllAlbums(serverUri);
 
         ServerUri = serverUri;
-        
+
         return albums;
     }
 

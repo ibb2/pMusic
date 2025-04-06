@@ -11,25 +11,36 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:AlbumViewModel />
     </Design.DataContext>
+    <UserControl.Styles>
+        <Style>
+            <Style Selector="TextBlock.h1">
+                <Setter Property="FontSize" Value="96"></Setter>
+                <Setter Property="FontWeight" Value="ExtraBold"></Setter>
+            </Style>
+        </Style>
+    </UserControl.Styles>
     <ScrollViewer>
         <Grid RowDefinitions="Auto, Auto, *">
             <Grid ColumnDefinitions="Auto, *">
-                <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
-                    <Image Source="/Assets/Images/blank_playlist.png"></Image>
-                </Border>
-                <StackPanel Grid.Column="1">
+                <Grid>
+                    <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="300" />
+                    </Border>
+                    <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
+                        <Image Source="{Binding Album.Thumb}" Width="300" />
+                    </Border>
+                </Grid>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock>Album</TextBlock>
-                    <TextBlock Text="{Binding AlbumTitle}"></TextBlock>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Border CornerRadius="1000" Margin="0 0 24 0" ClipToBounds="True">
-                            <Image Source="/Assets/Images/blank_playlist.png" Width="30" Height="30">
-                                <Image.Stretch></Image.Stretch>
-                            </Image>
+                    <TextBlock Classes="h1" Text="{Binding Album.Title}"></TextBlock>
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Border CornerRadius="1000" Margin="0 0 12 0" ClipToBounds="True">
+                            <Image Source="/Assets/Images/blank_playlist.png" Width="30" Height="30" />
                         </Border>
-                        <TextBlock Text="{Binding AlbumArtist}"></TextBlock>
-                        <TextBlock Text="{Binding AlbumReleaseDate}"></TextBlock>
-                        <TextBlock Text="{Binding AlbumTrackLength}"></TextBlock>
-                        <TextBlock Text="{Binding AlbumDuration}"></TextBlock>
+                        <TextBlock Text="{Binding Album.Artist}" FontWeight="SemiBold" VerticalAlignment="Center"></TextBlock>
+                        <TextBlock Text="{Binding Album.OriginallyAvailableAt}" VerticalAlignment="Center"></TextBlock>
+                        <!-- <TextBlock Text="{Binding AlbumTrackLength}"></TextBlock> -->
+                        <!-- <TextBlock Text="{Binding AlbumDuration}"></TextBlock> -->
                     </StackPanel>
                 </StackPanel>
             </Grid>
