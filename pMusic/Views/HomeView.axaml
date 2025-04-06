@@ -13,12 +13,11 @@
     </Design.DataContext>
     <UserControl.Styles>
         <Style>
-            <Setter Property="ContentPresenter.Background" Value="Transparent" />
             <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                <Setter Property="CornerRadius" Value="24" />
+                <Setter Property="CornerRadius" Value="8" />
             </Style>
             <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
-                <Setter Property="CornerRadius" Value="24" />
+                <Setter Property="CornerRadius" Value="8" />
             </Style>
             <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
                 <Setter Property="Background" Value="Transparent"></Setter>
@@ -93,11 +92,14 @@
                         <DataTemplate>
                             <StackPanel PointerPressed="GoToAlbum">
                                 <Grid Margin="0, 0, 0, 12">
-                                    <Border CornerRadius="4" ClipToBounds="True">
-                                        <Image Source="/Assets/Images/blank_playlist.png" Width="150" />
-                                    </Border>
-                                    <Border CornerRadius="4" ClipToBounds="True">
-                                        <Image Source="{Binding Thumb}" Width="150" />
+                                    <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True"
+                                            BorderBrush="LightGray"
+                                            BorderThickness="1">
+                                        <Rectangle RadiusX="4" RadiusY="4">
+                                            <Rectangle.Fill>
+                                                <ImageBrush Source="{Binding Thumb}" Stretch="UniformToFill" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
                                     </Border>
                                 </Grid>
                                 <TextBlock Padding="5,0,0,8" Text="{Binding Title}" />
@@ -108,12 +110,7 @@
                     <ItemsControl.Styles>
                         <Style>
                             <Setter Property="ContentPresenter.Background" Value="Transparent" />
-                            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                                <Setter Property="CornerRadius" Value="24" />
-                            </Style>
-                            <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
-                                <Setter Property="CornerRadius" Value="24" />
-                            </Style>
+
                         </Style>
                     </ItemsControl.Styles>
                 </ListBox>
@@ -133,8 +130,10 @@
                         <DataTemplate>
                             <StackPanel PointerPressed="GoToAlbum">
                                 <Grid Margin="0, 0, 0, 12">
-                                    <Border Width="175" Height="175" CornerRadius="24" ClipToBounds="True">
-                                        <Rectangle RadiusX="24" RadiusY="24">
+                                    <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True"
+                                            BorderBrush="LightGray"
+                                            BorderThickness="1">
+                                        <Rectangle RadiusX="4" RadiusY="4">
                                             <Rectangle.Fill>
                                                 <ImageBrush Source="{Binding Thumb}" Stretch="UniformToFill" />
                                             </Rectangle.Fill>
@@ -149,12 +148,6 @@
                     <ItemsControl.Styles>
                         <Style>
                             <Setter Property="ContentPresenter.Background" Value="Transparent" />
-                            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                                <Setter Property="CornerRadius" Value="24" />
-                            </Style>
-                            <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
-                                <Setter Property="CornerRadius" Value="24" />
-                            </Style>
                         </Style>
                     </ItemsControl.Styles>
                 </ListBox>
@@ -176,11 +169,11 @@
                             <DataTemplate>
                                 <StackPanel>
                                     <Grid Margin="0, 0, 0, 12">
-                                        <Border Width="175" Height="175" CornerRadius="24" ClipToBounds="True">
+                                        <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True">
                                             <Image Source="/Assets/Images/blank_playlist.png" Stretch="UniformToFill" />
                                         </Border>
-                                        <Border Width="175" Height="175" CornerRadius="24" ClipToBounds="True">
-                                            <Rectangle RadiusX="24" RadiusY="24">
+                                        <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True">
+                                            <Rectangle RadiusX="4" RadiusY="4">
                                                 <Rectangle.Fill>
                                                     <ImageBrush Source="{Binding Composite}" Stretch="UniformToFill" />
                                                 </Rectangle.Fill>
@@ -195,12 +188,6 @@
                         <ItemsControl.Styles>
                             <Style>
                                 <Setter Property="ContentPresenter.Background" Value="Transparent" />
-                                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                                    <Setter Property="CornerRadius" Value="24" />
-                                </Style>
-                                <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
-                                    <Setter Property="CornerRadius" Value="24" />
-                                </Style>
                             </Style>
                         </ItemsControl.Styles>
                     </ListBox>
