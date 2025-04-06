@@ -27,8 +27,10 @@ public partial class Navigation : ObservableObject
     private readonly Dictionary<Type, ViewModelBase> _viewModels = new();
     
     // Singleton instance
-    public static Navigation Instance { get; } = new(music: _music, plex: _plex);
-    
+    public static Navigation Instance { get; } = new(
+        music: Ioc.Default.GetRequiredService<IMusic>(),
+        plex: Ioc.Default.GetRequiredService<Plex>()
+    );
     private Navigation(IMusic music, Plex plex)
     {
         _music = music;
