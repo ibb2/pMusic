@@ -44,7 +44,8 @@ public class Music : IMusic
     {
         await Task.Delay(TimeSpan.FromSeconds(1), ct);
 
-        var albums = await plex.GetTrackList(ServerUri!, artistKey);
+        var serverUri = await plex.GetServerCapabilitiesAsync();
+        var albums = await plex.GetTrackList(serverUri!, artistKey);
 
         var temp = ImmutableArray<Album>.Empty;
         return albums;

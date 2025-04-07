@@ -16,7 +16,7 @@ public partial record Playlist(
     string Icon,
     int ViewCount,
     DateTime LastViewedAt,
-    int Duration,
+    TimeSpan Duration,
     int LeafCount,
     DateTime AddedAt,
     DateTime UpdatedAt);

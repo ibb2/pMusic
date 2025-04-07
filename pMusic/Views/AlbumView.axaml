@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
+             xmlns:local="clr-namespace:pMusic.Views"
              x:Class="pMusic.Views.AlbumView"
              x:DataType="vm:AlbumViewModel">
     <Design.DataContext>
@@ -11,11 +12,17 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:AlbumViewModel />
     </Design.DataContext>
+    <UserControl.Resources>
+        <local:TimeSpanToMinSecConverter x:Key="TimeSpanToMinSecConverter" />
+    </UserControl.Resources>
     <UserControl.Styles>
         <Style>
             <Style Selector="TextBlock.h1">
                 <Setter Property="FontSize" Value="96"></Setter>
                 <Setter Property="FontWeight" Value="ExtraBold"></Setter>
+            </Style>
+            <Style Selector="DataGrid.right">
+                <Setter Property="HorizontalAlignment" Value="Right"></Setter>
             </Style>
         </Style>
     </UserControl.Styles>
@@ -56,80 +63,48 @@
                     <Button Content="{LucideIconContent List}"></Button>
                 </TextBlock>
             </Grid>
-            <StackPanel Grid.Row="2" HorizontalAlignment="Stretch" Spacing="16">
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <TextBlock>1</TextBlock>
-                    <StackPanel>
-                        <TextBlock>POP OUT</TextBlock>
-                        <TextBlock>Playboi Carti</TextBlock>
-                    </StackPanel>
-                    <TextBlock>3,000,000</TextBlock>
-                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
-                    </Button>
-                    <TextBlock>2:41</TextBlock>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <TextBlock>1</TextBlock>
-                    <StackPanel>
-                        <TextBlock>POP OUT</TextBlock>
-                        <TextBlock>Playboi Carti</TextBlock>
-                    </StackPanel>
-                    <TextBlock>3,000,000</TextBlock>
-                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
-                    </Button>
-                    <TextBlock>2:41</TextBlock>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <TextBlock>1</TextBlock>
-                    <StackPanel>
-                        <TextBlock>POP OUT</TextBlock>
-                        <TextBlock>Playboi Carti</TextBlock>
-                    </StackPanel>
-                    <TextBlock>3,000,000</TextBlock>
-                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
-                    </Button>
-                    <TextBlock>2:41</TextBlock>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <TextBlock>1</TextBlock>
-                    <StackPanel>
-                        <TextBlock>POP OUT</TextBlock>
-                        <TextBlock>Playboi Carti</TextBlock>
-                    </StackPanel>
-                    <TextBlock>3,000,000</TextBlock>
-                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
-                    </Button>
-                    <TextBlock>2:41</TextBlock>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <TextBlock>1</TextBlock>
-                    <StackPanel>
-                        <TextBlock>POP OUT</TextBlock>
-                        <TextBlock>Playboi Carti</TextBlock>
-                    </StackPanel>
-                    <TextBlock>3,000,000</TextBlock>
-                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
-                    </Button>
-                    <TextBlock>2:41</TextBlock>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <TextBlock>1</TextBlock>
-                    <StackPanel>
-                        <TextBlock>POP OUT</TextBlock>
-                        <TextBlock>Playboi Carti</TextBlock>
-                    </StackPanel>
-                    <TextBlock>3,000,000</TextBlock>
-                    <Button Content="{LucideIconContent Plus}" Width="30" Height="30" Padding="0"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="1000">
-                    </Button>
-                    <TextBlock>2:41</TextBlock>
-                </StackPanel>
-            </StackPanel>
+            <DataGrid Grid.Row="2" Name="Tracklist" ItemsSource="{Binding TrackList}" IsReadOnly="True"
+                      CanUserResizeColumns="True">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn>
+                        <DataGridTemplateColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="#" HorizontalAlignment="Center"></TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.HeaderTemplate>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Panel>
+                                    <!-- Text that shows by default -->
+                                    <TextBlock Text="{Binding Index}"
+                                               IsVisible="{Binding !$parent[DataGridCellsPresenter].IsPointerOver}"
+                                               VerticalAlignment="Center" Padding="12 0 0 0" />
+                                    <!-- Button that appears on hover -->
+                                    <Button Content="{LucideIconContent Play}"
+                                            IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}"
+                                            Command="{Binding $parent.((vm:AlbumViewModel)DataContext).PlayCommand}"
+                                            Width="{Binding $parent[DataGridCell].Bounds.Width}"
+                                            Height="{Binding $parent[DataGridCell].Bounds.Height}" />
+                                </Panel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Title" Width="*" Binding="{Binding Title}" />
+                    <!--The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"-->
+                    <!-- <DataGridTextColumn Header="Rating" Binding="{Binding RatingCount}"></DataGridTextColumn> -->
+                    <DataGridTextColumn
+                        Binding="{Binding Duration, Converter={StaticResource TimeSpanToMinSecConverter}}"
+                        CellStyleClasses="right">
+                        <DataGridTextColumn.HeaderTemplate>
+                            <!-- Simply use a HeaderTemplate -->
+                            <DataTemplate>
+                                <TextBlock Text="Length" HorizontalAlignment="Right"></TextBlock>
+                            </DataTemplate>
+                        </DataGridTextColumn.HeaderTemplate>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
     </ScrollViewer>
 </UserControl>

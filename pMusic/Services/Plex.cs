@@ -229,7 +229,7 @@ public class Plex
                     LastViewedAt: DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(playlist.Attribute("lastViewedAt")?.Value ?? "0"))
                         .LocalDateTime,
-                    Duration: int.Parse(playlist.Attribute("duration")?.Value ?? "0"),
+                    Duration: TimeSpan.FromMilliseconds(int.Parse(playlist.Attribute("duration")?.Value ?? "0")),
                     LeafCount: int.Parse(playlist.Attribute("leafCount")?.Value ?? "0"),
                     AddedAt: DateTimeOffset.FromUnixTimeSeconds(long.Parse(playlist.Attribute("addedAt")?.Value ?? "0"))
                         .LocalDateTime,
@@ -283,7 +283,7 @@ public class Plex
                 ParentThumb: track.Attribute("parentThumb")?.Value ?? "",
                 GrandparentThumb: track.Attribute("grandparentThumb")?.Value ?? "",
                 GrandparentArt: track.Attribute("grandparentArt")?.Value ?? "",
-                Duration: int.Parse(track.Attribute("duration")?.Value ?? "0"),
+                Duration: TimeSpan.FromMilliseconds(int.Parse(track.Attribute("duration")?.Value ?? "0")),
                 AddedAt: int.Parse(track.Attribute("addedAt")?.Value ?? "0"),
                 UpdatedAt: int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
                 MusicAnalysisVersion: int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
