@@ -1,3 +1,5 @@
+using System;
+
 namespace pMusic.Models;
 
 public partial record Track(
@@ -25,7 +27,7 @@ public partial record Track(
     string ParentThumb,
     string GrandparentThumb,
     string GrandparentArt,
-    int Duration,
+    TimeSpan Duration,
     long AddedAt,
     long UpdatedAt,
     int MusicAnalysisVersion,

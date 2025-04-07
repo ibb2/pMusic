@@ -33,7 +33,9 @@ public class Plex
     private static readonly string _plexProduct = "pMusic";
     private static readonly string _plexDeviceName = "Desktop";
     private static readonly string _plexPlatform = "Desktop";
-    private static readonly PlexAPI _plexApi = new PlexAPI(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+
+    private static readonly PlexAPI _plexApi =
+        new PlexAPI(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
 
     public Plex(HttpClient httpClient)
     {
@@ -61,7 +63,7 @@ public class Plex
         response.EnsureSuccessStatusCode();
 
         var userDataXml = await response.Content.ReadAsStringAsync();
-        var thumbnail = await  GetBitmapImage(XElement.Parse(userDataXml).Attribute("thumb")?.Value);
+        var thumbnail = await GetBitmapImage(XElement.Parse(userDataXml).Attribute("thumb")?.Value);
         return thumbnail;
     }
 
@@ -227,7 +229,7 @@ public class Plex
                     LastViewedAt: DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(playlist.Attribute("lastViewedAt")?.Value ?? "0"))
                         .LocalDateTime,
-                    Duration: int.Parse(playlist.Attribute("duration")?.Value ?? "0"),
+                    Duration: TimeSpan.FromMilliseconds(int.Parse(playlist.Attribute("duration")?.Value ?? "0")),
                     LeafCount: int.Parse(playlist.Attribute("leafCount")?.Value ?? "0"),
                     AddedAt: DateTimeOffset.FromUnixTimeSeconds(long.Parse(playlist.Attribute("addedAt")?.Value ?? "0"))
                         .LocalDateTime,
@@ -281,7 +283,7 @@ public class Plex
                 ParentThumb: track.Attribute("parentThumb")?.Value ?? "",
                 GrandparentThumb: track.Attribute("grandparentThumb")?.Value ?? "",
                 GrandparentArt: track.Attribute("grandparentArt")?.Value ?? "",
-                Duration: int.Parse(track.Attribute("duration")?.Value ?? "0"),
+                Duration: TimeSpan.FromMilliseconds(int.Parse(track.Attribute("duration")?.Value ?? "0")),
                 AddedAt: int.Parse(track.Attribute("addedAt")?.Value ?? "0"),
                 UpdatedAt: int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
                 MusicAnalysisVersion: int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
@@ -295,7 +297,7 @@ public class Plex
     private static Media ParseMedia(XElement mediaElement)
     {
         if (mediaElement == null) return null;
-            
+
         return new Media(
             Id: mediaElement.Attribute("id")?.Value ?? "",
             Duration: int.Parse(mediaElement.Attribute("duration")?.Value ?? "0"),
@@ -337,7 +339,15 @@ public class Plex
                         await GetBitmapImage(
                             $"{uri}{directory.Attribute("thumb")?.Value}?X-Plex-Token={_plexToken}");
                 }
-                
+
+                Bitmap? artBitmap = null;
+                if (directory.Attribute("art")?.Value != null)
+                {
+                    artBitmap =
+                        await GetBitmapImage(
+                            $"{uri}{directory.Attribute("art")?.Value}?X-Plex-Token={_plexToken}");
+                }
+
                 return new Album(
                     RatingKey: directory.Attribute("ratingKey")?.Value ?? "",
                     Key: directory.Attribute("key")?.Value ?? "",
@@ -356,7 +366,7 @@ public class Plex
                     LastViewedAt: int.Parse(directory.Attribute("lastViewedAt")?.Value ?? "0"),
                     Year: directory.Attribute("year")?.Value ?? "",
                     Thumb: thumbBitmap,
-                    Art: directory.Attribute("art")?.Value ?? "",
+                    Art: artBitmap,
                     ParentThumb: directory.Attribute("parentThumb")?.Value ?? "0",
                     OriginallyAvailableAt: DateTime.Parse(directory.Attribute("originallyAvailableAt")!.Value),
                     AddedAt: int.Parse(directory.Attribute("addedAt")?.Value ?? "0"),
@@ -365,7 +375,7 @@ public class Plex
                     MusicAnalysisVersion: int.Parse(directory.Attribute("musicAnalysisVersion")?.Value ?? "0")
                 );
             }).ToList();
-        
+
         return (await Task.WhenAll(items)).ToList();
     }
 
@@ -383,7 +393,7 @@ public class Plex
                         await GetBitmapImage(
                             $"{uri}{directory.Attribute("thumb")?.Value}?X-Plex-Token={_plexToken}");
                 }
-                
+
                 return new Artist
                 (
                     RatingKey: directory.Attribute("ratingKey")?.Value ?? "",
@@ -435,7 +445,7 @@ public class Plex
                         : null
                 );
             }).ToList();
-        
+
         return (await Task.WhenAll(items)).ToList();
     }
 

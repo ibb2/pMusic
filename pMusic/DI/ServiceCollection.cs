@@ -14,8 +14,9 @@ public static class ServiceCollectionExtensions
         collection.AddHttpClient<Plex>();
         collection.AddTransient<IMusic, Music>();
         collection.AddTransient<MainViewModel>();
-        collection.AddTransient<Demo>();
         collection.AddTransient<HomeViewModel>();
+        collection.AddTransient<AlbumViewModel>();
+        collection.AddTransient<ArtistViewModel>();
         collection.AddTransient<MainWindow>();
         collection.AddTransient<HomeView>();
         collection.AddSingleton<Navigation>();

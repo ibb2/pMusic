@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using pMusic.Interface;
 using pMusic.Models;
@@ -16,7 +17,11 @@ public abstract partial class ViewModelBase : ObservableObject
     [RelayCommand]
     public void GoToAlbum(Album album)
     {
-        Navigation.GoToView<AlbumViewModel>(vm => vm.Album = album);
+        Navigation.GoToView<AlbumViewModel>(vm =>
+        {
+            vm.Album = album;
+            _ = vm.GetTracks();
+        });
     }
 
     [RelayCommand]
