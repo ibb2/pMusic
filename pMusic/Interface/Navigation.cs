@@ -62,8 +62,6 @@ public partial class Navigation : ObservableObject
         //         return Ioc.Default.GetRequiredService<T>();
         // }
 
-        Ioc.Default.GetRequiredService<T>();
-
         if (!_viewModels.ContainsKey(type))
         {
             _viewModels[type] = Ioc.Default.GetRequiredService<T>();
