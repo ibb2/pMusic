@@ -44,7 +44,6 @@ public partial class AlbumViewModel : ViewModelBase
             TrackList.Add(track);
         }
 
-        var i = 1;
     }
 
     [RelayCommand]
