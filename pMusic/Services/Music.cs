@@ -15,7 +15,7 @@ public interface IMusic
     ValueTask<IImmutableList<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey);
     ValueTask<ImmutableList<Playlist>> GetPlaylists(CancellationToken ct, Plex plex);
     ValueTask<IImmutableList<Album>> GetAllAlbums(CancellationToken ct, Plex plex);
-    string GetServerUri();
+    ValueTask<string> GetServerUri(CancellationToken ct, Plex plex);
 }
 
 public class Music : IMusic
@@ -74,8 +74,10 @@ public class Music : IMusic
     }
 
 
-    public string GetServerUri()
+    public async ValueTask<string> GetServerUri(CancellationToken ct, Plex plex)
     {
+        ServerUri = await plex.GetServerCapabilitiesAsync();
+
         return ServerUri;
     }
 }
