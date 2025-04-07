@@ -47,7 +47,6 @@ public class Music : IMusic
         var serverUri = await plex.GetServerCapabilitiesAsync();
         var albums = await plex.GetTrackList(serverUri!, artistKey);
 
-        var temp = ImmutableArray<Album>.Empty;
         return albums;
     }
 
