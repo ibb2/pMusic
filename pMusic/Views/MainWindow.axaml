@@ -7,6 +7,22 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="pMusic.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="pMusic">
-        <views:MainView />
+        Title="pMusic"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True">
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="0.5"
+                    MaterialOpacity="0.95" />
+            </ExperimentalAcrylicBorder.Material>
+            <views:MainView />
+        </ExperimentalAcrylicBorder>
+        <!-- <views:MainView /> -->
+    </Panel>
+
 </Window>
