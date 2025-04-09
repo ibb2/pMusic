@@ -19,10 +19,11 @@ public class Playback
     private SoundPlayer _player;
     private readonly SoundPlayer _soundPlayerState;
     private readonly double _currentTimeState;
+    private readonly Track _track;
     private MusicPlayer _musicPlayer;
 
     public Playback(Plex plex, string uri, Mixer mixer, SoundPlayer soundPlayerState,
-        double currentTimeState, MusicPlayer musicPlayer)
+        double currentTimeState, MusicPlayer musicPlayer, Track track)
     {
         _plex = plex;
         _baseUri = uri;
@@ -30,6 +31,8 @@ public class Playback
         _soundPlayerState = soundPlayerState;
         _currentTimeState = currentTimeState;
         _musicPlayer = musicPlayer;
+        _track = track;
+        _track = track;
     }
 
     public void StartPlayback(SoundPlayer player, string key, string ratingKey, decimal duration,
@@ -41,6 +44,7 @@ public class Playback
         _duration = duration;
 
         _musicPlayer.PlaybackState = PlaybackState.Playing;
+        _musicPlayer.CurrentlyPlayingTrack = _track;
 
         _timer = new Timer(async _ =>
             {

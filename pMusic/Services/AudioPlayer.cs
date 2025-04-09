@@ -18,7 +18,7 @@ public interface IAudioPlayerService
     // public SoundPlayer SoundPlayer { get; }
     // public double PlaybackPosition { get; }
 
-    ValueTask PlayAudio(string uri, string baseUri, string ratingKey, string key);
+    ValueTask PlayAudio(string uri, string baseUri, Track track);
     ValueTask PauseAudio();
 
     ValueTask ResumeAudio();
@@ -34,6 +34,7 @@ public partial class AudioPlayer : IAudioPlayerService
     public double PlaybackPosition;
     public Plex Plex;
     private MusicPlayer _musicPlayer;
+    private Track _currentTrack;
 
     private static AudioEngine? _audioEngine;
 
@@ -47,12 +48,14 @@ public partial class AudioPlayer : IAudioPlayerService
 
     public SoundPlayer Player { get; set; }
 
-    public async ValueTask PlayAudio(string uri, string baseUri, string ratingKey, string key)
+    public async ValueTask PlayAudio(string uri, string baseUri, Track track)
     {
         try
         {
+            _currentTrack = track;
+
             _playback = new Playback(plex: Plex, uri: baseUri, mixer: Mixer.Master, SoundPlayer, PlaybackPosition,
-                musicPlayer: _musicPlayer);
+                musicPlayer: _musicPlayer, track: track);
 
             // Initialize the audio engine with the MiniAudio backend.
             if (_audioEngine is null) _audioEngine = new MiniAudioEngine(44100, Capability.Playback);
@@ -80,7 +83,7 @@ public partial class AudioPlayer : IAudioPlayerService
             // Start playback.
             Player.Play();
 
-            _playback.StartPlayback(player: Player, key: key, ratingKey: ratingKey,
+            _playback.StartPlayback(player: Player, key: track.Key, ratingKey: track.RatingKey,
                 Decimal.Round((Decimal)Player.Duration * 1000, MidpointRounding.ToZero),
                 SoundPlayer, PlaybackPosition);
         }
@@ -103,12 +106,12 @@ public partial class AudioPlayer : IAudioPlayerService
         _musicPlayer.PlaybackState = PlaybackState.Paused;
         await _playback.PausePlayback();
     }
-    //
-    // public async ValueTask Stop()
-    // {
-    //     Player?.Stop();
-    //     await _soundPlayer.UpdateAsync(_ => Player);
-    //     await _isPlaying.UpdateAsync(_ => false);
-    //     await _playback.StopPlayback();
-    // }
+
+    public async ValueTask Stop()
+    {
+        Player?.Stop();
+        _musicPlayer.PlaybackState = PlaybackState.Stopped;
+        _musicPlayer.CurrentlyPlayingTrack = null;
+        await _playback.StopPlayback();
+    }
 }

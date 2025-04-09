@@ -40,7 +40,7 @@ public partial class AlbumViewModel : ViewModelBase
 
     public async ValueTask GetTracks()
     {
-        var tracks = await _music.GetTrackList(CancellationToken.None, _plex, Album.RatingKey);
+        var tracks = await _music.GetTrackList(CancellationToken.None, _plex, Album.RatingKey, Album.Artist);
 
         foreach (var track in tracks)
         {
@@ -53,7 +53,6 @@ public partial class AlbumViewModel : ViewModelBase
     {
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
         var url = serverUri + track.Media.Part.Key;
-        _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, ratingKey: track.RatingKey,
-            key: track.Key);
+        _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 }

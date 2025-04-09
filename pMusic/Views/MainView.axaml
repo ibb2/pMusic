@@ -155,12 +155,21 @@
                     Padding="8" Margin="8 0 8 4">
                 <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border CornerRadius="5" ClipToBounds="True">
-                            <Image Source="/Assets/Images/blank_playlist.png" Width="50" ClipToBounds="True" />
-                        </Border>
+                        <Grid>
+                            <Border CornerRadius="5" ClipToBounds="True">
+                                <Image Source="/Assets/Images/blank_playlist.png" Width="50"
+                                       ClipToBounds="True" />
+                            </Border>
+                            <Border CornerRadius="5" ClipToBounds="True">
+                                <Image Source="{Binding MusicPlayer.CurrentlyPlayingTrack.Thumb}" Width="50"
+                                       ClipToBounds="True" />
+                            </Border>
+                        </Grid>
                         <StackPanel>
-                            <TextBlock Foreground="Black" VerticalAlignment="Center" Margin="8 4">Inamorata</TextBlock>
-                            <TextBlock Foreground="Black" VerticalAlignment="Center" Margin="8 4">Mareux</TextBlock>
+                            <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Title}" Foreground="Black"
+                                       VerticalAlignment="Center" Margin="8 4" />
+                            <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Artist}" Foreground="Black"
+                                       VerticalAlignment="Center" Margin="8 4" />
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="4">

@@ -111,12 +111,12 @@ public class Plex
         return albums.ToImmutableList();
     }
 
-    public async ValueTask<IImmutableList<Track>> GetTrackList(string uri, string albumKey)
+    public async ValueTask<IImmutableList<Track>> GetTrackList(string uri, string albumKey, string artist)
     {
         var trackUri = uri + "/library/metadata/" + albumKey + "/children";
         var trackXml = await httpClient.GetStringAsync(trackUri);
 
-        var tracks = ParseTracks(XElement.Parse(trackXml)).ToImmutableList();
+        var tracks = ParseTracks(XElement.Parse(trackXml), artist).ToImmutableList();
         var empty = ImmutableList<Track>.Empty;
 
         return tracks;
@@ -251,7 +251,7 @@ public class Plex
         return new Bitmap(memoryStream);
     }
 
-    public static List<Track> ParseTracks(XElement mediaContainer)
+    public static List<Track> ParseTracks(XElement mediaContainer, string artist)
     {
         if (mediaContainer == null) return new List<Track>();
 
@@ -267,6 +267,7 @@ public class Plex
                 ParentStudio: track.Attribute("parentStudio")?.Value ?? "",
                 Type: track.Attribute("type")?.Value ?? "",
                 Title: track.Attribute("title")?.Value ?? "",
+                Artist: artist,
                 GrandparentKey: track.Attribute("grandparentKey")?.Value ?? "",
                 ParentKey: track.Attribute("parentKey")?.Value ?? "",
                 GrandparentTitle: track.Attribute("grandparentTitle")?.Value ?? "",

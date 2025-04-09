@@ -13,6 +13,7 @@ public partial record Track(
     string ParentStudio,
     string Type,
     string Title,
+    string Artist,
     string GrandparentKey,
     string ParentKey,
     string GrandparentTitle,
