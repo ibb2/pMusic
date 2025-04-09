@@ -178,17 +178,22 @@
                             Classes="No-Hover"
                             Content="{LucideIconContent Kind=Rewind, StrokeWidth=2, 
                         Size=20}"
+                            Foreground="{DynamicResource AccentButtonForegroundDisabled}"
                             Background="Transparent" CornerRadius="100" Width="40" Height="40">
                         </Button>
                         <Grid>
                             <Button Content="{LucideIconContent Kind=Play, Size=25, StrokeWidth=2}"
                                     HorizontalAlignment="Center"
+                                    Foreground="{DynamicResource SystemAltHighColor}"
+                                    Background="{DynamicResource SystemBaseHighColor}"
                                     Command="{Binding PlayPause}"
                                     IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
                                     Classes="Home"
                                     VerticalAlignment="Center">
                             </Button>
                             <Button Content="{LucideIconContent Kind=Pause, Size=25, StrokeWidth=2}"
+                                    Foreground="{DynamicResource SystemAltHighColor}"
+                                    Background="{DynamicResource SystemBaseHighColor}"
                                     Width="40" Height="40" HorizontalAlignment="Center"
                                     Command="{Binding PlayPause}"
                                     IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
@@ -198,6 +203,7 @@
                         </Grid>
                         <Button
                             Classes="No-Hover"
+                            Foreground="{DynamicResource ToggleButtonForegroundDisabled}"
                             Content="{LucideIconContent Kind=FastForward, StrokeWidth=2, 
                         Size=20}"
                             Background="Transparent" CornerRadius="100" Width="40" Height="40">
