@@ -74,9 +74,9 @@ public partial class AudioPlayer : IAudioPlayerService
             Mixer.Master.AddComponent(Player);
             // Start playback.
             Player.Play();
-            // _playback.StartPlayback(player: Player, key: key, ratingKey: ratingKey,
-            //     Decimal.Round((Decimal)Player.Duration * 1000, MidpointRounding.ToZero),
-            //     SoundPlayer, PlaybackPosition);
+            _playback.StartPlayback(player: Player, key: key, ratingKey: ratingKey,
+                Decimal.Round((Decimal)Player.Duration * 1000, MidpointRounding.ToZero),
+                SoundPlayer, PlaybackPosition);
         }
         catch (Exception ex)
         {

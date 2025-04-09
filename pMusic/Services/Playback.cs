@@ -39,7 +39,7 @@ public class Playback
 
         _timer = new Timer(async _ =>
             {
-                // await UpdateTimeline("playing");
+                await UpdateTimeline("playing");
                 // await state.UpdateAsync(_ => player);
                 // var val = await state;
                 // await _soundPlayerState.UpdateAsync(_ => val);
@@ -85,8 +85,8 @@ public class Playback
         Console.WriteLine($"Rounded Track Progess {formattedTime}");
         await Task.Delay(1000);
         // await Plex.UpdateTrackProgress(ratingKey: ratingKey, progress: Player.Time);
-        // await _plex.UpdateSession(uri: _baseUri, key: _key, state: state, ratingKey: _ratingKey, formattedTime,
-        //     duration: _duration);
+        await _plex.UpdateSession(uri: _baseUri, key: _key, state: state, ratingKey: _ratingKey, formattedTime,
+            duration: _duration);
     }
 
     private async ValueTask TrackCompleted(string ratingKey)
