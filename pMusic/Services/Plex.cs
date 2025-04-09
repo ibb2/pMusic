@@ -116,10 +116,10 @@ public class Plex
         var trackUri = uri + "/library/metadata/" + albumKey + "/children";
         var trackXml = await httpClient.GetStringAsync(trackUri);
 
-        var tracks = ParseTracks(XElement.Parse(trackXml), artist).ToImmutableList();
+        var tracks = await ParseTracks(XElement.Parse(trackXml), uri, artist);
         var empty = ImmutableList<Track>.Empty;
 
-        return tracks;
+        return tracks.ToImmutableList();
     }
 
     public async ValueTask UpdateTrackProgress(string ratingKey, float progress)
@@ -251,12 +251,22 @@ public class Plex
         return new Bitmap(memoryStream);
     }
 
-    public static List<Track> ParseTracks(XElement mediaContainer, string artist)
+    public async Task<List<Track>> ParseTracks(XElement mediaContainer, string uri, string artist)
     {
         if (mediaContainer == null) return new List<Track>();
 
-        var items = mediaContainer.Elements("Track").Select(
-            track => new Track(
+
+        var items = mediaContainer.Elements("Track").Select(async track =>
+        {
+            Bitmap? thumb = null;
+            if (track.Attribute("thumb")?.Value != null)
+            {
+                thumb =
+                    await GetBitmapImage(
+                        $"{uri}{track.Attribute("thumb")?.Value}?X-Plex-Token={_plexToken}");
+            }
+
+            return new Track(
                 RatingKey: track.Attribute("ratingKey")?.Value ?? "",
                 Key: track.Attribute("key")?.Value ?? "",
                 ParentRatingKey: track.Attribute("parentRatingKey")?.Value ?? "",
@@ -277,7 +287,7 @@ public class Plex
                 ParentIndex: int.Parse(track.Attribute("parentIndex")?.Value ?? "0"),
                 RatingCount: int.Parse(track.Attribute("ratingCount")?.Value ?? "0"),
                 ParentYear: int.Parse(track.Attribute("parentYear")?.Value! ?? "0"),
-                Thumb: track.Attribute("thumb")?.Value ?? "",
+                Thumb: thumb,
                 Art: track.Attribute("art")?.Value ?? "",
                 ParentThumb: track.Attribute("parentThumb")?.Value ?? "",
                 GrandparentThumb: track.Attribute("grandparentThumb")?.Value ?? "",
@@ -287,10 +297,10 @@ public class Plex
                 UpdatedAt: int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
                 MusicAnalysisVersion: int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
                 Media: ParseMedia(track.Element("Media")!)
-            )
-        ).ToList();
+            );
+        }).ToList();
 
-        return items;
+        return (await Task.WhenAll(items)).ToList();
     }
 
     private static Media ParseMedia(XElement mediaElement)

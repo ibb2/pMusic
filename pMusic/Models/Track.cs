@@ -1,4 +1,5 @@
 using System;
+using Avalonia.Media.Imaging;
 
 namespace pMusic.Models;
 
@@ -23,7 +24,7 @@ public partial record Track(
     int ParentIndex,
     int RatingCount,
     int ParentYear,
-    string Thumb,
+    Bitmap? Thumb,
     string Art,
     string ParentThumb,
     string GrandparentThumb,
