@@ -16,13 +16,14 @@
             <ExperimentalAcrylicBorder.Material>
                 <ExperimentalAcrylicMaterial
                     BackgroundSource="Digger"
-                    TintColor="Black"
-                    TintOpacity="0.5"
-                    MaterialOpacity="0.95" />
+                    TintColor="{DynamicResource SystemAccentColor}"
+                    TintOpacity="0.2"
+                    MaterialOpacity="50"
+                    FallbackColor="{DynamicResource RegionColor}" />
             </ExperimentalAcrylicBorder.Material>
-            <views:MainView />
+            <!-- <views:MainView /> -->
         </ExperimentalAcrylicBorder>
-        <!-- <views:MainView /> -->
+        <views:MainView />
     </Panel>
 
 </Window>

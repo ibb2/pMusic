@@ -20,6 +20,9 @@
     </UserControl.Resources>
 
     <UserControl.Styles>
+        <Style Selector="Border.Panel">
+            <Setter Property="Background" Value="{DynamicResource SystemBaseLowColor}"></Setter>
+        </Style>
         <Style Selector="Button.Home">
             <Setter Property="CornerRadius">100</Setter>
             <Setter Property="Height">40</Setter>
@@ -72,7 +75,7 @@
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="250, 4, *">
             <!-- Sidebar -->
-            <Border CornerRadius="4"
+            <Border Classes="Panel" CornerRadius="4"
                     Padding="8" Margin="8 4 0 2">
                 <StackPanel Grid.Column="0" Spacing="12">
                     <Grid ColumnDefinitions="Auto, Auto" VerticalAlignment="Center">
@@ -120,10 +123,10 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <GridSplitter Grid.Column="1" Grid.Row="0"
+            <GridSplitter Grid.Column="1" Grid.Row="0" Background="Transparent"
                           ResizeDirection="Columns" />
             <!-- Main Content -->
-            <Border Grid.Column="2" CornerRadius="4"
+            <Border Grid.Column="2" Classes="Panel" CornerRadius="4"
                     BorderThickness="2"
                     Padding="8" Margin="0 4 8 2">
                 <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
