@@ -29,6 +29,12 @@
             <Setter Property="Height">40</Setter>
             <Setter Property="Width">40</Setter>
         </Style>
+        <Style Selector="Button.No-Hover:pointerover">
+
+        </Style>
+        <Style Selector="Button.No-Hover:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
         <Style Selector="StackPanel.SidePanel">
             <!-- <Setter Property="">100</Setter> -->
             <Setter Property="Height">40</Setter>
@@ -168,18 +174,21 @@
                 <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="4">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Spacing="4">
-                        <Button Content="{LucideIconContent Kind=Rewind, Size=20, StrokeWidth=1.7}"
-                                Background="Transparent">
+                        <Button
+                            Classes="No-Hover"
+                            Content="{LucideIconContent Kind=Rewind, StrokeWidth=2, 
+                        Size=20}"
+                            Background="Transparent" CornerRadius="100" Width="40" Height="40">
                         </Button>
                         <Grid>
-                            <Button Content="{LucideIconContent Kind=Play, Size=20, StrokeWidth=1.5}"
-                                    Width="40" Height="40" HorizontalAlignment="Center"
+                            <Button Content="{LucideIconContent Kind=Play, Size=25, StrokeWidth=2}"
+                                    HorizontalAlignment="Center"
                                     Command="{Binding PlayPause}"
                                     IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
                                     Classes="Home"
                                     VerticalAlignment="Center">
                             </Button>
-                            <Button Content="{LucideIconContent Kind=Pause, Size=20, StrokeWidth=1.5}"
+                            <Button Content="{LucideIconContent Kind=Pause, Size=25, StrokeWidth=2}"
                                     Width="40" Height="40" HorizontalAlignment="Center"
                                     Command="{Binding PlayPause}"
                                     IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
@@ -187,8 +196,11 @@
                                     VerticalAlignment="Center">
                             </Button>
                         </Grid>
-                        <Button Content="{LucideIconContent Kind=FastForward, Size=20, StrokeWidth=1.5}"
-                                Background="Transparent">
+                        <Button
+                            Classes="No-Hover"
+                            Content="{LucideIconContent Kind=FastForward, StrokeWidth=2, 
+                        Size=20}"
+                            Background="Transparent" CornerRadius="100" Width="40" Height="40">
                         </Button>
                     </StackPanel>
                     <ProgressBar Minimum="0" Maximum="100" Value="35" Height="5" />
