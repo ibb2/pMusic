@@ -41,7 +41,8 @@ public class TimeSpanToMinSecConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        // Implementation for two-way binding if needed
         throw new NotImplementedException();
+        // Implementation for two-way binding if needed
+        // throw new NotImplementedException();
     }
 }

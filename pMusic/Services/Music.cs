@@ -12,10 +12,10 @@ public interface IMusic
 {
     // ValueTask<ObservableCollection<Artist>> GetArtistsAsync(CancellationToken ct, Plex plex);
     // ValueTask<ObservableCollection<Album>> GetArtistAlbums(CancellationToken ct, Plex plex, int libraryId, string artistKey, string artistTitle);
-    ValueTask<IImmutableList<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey);
+    ValueTask<IImmutableList<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey, string artist);
     ValueTask<ImmutableList<Playlist>> GetPlaylists(CancellationToken ct, Plex plex);
     ValueTask<IImmutableList<Album>> GetAllAlbums(CancellationToken ct, Plex plex);
-    string GetServerUri();
+    ValueTask<string> GetServerUri(CancellationToken ct, Plex plex);
 }
 
 public class Music : IMusic
@@ -40,12 +40,13 @@ public class Music : IMusic
     //     return albums;
     // }    
     //
-    public async ValueTask<IImmutableList<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey)
+    public async ValueTask<IImmutableList<Track>> GetTrackList(CancellationToken ct, Plex plex, string artistKey,
+        string artist)
     {
         await Task.Delay(TimeSpan.FromSeconds(1), ct);
 
         var serverUri = await plex.GetServerCapabilitiesAsync();
-        var albums = await plex.GetTrackList(serverUri!, artistKey);
+        var albums = await plex.GetTrackList(serverUri!, artistKey, artist);
 
         return albums;
     }
@@ -74,8 +75,10 @@ public class Music : IMusic
     }
 
 
-    public string GetServerUri()
+    public async ValueTask<string> GetServerUri(CancellationToken ct, Plex plex)
     {
+        ServerUri = await plex.GetServerCapabilitiesAsync();
+
         return ServerUri;
     }
 }

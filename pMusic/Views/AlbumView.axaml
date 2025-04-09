@@ -75,16 +75,17 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Panel>
+                                    <!-- Button that appears on hover -->
+                                    <Button Content="{LucideIconContent Play}"
+                                            IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}"
+                                            Command="{Binding ((vm:AlbumViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding }"
+                                            Width="{Binding $parent[DataGridCell].Bounds.Width}"
+                                            Height="{Binding $parent[DataGridCell].Bounds.Height}" />
                                     <!-- Text that shows by default -->
                                     <TextBlock Text="{Binding Index}"
                                                IsVisible="{Binding !$parent[DataGridCellsPresenter].IsPointerOver}"
                                                VerticalAlignment="Center" Padding="12 0 0 0" />
-                                    <!-- Button that appears on hover -->
-                                    <Button Content="{LucideIconContent Play}"
-                                            IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}"
-                                            Command="{Binding $parent.((vm:AlbumViewModel)DataContext).PlayCommand}"
-                                            Width="{Binding $parent[DataGridCell].Bounds.Width}"
-                                            Height="{Binding $parent[DataGridCell].Bounds.Height}" />
                                 </Panel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

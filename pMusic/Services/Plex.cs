@@ -111,15 +111,15 @@ public class Plex
         return albums.ToImmutableList();
     }
 
-    public async ValueTask<IImmutableList<Track>> GetTrackList(string uri, string albumKey)
+    public async ValueTask<IImmutableList<Track>> GetTrackList(string uri, string albumKey, string artist)
     {
         var trackUri = uri + "/library/metadata/" + albumKey + "/children";
         var trackXml = await httpClient.GetStringAsync(trackUri);
 
-        var tracks = ParseTracks(XElement.Parse(trackXml)).ToImmutableList();
+        var tracks = await ParseTracks(XElement.Parse(trackXml), uri, artist);
         var empty = ImmutableList<Track>.Empty;
 
-        return tracks;
+        return tracks.ToImmutableList();
     }
 
     public async ValueTask UpdateTrackProgress(string ratingKey, float progress)
@@ -162,15 +162,13 @@ public class Plex
         // var res = await httpClient.SendAsync(request);
     }
 
-    public async ValueTask<MemoryStream> GetPlaybackStreamUrl(string uri)
+    public async ValueTask<MemoryStream> GetPlaybackStream(string uri)
     {
-        var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
-        var httpStream = await response.Content.ReadAsStreamAsync();
+        using var stream = await httpClient.GetStreamAsync(uri);
 
         // Copy to MemoryStream
         var memoryStream = new MemoryStream();
-        await httpStream.CopyToAsync(memoryStream);
+        await stream.CopyToAsync(memoryStream);
 
         return memoryStream;
     }
@@ -253,12 +251,22 @@ public class Plex
         return new Bitmap(memoryStream);
     }
 
-    public static List<Track> ParseTracks(XElement mediaContainer)
+    public async Task<List<Track>> ParseTracks(XElement mediaContainer, string uri, string artist)
     {
         if (mediaContainer == null) return new List<Track>();
 
-        var items = mediaContainer.Elements("Track").Select(
-            track => new Track(
+
+        var items = mediaContainer.Elements("Track").Select(async track =>
+        {
+            Bitmap? thumb = null;
+            if (track.Attribute("thumb")?.Value != null)
+            {
+                thumb =
+                    await GetBitmapImage(
+                        $"{uri}{track.Attribute("thumb")?.Value}?X-Plex-Token={_plexToken}");
+            }
+
+            return new Track(
                 RatingKey: track.Attribute("ratingKey")?.Value ?? "",
                 Key: track.Attribute("key")?.Value ?? "",
                 ParentRatingKey: track.Attribute("parentRatingKey")?.Value ?? "",
@@ -269,6 +277,7 @@ public class Plex
                 ParentStudio: track.Attribute("parentStudio")?.Value ?? "",
                 Type: track.Attribute("type")?.Value ?? "",
                 Title: track.Attribute("title")?.Value ?? "",
+                Artist: artist,
                 GrandparentKey: track.Attribute("grandparentKey")?.Value ?? "",
                 ParentKey: track.Attribute("parentKey")?.Value ?? "",
                 GrandparentTitle: track.Attribute("grandparentTitle")?.Value ?? "",
@@ -278,7 +287,7 @@ public class Plex
                 ParentIndex: int.Parse(track.Attribute("parentIndex")?.Value ?? "0"),
                 RatingCount: int.Parse(track.Attribute("ratingCount")?.Value ?? "0"),
                 ParentYear: int.Parse(track.Attribute("parentYear")?.Value! ?? "0"),
-                Thumb: track.Attribute("thumb")?.Value ?? "",
+                Thumb: thumb,
                 Art: track.Attribute("art")?.Value ?? "",
                 ParentThumb: track.Attribute("parentThumb")?.Value ?? "",
                 GrandparentThumb: track.Attribute("grandparentThumb")?.Value ?? "",
@@ -288,10 +297,10 @@ public class Plex
                 UpdatedAt: int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
                 MusicAnalysisVersion: int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
                 Media: ParseMedia(track.Element("Media")!)
-            )
-        ).ToList();
+            );
+        }).ToList();
 
-        return items;
+        return (await Task.WhenAll(items)).ToList();
     }
 
     private static Media ParseMedia(XElement mediaElement)
