@@ -12,6 +12,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
 using pMusic.Interface;
@@ -51,6 +52,11 @@ public partial class MainViewModel : ViewModelBase
         _plex = plex;
         MusicPlayer = musicPlayer;
         _audioPlayer = audioPlayer;
+    }
+
+    public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),
+        Ioc.Default.GetRequiredService<IAudioPlayerService>())
+    {
     }
 
     public void CheckLoginStatus()
