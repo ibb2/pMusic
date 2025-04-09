@@ -1,7 +1,9 @@
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KeySharp;
+using pMusic.Models;
 using SoundFlow.Abstracts;
 using SoundFlow.Backends.MiniAudio;
 using SoundFlow.Components;
@@ -30,24 +32,26 @@ public partial class AudioPlayer : IAudioPlayerService
     public SoundPlayer? SoundPlayer = null;
     public double PlaybackPosition;
     public Plex Plex;
+    private MusicPlayer _musicPlayer;
 
     private static AudioEngine? _audioEngine;
 
     private Playback _playback;
 
-    public AudioPlayer(Plex plex)
+    public AudioPlayer(Plex plex, MusicPlayer musicPlayer)
     {
         Plex = plex;
+        _musicPlayer = musicPlayer;
     }
 
     public SoundPlayer Player { get; set; }
-
 
     public async ValueTask PlayAudio(string uri, string baseUri, string ratingKey, string key)
     {
         try
         {
-            _playback = new Playback(plex: Plex, uri: baseUri, mixer: Mixer.Master, SoundPlayer, PlaybackPosition);
+            _playback = new Playback(plex: Plex, uri: baseUri, mixer: Mixer.Master, SoundPlayer, PlaybackPosition,
+                musicPlayer: _musicPlayer);
 
             // Initialize the audio engine with the MiniAudio backend.
             if (_audioEngine is null) _audioEngine = new MiniAudioEngine(44100, Capability.Playback);
@@ -74,6 +78,7 @@ public partial class AudioPlayer : IAudioPlayerService
             Mixer.Master.AddComponent(Player);
             // Start playback.
             Player.Play();
+
             _playback.StartPlayback(player: Player, key: key, ratingKey: ratingKey,
                 Decimal.Round((Decimal)Player.Duration * 1000, MidpointRounding.ToZero),
                 SoundPlayer, PlaybackPosition);

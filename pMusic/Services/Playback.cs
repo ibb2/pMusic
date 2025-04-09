@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using pMusic.Models;
 using SoundFlow.Components;
 using SoundFlow.Enums;
 
@@ -18,15 +19,17 @@ public class Playback
     private SoundPlayer _player;
     private readonly SoundPlayer _soundPlayerState;
     private readonly double _currentTimeState;
+    private MusicPlayer _musicPlayer;
 
     public Playback(Plex plex, string uri, Mixer mixer, SoundPlayer soundPlayerState,
-        double currentTimeState)
+        double currentTimeState, MusicPlayer musicPlayer)
     {
         _plex = plex;
         _baseUri = uri;
         _mixer = mixer;
         _soundPlayerState = soundPlayerState;
         _currentTimeState = currentTimeState;
+        _musicPlayer = musicPlayer;
     }
 
     public void StartPlayback(SoundPlayer player, string key, string ratingKey, decimal duration,
@@ -40,6 +43,7 @@ public class Playback
         _timer = new Timer(async _ =>
             {
                 await UpdateTimeline("playing");
+                _musicPlayer.PlaybackState = PlaybackState.Playing;
                 // await state.UpdateAsync(_ => player);
                 // var val = await state;
                 // await _soundPlayerState.UpdateAsync(_ => val);
@@ -59,6 +63,7 @@ public class Playback
     public async ValueTask PausePlayback()
     {
         _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        _musicPlayer.PlaybackState = PlaybackState.Paused;
         await UpdateTimeline("paused");
     }
 
@@ -80,9 +85,9 @@ public class Playback
             return;
         }
 
-        Console.WriteLine($"Track Progress {_player.Time}");
+        // Console.WriteLine($"Track Progress {_player.Time}");
         var formattedTime = decimal.Round((decimal)_player.Time, MidpointRounding.ToZero) * 1000;
-        Console.WriteLine($"Rounded Track Progess {formattedTime}");
+        // Console.WriteLine($"Rounded Track Progess {formattedTime}");
         await Task.Delay(1000);
         // await Plex.UpdateTrackProgress(ratingKey: ratingKey, progress: Player.Time);
         await _plex.UpdateSession(uri: _baseUri, key: _key, state: state, ratingKey: _ratingKey, formattedTime,

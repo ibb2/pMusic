@@ -15,6 +15,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
 using pMusic.Interface;
+using pMusic.Models;
 using pMusic.Services;
 
 namespace pMusic.ViewModels;
@@ -22,25 +23,33 @@ namespace pMusic.ViewModels;
 public partial class MainViewModel : ViewModelBase
 {
     private readonly Plex _plex;
-    
+
+    public MusicPlayer MusicPlayer { get; }
+
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
-    [ObservableProperty] private bool _isLoggedIn = !string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
-    [ObservableProperty] private bool _isLoggedInTrue = string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+
+    [ObservableProperty] private bool _isLoggedIn =
+        !string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+
+    [ObservableProperty] private bool _isLoggedInTrue =
+        string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+
     [ObservableProperty] private Bitmap _thumbnailUrl;
 
     [ObservableProperty] private bool _isLoading;
-    
+
     [ObservableProperty] private ViewModelBase _currentPage;
     // private readonly HomeViewModel _homeView = new();
     // private readonly ArtistViewModel _artistView = new ();
     // private readonly AlbumViewModel _albumView = new ();
     // private readonly TrackViewModel _trackView = new ();
 
-    public MainViewModel(Plex plex)
+    public MainViewModel(Plex plex, MusicPlayer musicPlayer)
     {
         _plex = plex;
+        MusicPlayer = musicPlayer;
     }
-    
+
     public void CheckLoginStatus()
     {
         string? authToken = null;

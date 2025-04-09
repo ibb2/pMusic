@@ -5,6 +5,8 @@
              xmlns:vm="clr-namespace:pMusic.ViewModels"
              xmlns:local="clr-namespace:pMusic.Interface"
              xmlns:views="clr-namespace:pMusic.Views"
+             xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+             xmlns:converter="clr-namespace:pMusic.Converter"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -13,6 +15,9 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainViewModel />
     </Design.DataContext>
+    <UserControl.Resources>
+        <converter:PlayingConverter x:Key="PlaybackStateToBooleanConverter" />
+    </UserControl.Resources>
 
     <UserControl.Styles>
         <Style Selector="Button.Home">
@@ -163,11 +168,30 @@
                             <Button Content="{LucideIconContent Kind=Rewind, Size=20, StrokeWidth=1.7}"
                                     Background="Transparent">
                             </Button>
-                            <Button Content="{LucideIconContent Kind=Play, Size=20, StrokeWidth=1.5}"
-                                    Width="40" Height="40" HorizontalAlignment="Center"
-                                    Classes="Home"
-                                    VerticalAlignment="Center">
-                            </Button>
+                            <Grid>
+                                <Button Content="{LucideIconContent Kind=Play, Size=20, StrokeWidth=1.5}"
+                                        Width="40" Height="40" HorizontalAlignment="Center"
+                                        IsVisible="{Binding !MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
+                                        Classes="Home"
+                                        VerticalAlignment="Center">
+                                </Button>
+                                <TextBlock Text="{Binding MusicPlayer.PlaybackState}" />
+                                <!-- <Button -->
+                                <!--     Width="40" Height="40" HorizontalAlignment="Center" -->
+                                <!--     Classes="Home" -->
+                                <!--     VerticalAlignment="Center"> -->
+                                <!--     <LucideIcon -->
+                                <!--         Kind="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToLucideIconConverter}}" -->
+                                <!--         Width="24" -->
+                                <!--         Height="24" /> -->
+                                <!-- </Button> -->
+                                <Button Content="{LucideIconContent Kind=Pause, Size=20, StrokeWidth=1.5}"
+                                        Width="40" Height="40" HorizontalAlignment="Center"
+                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
+                                        Classes="Home"
+                                        VerticalAlignment="Center">
+                                </Button>
+                            </Grid>
                             <Button Content="{LucideIconContent Kind=FastForward, Size=20, StrokeWidth=1.5}"
                                     Background="Transparent">
                             </Button>
