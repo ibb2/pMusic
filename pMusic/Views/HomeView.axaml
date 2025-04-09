@@ -15,20 +15,26 @@
         <Style>
             <Style Selector="TextBlock.h2">
                 <Setter Property="FontSize" Value="22"></Setter>
-                <Setter Property="FontWeight" Value="SemiBold"></Setter>
+                <Setter Property="FontWeight" Value="Bold"></Setter>
+            </Style>
+            <Style Selector="ListBox /template/ ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
             </Style>
             <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
                 <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Background"
+                        Value="{DynamicResource SystemChromeHighColor}">
+                </Setter>
             </Style>
             <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
                 <Setter Property="CornerRadius" Value="8" />
             </Style>
-            <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                <Setter Property="Background" Value="Transparent"></Setter>
-            </Style>
+            <!-- <Style Selector="ListBoxItem:selected /template/ ContentPresenter"> -->
+            <!--     <Setter Property="Background" Value="Transparent"></Setter> -->
+            <!-- </Style> -->
         </Style>
     </UserControl.Styles>
-    <ScrollViewer IsScrollChainingEnabled="True">
+    <ScrollViewer IsScrollChainingEnabled="True" Padding="32 0">
         <Grid Grid.RowDefinitions="*, *, *, *">
             <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
             <!-- Recently Played -->
@@ -65,7 +71,7 @@
                 <TextBlock Classes="h2">Recently Played</TextBlock>
                 <!-- New Releases / Recently Added? -->
                 <ListBox ItemsSource="{Binding Albums}" SelectionMode="Single"
-                         ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                         ScrollViewer.HorizontalScrollBarVisibility="Hidden" Background="Transparent">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal" />
@@ -76,7 +82,7 @@
                             <StackPanel PointerPressed="GoToAlbum">
                                 <Grid Margin="0, 0, 0, 12">
                                     <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True"
-                                            BorderBrush="LightGray"
+                                            BorderBrush="{DynamicResource SystemChromeHighColor}"
                                             BorderThickness="1">
                                         <Rectangle RadiusX="4" RadiusY="4">
                                             <Rectangle.Fill>
@@ -92,8 +98,7 @@
                     </ListBox.ItemTemplate>
                     <ItemsControl.Styles>
                         <Style>
-                            <Setter Property="ContentPresenter.Background" Value="Transparent" />
-
+                            <!-- <Setter Property="ContentPresenter.Background" Value="Transparent" /> -->
                         </Style>
                     </ItemsControl.Styles>
                 </ListBox>
@@ -114,7 +119,7 @@
                             <StackPanel PointerPressed="GoToAlbum">
                                 <Grid Margin="0, 0, 0, 12">
                                     <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True"
-                                            BorderBrush="LightGray"
+                                            BorderBrush="{DynamicResource SystemChromeHighColor}"
                                             BorderThickness="1">
                                         <Rectangle RadiusX="4" RadiusY="4">
                                             <Rectangle.Fill>
