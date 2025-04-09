@@ -38,19 +38,22 @@
         <Grid Grid.RowDefinitions="*, *, *, *">
             <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
             <!-- Recently Played -->
-            <ListBox Grid.Row="0" Margin="0 32" ItemsSource="{Binding TopEight}" HorizontalAlignment="Center"
+            <ListBox Classes="Top" Grid.Row="0" Margin="0 32" ItemsSource="{Binding TopEight}"
+                     HorizontalAlignment="Center"
                      SelectionMode="Single"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" />
+                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" />
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border CornerRadius="5" ClipToBounds="True"
-                                Background="{DynamicResource AccentButtonBackground}" Width="150">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                Background="{DynamicResource AccentButtonBackground}"
+                                Width="{Binding $parent[ListBox].Width}" MinWidth="200">
+                            <StackPanel Orientation="Horizontal" Spacing="8"
+                                        Background="{DynamicResource SystemBaseLowColor}">
                                 <Grid>
                                     <Image Source="/Assets/Images/blank_playlist.png" Width="50" Height="50"
                                            Stretch="UniformToFill" />
