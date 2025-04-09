@@ -17,6 +17,7 @@
     </Design.DataContext>
     <UserControl.Resources>
         <converter:PlayingConverter x:Key="PlaybackStateToBooleanConverter" />
+        <converter:PausedConverter x:Key="PausedConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -169,22 +170,13 @@
                                     Background="Transparent">
                             </Button>
                             <Grid>
+                                <!-- <TextBlock Text="{Binding MusicPlayer.PlaybackState}" /> -->
                                 <Button Content="{LucideIconContent Kind=Play, Size=20, StrokeWidth=1.5}"
                                         Width="40" Height="40" HorizontalAlignment="Center"
-                                        IsVisible="{Binding !MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
+                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PausedConverter}}"
                                         Classes="Home"
                                         VerticalAlignment="Center">
                                 </Button>
-                                <TextBlock Text="{Binding MusicPlayer.PlaybackState}" />
-                                <!-- <Button -->
-                                <!--     Width="40" Height="40" HorizontalAlignment="Center" -->
-                                <!--     Classes="Home" -->
-                                <!--     VerticalAlignment="Center"> -->
-                                <!--     <LucideIcon -->
-                                <!--         Kind="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToLucideIconConverter}}" -->
-                                <!--         Width="24" -->
-                                <!--         Height="24" /> -->
-                                <!-- </Button> -->
                                 <Button Content="{LucideIconContent Kind=Pause, Size=20, StrokeWidth=1.5}"
                                         Width="40" Height="40" HorizontalAlignment="Center"
                                         IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
