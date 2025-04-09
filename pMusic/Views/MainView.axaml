@@ -17,7 +17,6 @@
     </Design.DataContext>
     <UserControl.Resources>
         <converter:PlayingConverter x:Key="PlaybackStateToBooleanConverter" />
-        <converter:PausedConverter x:Key="PausedConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -183,14 +182,14 @@
                                 <Button Content="{LucideIconContent Kind=Play, Size=20, StrokeWidth=1.5}"
                                         Width="40" Height="40" HorizontalAlignment="Center"
                                         Command="{Binding PlayPause}"
-                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PausedConverter}, ConverterParameter=NotPlaying}"
+                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
                                         Classes="Home"
                                         VerticalAlignment="Center">
                                 </Button>
                                 <Button Content="{LucideIconContent Kind=Pause, Size=20, StrokeWidth=1.5}"
                                         Width="40" Height="40" HorizontalAlignment="Center"
                                         Command="{Binding PlayPause}"
-                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PausedConverter}}"
+                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
                                         Classes="Home"
                                         VerticalAlignment="Center">
                                 </Button>
