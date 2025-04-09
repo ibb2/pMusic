@@ -46,7 +46,7 @@
                 <TextBox Grid.Column="1" Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <Button Content="{LucideIconContent Kind=Bell}" Width="40" Height="40" Background="Azure"
+                <Button Content="{LucideIconContent Kind=Bell}" Width="40" Height="40"
                         Margin="0 0 8 0" CornerRadius=" 100" />
                 <Button Width="40" Height="40" Margin="0 0 8 0" Padding="0" CornerRadius="100">
                     <Border ClipToBounds="True" CornerRadius="100">
@@ -72,9 +72,7 @@
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="250, 4, *">
             <!-- Sidebar -->
-            <Border CornerRadius="4" Background="Gainsboro"
-                    BorderBrush="Black"
-                    BorderThickness="2"
+            <Border CornerRadius="4"
                     Padding="8" Margin="8 4 0 2">
                 <StackPanel Grid.Column="0" Spacing="12">
                     <Grid ColumnDefinitions="Auto, Auto" VerticalAlignment="Center">
@@ -122,10 +120,10 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <GridSplitter Grid.Column="1" Grid.Row="0" Background="Transparent" Foreground="Azure"
+            <GridSplitter Grid.Column="1" Grid.Row="0"
                           ResizeDirection="Columns" />
             <!-- Main Content -->
-            <Border Grid.Column="2" BorderBrush="Black" CornerRadius="4"
+            <Border Grid.Column="2" CornerRadius="4"
                     BorderThickness="2"
                     Padding="8" Margin="0 4 8 2">
                 <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
@@ -148,8 +146,7 @@
         </Grid>
         <Grid Grid.Row="2" Height="70">
             <!-- Bottom Music Player -->
-            <Border CornerRadius="4" Background="Gainsboro"
-                    BorderBrush="Black"
+            <Border CornerRadius="4"
                     BorderThickness="2"
                     Padding="8" Margin="8 0 8 4">
                 <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
