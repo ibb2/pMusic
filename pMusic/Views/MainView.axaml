@@ -173,13 +173,15 @@
                                 <!-- <TextBlock Text="{Binding MusicPlayer.PlaybackState}" /> -->
                                 <Button Content="{LucideIconContent Kind=Play, Size=20, StrokeWidth=1.5}"
                                         Width="40" Height="40" HorizontalAlignment="Center"
-                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PausedConverter}}"
+                                        Command="{Binding PlayPause}"
+                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PausedConverter}, ConverterParameter=NotPlaying}"
                                         Classes="Home"
                                         VerticalAlignment="Center">
                                 </Button>
                                 <Button Content="{LucideIconContent Kind=Pause, Size=20, StrokeWidth=1.5}"
                                         Width="40" Height="40" HorizontalAlignment="Center"
-                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
+                                        Command="{Binding PlayPause}"
+                                        IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PausedConverter}}"
                                         Classes="Home"
                                         VerticalAlignment="Center">
                                 </Button>

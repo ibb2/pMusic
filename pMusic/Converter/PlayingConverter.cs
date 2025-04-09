@@ -39,15 +39,17 @@ public class PausedConverter : IValueConverter
     public object? Convert(object? value, Type targetType,
         object? parameter, CultureInfo culture)
     {
-        if (value is PlaybackState state)
-        {
-            Console.WriteLine($"Playback State: {state == PlaybackState.Playing}");
-            return !(state == PlaybackState.Playing);
+        if (value is not PlaybackState state)
+            return false;
 
-            // see https://docs.avaloniaui.net/docs/guides/data-binding/how-to-create-a-custom-data-binding-converter
-        }
+        var param = parameter as string;
 
-        return false;
+        if (param == "NotPlaying")
+            return state != PlaybackState.Playing;
+
+        return state == PlaybackState.Playing;
+
+        // see https://docs.avaloniaui.net/docs/guides/data-binding/how-to-create-a-custom-data-binding-converter
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

@@ -40,10 +40,11 @@ public class Playback
         _ratingKey = ratingKey;
         _duration = duration;
 
+        _musicPlayer.PlaybackState = PlaybackState.Playing;
+
         _timer = new Timer(async _ =>
             {
                 await UpdateTimeline("playing");
-                _musicPlayer.PlaybackState = PlaybackState.Playing;
                 // await state.UpdateAsync(_ => player);
                 // var val = await state;
                 // await _soundPlayerState.UpdateAsync(_ => val);
@@ -63,7 +64,6 @@ public class Playback
     public async ValueTask PausePlayback()
     {
         _timer.Change(Timeout.Infinite, Timeout.Infinite);
-        _musicPlayer.PlaybackState = PlaybackState.Paused;
         await UpdateTimeline("paused");
     }
 

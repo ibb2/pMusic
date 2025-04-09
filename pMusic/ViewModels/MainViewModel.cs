@@ -17,12 +17,14 @@ using KeySharp;
 using pMusic.Interface;
 using pMusic.Models;
 using pMusic.Services;
+using SoundFlow.Enums;
 
 namespace pMusic.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
     private readonly Plex _plex;
+    private readonly IAudioPlayerService _audioPlayer;
 
     public MusicPlayer MusicPlayer { get; }
 
@@ -44,10 +46,11 @@ public partial class MainViewModel : ViewModelBase
     // private readonly AlbumViewModel _albumView = new ();
     // private readonly TrackViewModel _trackView = new ();
 
-    public MainViewModel(Plex plex, MusicPlayer musicPlayer)
+    public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer)
     {
         _plex = plex;
         MusicPlayer = musicPlayer;
+        _audioPlayer = audioPlayer;
     }
 
     public void CheckLoginStatus()
@@ -79,5 +82,17 @@ public partial class MainViewModel : ViewModelBase
     {
         ThumbnailUrl = await _plex.GetUserProfilePicture();
         Console.WriteLine($"thumbnail url {ThumbnailUrl}");
+    }
+
+    public void PlayPause()
+    {
+        if (MusicPlayer.PlaybackState == PlaybackState.Playing)
+        {
+            _audioPlayer.PauseAudio();
+        }
+        else
+        {
+            _audioPlayer.ResumeAudio();
+        }
     }
 }

@@ -19,8 +19,9 @@ public interface IAudioPlayerService
     // public double PlaybackPosition { get; }
 
     ValueTask PlayAudio(string uri, string baseUri, string ratingKey, string key);
-    // ValueTask PauseAudio();
-    // ValueTask ResumeAudio();
+    ValueTask PauseAudio();
+
+    ValueTask ResumeAudio();
     // ValueTask Stop();
 }
 
@@ -89,21 +90,19 @@ public partial class AudioPlayer : IAudioPlayerService
         }
     }
 
-    // public async ValueTask ResumeAudio()
-    // {
-    //     Player?.Play();
-    //     await _soundPlayer.UpdateAsync(_ => Player);
-    //     await _isPlaying.UpdateAsync(_ => true);
-    //     await _playback.UnPausePlayback();
-    // }
-    //
-    // public async ValueTask PauseAudio()
-    // {
-    //     Player?.Pause();
-    //     await _soundPlayer.UpdateAsync(_ => Player);
-    //     await _isPlaying.UpdateAsync(_ => false);
-    //     await _playback.PausePlayback();
-    // }
+    public async ValueTask ResumeAudio()
+    {
+        Player?.Play();
+        _musicPlayer.PlaybackState = PlaybackState.Playing;
+        await _playback.UnPausePlayback();
+    }
+
+    public async ValueTask PauseAudio()
+    {
+        Player?.Pause();
+        _musicPlayer.PlaybackState = PlaybackState.Paused;
+        await _playback.PausePlayback();
+    }
     //
     // public async ValueTask Stop()
     // {
