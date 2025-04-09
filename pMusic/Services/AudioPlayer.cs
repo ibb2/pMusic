@@ -52,12 +52,16 @@ public partial class AudioPlayer : IAudioPlayerService
             // Initialize the audio engine with the MiniAudio backend.
             if (_audioEngine is null) _audioEngine = new MiniAudioEngine(44100, Capability.Playback);
 
-            var url = await Plex.GetPlaybackStreamUrl(uri);
+            var musicMemoryStream = await Plex.GetPlaybackStream(uri);
 
-            // using var dataProvider = new NetworkDataProvider($"{uri}?X-Plex-Token={_plexToken}");
-            var dataProvider =
-                new NetworkDataProvider(
-                    "http://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Sevish_-__nbsp_.mp3");
+            var dataProvider = new ChunkedDataProvider(musicMemoryStream, chunkSize: 4096);
+            // var dataProvider = new NetworkDataProvider($"{uri}?X-Plex-Token={_plexToken}");
+            // var dataProvider =
+            //     new NetworkDataProvider(
+            //         "http://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Sevish_-__nbsp_.mp3");
+            // var dataProvider =
+            //     new NetworkDataProvider(
+            //         "https://freesound.org/people/kevp888/sounds/797756/download/797756__kevp888__r4_00491_exp01_jurassic_world_alien_planet.wav");
 
             // Create a SoundPlayer and load the stream.
             Player = new SoundPlayer(dataProvider);

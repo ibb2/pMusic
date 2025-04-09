@@ -162,15 +162,13 @@ public class Plex
         // var res = await httpClient.SendAsync(request);
     }
 
-    public async ValueTask<MemoryStream> GetPlaybackStreamUrl(string uri)
+    public async ValueTask<MemoryStream> GetPlaybackStream(string uri)
     {
-        var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
-        var httpStream = await response.Content.ReadAsStreamAsync();
+        using var stream = await httpClient.GetStreamAsync(uri);
 
         // Copy to MemoryStream
         var memoryStream = new MemoryStream();
-        await httpStream.CopyToAsync(memoryStream);
+        await stream.CopyToAsync(memoryStream);
 
         return memoryStream;
     }
