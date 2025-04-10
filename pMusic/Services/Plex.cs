@@ -425,32 +425,32 @@ public class Plex
                     // Parse Image
                     Image: directory.Element("Image") != null
                         ? new Image
-                        {
-                            Alt = directory.Element("Image")?.Attribute("alt")?.Value,
-                            Type = directory.Element("Image")?.Attribute("type")?.Value,
-                            Url = directory.Element("Image")?.Attribute("url")?.Value
-                        }
+                        (
+                            Alt: directory.Element("Image")?.Attribute("alt")?.Value,
+                            Type: directory.Element("Image")?.Attribute("type")?.Value,
+                            Url: directory.Element("Image")?.Attribute("url")?.Value
+                        )
                         : null,
 
                     // Parse UltraBlurColors
                     Ubc: directory.Element("UltraBlurColors") != null
                         ? new UltraBlurColors
-                        {
-                            TopLeft = directory.Element("UltraBlurColors")?.Attribute("topLeft")?.Value,
-                            TopRight = directory.Element("UltraBlurColors")?.Attribute("topRight")?.Value,
-                            BottomLeft = directory.Element("UltraBlurColors")?.Attribute("bottomLeft")?.Value,
-                            BottomRight = directory.Element("UltraBlurColors")?.Attribute("bottomRight")?.Value
-                        }
+                        (
+                            TopLeft: directory.Element("UltraBlurColors")?.Attribute("topLeft")?.Value,
+                            TopRight: directory.Element("UltraBlurColors")?.Attribute("topRight")?.Value,
+                            BottomLeft: directory.Element("UltraBlurColors")?.Attribute("bottomLeft")?.Value,
+                            BottomRight: directory.Element("UltraBlurColors")?.Attribute("bottomRight")?.Value
+                        )
                         : null,
 
                     // Parse Genres
                     Genres: directory.Elements("Genre")
-                        .Select(genre => new Genre { Tag = genre.Attribute("tag")?.Value })
+                        .Select(genre => new Genre(Tag: genre.Attribute("tag")?.Value))
                         .ToArray(),
 
                     // Parse Country
                     Country: directory.Element("Country") != null
-                        ? new Country { Tag = directory.Element("Country")?.Attribute("tag")?.Value }
+                        ? new Country(Tag: directory.Element("Country")?.Attribute("tag")?.Value)
                         : null
                 );
             }).ToList();
