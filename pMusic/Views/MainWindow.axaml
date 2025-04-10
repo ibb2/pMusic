@@ -7,6 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="pMusic.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="pMusic">
-        <views:MainView />
+        Title="pMusic"
+        Background="{DynamicResource RegionColor}" Padding="8 0">
+    <views:MainView />
 </Window>

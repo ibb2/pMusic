@@ -24,27 +24,23 @@ public partial record Artist(
     Country? Country = null
 );
 
-public record Image
-{
-    public string Alt { get; set; }
-    public string Type { get; set; }
-    public string Url { get; set; }
-}
+public record Image(
+    string Alt,
+    string Type,
+    string Url
+);
 
-public record UltraBlurColors
-{
-    public string TopLeft { get; set; }
-    public string TopRight { get; set; }
-    public string BottomLeft { get; set; }
-    public string BottomRight { get; set; }
-}
+public record UltraBlurColors(
+    string TopLeft,
+    string TopRight,
+    string BottomLeft,
+    string BottomRight
+);
 
-public record Genre
-{
-    public string Tag { get; set; }
-}
+public record Genre(
+    string Tag
+);
 
-public record Country
-{
-    public string Tag { get; set; }
-}
+public record Country(
+    string Tag
+);
