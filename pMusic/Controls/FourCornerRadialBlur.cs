@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Styling;
 using System;
 
 namespace pMusic.Controls;
@@ -47,14 +48,25 @@ public class FourCornerGradientBlur : ContentControl
     {
         PropertyChanged += (sender, e) =>
         {
-            if (e.Property == TopLeftColorProperty ||
-                e.Property == TopRightColorProperty ||
-                e.Property == BottomLeftColorProperty ||
-                e.Property == BottomRightColorProperty)
+            if (e.Property == BackgroundProperty)
             {
                 InvalidateVisual();
             }
         };
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == TopLeftColorProperty ||
+            change.Property == TopRightColorProperty ||
+            change.Property == BottomLeftColorProperty ||
+            change.Property == BottomRightColorProperty ||
+            change.Property == BackgroundProperty)
+        {
+            InvalidateVisual();
+        }
     }
 
     public override void Render(DrawingContext context)
@@ -64,94 +76,143 @@ public class FourCornerGradientBlur : ContentControl
 
         try
         {
-            // Parse the color values
             var topLeft = Color.Parse($"#{TopLeftColor}");
             var topRight = Color.Parse($"#{TopRightColor}");
             var bottomLeft = Color.Parse($"#{BottomLeftColor}");
             var bottomRight = Color.Parse($"#{BottomRightColor}");
 
-            // Create a ConicGradientBrush for each corner
-            DrawCornerGradient(context, bounds, topLeft, topRight, bottomLeft, bottomRight);
+            bool isLightMode = IsLightTheme();
+
+            // For a softer look with proper alpha handling
+            if (isLightMode)
+            {
+                // Light mode - very subtle effect (25% opacity)
+                DrawSoftGradient(context, bounds,
+                    SetColorAlpha(topLeft, 0x40),
+                    SetColorAlpha(topRight, 0x40),
+                    SetColorAlpha(bottomLeft, 0x40),
+                    SetColorAlpha(bottomRight, 0x40),
+                    centerAlpha: 0x26); // ~15% opacity
+                // For an ultra-light look:
+                // DrawSoftGradient(context, bounds, 
+                //     SetColorAlpha(topLeft, 0x20),  // ~12% opacity
+                //     SetColorAlpha(topRight, 0x20),
+                //     SetColorAlpha(bottomLeft, 0x20),
+                //     SetColorAlpha(bottomRight, 0x20),
+                //     centerAlpha: 0x10);  // ~6% opacity
+            }
+            else
+            {
+                // Dark mode - slightly more visible but still subtle (40% opacity)
+                DrawSoftGradient(context, bounds,
+                    SetColorAlpha(topLeft, 0x60),
+                    SetColorAlpha(topRight, 0x60),
+                    SetColorAlpha(bottomLeft, 0x60),
+                    SetColorAlpha(bottomRight, 0x60),
+                    centerAlpha: 0x40); // ~25% opacity
+            }
         }
         catch (Exception)
         {
-            // Fallback to a solid color if there's a problem
-            context.FillRectangle(Brushes.Gray, bounds);
+            context.FillRectangle(Brushes.Transparent, bounds);
         }
+    }
+
+    private Color SetColorAlpha(Color color, byte alpha)
+    {
+        return Color.FromArgb(alpha, color.R, color.G, color.B);
+    }
+
+    private void DrawSoftGradient(DrawingContext context, Rect bounds,
+        Color topLeft, Color topRight,
+        Color bottomLeft, Color bottomRight,
+        byte centerAlpha)
+    {
+        // Create center color with adjusted alpha
+        var centerColor = AverageColor(new[] { topLeft, topRight, bottomLeft, bottomRight });
+        centerColor = SetColorAlpha(centerColor, centerAlpha);
+
+        // Fill with the center color first
+        context.FillRectangle(new SolidColorBrush(centerColor), bounds);
+
+        // Create very subtle corner gradients
+        var gradients = new[]
+        {
+            CreateCornerGradient(topLeft, centerColor, new RelativePoint(0, 0, RelativeUnit.Relative)),
+            CreateCornerGradient(topRight, centerColor, new RelativePoint(1, 0, RelativeUnit.Relative)),
+            CreateCornerGradient(bottomLeft, centerColor, new RelativePoint(0, 1, RelativeUnit.Relative)),
+            CreateCornerGradient(bottomRight, centerColor, new RelativePoint(1, 1, RelativeUnit.Relative))
+        };
+
+        // Apply with very low opacity
+        foreach (var gradient in gradients)
+        {
+            using (context.PushOpacity(0.3)) // Even more transparent
+            {
+                context.FillRectangle(gradient, bounds);
+            }
+        }
+    }
+
+    private LinearGradientBrush CreateCornerGradient(Color cornerColor, Color centerColor, RelativePoint startPoint)
+    {
+        return new LinearGradientBrush
+        {
+            StartPoint = startPoint,
+            EndPoint = new RelativePoint(0.5, 0.5, RelativeUnit.Relative),
+            GradientStops = new GradientStops
+            {
+                new GradientStop(cornerColor, 0),
+                new GradientStop(Color.FromArgb(0, centerColor.R, centerColor.G, centerColor.B), 1)
+            }
+        };
+    }
+
+
+    private bool IsLightTheme()
+    {
+        // Check if background is light
+        if (Background is ISolidColorBrush brush)
+        {
+            // Calculate relative luminance (perceived brightness)
+            double luminance = (0.299 * brush.Color.R + 0.587 * brush.Color.G + 0.114 * brush.Color.B) / 255;
+            return luminance > 0.5;
+        }
+
+        return false; // default to dark mode if we can't determine
     }
 
     private void DrawCornerGradient(DrawingContext context, Rect bounds,
         Color topLeft, Color topRight,
-        Color bottomLeft, Color bottomRight)
+        Color bottomLeft, Color bottomRight, bool isLightMode)
     {
-        // Create a lighter center color (average of all corners and lighten)
+        // Create a center color (average of all corners)
         var centerColor = AverageColor(new[] { topLeft, topRight, bottomLeft, bottomRight });
-        centerColor = LightenColor(centerColor, 0.2); // Lighten the center
 
-        // Darken corner colors
-        topLeft = DarkenColor(topLeft, 0.3);
-        topRight = DarkenColor(topRight, 0.3);
-        bottomLeft = DarkenColor(bottomLeft, 0.3);
-        bottomRight = DarkenColor(bottomRight, 0.3);
+        // Adjust colors based on theme
+        if (isLightMode)
+        {
+            // For light mode, make the effect more subtle
+            centerColor = LightenColor(centerColor, 0.4); // Lighten the center more
+            topLeft = LightenColor(topLeft, 0.3);
+            topRight = LightenColor(topRight, 0.3);
+            bottomLeft = LightenColor(bottomLeft, 0.3);
+            bottomRight = LightenColor(bottomRight, 0.3);
+        }
+        else
+        {
+            // For dark mode, keep the original darker effect
+            centerColor = LightenColor(centerColor, 0.2);
+            topLeft = DarkenColor(topLeft, 0.3);
+            topRight = DarkenColor(topRight, 0.3);
+            bottomLeft = DarkenColor(bottomLeft, 0.3);
+            bottomRight = DarkenColor(bottomRight, 0.3);
+        }
 
-        // Start with base background color - the lightened center color
+        // Start with base background color - the center color
         context.FillRectangle(new SolidColorBrush(centerColor), bounds);
 
-        // Use linear gradients instead of radial for a more dramatic effect
-
-        // Top edge gradient (top-left to top-right)
-        var topGradient = new LinearGradientBrush
-        {
-            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
-            EndPoint = new RelativePoint(1, 0, RelativeUnit.Relative),
-            GradientStops = new GradientStops
-            {
-                new GradientStop(topLeft, 0),
-                new GradientStop(centerColor, 0.5),
-                new GradientStop(topRight, 1)
-            }
-        };
-
-        // Left edge gradient (top-left to bottom-left)
-        var leftGradient = new LinearGradientBrush
-        {
-            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
-            EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
-            GradientStops = new GradientStops
-            {
-                new GradientStop(topLeft, 0),
-                new GradientStop(centerColor, 0.5),
-                new GradientStop(bottomLeft, 1)
-            }
-        };
-
-        // Right edge gradient (top-right to bottom-right)
-        var rightGradient = new LinearGradientBrush
-        {
-            StartPoint = new RelativePoint(1, 0, RelativeUnit.Relative),
-            EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
-            GradientStops = new GradientStops
-            {
-                new GradientStop(topRight, 0),
-                new GradientStop(centerColor, 0.5),
-                new GradientStop(bottomRight, 1)
-            }
-        };
-
-        // Bottom edge gradient (bottom-left to bottom-right)
-        var bottomGradient = new LinearGradientBrush
-        {
-            StartPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
-            EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
-            GradientStops = new GradientStops
-            {
-                new GradientStop(bottomLeft, 0),
-                new GradientStop(centerColor, 0.5),
-                new GradientStop(bottomRight, 1)
-            }
-        };
-
-        // Create a gradient from each corner to center
+        // Create gradients from each corner to center
         var topLeftGradient = new LinearGradientBrush
         {
             StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
@@ -196,26 +257,83 @@ public class FourCornerGradientBlur : ContentControl
             }
         };
 
-        // Draw all the edge gradients
-        using (context.PushOpacity(0.4))
-        {
-            context.FillRectangle(topGradient, bounds);
-            context.FillRectangle(leftGradient, bounds);
-            context.FillRectangle(rightGradient, bounds);
-            context.FillRectangle(bottomGradient, bounds);
-        }
+        // Adjust opacity based on theme
+        double cornerOpacity = isLightMode ? 0.3 : 0.6;
+        double edgeOpacity = isLightMode ? 0.2 : 0.4;
 
         // Draw the corner gradients
-        using (context.PushOpacity(0.6))
+        using (context.PushOpacity(cornerOpacity))
         {
             context.FillRectangle(topLeftGradient, bounds);
             context.FillRectangle(topRightGradient, bounds);
             context.FillRectangle(bottomLeftGradient, bounds);
             context.FillRectangle(bottomRightGradient, bounds);
         }
+
+        // For light mode, we might want to simplify the effect
+        if (!isLightMode)
+        {
+            // Original edge gradients for dark mode
+            var topGradient = new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(1, 0, RelativeUnit.Relative),
+                GradientStops = new GradientStops
+                {
+                    new GradientStop(topLeft, 0),
+                    new GradientStop(centerColor, 0.5),
+                    new GradientStop(topRight, 1)
+                }
+            };
+
+            var leftGradient = new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+                GradientStops = new GradientStops
+                {
+                    new GradientStop(topLeft, 0),
+                    new GradientStop(centerColor, 0.5),
+                    new GradientStop(bottomLeft, 1)
+                }
+            };
+
+            var rightGradient = new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(1, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+                GradientStops = new GradientStops
+                {
+                    new GradientStop(topRight, 0),
+                    new GradientStop(centerColor, 0.5),
+                    new GradientStop(bottomRight, 1)
+                }
+            };
+
+            var bottomGradient = new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+                GradientStops = new GradientStops
+                {
+                    new GradientStop(bottomLeft, 0),
+                    new GradientStop(centerColor, 0.5),
+                    new GradientStop(bottomRight, 1)
+                }
+            };
+
+            // Draw all the edge gradients
+            using (context.PushOpacity(edgeOpacity))
+            {
+                context.FillRectangle(topGradient, bounds);
+                context.FillRectangle(leftGradient, bounds);
+                context.FillRectangle(rightGradient, bounds);
+                context.FillRectangle(bottomGradient, bounds);
+            }
+        }
     }
 
-// Helper method to darken a color
+    // Helper methods (DarkenColor, LightenColor, AverageColor remain the same)
     private Color DarkenColor(Color color, double factor)
     {
         return Color.FromArgb(
@@ -226,7 +344,6 @@ public class FourCornerGradientBlur : ContentControl
         );
     }
 
-// Helper method to lighten a color
     private Color LightenColor(Color color, double factor)
     {
         return Color.FromArgb(
@@ -237,7 +354,6 @@ public class FourCornerGradientBlur : ContentControl
         );
     }
 
-// Helper method to get the average of multiple colors
     private Color AverageColor(Color[] colors)
     {
         int r = 0, g = 0, b = 0, a = 0;
