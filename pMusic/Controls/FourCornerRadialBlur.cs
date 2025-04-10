@@ -84,79 +84,146 @@ public class FourCornerGradientBlur : ContentControl
         Color topLeft, Color topRight,
         Color bottomLeft, Color bottomRight)
     {
-        // Lighten the colors for more contrast
-        topLeft = LightenColor(topLeft, 0.3);
-        topRight = LightenColor(topRight, 0.3);
-        bottomLeft = LightenColor(bottomLeft, 0.3);
-        bottomRight = LightenColor(bottomRight, 0.3);
+        // Create a lighter center color (average of all corners and lighten)
+        var centerColor = AverageColor(new[] { topLeft, topRight, bottomLeft, bottomRight });
+        centerColor = LightenColor(centerColor, 0.2); // Lighten the center
 
-        // Reduce the radius to make the gradient more aggressive
-        double radius = 0.4; // Smaller radius creates a more pronounced effect
+        // Darken corner colors
+        topLeft = DarkenColor(topLeft, 0.3);
+        topRight = DarkenColor(topRight, 0.3);
+        bottomLeft = DarkenColor(bottomLeft, 0.3);
+        bottomRight = DarkenColor(bottomRight, 0.3);
 
-        // Top-left corner gradient
-        var topLeftBrush = new RadialGradientBrush
+        // Start with base background color - the lightened center color
+        context.FillRectangle(new SolidColorBrush(centerColor), bounds);
+
+        // Use linear gradients instead of radial for a more dramatic effect
+
+        // Top edge gradient (top-left to top-right)
+        var topGradient = new LinearGradientBrush
         {
-            Center = new RelativePoint(0, 0, RelativeUnit.Relative),
-            GradientOrigin = new RelativePoint(0, 0, RelativeUnit.Relative),
-            Radius = radius,
+            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(1, 0, RelativeUnit.Relative),
             GradientStops = new GradientStops
             {
                 new GradientStop(topLeft, 0),
-                new GradientStop(Color.FromArgb(0, topLeft.R, topLeft.G, topLeft.B), 0.5)
+                new GradientStop(centerColor, 0.5),
+                new GradientStop(topRight, 1)
             }
         };
 
-        // Top-right corner gradient
-        var topRightBrush = new RadialGradientBrush
+        // Left edge gradient (top-left to bottom-left)
+        var leftGradient = new LinearGradientBrush
         {
-            Center = new RelativePoint(1, 0, RelativeUnit.Relative),
-            GradientOrigin = new RelativePoint(1, 0, RelativeUnit.Relative),
-            Radius = radius,
+            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+            GradientStops = new GradientStops
+            {
+                new GradientStop(topLeft, 0),
+                new GradientStop(centerColor, 0.5),
+                new GradientStop(bottomLeft, 1)
+            }
+        };
+
+        // Right edge gradient (top-right to bottom-right)
+        var rightGradient = new LinearGradientBrush
+        {
+            StartPoint = new RelativePoint(1, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
             GradientStops = new GradientStops
             {
                 new GradientStop(topRight, 0),
-                new GradientStop(Color.FromArgb(0, topRight.R, topRight.G, topRight.B), 0.5)
+                new GradientStop(centerColor, 0.5),
+                new GradientStop(bottomRight, 1)
             }
         };
 
-        // Bottom-left corner gradient
-        var bottomLeftBrush = new RadialGradientBrush
+        // Bottom edge gradient (bottom-left to bottom-right)
+        var bottomGradient = new LinearGradientBrush
         {
-            Center = new RelativePoint(0, 1, RelativeUnit.Relative),
-            GradientOrigin = new RelativePoint(0, 1, RelativeUnit.Relative),
-            Radius = radius,
+            StartPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
             GradientStops = new GradientStops
             {
                 new GradientStop(bottomLeft, 0),
-                new GradientStop(Color.FromArgb(0, bottomLeft.R, bottomLeft.G, bottomLeft.B), 0.5)
+                new GradientStop(centerColor, 0.5),
+                new GradientStop(bottomRight, 1)
             }
         };
 
-        // Bottom-right corner gradient
-        var bottomRightBrush = new RadialGradientBrush
+        // Create a gradient from each corner to center
+        var topLeftGradient = new LinearGradientBrush
         {
-            Center = new RelativePoint(1, 1, RelativeUnit.Relative),
-            GradientOrigin = new RelativePoint(1, 1, RelativeUnit.Relative),
-            Radius = radius,
+            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(0.5, 0.5, RelativeUnit.Relative),
+            GradientStops = new GradientStops
+            {
+                new GradientStop(topLeft, 0),
+                new GradientStop(Color.FromArgb(0, centerColor.R, centerColor.G, centerColor.B), 1)
+            }
+        };
+
+        var topRightGradient = new LinearGradientBrush
+        {
+            StartPoint = new RelativePoint(1, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(0.5, 0.5, RelativeUnit.Relative),
+            GradientStops = new GradientStops
+            {
+                new GradientStop(topRight, 0),
+                new GradientStop(Color.FromArgb(0, centerColor.R, centerColor.G, centerColor.B), 1)
+            }
+        };
+
+        var bottomLeftGradient = new LinearGradientBrush
+        {
+            StartPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(0.5, 0.5, RelativeUnit.Relative),
+            GradientStops = new GradientStops
+            {
+                new GradientStop(bottomLeft, 0),
+                new GradientStop(Color.FromArgb(0, centerColor.R, centerColor.G, centerColor.B), 1)
+            }
+        };
+
+        var bottomRightGradient = new LinearGradientBrush
+        {
+            StartPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(0.5, 0.5, RelativeUnit.Relative),
             GradientStops = new GradientStops
             {
                 new GradientStop(bottomRight, 0),
-                new GradientStop(Color.FromArgb(0, bottomRight.R, bottomRight.G, bottomRight.B), 0.5)
+                new GradientStop(Color.FromArgb(0, centerColor.R, centerColor.G, centerColor.B), 1)
             }
         };
 
-        // Draw a base color first (average of all colors)
-        var baseColor = AverageColor(new[] { topLeft, topRight, bottomLeft, bottomRight });
-        context.FillRectangle(new SolidColorBrush(baseColor), bounds);
-
-        // Draw all four gradients with increased opacity
-        using (context.PushOpacity(0.85))
+        // Draw all the edge gradients
+        using (context.PushOpacity(0.4))
         {
-            context.FillRectangle(topLeftBrush, bounds);
-            context.FillRectangle(topRightBrush, bounds);
-            context.FillRectangle(bottomLeftBrush, bounds);
-            context.FillRectangle(bottomRightBrush, bounds);
+            context.FillRectangle(topGradient, bounds);
+            context.FillRectangle(leftGradient, bounds);
+            context.FillRectangle(rightGradient, bounds);
+            context.FillRectangle(bottomGradient, bounds);
         }
+
+        // Draw the corner gradients
+        using (context.PushOpacity(0.6))
+        {
+            context.FillRectangle(topLeftGradient, bounds);
+            context.FillRectangle(topRightGradient, bounds);
+            context.FillRectangle(bottomLeftGradient, bounds);
+            context.FillRectangle(bottomRightGradient, bounds);
+        }
+    }
+
+// Helper method to darken a color
+    private Color DarkenColor(Color color, double factor)
+    {
+        return Color.FromArgb(
+            color.A,
+            (byte)Math.Max(0, color.R * (1 - factor)),
+            (byte)Math.Max(0, color.G * (1 - factor)),
+            (byte)Math.Max(0, color.B * (1 - factor))
+        );
     }
 
 // Helper method to lighten a color

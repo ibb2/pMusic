@@ -16,7 +16,7 @@
             <ExperimentalAcrylicBorder.Material>
                 <ExperimentalAcrylicMaterial
                     BackgroundSource="Digger"
-                    TintColor="{DynamicResource SystemAccentColor}"
+                    TintColor="{DynamicResource SystemAltMediumColor}"
                     TintOpacity="0.2"
                     MaterialOpacity="50"
                     FallbackColor="{DynamicResource RegionColor}" />

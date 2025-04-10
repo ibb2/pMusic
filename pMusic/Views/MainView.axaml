@@ -22,7 +22,7 @@
 
     <UserControl.Styles>
         <Style Selector="Border.Panel">
-            <Setter Property="Background" Value="{DynamicResource SystemBaseLowColor}"></Setter>
+            <Setter Property="Background" Value="{DynamicResource SystemAltLowColor}"></Setter>
         </Style>
         <Style Selector="Button.Home">
             <Setter Property="CornerRadius">100</Setter>
