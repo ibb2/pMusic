@@ -35,4 +35,19 @@ public abstract partial class ViewModelBase : ObservableObject
     {
         Navigation.GoToView<TrackViewModel>(vm => vm.Title = "Updated Track Title");
     }
+
+    public void GoBack()
+    {
+        Navigation.GoBack();
+    }
+
+    public void GoForward()
+    {
+        Navigation.GoForward();
+    }
+
+    public void GoHome()
+    {
+        Navigation.GoHome();
+    }
 }
