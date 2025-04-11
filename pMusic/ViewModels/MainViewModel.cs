@@ -26,8 +26,7 @@ public partial class MainViewModel : ViewModelBase
 {
     private readonly Plex _plex;
     private readonly IAudioPlayerService _audioPlayer;
-
-    public MusicPlayer MusicPlayer { get; }
+    public static MusicPlayer MusicPlayer { get; set; }
 
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
 
@@ -38,20 +37,16 @@ public partial class MainViewModel : ViewModelBase
         string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
 
     [ObservableProperty] private Bitmap _thumbnailUrl;
-
     [ObservableProperty] private bool _isLoading;
-
     [ObservableProperty] private ViewModelBase _currentPage;
-    // private readonly HomeViewModel _homeView = new();
-    // private readonly ArtistViewModel _artistView = new ();
-    // private readonly AlbumViewModel _albumView = new ();
-    // private readonly TrackViewModel _trackView = new ();
+    [ObservableProperty] private float _pos;
 
     public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer)
     {
         _plex = plex;
         MusicPlayer = musicPlayer;
         _audioPlayer = audioPlayer;
+        _pos = MusicPlayer.Position;
     }
 
     public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),

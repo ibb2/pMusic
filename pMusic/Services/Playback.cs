@@ -49,6 +49,7 @@ public class Playback
         _timer = new Timer(async _ =>
             {
                 await UpdateTimeline("playing");
+                _musicPlayer.Position = player.Time;
                 // await state.UpdateAsync(_ => player);
                 // var val = await state;
                 // await _soundPlayerState.UpdateAsync(_ => val);

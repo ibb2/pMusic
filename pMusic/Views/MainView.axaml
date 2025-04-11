@@ -194,6 +194,8 @@
                                     Command="{Binding PlayPause}"
                                     IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
                                     Classes="Home"
+                                    Padding="0"
+                                    HorizontalContentAlignment="Center"
                                     VerticalAlignment="Center">
                             </Button>
                             <Button Content="{LucideIconContent Kind=Pause, Size=25, StrokeWidth=2}"
@@ -203,6 +205,8 @@
                                     Command="{Binding PlayPause}"
                                     IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
                                     Classes="Home"
+                                    Padding="0"
+                                    HorizontalContentAlignment="Center"
                                     VerticalAlignment="Center">
                             </Button>
                         </Grid>
@@ -214,7 +218,9 @@
                             Background="Transparent" CornerRadius="100" Width="40" Height="40">
                         </Button>
                     </StackPanel>
-                    <Slider Maximum="100" Value="50" Width="250"></Slider>
+                    <Slider Maximum="{Binding MusicPlayer.CurrentlyPlayingTrack.Duration}"
+                            Value="{Binding MusicPlayer.Position}" Width="250">
+                    </Slider>
                     <!-- <ProgressBar Minimum="0" Maximum="100" Value="35" Height="5" /> -->
                 </StackPanel>
                 <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
