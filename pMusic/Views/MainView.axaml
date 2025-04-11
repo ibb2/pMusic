@@ -45,8 +45,12 @@
     <Grid RowDefinitions="Auto, *, Auto">
         <Grid ColumnDefinitions="Auto, *, Auto" Margin="0, 8 0 2">
             <StackPanel Orientation="Horizontal">
-                <Button Content="{LucideIconContent Kind=ChevronLeft}" Background="Transparent" Foreground="Gray"></Button>
-                <Button Content="{LucideIconContent Kind=ChevronRight}" Background="Transparent" Foreground="Gray"></Button>
+                <Button Content="{LucideIconContent Kind=ChevronLeft}" Command="{Binding GoBack}"
+                        Background="Transparent" Foreground="Gray">
+                </Button>
+                <Button Content="{LucideIconContent Kind=ChevronRight}" Command="{Binding GoForward}"
+                        Background="Transparent" Foreground="Gray">
+                </Button>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Background="{DynamicResource AccentButtonBackground}"

@@ -19,9 +19,8 @@ public partial class Navigation : ObservableObject
     private static IMusic _music;
     private static Plex _plex;
 
-
-    // private readonly HomeViewModel _homeView = new();
-
+    [ObservableProperty] private Stack<ViewModelBase> _navStack = new();
+    [ObservableProperty] private Stack<ViewModelBase> _popStack = new();
     [ObservableProperty] private object? _currentView;
 
     private readonly Dictionary<Type, ViewModelBase> _viewModels = new();
@@ -44,23 +43,13 @@ public partial class Navigation : ObservableObject
         var viewModel = GetViewModel<T>();
         intializer(viewModel);
         CurrentView = viewModel;
+        PushToNavStack(viewModel);
     }
 
     // Factory method to get view model instances
     public T GetViewModel<T>() where T : ViewModelBase, new()
     {
         Type type = typeof(T);
-
-        // Create the view model if it doesn't exist yet
-        // switch (type)
-        // {
-        //     case Type t when type == typeof(HomeViewModel):
-        //         return Ioc.Default.GetRequiredService<T>();
-        //     case Type t when type == typeof(ArtistViewModel):
-        //         return Ioc.Default.GetRequiredService<T>();
-        //     case Type t when type == typeof(AlbumViewModel):
-        //         return Ioc.Default.GetRequiredService<T>();
-        // }
 
         if (!_viewModels.ContainsKey(type))
         {
@@ -69,4 +58,36 @@ public partial class Navigation : ObservableObject
 
         return (T)_viewModels[type];
     }
+
+    private void PushToNavStack(ViewModelBase viewModel)
+    {
+        NavStack.Push(viewModel);
+    }
+
+    private void PopFromNavStack(bool direction)
+    {
+        if (NavStack.Count <= 0 && PopStack.Count <= 0) return;
+
+        if (direction)
+        {
+            if (NavStack.Count == 1)
+            {
+                CurrentView = GetViewModel<HomeViewModel>();
+                PopStack.Push(NavStack.Pop());
+                return;
+            }
+
+            PopStack.Push(NavStack.Pop());
+            CurrentView = NavStack.Pop();
+        }
+        else
+        {
+            var topOfStack = PopStack.Pop();
+            NavStack.Push(topOfStack);
+            CurrentView = topOfStack;
+        }
+    }
+
+    public void GoBack() => PopFromNavStack(true);
+    public void GoForward() => PopFromNavStack(false);
 }
