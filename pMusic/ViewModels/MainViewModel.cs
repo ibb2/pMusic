@@ -26,7 +26,7 @@ public partial class MainViewModel : ViewModelBase
 {
     private readonly Plex _plex;
     private readonly IAudioPlayerService _audioPlayer;
-    public MusicPlayer MusicPlayer { get; set; }
+    public MusicPlayer MusicPlayer { get; }
 
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
 

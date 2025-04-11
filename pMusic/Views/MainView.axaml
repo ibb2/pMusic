@@ -18,6 +18,8 @@
     <UserControl.Resources>
         <converter:PlayingConverter x:Key="PlaybackStateToBooleanConverter" />
         <converter:HalfWidth x:Key="HalfWidth" />
+        <converter:Seconds x:Key="SecondsToMinutesConverter" />
+        <converter:Int x:Key="IntToBoolConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -42,7 +44,7 @@
             <Setter Property="Width">40</Setter>
         </Style>
     </UserControl.Styles>
-    <Grid RowDefinitions="Auto, *, 100">
+    <Grid RowDefinitions="Auto, *, 150">
         <Grid ColumnDefinitions="Auto, *, Auto" Margin="0, 8 0 2">
             <StackPanel Orientation="Horizontal">
                 <Button Content="{LucideIconContent Kind=ChevronLeft}" Command="{Binding GoBack}"
@@ -159,74 +161,84 @@
                 </UserControl>
             </Border>
         </Grid>
-        <Grid Grid.Row="2" Height="70">
+        <Grid Grid.Row="2" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
             <!-- Bottom Music Player -->
-            <Grid ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
-                <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal">
+                <Grid>
+                    <Border CornerRadius="5" ClipToBounds="True">
+                        <Image Source="{Binding MusicPlayer.CurrentlyPlayingTrack.Thumb}" Width="50"
+                               ClipToBounds="True" />
+                    </Border>
+                </Grid>
+                <StackPanel>
+                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Title}" Foreground="Black"
+                               VerticalAlignment="Center" Margin="8 4" />
+                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Artist}" Foreground="Black"
+                               VerticalAlignment="Center" Margin="8 4" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Spacing="4">
+                    <Button
+                        Classes="No-Hover"
+                        Content="{LucideIconContent Kind=Rewind, StrokeWidth=2, 
+                        Size=20}"
+                        Foreground="{DynamicResource AccentButtonForegroundDisabled}"
+                        Background="Transparent" CornerRadius="100" Width="40" Height="40">
+                    </Button>
                     <Grid>
-                        <Border CornerRadius="5" ClipToBounds="True">
-                            <Image Source="{Binding MusicPlayer.CurrentlyPlayingTrack.Thumb}" Width="50"
-                                   ClipToBounds="True" />
-                        </Border>
+                        <Button Content="{LucideIconContent Kind=Play, Size=25, StrokeWidth=2}"
+                                HorizontalAlignment="Center"
+                                Foreground="{DynamicResource SystemAltHighColor}"
+                                Background="{DynamicResource SystemBaseHighColor}"
+                                Command="{Binding PlayPause}"
+                                IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
+                                Classes="Home"
+                                Padding="0"
+                                HorizontalContentAlignment="Center"
+                                VerticalAlignment="Center">
+                        </Button>
+                        <Button Content="{LucideIconContent Kind=Pause, Size=25, StrokeWidth=2}"
+                                Foreground="{DynamicResource SystemAltHighColor}"
+                                Background="{DynamicResource SystemBaseHighColor}"
+                                Width="40" Height="40" HorizontalAlignment="Center"
+                                Command="{Binding PlayPause}"
+                                IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
+                                Classes="Home"
+                                Padding="0"
+                                HorizontalContentAlignment="Center"
+                                VerticalAlignment="Center">
+                        </Button>
                     </Grid>
-                    <StackPanel>
-                        <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Title}" Foreground="Black"
-                                   VerticalAlignment="Center" Margin="8 4" />
-                        <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Artist}" Foreground="Black"
-                                   VerticalAlignment="Center" Margin="8 4" />
-                    </StackPanel>
+                    <Button
+                        Classes="No-Hover"
+                        Foreground="{DynamicResource ToggleButtonForegroundDisabled}"
+                        Content="{LucideIconContent Kind=FastForward, StrokeWidth=2, 
+                        Size=20}"
+                        Background="Transparent" CornerRadius="100" Width="40" Height="40">
+                    </Button>
                 </StackPanel>
-                <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="0">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Spacing="4">
-                        <Button
-                            Classes="No-Hover"
-                            Content="{LucideIconContent Kind=Rewind, StrokeWidth=2, 
-                        Size=20}"
-                            Foreground="{DynamicResource AccentButtonForegroundDisabled}"
-                            Background="Transparent" CornerRadius="100" Width="40" Height="40">
-                        </Button>
-                        <Grid>
-                            <Button Content="{LucideIconContent Kind=Play, Size=25, StrokeWidth=2}"
-                                    HorizontalAlignment="Center"
-                                    Foreground="{DynamicResource SystemAltHighColor}"
-                                    Background="{DynamicResource SystemBaseHighColor}"
-                                    Command="{Binding PlayPause}"
-                                    IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
-                                    Classes="Home"
-                                    Padding="0"
-                                    HorizontalContentAlignment="Center"
-                                    VerticalAlignment="Center">
-                            </Button>
-                            <Button Content="{LucideIconContent Kind=Pause, Size=25, StrokeWidth=2}"
-                                    Foreground="{DynamicResource SystemAltHighColor}"
-                                    Background="{DynamicResource SystemBaseHighColor}"
-                                    Width="40" Height="40" HorizontalAlignment="Center"
-                                    Command="{Binding PlayPause}"
-                                    IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
-                                    Classes="Home"
-                                    Padding="0"
-                                    HorizontalContentAlignment="Center"
-                                    VerticalAlignment="Center">
-                            </Button>
-                        </Grid>
-                        <Button
-                            Classes="No-Hover"
-                            Foreground="{DynamicResource ToggleButtonForegroundDisabled}"
-                            Content="{LucideIconContent Kind=FastForward, StrokeWidth=2, 
-                        Size=20}"
-                            Background="Transparent" CornerRadius="100" Width="40" Height="40">
-                        </Button>
-                    </StackPanel>
-                    <Slider Maximum="{Binding MusicPlayer.CurrentlyPlayingTrack.Duration}"
-                            Value="{Binding MusicPlayer.Position}" Width="250">
+                <Grid ColumnDefinitions="30, 250, *" ShowGridLines="True"
+                      VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock
+                        Text="{Binding MusicPlayer.Position, Converter={StaticResource SecondsToMinutesConverter}}"
+                        VerticalAlignment="Center">
+                    </TextBlock>
+                    <Slider Grid.Column="1" Maximum="{Binding MusicPlayer.CurrentlyPlayingTrack.Duration}"
+                            Value="{Binding MusicPlayer.Position}" Width="250" Padding="4 0"
+                            VerticalAlignment="Center">
                     </Slider>
-                    <!-- <ProgressBar Minimum="0" Maximum="100" Value="35" Height="5" /> -->
-                </StackPanel>
-                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <!-- <ProgressBar Minimum="0" Maximum="25" Value="5" Height="5" Width="25" /> -->
-                </StackPanel>
-            </Grid>
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Duration, Converter={StaticResource SecondsToMinutesConverter}}"
+                               VerticalAlignment="Center">
+                    </TextBlock>
+                </Grid>
+                <!-- <ProgressBar Minimum="0" Maximum="100" Value="35" Height="5" /> -->
+            </StackPanel>
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <!-- <ProgressBar Minimum="0" Maximum="25" Value="5" Height="5" Width="25" /> -->
+            </StackPanel>
         </Grid>
     </Grid>
 

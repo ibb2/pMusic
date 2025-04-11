@@ -10,15 +10,16 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public SoundPlayer soundPlayer;
     [ObservableProperty] public PlaybackState playbackState;
     [ObservableProperty] public Track? currentlyPlayingTrack = null;
-    [ObservableProperty] public float position;
+    [ObservableProperty] public float? position = null;
     [ObservableProperty] public float volume;
 
     public MusicPlayer()
     {
     }
 
-    partial void OnPositionChanged(float value)
+    partial void OnPositionChanged(float? value)
     {
-        SoundPlayer.Seek(value);
+        if (value.HasValue)
+            SoundPlayer.Seek((float)value);
     }
 }
