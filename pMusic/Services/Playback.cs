@@ -43,12 +43,15 @@ public class Playback
         _ratingKey = ratingKey;
         _duration = duration;
 
+        _musicPlayer.Position = 0;
         _musicPlayer.PlaybackState = PlaybackState.Playing;
         _musicPlayer.CurrentlyPlayingTrack = _track;
 
         _timer = new Timer(async _ =>
             {
                 await UpdateTimeline("playing");
+                var formattedTime = decimal.Round((decimal)_player.Time);
+                _musicPlayer.Position = (float)formattedTime;
                 // await state.UpdateAsync(_ => player);
                 // var val = await state;
                 // await _soundPlayerState.UpdateAsync(_ => val);
@@ -90,7 +93,7 @@ public class Playback
         }
 
         // Console.WriteLine($"Track Progress {_player.Time}");
-        var formattedTime = decimal.Round((decimal)_player.Time, MidpointRounding.ToZero) * 1000;
+        var formattedTime = decimal.Round((decimal)_player.Time) * 1000;
         // Console.WriteLine($"Rounded Track Progess {formattedTime}");
         await Task.Delay(1000);
         // await Plex.UpdateTrackProgress(ratingKey: ratingKey, progress: Player.Time);
