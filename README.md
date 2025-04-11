@@ -20,7 +20,8 @@ There are 2 different methods to install pMusic
 
 ## Screenshots
 
-Coming soon™️.
+<img width="1385" alt="Screenshot 2025-04-10 at 10 21 32 PM" src="https://github.com/user-attachments/assets/b7b04f4c-505f-4ded-9af3-e4bcfc302de4" />
+<img width="1385" alt="Screenshot 2025-04-10 at 10 21 50 PM" src="https://github.com/user-attachments/assets/cbbfc703-4301-41bf-89a3-1c57bf7f8c6a" />
 
 ## Roadmap
 (Probably in order)
