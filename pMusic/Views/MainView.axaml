@@ -42,7 +42,7 @@
             <Setter Property="Width">40</Setter>
         </Style>
     </UserControl.Styles>
-    <Grid RowDefinitions="Auto, *, Auto">
+    <Grid RowDefinitions="Auto, *, 100">
         <Grid ColumnDefinitions="Auto, *, Auto" Margin="0, 8 0 2">
             <StackPanel Orientation="Horizontal">
                 <Button Content="{LucideIconContent Kind=ChevronLeft}" Command="{Binding GoBack}"
@@ -161,8 +161,8 @@
         </Grid>
         <Grid Grid.Row="2" Height="70">
             <!-- Bottom Music Player -->
-            <Grid ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <Grid ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
+                <StackPanel Orientation="Horizontal">
                     <Grid>
                         <Border CornerRadius="5" ClipToBounds="True">
                             <Image Source="{Binding MusicPlayer.CurrentlyPlayingTrack.Thumb}" Width="50"
@@ -176,7 +176,7 @@
                                    VerticalAlignment="Center" Margin="8 4" />
                     </StackPanel>
                 </StackPanel>
-                <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="4">
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Spacing="4">
                         <Button
@@ -214,7 +214,8 @@
                             Background="Transparent" CornerRadius="100" Width="40" Height="40">
                         </Button>
                     </StackPanel>
-                    <ProgressBar Minimum="0" Maximum="100" Value="35" Height="5" />
+                    <Slider Maximum="100" Value="50" Width="250"></Slider>
+                    <!-- <ProgressBar Minimum="0" Maximum="100" Value="35" Height="5" /> -->
                 </StackPanel>
                 <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <!-- <ProgressBar Minimum="0" Maximum="25" Value="5" Height="5" Width="25" /> -->
