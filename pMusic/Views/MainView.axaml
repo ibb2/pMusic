@@ -171,9 +171,9 @@
                     </Border>
                 </Grid>
                 <StackPanel>
-                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Title}" Foreground="Black"
+                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Title}"
                                VerticalAlignment="Center" Margin="8 4" />
-                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Artist}" Foreground="Black"
+                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Artist}"
                                VerticalAlignment="Center" Margin="8 4" />
                 </StackPanel>
             </StackPanel>
