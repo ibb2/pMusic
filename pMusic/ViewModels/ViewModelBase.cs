@@ -45,4 +45,9 @@ public abstract partial class ViewModelBase : ObservableObject
     {
         Navigation.GoForward();
     }
+
+    public void GoHome()
+    {
+        Navigation.GoHome();
+    }
 }

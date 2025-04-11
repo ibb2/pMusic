@@ -64,8 +64,16 @@ public partial class Navigation : ObservableObject
         NavStack.Push(viewModel);
     }
 
-    private void PopFromNavStack(bool direction)
+    private void PopFromNavStack(bool direction, bool home)
     {
+        if (home)
+        {
+            CurrentView = GetViewModel<HomeViewModel>();
+            NavStack = new Stack<ViewModelBase>();
+            PopStack = new Stack<ViewModelBase>();
+            return;
+        }
+
         if (NavStack.Count <= 0 && PopStack.Count <= 0) return;
 
         if (direction)
@@ -88,6 +96,7 @@ public partial class Navigation : ObservableObject
         }
     }
 
-    public void GoBack() => PopFromNavStack(true);
-    public void GoForward() => PopFromNavStack(false);
+    public void GoBack() => PopFromNavStack(true, false);
+    public void GoForward() => PopFromNavStack(false, false);
+    public void GoHome() => PopFromNavStack(true, true);
 }

@@ -53,10 +53,13 @@
                 </Button>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Background="{DynamicResource AccentButtonBackground}"
-                        Foreground="{DynamicResource AccentButtonForeground}" Classes="Home"
-                        Content="{LucideIconContent Kind=House}" HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Margin=" 4 0 ">
+                <Button Classes="Home"
+                        Content="{LucideIconContent Kind=House}"
+                        Command="{Binding GoHome}"
+                        Background="{DynamicResource AccentButtonBackground}"
+                        Foreground="{DynamicResource AccentButtonForeground}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" Padding="0">
                 </Button>
                 <TextBox Grid.Column="1" Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
