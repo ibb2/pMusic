@@ -29,6 +29,7 @@ public class Artist
 
 public class Image
 {
+    public int Id { get; set; }
     public string Alt { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
@@ -36,6 +37,8 @@ public class Image
 
 public class UltraBlurColors
 {
+    public int Id { get; set; }
+
     public string TopLeft { get; set; } = string.Empty;
     public string TopRight { get; set; } = string.Empty;
     public string BottomLeft { get; set; } = string.Empty;
@@ -44,10 +47,12 @@ public class UltraBlurColors
 
 public class Genre
 {
+    public int Id { get; set; }
     public string Tag { get; set; } = string.Empty;
 }
 
 public class Country
 {
+    public int Id { get; set; }
     public string Tag { get; set; } = string.Empty;
 }
