@@ -20,6 +20,7 @@
         <converter:HalfWidth x:Key="HalfWidth" />
         <converter:Seconds x:Key="SecondsToMinutesConverter" />
         <converter:Int x:Key="IntToBoolConverter" />
+        <converter:Thumbnail x:Key="Thumbnail" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -104,46 +105,28 @@
                         <ListBox ItemsSource="{Binding Sidebar.PinnedAlbum}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Title}"></TextBlock>
-                                    </StackPanel>
+                                    <Button>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border ClipToBounds="True" CornerRadius="5" Margin="0 0 8 0">
+                                                <Image
+                                                    Source="{Binding Thumb, 
+                                                Converter={StaticResource Thumbnail}}"
+                                                    Width="40">
+                                                </Image>
+                                            </Border>
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{Binding Title}"></TextBlock>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <!-- Pinned Icon -->
+                                                    <TextBlock FontSize="12">Album</TextBlock>
+                                                    <TextBlock FontSize="12" Text="{Binding Artist}"></TextBlock>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Button>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <!-- <Grid ColumnDefinitions="Auto, *"> -->
-                        <!--     <Button> -->
-                        <!--         <StackPanel Orientation="Horizontal"> -->
-                        <!--             <Border ClipToBounds="True" CornerRadius="5" Margin="0 0 8 0"> -->
-                        <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="40"></Image> -->
-                        <!--             </Border> -->
-                        <!--             <StackPanel Spacing="4"> -->
-                        <!--                 <TextBlock>Liked Songs</TextBlock> -->
-                        <!--                 <StackPanel Orientation="Horizontal" Spacing="8"> -->
-                        <!--                     ~1~ Pinned Icon @1@ -->
-                        <!--                     <TextBlock>Playlists</TextBlock> -->
-                        <!--                     <TextBlock> 1,416 songs</TextBlock> -->
-                        <!--                 </StackPanel> -->
-                        <!--             </StackPanel> -->
-                        <!--         </StackPanel> -->
-                        <!--     </Button> -->
-                        <!-- </Grid> -->
-                        <!-- <Grid ColumnDefinitions="Auto, *"> -->
-                        <!--     <Button> -->
-                        <!--         <StackPanel Orientation="Horizontal"> -->
-                        <!--             <Border ClipToBounds="True" CornerRadius="5" Margin="0 0 8 0"> -->
-                        <!--                 <Image Source="/Assets/Images/blank_playlist.png" Width="40"></Image> -->
-                        <!--             </Border> -->
-                        <!--             <StackPanel Spacing="4"> -->
-                        <!--                 <TextBlock>Liked Songs</TextBlock> -->
-                        <!--                 <StackPanel Orientation="Horizontal" Spacing="8"> -->
-                        <!--                     ~1~ Pinned Icon @1@ -->
-                        <!--                     <TextBlock>Playlists</TextBlock> -->
-                        <!--                     <TextBlock> 1,416 songs</TextBlock> -->
-                        <!--                 </StackPanel> -->
-                        <!--             </StackPanel> -->
-                        <!--         </StackPanel> -->
-                        <!--     </Button> -->
-                        <!-- </Grid> -->
                     </StackPanel>
                 </StackPanel>
             </Border>
