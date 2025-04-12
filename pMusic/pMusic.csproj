@@ -26,10 +26,24 @@
         <PackageReference Include="Lucide.Avalonia"/>
         <PackageReference Include="LucideAvalonia"/>
         <PackageReference Include="LukeHagar.PlexAPI.SDK"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
         <PackageReference Include="Microsoft.Extensions.Http"/>
         <PackageReference Include="Microsoft.Extensions.Http.Polly"/>
         <PackageReference Include="SoundFlow"/>
         <PackageReference Include="System.Net.Http"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Database\" />
     </ItemGroup>
 </Project>
