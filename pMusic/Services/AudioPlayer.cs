@@ -81,6 +81,7 @@ public partial class AudioPlayer : IAudioPlayerService
             // Add the player to the master mixer.
             Mixer.Master.AddComponent(Player);
             // Start playback.
+            _musicPlayer.SoundPlayer = Player;
             Player.Play();
 
             _playback.StartPlayback(player: Player, key: track.Key, ratingKey: track.RatingKey,
