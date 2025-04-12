@@ -26,7 +26,7 @@ public class Track
     public int ParentIndex { get; set; }
     public int RatingCount { get; set; }
     public int ParentYear { get; set; }
-    public Bitmap? Thumb { get; set; }
+    public byte[]? Thumb { get; set; }
     public string Art { get; set; }
     public string ParentThumb { get; set; }
     public string GrandparentThumb { get; set; }
