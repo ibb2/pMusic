@@ -1,5 +1,7 @@
 using System.Net.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
 using pMusic.Services;
@@ -13,6 +15,8 @@ public static class ServiceCollectionExtensions
     public static void AddCommonServices(this IServiceCollection collection)
     {
         collection.AddHttpClient<Plex>();
+        collection.AddDbContext<MusicDbContext>(
+            optionBuilder => optionBuilder.UseSqlite("Data Source=music.db"));
         collection.AddSingleton<Navigation>();
         collection.AddSingleton<IAudioPlayerService, AudioPlayer>();
         collection.AddSingleton<MusicPlayer>();

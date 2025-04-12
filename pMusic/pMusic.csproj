@@ -42,8 +42,4 @@
         <PackageReference Include="SoundFlow"/>
         <PackageReference Include="System.Net.Http"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Database\Models\"/>
-    </ItemGroup>
 </Project>

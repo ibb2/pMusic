@@ -54,7 +54,8 @@ public class Media
 
 public class Part
 {
-    public string Id { get; set; }
+    public int Id { get; set; }
+    public string PartId { get; set; }
     public string Key { get; set; }
     public int Duration { get; set; }
     public string File { get; set; }
