@@ -38,4 +38,7 @@ public class Album
     public Image? Image { get; set; }
     public UltraBlurColors? UltraBlurColors { get; set; }
     public List<Genre>? Genres { get; set; } = new();
+
+    // Custom Properties
+    public bool IsPinned { get; set; } = false;
 }

@@ -22,4 +22,7 @@ public class Playlist
     public int LeafCount { get; set; }
     public DateTime AddedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    // Custom Properties
+    public bool IsPinned { get; set; } = false;
 }
