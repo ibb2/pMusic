@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
+using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
 using pMusic.Services;
@@ -24,6 +26,8 @@ namespace pMusic.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    private MusicDbContext _musicDbContext;
+
     private readonly Plex _plex;
     private readonly IAudioPlayerService _audioPlayer;
     public MusicPlayer MusicPlayer { get; }
@@ -40,17 +44,22 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private ViewModelBase _currentPage;
 
-    public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer)
+    public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer,
+        MusicDbContext musicDbContext)
     {
         _plex = plex;
         MusicPlayer = musicPlayer;
         _audioPlayer = audioPlayer;
+        _musicDbContext = musicDbContext;
     }
 
     public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),
-        Ioc.Default.GetRequiredService<IAudioPlayerService>())
+        Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>())
     {
     }
+
+
+    public List<Album> Albums => _musicDbContext.Albums.Where(a => a.IsPinned).ToList();
 
     public void CheckLoginStatus()
     {

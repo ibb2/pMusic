@@ -108,6 +108,7 @@ public class Plex
         var albumXml = await httpClient.GetStringAsync(albumUri);
 
         var albums = await ParseAlbums(XElement.Parse(albumXml), uri, artist);
+        await _musicDbContext.SaveChangesAsync();
 
         return albums.ToImmutableList();
     }
@@ -351,7 +352,6 @@ public class Plex
                 return album;
             }).ToList();
 
-        // await _musicDbContext.SaveChangesAsync();
         var albums = (await Task.WhenAll(items)).ToList();
         return albums;
     }

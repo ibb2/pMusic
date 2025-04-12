@@ -12,6 +12,13 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Update="..\music.db">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>music.db</Link>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Avalonia"/>
         <PackageReference Include="Avalonia.Controls.DataGrid"/>
         <PackageReference Include="Avalonia.Themes.Fluent"/>

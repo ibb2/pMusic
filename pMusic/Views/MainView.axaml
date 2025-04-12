@@ -33,7 +33,6 @@
             <Setter Property="Width">40</Setter>
         </Style>
         <Style Selector="Button.No-Hover:pointerover">
-
         </Style>
         <Style Selector="Button.No-Hover:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent" />
@@ -102,6 +101,13 @@
                     <!-- <StackPanel><TextBlock>Library Search</TextBlock></StackPanel> -->
                     <!-- List of library items -->
                     <StackPanel Spacing="4">
+                        <ListBox ItemsSource="{Binding Albums}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Title}"></TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                         <Grid ColumnDefinitions="Auto, *">
                             <Button>
                                 <StackPanel Orientation="Horizontal">

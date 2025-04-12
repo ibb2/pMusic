@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using Microsoft.EntityFrameworkCore;
 using pMusic.Models;
 
@@ -13,6 +15,14 @@ public class MusicDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        optionsBuilder.UseSqlite("Data Source=music.db");
+        // optionsBuilder.UseSqlite("Data Source=music.db");
+        // Get the directory where the application is running
+        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        string dbPath = Path.Combine(baseDir, "music.db");
+
+        // Log or debug the path to verify
+        Console.WriteLine($"Database path: {dbPath}");
+
+        optionsBuilder.UseSqlite($"Data Source={dbPath}");
     }
 }
