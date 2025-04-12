@@ -80,7 +80,7 @@
                                 <Button Content="{LucideIconContent Shuffle}" Height="50" Width="50"
                                         CornerRadius="1000">
                                 </Button>
-                                <Button Content="{LucideIconContent CirclePlus}" Command="{Binding AddToLibrary}"
+                                <Button Content="{LucideIconContent CirclePlus}" Command="{Binding AddToLibraryCommand}"
                                         CommandParameter="{Binding Album}"
                                         Height="50" Width="50"
                                         CornerRadius="1000">

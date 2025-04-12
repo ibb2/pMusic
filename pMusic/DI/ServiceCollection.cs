@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
         collection.AddSingleton<Navigation>();
         collection.AddSingleton<IAudioPlayerService, AudioPlayer>();
         collection.AddSingleton<MusicPlayer>();
+        collection.AddSingleton<Sidebar>();
         collection.AddTransient<IMusic, Music>();
         collection.AddTransient<MainViewModel>();
         collection.AddTransient<HomeViewModel>();

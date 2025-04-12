@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,6 +18,7 @@ public partial class AlbumViewModel : ViewModelBase
     private Plex _plex;
     private IAudioPlayerService _audioPlayerService;
     private MusicDbContext _musicDbContext;
+    private Sidebar _sidebar;
 
     [ObservableProperty] public Album? _Album = null;
     public ObservableCollection<Track?> TrackList { get; set; } = new();
@@ -28,17 +30,18 @@ public partial class AlbumViewModel : ViewModelBase
     [ObservableProperty] public string _title = "Album";
 
     public AlbumViewModel(IMusic music, Plex plex, IAudioPlayerService audioPlayerService,
-        MusicDbContext musicDbContext)
+        MusicDbContext musicDbContext, Sidebar sidebar)
     {
         _music = music;
         _plex = plex;
         _audioPlayerService = audioPlayerService;
         _musicDbContext = musicDbContext;
-        // _ = GetTracks();
+        _sidebar = sidebar;
     }
 
     public AlbumViewModel() : this(Ioc.Default.GetRequiredService<IMusic>(), Ioc.Default.GetRequiredService<Plex>(),
-        Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>())
+        Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
+        Ioc.Default.GetRequiredService<Sidebar>())
     {
     }
 
@@ -60,22 +63,18 @@ public partial class AlbumViewModel : ViewModelBase
         _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 
-    public async ValueTask AddToLibrary(Album currentAlbum)
+    [RelayCommand]
+    public async Task AddToLibrary(Album currentAlbum)
     {
-        Console.WriteLine($"Album  {currentAlbum.Id}");
-        Album? album = null;
-        try
-        {
-            album = await _musicDbContext.Albums.FindAsync(currentAlbum.Id);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-
+        _sidebar.PinnedAlbum = new();
+        var album = await _musicDbContext.Albums.FindAsync(currentAlbum.Id);
         if (album == null) return;
         album.IsPinned = !album.IsPinned;
         await _musicDbContext.SaveChangesAsync();
-        Console.WriteLine($"Album updated {currentAlbum.Title}");
+        var albums = _musicDbContext.Albums.Where(x => x.IsPinned).ToList();
+        foreach (var a in albums)
+        {
+            _sidebar.PinnedAlbum.Add(a);
+        }
     }
 }

@@ -1,6 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
 
@@ -8,11 +13,19 @@ namespace pMusic.ViewModels;
 
 public abstract partial class ViewModelBase : ObservableObject
 {
+    private MusicDbContext _musicDbContext;
+
     // Access to navigation
     protected Navigation Navigation => Navigation.Instance;
 
-    // [RelayCommand]
-    // public void GoToHome() => Navigation.GoToHome();
+    protected ViewModelBase(MusicDbContext musicDbContext)
+    {
+        _musicDbContext = musicDbContext;
+    }
+
+    protected ViewModelBase()
+    {
+    }
 
     [RelayCommand]
     public void GoToAlbum(Album album)

@@ -30,7 +30,9 @@ public partial class MainViewModel : ViewModelBase
 
     private readonly Plex _plex;
     private readonly IAudioPlayerService _audioPlayer;
+
     public MusicPlayer MusicPlayer { get; }
+    public Sidebar Sidebar { get; }
 
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
 
@@ -45,21 +47,26 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private ViewModelBase _currentPage;
 
     public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer,
-        MusicDbContext musicDbContext)
+        MusicDbContext musicDbContext, Sidebar sidebar)
     {
         _plex = plex;
         MusicPlayer = musicPlayer;
         _audioPlayer = audioPlayer;
         _musicDbContext = musicDbContext;
+        Sidebar = sidebar;
+
+        foreach (var a in _musicDbContext.Albums.Where(a => a.IsPinned).ToList())
+        {
+            Sidebar.PinnedAlbum?.Add(a);
+        }
     }
 
     public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),
-        Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>())
+        Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
+        Ioc.Default.GetRequiredService<Sidebar>())
     {
     }
 
-
-    public List<Album> Albums => _musicDbContext.Albums.Where(a => a.IsPinned).ToList();
 
     public void CheckLoginStatus()
     {
