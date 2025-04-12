@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
+             xmlns:converter="clr-namespace:pMusic.Converter"
              x:Class="pMusic.Views.HomeView"
              x:DataType="vm:HomeViewModel">
     <Design.DataContext>
@@ -11,6 +12,9 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:HomeViewModel />
     </Design.DataContext>
+    <UserControl.Resources>
+        <converter:Thumbnail x:Key="ThumbnailToBitmapConverter" />
+    </UserControl.Resources>
     <UserControl.Styles>
         <Style>
             <Style Selector="TextBlock.h2">
@@ -57,7 +61,9 @@
                                 <Grid>
                                     <Image Source="/Assets/Images/blank_playlist.png" Width="50" Height="50"
                                            Stretch="UniformToFill" />
-                                    <Image Source="{Binding Thumb}" Width="50" Height="50" Stretch="UniformToFill" />
+                                    <Image
+                                        Source="{Binding Thumb, Converter={StaticResource ThumbnailToBitmapConverter}}"
+                                        Width="50" Height="50" Stretch="UniformToFill" />
                                 </Grid>
                                 <TextBlock Text="{Binding Title}" VerticalAlignment="Center"></TextBlock>
                             </StackPanel>

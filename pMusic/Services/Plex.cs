@@ -10,6 +10,7 @@ using Avalonia.Media.Imaging;
 using KeySharp;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using pMusic.Database;
 using pMusic.Models;
 using Country = pMusic.Models.Country;
 using Genre = pMusic.Models.Genre;
@@ -24,6 +25,8 @@ namespace pMusic.Services;
 public class Plex
 {
     public readonly HttpClient httpClient;
+    private static string _serverUrl;
+    private readonly MusicDbContext _musicDbContext;
     private readonly string _plexClientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
     private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
 
@@ -37,9 +40,11 @@ public class Plex
     private static readonly PlexAPI _plexApi =
         new PlexAPI(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
 
-    public Plex(HttpClient httpClient)
+
+    public Plex(HttpClient httpClient, MusicDbContext musicDbContext)
     {
         this.httpClient = httpClient;
+        _musicDbContext = musicDbContext;
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Token", _plexToken);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Client-Identifier", _plexClientIdentifier);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Session-Identifier", _plexSessionIdentifier);
@@ -47,11 +52,6 @@ public class Plex
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Device-Name", _plexDeviceName);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Platform", _plexPlatform);
     }
-
-    // public async ValueTask<Bitmap> GetUserAccount(string uri)
-    // {
-    //     
-    // }
 
     public async ValueTask<Bitmap> GetUserProfilePicture()
     {
@@ -74,6 +74,7 @@ public class Plex
         var serversXmlRes = await httpClient.GetStringAsync(uri);
         var serverUri = XElement.Parse(serversXmlRes).Descendants("connection").First().Attribute("uri").Value;
         Console.WriteLine($"{serverUri} -> Server Response");
+        _serverUrl = serverUri;
         return serverUri;
     }
 
@@ -179,14 +180,6 @@ public class Plex
             .Where(playlist => playlist.Attribute("playlistType")?.Value == "audio")
             .Select(async playlist =>
             {
-                Bitmap? compositeBitmap = null;
-                if (playlist.Attribute("composite")?.Value != null)
-                {
-                    compositeBitmap =
-                        await GetBitmapImage(
-                            $"{uri}{playlist.Attribute("composite")?.Value}?X-Plex-Token={_plexToken}");
-                }
-
                 return new Playlist
                 {
                     RatingKey = playlist.Attribute("ratingKey")?.Value ?? "",
@@ -197,7 +190,7 @@ public class Plex
                     Summary = playlist.Attribute("summary")?.Value ?? "",
                     Smart = int.Parse(playlist.Attribute("smart")?.Value ?? "0"),
                     PlaylistType = playlist.Attribute("playlistType")?.Value ?? "",
-                    Composite = playlist.Attribute("composite")?.Value ?? "",
+                    Composite = uri + playlist.Attribute("composite")?.Value ?? "",
                     Icon = playlist.Attribute("icon")?.Value ?? "",
                     ViewCount = int.Parse(playlist.Attribute("viewCount")?.Value ?? "0"),
                     LastViewedAt = DateTimeOffset
@@ -247,7 +240,7 @@ public class Plex
                 ParentIndex = int.Parse(track.Attribute("parentIndex")?.Value ?? "0"),
                 RatingCount = int.Parse(track.Attribute("ratingCount")?.Value ?? "0"),
                 ParentYear = int.Parse(track.Attribute("parentYear")?.Value ?? "0"),
-                Thumb = track.Attribute("thumb")?.Value ?? "",
+                Thumb = uri + track.Attribute("thumb")?.Value ?? "",
                 Art = track.Attribute("art")?.Value ?? "",
                 ParentThumb = track.Attribute("parentThumb")?.Value ?? "",
                 GrandparentThumb = track.Attribute("grandparentThumb")?.Value ?? "",
@@ -303,7 +296,7 @@ public class Plex
         var items = mediaContainer.Elements("Directory").Select(
             async directory =>
             {
-                return new Album
+                var album = new Album
                 {
                     AddedAt = DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(directory.Attribute("addedAt")?.Value ?? "0")).LocalDateTime,
@@ -329,7 +322,7 @@ public class Plex
                     Studio = directory.Attribute("studio")?.Value ?? "",
                     Summary = directory.Attribute("summary")?.Value ?? "",
                     Index = directory.Attribute("index")?.Value ?? "",
-                    Thumb = directory.Attribute("thumb")?.Value ?? "",
+                    Thumb = uri + directory.Attribute("thumb")?.Value ?? "",
                     Title = directory.Attribute("title")?.Value ?? "",
                     Artist = artist,
                     Type = directory.Attribute("type")?.Value ?? "",
@@ -352,8 +345,13 @@ public class Plex
                         BottomRight = directory.Element("UltraBlurColors").Attribute("bottomRight")?.Value ?? ""
                     }
                 };
+
+                _musicDbContext.Add(album);
+
+                return album;
             }).ToList();
 
+        // await _musicDbContext.SaveChangesAsync();
         var albums = (await Task.WhenAll(items)).ToList();
         return albums;
     }
@@ -378,7 +376,7 @@ public class Plex
                     SkipCount = directory.Attribute("skipCount")?.Value ?? "",
                     LastViewedAt = directory.Attribute("lastViewedAt")?.Value ?? "",
                     LastRatedAt = directory.Attribute("lastRatedAt")?.Value ?? "",
-                    Thumb = directory.Attribute("thumb")?.Value ?? "",
+                    Thumb = uri + directory.Attribute("thumb")?.Value ?? "",
                     AddedAt = directory.Attribute("addedAt")?.Value ?? "",
                     UpdatedAt = directory.Attribute("updatedAt")?.Value ?? "",
                     LibraryKey = libKey,
@@ -450,5 +448,14 @@ public class Plex
                 }
                 : null
         };
+    }
+
+    public async ValueTask<Bitmap> GetBitmapImage(string url)
+    {
+        var imageBytes = await httpClient.GetByteArrayAsync(url);
+
+        using var memoryStream = new MemoryStream(imageBytes);
+        // In Avalonia, use DecodeToHeight instead of DecodeToWidth
+        return new Bitmap(memoryStream);
     }
 }
