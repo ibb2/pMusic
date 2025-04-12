@@ -101,7 +101,6 @@
                     <!-- <StackPanel><TextBlock>Library Search</TextBlock></StackPanel> -->
                     <!-- List of library items -->
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding Sidebar.PinnedAlbum.Count}"></TextBlock>
                         <ListBox ItemsSource="{Binding Sidebar.PinnedAlbum}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>

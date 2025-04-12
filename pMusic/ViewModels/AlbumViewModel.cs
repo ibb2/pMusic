@@ -67,10 +67,14 @@ public partial class AlbumViewModel : ViewModelBase
     public async Task AddToLibrary(Album currentAlbum)
     {
         _sidebar.PinnedAlbum = new();
-        var album = await _musicDbContext.Albums.FindAsync(currentAlbum.Id);
-        if (album == null) return;
-        album.IsPinned = !album.IsPinned;
-        await _musicDbContext.SaveChangesAsync();
+
+        // No need to re-fetch or attach
+        currentAlbum.IsPinned = !currentAlbum.IsPinned;
+
+        var count = await _musicDbContext.SaveChangesAsync();
+        Console.WriteLine($"count: {count}");
+        Console.WriteLine($"currentAlbum ref: {currentAlbum.GetHashCode()}");
+
         var albums = _musicDbContext.Albums.Where(x => x.IsPinned).ToList();
         foreach (var a in albums)
         {

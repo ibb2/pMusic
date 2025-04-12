@@ -102,13 +102,18 @@ public class Plex
     public async ValueTask<IImmutableList<Album>> GetArtistAlbums(string uri, int libraryId, string artistKey,
         string artist)
     {
+        if (_musicDbContext.Albums.Any())
+        {
+            return _musicDbContext.Albums.ToImmutableList();
+        }
+
         var albumUri =
             uri + "/library/sections/" + libraryId + "/all?artist.id=" + artistKey +
             "&type=9&"; // "includeGuids={include_guids}&{filter}"
         var albumXml = await httpClient.GetStringAsync(albumUri);
 
         var albums = await ParseAlbums(XElement.Parse(albumXml), uri, artist);
-        await _musicDbContext.SaveChangesAsync();
+        // await _musicDbContext.SaveChangesAsync();
 
         return albums.ToImmutableList();
     }
