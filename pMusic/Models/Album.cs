@@ -27,7 +27,7 @@ public class Album
     public string? Studio { get; set; }
     public string? Summary { get; set; }
     public string? Index { get; set; }
-    public Bitmap? Thumb { get; set; }
+    public string Thumb { get; set; }
     public string? Title { get; set; }
     public string? Artist { get; set; }
     public string? Type { get; set; }

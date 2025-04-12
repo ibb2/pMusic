@@ -14,7 +14,7 @@ public class Playlist
     public string Summary { get; set; }
     public int Smart { get; set; }
     public string PlaylistType { get; set; }
-    public byte[]? Composite { get; set; }
+    public string Composite { get; set; }
     public string Icon { get; set; }
     public int ViewCount { get; set; }
     public DateTime LastViewedAt { get; set; }

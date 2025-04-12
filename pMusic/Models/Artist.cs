@@ -17,7 +17,7 @@ public class Artist
     public string SkipCount { get; set; } = string.Empty;
     public string LastViewedAt { get; set; } = string.Empty;
     public string LastRatedAt { get; set; } = string.Empty;
-    public byte[]? Thumb { get; set; }
+    public string Thumb { get; set; }
     public string AddedAt { get; set; } = string.Empty;
     public string UpdatedAt { get; set; } = string.Empty;
     public int LibraryKey { get; set; }
