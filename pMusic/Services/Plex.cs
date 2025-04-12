@@ -122,32 +122,10 @@ public class Plex
         return tracks.ToImmutableList();
     }
 
-    public async ValueTask UpdateTrackProgress(string ratingKey, float progress)
-    {
-        var res = await _plexApi.Media.UpdatePlayProgressAsync(
-            key: ratingKey,
-            time: progress,
-            state: "played"
-        );
-
-        Console.WriteLine($"Update Play Progress Response: {res}");
-    }
-
     public async ValueTask MarkTrackAsPlayed(double ratingKey)
     {
         var res = await _plexApi.Media.MarkPlayedAsync(key: ratingKey);
         Console.WriteLine($"Mark Played Response: {res}");
-    }
-
-    public async ValueTask CreateSession(string uri, string key, string ratingKey, Decimal duration)
-    {
-        var cleanedDecimal = Decimal.Round(duration, MidpointRounding.ToZero);
-        var timelineUri = uri + "/:/timeline?type=music&key=" + key + "&state=playing&ratingKey=" + ratingKey +
-                          "&time=0&playbackTime=0&duration=" + cleanedDecimal;
-        await httpClient.GetAsync(timelineUri);
-        // var request = new HttpRequestMessage(HttpMethod.Put, timelineUri);
-        // request.Headers.Add("Accept", "application/json");
-        // var res = await httpClient.SendAsync(request);
     }
 
     public async ValueTask UpdateSession(string uri, string key, string state, string ratingKey, Decimal time,
@@ -157,9 +135,6 @@ public class Plex
         var timelineUri = uri + "/:/timeline?type=music&key=" + key + "&state=" + state + "&ratingKey=" + ratingKey +
                           "&time=" + time + "&playbackTime=" + time + "&duration=" + cleanedDecimal;
         await httpClient.GetAsync(timelineUri);
-        // var request = new HttpRequestMessage(HttpMethod.Put, timelineUri);
-        // request.Headers.Add("Accept", "application/json");
-        // var res = await httpClient.SendAsync(request);
     }
 
     public async ValueTask<MemoryStream> GetPlaybackStream(string uri)
@@ -243,15 +218,6 @@ public class Plex
         return results.ToList();
     }
 
-    public async ValueTask<Bitmap> GetBitmapImage(string url)
-    {
-        var imageBytes = await httpClient.GetByteArrayAsync(url);
-
-        using var memoryStream = new MemoryStream(imageBytes);
-        // In Avalonia, use DecodeToHeight instead of DecodeToWidth
-        return new Bitmap(memoryStream);
-    }
-
     public async Task<List<Track>> ParseTracks(XElement mediaContainer, string uri, string artist)
     {
         if (mediaContainer == null) return new List<Track>();
@@ -259,14 +225,6 @@ public class Plex
 
         var items = mediaContainer.Elements("Track").Select(async track =>
         {
-            Bitmap? thumb = null;
-            if (track.Attribute("thumb")?.Value != null)
-            {
-                thumb =
-                    await GetBitmapImage(
-                        $"{uri}{track.Attribute("thumb")?.Value}?X-Plex-Token={_plexToken}");
-            }
-
             return new Track
             {
                 RatingKey = track.Attribute("ratingKey")?.Value ?? "",
@@ -345,22 +303,6 @@ public class Plex
         var items = mediaContainer.Elements("Directory").Select(
             async directory =>
             {
-                Bitmap? thumbBitmap = null;
-                if (directory.Attribute("thumb")?.Value != null)
-                {
-                    thumbBitmap =
-                        await GetBitmapImage(
-                            $"{uri}{directory.Attribute("thumb")?.Value}");
-                }
-
-                Bitmap? artBitmap = null;
-                if (directory.Attribute("art")?.Value != null)
-                {
-                    artBitmap =
-                        await GetBitmapImage(
-                            $"{uri}{directory.Attribute("art")?.Value}");
-                }
-
                 return new Album
                 {
                     AddedAt = DateTimeOffset
@@ -423,14 +365,6 @@ public class Plex
         var items = mediaContainer.Elements("Directory")
             .Select(async directory =>
             {
-                Bitmap? thumbBitmap = null;
-                if (directory.Attribute("thumb")?.Value != null)
-                {
-                    thumbBitmap =
-                        await GetBitmapImage(
-                            $"{uri}{directory.Attribute("thumb")?.Value}?X-Plex-Token={_plexToken}");
-                }
-
                 return new Artist
                 {
                     RatingKey = directory.Attribute("ratingKey")?.Value ?? "",
