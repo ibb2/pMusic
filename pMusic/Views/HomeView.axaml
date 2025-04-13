@@ -55,14 +55,14 @@
                     <DataTemplate>
                         <Border CornerRadius="5" ClipToBounds="True"
                                 Background="{DynamicResource AccentButtonBackground}"
-                                Width="{Binding $parent[ListBox].Width}" MinWidth="200">
+                                MinWidth="300" MaxHeight="400" Margin="0 0 0 12">
                             <StackPanel Orientation="Horizontal" Spacing="8"
                                         Background="{DynamicResource SystemChromeHighColor}">
                                 <Grid>
                                     <Image Source="/Assets/Images/blank_playlist.png" Width="50" Height="50"
                                            Stretch="UniformToFill" />
                                     <Image
-                                        Source="{Binding Thumb, Converter={StaticResource ThumbnailToBitmapConverter}}"
+                                        Source="{Binding Thumb}"
                                         Width="50" Height="50" Stretch="UniformToFill" />
                                 </Grid>
                                 <TextBlock Text="{Binding Title}" VerticalAlignment="Center"></TextBlock>
@@ -88,7 +88,7 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel PointerPressed="GoToAlbum">
+                            <StackPanel PointerPressed="GoToAlbum" Spacing="4">
                                 <Grid Margin="0, 0, 0, 12">
                                     <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True"
                                             BorderThickness="1">
@@ -124,7 +124,7 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel PointerPressed="GoToAlbum">
+                            <StackPanel PointerPressed="GoToAlbum" Spacing="4">
                                 <Grid Margin="0, 0, 0, 12">
                                     <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True"
                                             BorderThickness="1">
@@ -150,7 +150,7 @@
             </StackPanel>
             <StackPanel Grid.Row="3" Margin="0 0 0 60" Spacing="24">
                 <!-- Recently Added -->
-                <TextBlock Classes="h2">Uniqely Yours</TextBlock>
+                <TextBlock Classes="h2">Uniquely Yours</TextBlock>
                 <!-- New Releases / Recently Added? -->
                 <ScrollViewer HorizontalScrollBarVisibility="Hidden">
                     <ListBox ItemsSource="{Binding Playlists}" SelectionMode="Single"
@@ -162,7 +162,7 @@
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel>
+                                <StackPanel Spacing="4">
                                     <Grid Margin="0, 0, 0, 12">
                                         <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True">
                                             <Image Source="/Assets/Images/blank_playlist.png" Stretch="UniformToFill" />

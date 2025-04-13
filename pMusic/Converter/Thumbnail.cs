@@ -16,8 +16,9 @@ public class Thumbnail : IValueConverter
         {
             var thumbnail = thumb + "?X-Plex-Token=" +
                             Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken");
+
             Console.WriteLine(thumbnail);
-            
+
             return thumbnail;
         }
 

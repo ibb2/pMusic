@@ -102,9 +102,9 @@ public class Plex
     public async ValueTask<IImmutableList<Album>> GetArtistAlbums(string uri, int libraryId, string artistKey,
         string artist)
     {
-        if (_musicDbContext.Albums.Any())
+        if (_musicDbContext.Albums.Any(a => a.Key == artist))
         {
-            return _musicDbContext.Albums.ToImmutableList();
+            return _musicDbContext.Albums.Where(a => a.Key == artistKey).ToImmutableList();
         }
 
         var albumUri =
@@ -113,7 +113,7 @@ public class Plex
         var albumXml = await httpClient.GetStringAsync(albumUri);
 
         var albums = await ParseAlbums(XElement.Parse(albumXml), uri, artist);
-        // await _musicDbContext.SaveChangesAsync();
+        await _musicDbContext.SaveChangesAsync();
 
         return albums.ToImmutableList();
     }
@@ -157,8 +157,15 @@ public class Plex
 
     public async ValueTask<IImmutableList<Playlist>> GetPlaylists(string uri)
     {
+        if (_musicDbContext.Playlists.Any())
+        {
+            return _musicDbContext.Playlists.ToImmutableList();
+        }
+
         var playlistsXml = await httpClient.GetStringAsync(uri + "/playlists");
         var playlists = await ParsePlaylists(XElement.Parse(playlistsXml), uri);
+
+        await _musicDbContext.SaveChangesAsync();
 
         return playlists.ToImmutableList();
     }
@@ -186,7 +193,7 @@ public class Plex
             .Where(playlist => playlist.Attribute("playlistType")?.Value == "audio")
             .Select(async playlist =>
             {
-                return new Playlist
+                var p = new Playlist
                 {
                     RatingKey = playlist.Attribute("ratingKey")?.Value ?? "",
                     Key = playlist.Attribute("key")?.Value ?? "",
@@ -210,6 +217,9 @@ public class Plex
                     UpdatedAt = DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(playlist.Attribute("updatedAt")?.Value ?? "0")).LocalDateTime
                 };
+
+                _musicDbContext.Playlists.Add(p);
+                return p;
             }).ToList();
 
         // Wait for all tasks to complete and return the results
