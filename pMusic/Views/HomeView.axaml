@@ -54,8 +54,8 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border CornerRadius="5" ClipToBounds="True"
-                                Background="{DynamicResource AccentButtonBackground}"
-                                MinWidth="300" MaxHeight="400" Margin="0 0 0 12">
+                                Background="{DynamicResource SystemChromeLowColor}"
+                                MinWidth="300" MaxHeight="400" Margin="0 4">
                             <StackPanel Orientation="Horizontal" Spacing="8"
                                         Background="{DynamicResource SystemChromeHighColor}">
                                 <Grid>
@@ -83,12 +83,12 @@
                          ScrollViewer.HorizontalScrollBarVisibility="Hidden" Background="Transparent">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" />
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel PointerPressed="GoToAlbum" Spacing="4">
+                            <StackPanel PointerPressed="GoToAlbum">
                                 <Grid Margin="0, 0, 0, 12">
                                     <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True"
                                             BorderThickness="1">
@@ -119,12 +119,12 @@
                          ScrollViewer.HorizontalScrollBarVisibility="Hidden">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" />
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel PointerPressed="GoToAlbum" Spacing="4">
+                            <StackPanel PointerPressed="GoToAlbum">
                                 <Grid Margin="0, 0, 0, 12">
                                     <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True"
                                             BorderThickness="1">
@@ -157,12 +157,12 @@
                              ScrollViewer.HorizontalScrollBarVisibility="Hidden">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
+                                <StackPanel Orientation="Horizontal" Spacing="8" />
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Spacing="4">
+                                <StackPanel>
                                     <Grid Margin="0, 0, 0, 12">
                                         <Border Width="175" Height="175" CornerRadius="4" ClipToBounds="True">
                                             <Image Source="/Assets/Images/blank_playlist.png" Stretch="UniformToFill" />

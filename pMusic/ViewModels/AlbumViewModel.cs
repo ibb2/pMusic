@@ -76,7 +76,9 @@ public partial class AlbumViewModel : ViewModelBase
         Console.WriteLine($"currentAlbum ref: {currentAlbum.GetHashCode()}");
 
         var albums = _musicDbContext.Albums.Where(x => x.IsPinned).ToList();
-        foreach (var a in albums)
+        var viewModels = albums.Select(a => new DisplayAlbumViewModel(a, _plex)).ToList();
+        await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
+        foreach (var a in viewModels)
         {
             _sidebar.PinnedAlbum.Add(a);
         }

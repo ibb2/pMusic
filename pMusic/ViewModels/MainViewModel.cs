@@ -55,16 +55,28 @@ public partial class MainViewModel : ViewModelBase
         _musicDbContext = musicDbContext;
         Sidebar = sidebar;
 
-        foreach (var a in _musicDbContext.Albums.Where(a => a.IsPinned).ToList())
-        {
-            Sidebar.PinnedAlbum?.Add(a);
-        }
+        _ = LoadPinnedAlbumsThumbnails();
     }
 
     public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),
         Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
         Ioc.Default.GetRequiredService<Sidebar>())
     {
+    }
+
+    public async ValueTask LoadPinnedAlbumsThumbnails()
+    {
+        // Empty Pinned Albums 
+        Sidebar.PinnedAlbum.Clear();
+
+        // Add new pinned albums
+        var pinnedAlbums = _musicDbContext.Albums.Where(a => a.IsPinned).ToList();
+        var viewModels = pinnedAlbums.Select(pa => new DisplayAlbumViewModel(pa, _plex)).ToList();
+
+        await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
+
+        foreach (var pinnedAlbum in viewModels)
+            Sidebar.PinnedAlbum.Add(pinnedAlbum);
     }
 
 

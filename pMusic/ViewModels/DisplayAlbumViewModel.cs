@@ -16,12 +16,14 @@ public partial class DisplayAlbumViewModel : ObservableObject
     public string Title { get; }
     public string Artist { get; }
     public string ThumbUrl { get; }
+    public Album Album { get; }
 
     [ObservableProperty] private Bitmap? thumb;
 
     public DisplayAlbumViewModel(Album album, Plex plex)
     {
         _plex = plex;
+        Album = album;
         Title = album.Title;
         Artist = album.Artist;
         ThumbUrl = album.Thumb;

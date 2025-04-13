@@ -29,13 +29,13 @@ public partial class HomeView : UserControl
     public void GoToAlbum(object? sender, PointerPressedEventArgs pointerPressedEvent)
     {
         Console.WriteLine("Pressed event");
-        var album = ((StackPanel)sender).DataContext as Album;
+        var album = ((StackPanel)sender).DataContext as DisplayAlbumViewModel;
         Console.WriteLine($"Go to album: {album.Title}");
 
         if (pointerPressedEvent.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
             var vm = (HomeViewModel)DataContext;
-            vm.GoToAlbum(album);
+            vm.GoToAlbum(album.Album);
         }
 
         pointerPressedEvent.Handled = true;
