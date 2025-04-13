@@ -3,9 +3,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using KeySharp;
 using pMusic.Database;
 using pMusic.Models;
 using pMusic.Services;
@@ -21,6 +23,7 @@ public partial class AlbumViewModel : ViewModelBase
     private Sidebar _sidebar;
 
     [ObservableProperty] public Album? _Album = null;
+    [ObservableProperty] public Bitmap? _Image = null;
     public ObservableCollection<Track?> TrackList { get; set; } = new();
     [ObservableProperty] public string _albumArtist = "Playboi Carti";
     [ObservableProperty] public string _albumDuration = "1h 16m";
@@ -82,5 +85,14 @@ public partial class AlbumViewModel : ViewModelBase
         {
             _sidebar.PinnedAlbum.Add(a);
         }
+    }
+
+
+    [RelayCommand]
+    public async Task LoadAlbumThumbnail()
+    {
+        var url = Album.Thumb + "?X-Plex-Token=" +
+                  Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken");
+        Image = await _plex.GetBitmapImage(url);
     }
 }
