@@ -50,7 +50,7 @@
                                         <Image Source="/Assets/Images/blank_playlist.png" Width="300" />
                                     </Border>
                                     <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
-                                        <Image Source="{Binding Album.Thumb}" Width="300" />
+                                        <Image Source="{Binding Image}" Width="300" />
                                     </Border>
                                 </Grid>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -80,7 +80,10 @@
                                 <Button Content="{LucideIconContent Shuffle}" Height="50" Width="50"
                                         CornerRadius="1000">
                                 </Button>
-                                <Button Content="{LucideIconContent CirclePlus}" Height="50" Width="50"
+                                <Button Content="{LucideIconContent CirclePlus}"
+                                        Command="{Binding AddToLibraryCommand}"
+                                        CommandParameter="{Binding Album}"
+                                        Height="50" Width="50"
                                         CornerRadius="1000">
                                 </Button>
                                 <Button Content="{LucideIconContent Download}" Height="50" Width="50"

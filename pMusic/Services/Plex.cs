@@ -10,6 +10,7 @@ using Avalonia.Media.Imaging;
 using KeySharp;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using pMusic.Database;
 using pMusic.Models;
 using Country = pMusic.Models.Country;
 using Genre = pMusic.Models.Genre;
@@ -24,6 +25,8 @@ namespace pMusic.Services;
 public class Plex
 {
     public readonly HttpClient httpClient;
+    private static string _serverUrl;
+    private readonly MusicDbContext _musicDbContext;
     private readonly string _plexClientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
     private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
 
@@ -37,9 +40,11 @@ public class Plex
     private static readonly PlexAPI _plexApi =
         new PlexAPI(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
 
-    public Plex(HttpClient httpClient)
+
+    public Plex(HttpClient httpClient, MusicDbContext musicDbContext)
     {
         this.httpClient = httpClient;
+        _musicDbContext = musicDbContext;
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Token", _plexToken);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Client-Identifier", _plexClientIdentifier);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Session-Identifier", _plexSessionIdentifier);
@@ -47,11 +52,6 @@ public class Plex
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Device-Name", _plexDeviceName);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Platform", _plexPlatform);
     }
-
-    // public async ValueTask<Bitmap> GetUserAccount(string uri)
-    // {
-    //     
-    // }
 
     public async ValueTask<Bitmap> GetUserProfilePicture()
     {
@@ -74,6 +74,7 @@ public class Plex
         var serversXmlRes = await httpClient.GetStringAsync(uri);
         var serverUri = XElement.Parse(serversXmlRes).Descendants("connection").First().Attribute("uri").Value;
         Console.WriteLine($"{serverUri} -> Server Response");
+        _serverUrl = serverUri;
         return serverUri;
     }
 
@@ -101,12 +102,18 @@ public class Plex
     public async ValueTask<IImmutableList<Album>> GetArtistAlbums(string uri, int libraryId, string artistKey,
         string artist)
     {
+        if (_musicDbContext.Albums.Any(a => a.Key == artist))
+        {
+            return _musicDbContext.Albums.Where(a => a.Key == artistKey).ToImmutableList();
+        }
+
         var albumUri =
             uri + "/library/sections/" + libraryId + "/all?artist.id=" + artistKey +
             "&type=9&"; // "includeGuids={include_guids}&{filter}"
         var albumXml = await httpClient.GetStringAsync(albumUri);
 
         var albums = await ParseAlbums(XElement.Parse(albumXml), uri, artist);
+        await _musicDbContext.SaveChangesAsync();
 
         return albums.ToImmutableList();
     }
@@ -122,32 +129,10 @@ public class Plex
         return tracks.ToImmutableList();
     }
 
-    public async ValueTask UpdateTrackProgress(string ratingKey, float progress)
-    {
-        var res = await _plexApi.Media.UpdatePlayProgressAsync(
-            key: ratingKey,
-            time: progress,
-            state: "played"
-        );
-
-        Console.WriteLine($"Update Play Progress Response: {res}");
-    }
-
     public async ValueTask MarkTrackAsPlayed(double ratingKey)
     {
         var res = await _plexApi.Media.MarkPlayedAsync(key: ratingKey);
         Console.WriteLine($"Mark Played Response: {res}");
-    }
-
-    public async ValueTask CreateSession(string uri, string key, string ratingKey, Decimal duration)
-    {
-        var cleanedDecimal = Decimal.Round(duration, MidpointRounding.ToZero);
-        var timelineUri = uri + "/:/timeline?type=music&key=" + key + "&state=playing&ratingKey=" + ratingKey +
-                          "&time=0&playbackTime=0&duration=" + cleanedDecimal;
-        await httpClient.GetAsync(timelineUri);
-        // var request = new HttpRequestMessage(HttpMethod.Put, timelineUri);
-        // request.Headers.Add("Accept", "application/json");
-        // var res = await httpClient.SendAsync(request);
     }
 
     public async ValueTask UpdateSession(string uri, string key, string state, string ratingKey, Decimal time,
@@ -157,9 +142,6 @@ public class Plex
         var timelineUri = uri + "/:/timeline?type=music&key=" + key + "&state=" + state + "&ratingKey=" + ratingKey +
                           "&time=" + time + "&playbackTime=" + time + "&duration=" + cleanedDecimal;
         await httpClient.GetAsync(timelineUri);
-        // var request = new HttpRequestMessage(HttpMethod.Put, timelineUri);
-        // request.Headers.Add("Accept", "application/json");
-        // var res = await httpClient.SendAsync(request);
     }
 
     public async ValueTask<MemoryStream> GetPlaybackStream(string uri)
@@ -175,8 +157,15 @@ public class Plex
 
     public async ValueTask<IImmutableList<Playlist>> GetPlaylists(string uri)
     {
+        if (_musicDbContext.Playlists.Any())
+        {
+            return _musicDbContext.Playlists.ToImmutableList();
+        }
+
         var playlistsXml = await httpClient.GetStringAsync(uri + "/playlists");
         var playlists = await ParsePlaylists(XElement.Parse(playlistsXml), uri);
+
+        await _musicDbContext.SaveChangesAsync();
 
         return playlists.ToImmutableList();
     }
@@ -204,50 +193,38 @@ public class Plex
             .Where(playlist => playlist.Attribute("playlistType")?.Value == "audio")
             .Select(async playlist =>
             {
-                Bitmap? compositeBitmap = null;
-                if (playlist.Attribute("composite")?.Value != null)
+                var p = new Playlist
                 {
-                    compositeBitmap =
-                        await GetBitmapImage(
-                            $"{uri}{playlist.Attribute("composite")?.Value}?X-Plex-Token={_plexToken}");
-                }
-
-                return new Playlist(
-                    RatingKey: playlist.Attribute("ratingKey")?.Value ?? "",
-                    Key: playlist.Attribute("key")?.Value ?? "",
-                    Guid: playlist.Attribute("guid")?.Value ?? "",
-                    Type: playlist.Attribute("type")?.Value ?? "",
-                    Title: playlist.Attribute("title")?.Value ?? "",
-                    Summary: playlist.Attribute("summary")?.Value ?? "",
-                    Smart: int.Parse(playlist.Attribute("smart")?.Value ?? "0"),
-                    PlaylistType: playlist.Attribute("playlistType")?.Value ?? "",
-                    Composite: compositeBitmap,
-                    Icon: playlist.Attribute("icon")?.Value ?? "",
-                    ViewCount: int.Parse(playlist.Attribute("viewCount")?.Value ?? "0"),
-                    LastViewedAt: DateTimeOffset
+                    RatingKey = playlist.Attribute("ratingKey")?.Value ?? "",
+                    Key = playlist.Attribute("key")?.Value ?? "",
+                    Guid = playlist.Attribute("guid")?.Value ?? "",
+                    Type = playlist.Attribute("type")?.Value ?? "",
+                    Title = playlist.Attribute("title")?.Value ?? "",
+                    Summary = playlist.Attribute("summary")?.Value ?? "",
+                    Smart = int.Parse(playlist.Attribute("smart")?.Value ?? "0"),
+                    PlaylistType = playlist.Attribute("playlistType")?.Value ?? "",
+                    Composite = uri + playlist.Attribute("composite")?.Value ?? "",
+                    Icon = playlist.Attribute("icon")?.Value ?? "",
+                    ViewCount = int.Parse(playlist.Attribute("viewCount")?.Value ?? "0"),
+                    LastViewedAt = DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(playlist.Attribute("lastViewedAt")?.Value ?? "0"))
                         .LocalDateTime,
-                    Duration: TimeSpan.FromMilliseconds(int.Parse(playlist.Attribute("duration")?.Value ?? "0")),
-                    LeafCount: int.Parse(playlist.Attribute("leafCount")?.Value ?? "0"),
-                    AddedAt: DateTimeOffset.FromUnixTimeSeconds(long.Parse(playlist.Attribute("addedAt")?.Value ?? "0"))
+                    Duration = TimeSpan.FromMilliseconds(int.Parse(playlist.Attribute("duration")?.Value ?? "0")),
+                    LeafCount = int.Parse(playlist.Attribute("leafCount")?.Value ?? "0"),
+                    AddedAt = DateTimeOffset
+                        .FromUnixTimeSeconds(long.Parse(playlist.Attribute("addedAt")?.Value ?? "0"))
                         .LocalDateTime,
-                    UpdatedAt: DateTimeOffset
+                    UpdatedAt = DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(playlist.Attribute("updatedAt")?.Value ?? "0")).LocalDateTime
-                );
+                };
+
+                _musicDbContext.Playlists.Add(p);
+                return p;
             }).ToList();
 
         // Wait for all tasks to complete and return the results
         var results = await Task.WhenAll(tasks);
         return results.ToList();
-    }
-
-    public async ValueTask<Bitmap> GetBitmapImage(string url)
-    {
-        var imageBytes = await httpClient.GetByteArrayAsync(url);
-
-        using var memoryStream = new MemoryStream(imageBytes);
-        // In Avalonia, use DecodeToHeight instead of DecodeToWidth
-        return new Bitmap(memoryStream);
     }
 
     public async Task<List<Track>> ParseTracks(XElement mediaContainer, string uri, string artist)
@@ -257,46 +234,39 @@ public class Plex
 
         var items = mediaContainer.Elements("Track").Select(async track =>
         {
-            Bitmap? thumb = null;
-            if (track.Attribute("thumb")?.Value != null)
+            return new Track
             {
-                thumb =
-                    await GetBitmapImage(
-                        $"{uri}{track.Attribute("thumb")?.Value}?X-Plex-Token={_plexToken}");
-            }
-
-            return new Track(
-                RatingKey: track.Attribute("ratingKey")?.Value ?? "",
-                Key: track.Attribute("key")?.Value ?? "",
-                ParentRatingKey: track.Attribute("parentRatingKey")?.Value ?? "",
-                GrandparentRatingKey: track.Attribute("grandparentRatingKey")?.Value ?? "",
-                Guid: track.Attribute("guid")?.Value ?? "",
-                ParentGuid: track.Attribute("parentGuid")?.Value ?? "",
-                GrandparentGuid: track.Attribute("grandparentGuid")?.Value ?? "",
-                ParentStudio: track.Attribute("parentStudio")?.Value ?? "",
-                Type: track.Attribute("type")?.Value ?? "",
-                Title: track.Attribute("title")?.Value ?? "",
-                Artist: artist,
-                GrandparentKey: track.Attribute("grandparentKey")?.Value ?? "",
-                ParentKey: track.Attribute("parentKey")?.Value ?? "",
-                GrandparentTitle: track.Attribute("grandparentTitle")?.Value ?? "",
-                ParentTitle: track.Attribute("parentTitle")?.Value ?? "",
-                Summary: track.Attribute("summary")?.Value ?? "",
-                Index: int.Parse(track.Attribute("index")?.Value ?? "0"),
-                ParentIndex: int.Parse(track.Attribute("parentIndex")?.Value ?? "0"),
-                RatingCount: int.Parse(track.Attribute("ratingCount")?.Value ?? "0"),
-                ParentYear: int.Parse(track.Attribute("parentYear")?.Value! ?? "0"),
-                Thumb: thumb,
-                Art: track.Attribute("art")?.Value ?? "",
-                ParentThumb: track.Attribute("parentThumb")?.Value ?? "",
-                GrandparentThumb: track.Attribute("grandparentThumb")?.Value ?? "",
-                GrandparentArt: track.Attribute("grandparentArt")?.Value ?? "",
-                Duration: TimeSpan.FromMilliseconds(int.Parse(track.Attribute("duration")?.Value ?? "0")),
-                AddedAt: int.Parse(track.Attribute("addedAt")?.Value ?? "0"),
-                UpdatedAt: int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
-                MusicAnalysisVersion: int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
-                Media: ParseMedia(track.Element("Media")!)
-            );
+                RatingKey = track.Attribute("ratingKey")?.Value ?? "",
+                Key = track.Attribute("key")?.Value ?? "",
+                ParentRatingKey = track.Attribute("parentRatingKey")?.Value ?? "",
+                GrandparentRatingKey = track.Attribute("grandparentRatingKey")?.Value ?? "",
+                Guid = track.Attribute("guid")?.Value ?? "",
+                ParentGuid = track.Attribute("parentGuid")?.Value ?? "",
+                GrandparentGuid = track.Attribute("grandparentGuid")?.Value ?? "",
+                ParentStudio = track.Attribute("parentStudio")?.Value ?? "",
+                Type = track.Attribute("type")?.Value ?? "",
+                Title = track.Attribute("title")?.Value ?? "",
+                Artist = artist,
+                GrandparentKey = track.Attribute("grandparentKey")?.Value ?? "",
+                ParentKey = track.Attribute("parentKey")?.Value ?? "",
+                GrandparentTitle = track.Attribute("grandparentTitle")?.Value ?? "",
+                ParentTitle = track.Attribute("parentTitle")?.Value ?? "",
+                Summary = track.Attribute("summary")?.Value ?? "",
+                Index = int.Parse(track.Attribute("index")?.Value ?? "0"),
+                ParentIndex = int.Parse(track.Attribute("parentIndex")?.Value ?? "0"),
+                RatingCount = int.Parse(track.Attribute("ratingCount")?.Value ?? "0"),
+                ParentYear = int.Parse(track.Attribute("parentYear")?.Value ?? "0"),
+                Thumb = uri + track.Attribute("thumb")?.Value ?? "",
+                Art = track.Attribute("art")?.Value ?? "",
+                ParentThumb = track.Attribute("parentThumb")?.Value ?? "",
+                GrandparentThumb = track.Attribute("grandparentThumb")?.Value ?? "",
+                GrandparentArt = track.Attribute("grandparentArt")?.Value ?? "",
+                Duration = TimeSpan.FromMilliseconds(int.Parse(track.Attribute("duration")?.Value ?? "0")),
+                AddedAt = int.Parse(track.Attribute("addedAt")?.Value ?? "0"),
+                UpdatedAt = int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
+                MusicAnalysisVersion = int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
+                Media = ParseMedia(track.Element("Media")!)
+            };
         }).ToList();
 
         return (await Task.WhenAll(items)).ToList();
@@ -306,29 +276,31 @@ public class Plex
     {
         if (mediaElement == null) return null;
 
-        return new Media(
-            Id: mediaElement.Attribute("id")?.Value ?? "",
-            Duration: int.Parse(mediaElement.Attribute("duration")?.Value ?? "0"),
-            Bitrate: int.Parse(mediaElement.Attribute("bitrate")?.Value ?? "0"),
-            AudioChannels: double.Parse(mediaElement.Attribute("audioChannels")?.Value ?? "0"),
-            AudioCodec: mediaElement.Attribute("audioCodec")?.Value ?? "",
-            Container: mediaElement.Attribute("container")?.Value ?? "",
-            Part: ParsePart(mediaElement.Element("Part"))
-        );
+        return new Media
+        {
+            MediaId = mediaElement.Attribute("id")?.Value ?? "",
+            Duration = int.Parse(mediaElement.Attribute("duration")?.Value ?? "0"),
+            Bitrate = int.Parse(mediaElement.Attribute("bitrate")?.Value ?? "0"),
+            AudioChannels = double.Parse(mediaElement.Attribute("audioChannels")?.Value ?? "0"),
+            AudioCodec = mediaElement.Attribute("audioCodec")?.Value ?? "",
+            Container = mediaElement.Attribute("container")?.Value ?? "",
+            Part = ParsePart(mediaElement.Element("Part"))
+        };
     }
 
     private static Part ParsePart(XElement partElement)
     {
         if (partElement == null) return null;
 
-        return new Part(
-            Id: partElement.Attribute("id")?.Value ?? "",
-            Key: partElement.Attribute("key")?.Value ?? "",
-            Duration: int.Parse(partElement.Attribute("duration")?.Value ?? "0"),
-            File: partElement.Attribute("file")?.Value ?? "",
-            Size: long.Parse(partElement.Attribute("size")?.Value ?? "0"),
-            Container: partElement.Attribute("container")?.Value ?? ""
-        );
+        return new Part
+        {
+            PartId = partElement.Attribute("id")?.Value ?? "",
+            Key = partElement.Attribute("key")?.Value ?? "",
+            Duration = int.Parse(partElement.Attribute("duration")?.Value ?? "0"),
+            File = partElement.Attribute("file")?.Value ?? "",
+            Size = long.Parse(partElement.Attribute("size")?.Value ?? "0"),
+            Container = partElement.Attribute("container")?.Value ?? ""
+        };
     }
 
     public async ValueTask<List<Album>> ParseAlbums(XElement mediaContainer, string uri, string artist)
@@ -340,72 +312,59 @@ public class Plex
         var items = mediaContainer.Elements("Directory").Select(
             async directory =>
             {
-                Bitmap? thumbBitmap = null;
-                if (directory.Attribute("thumb")?.Value != null)
+                var album = new Album
                 {
-                    thumbBitmap =
-                        await GetBitmapImage(
-                            $"{uri}{directory.Attribute("thumb")?.Value}");
-                }
-
-                Bitmap? artBitmap = null;
-                if (directory.Attribute("art")?.Value != null)
-                {
-                    artBitmap =
-                        await GetBitmapImage(
-                            $"{uri}{directory.Attribute("art")?.Value}");
-                }
-
-                var newAlbum = new Album(
-                    AddedAt: DateTimeOffset
+                    AddedAt = DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(directory.Attribute("addedAt")?.Value ?? "0")).LocalDateTime,
-                    Guid: directory.Attribute("guid")?.Value ?? "",
-                    Key: directory.Attribute("key")?.Value ?? "",
-                    LastRatedAt: DateTimeOffset
+                    Guid = directory.Attribute("guid")?.Value ?? "",
+                    Key = directory.Attribute("key")?.Value ?? "",
+                    LastRatedAt = DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(directory.Attribute("lastRatedAt")?.Value ?? "0"))
                         .LocalDateTime,
-                    LastViewedAt: DateTimeOffset
+                    LastViewedAt = DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(directory.Attribute("lastViewedAt")?.Value ?? "0"))
                         .LocalDateTime,
-                    LoudnessAnalysisVersion: directory.Attribute("loudnessAnalysisVersion")?.Value ?? "",
-                    OriginallyAvailableAt: DateTime.Parse
-                        (directory.Attribute("originallyAvailableAt")!.Value),
-                    MusicAnalysisVersion: directory.Attribute("musicAnalysisVersion")?.Value ?? "",
-                    ParentGuid: directory.Attribute("parentGuid")?.Value ?? "",
-                    ParentKey: directory.Attribute("parentKey")?.Value ?? "",
-                    ParentRatingKey: directory.Attribute("parentRatingKey")?.Value ?? "",
-                    ParentThumb: directory.Attribute("parentThumb")?.Value ?? "0",
-                    ParentTitle: directory.Attribute("parentTitle")?.Value ?? "",
-                    Rating: directory.Attribute("rating")?.Value ?? "0",
-                    RatingKey: directory.Attribute("ratingKey")?.Value ?? "",
-                    SkipCount: directory.Attribute("skipCount")?.Value ?? "",
-                    Studio: directory.Attribute("studio")?.Value ?? "",
-                    Summary: directory.Attribute("summary")?.Value ?? "",
-                    Index: directory.Attribute("index")?.Value ?? "",
-                    Thumb: thumbBitmap,
-                    Title: directory.Attribute("title")?.Value ?? "",
-                    Artist: artist,
-                    Type: directory.Attribute("type")?.Value ?? "",
-                    UpdatedAt: DateTimeOffset
+                    LoudnessAnalysisVersion = directory.Attribute("loudnessAnalysisVersion")?.Value ?? "",
+                    OriginallyAvailableAt = DateTime.Parse(directory.Attribute("originallyAvailableAt")!.Value),
+                    MusicAnalysisVersion = directory.Attribute("musicAnalysisVersion")?.Value ?? "",
+                    ParentGuid = directory.Attribute("parentGuid")?.Value ?? "",
+                    ParentKey = directory.Attribute("parentKey")?.Value ?? "",
+                    ParentRatingKey = directory.Attribute("parentRatingKey")?.Value ?? "",
+                    ParentThumb = directory.Attribute("parentThumb")?.Value ?? "0",
+                    ParentTitle = directory.Attribute("parentTitle")?.Value ?? "",
+                    Rating = directory.Attribute("rating")?.Value ?? "0",
+                    RatingKey = directory.Attribute("ratingKey")?.Value ?? "",
+                    SkipCount = directory.Attribute("skipCount")?.Value ?? "",
+                    Studio = directory.Attribute("studio")?.Value ?? "",
+                    Summary = directory.Attribute("summary")?.Value ?? "",
+                    Index = directory.Attribute("index")?.Value ?? "",
+                    Thumb = uri + directory.Attribute("thumb")?.Value ?? "",
+                    Title = directory.Attribute("title")?.Value ?? "",
+                    Artist = artist,
+                    Type = directory.Attribute("type")?.Value ?? "",
+                    UpdatedAt = DateTimeOffset
                         .FromUnixTimeSeconds(long.Parse(directory.Attribute("updatedAt")?.Value ?? "0")).LocalDateTime,
-                    UserRating: directory.Attribute("userRating")?.Value ?? "0",
-                    ViewCount: directory.Attribute("viewCount")?.Value ?? "0",
-                    Year: directory.Attribute("year")?.Value ?? "",
-                    Image: new Image(
-                        Alt: directory.Element("Image").Attribute("alt")?.Value ?? "",
-                        Type: directory.Element("Image").Attribute("type")?.Value ?? "",
-                        Url: directory.Element("Image").Attribute("url")?.Value ?? ""
-                    ),
-                    UltraBlurColors: new UltraBlurColors(
-                        TopLeft: directory.Element("UltraBlurColors").Attribute("topLeft")?.Value ?? "",
-                        TopRight: directory.Element("UltraBlurColors").Attribute("topRight")?.Value ?? "",
-                        BottomLeft: directory.Element("UltraBlurColors").Attribute("bottomLeft")?.Value ?? "",
-                        BottomRight: directory.Element("UltraBlurColors").Attribute("bottomRight")?.Value ?? ""
-                    ));
-        // Genre:
-                // directory.Element("Genre").Attribute("tag")?.Value ?? "",
-                //     );
-                return newAlbum;
+                    UserRating = directory.Attribute("userRating")?.Value ?? "0",
+                    ViewCount = directory.Attribute("viewCount")?.Value ?? "0",
+                    Year = directory.Attribute("year")?.Value ?? "",
+                    Image = new Image
+                    {
+                        Alt = directory.Element("Image").Attribute("alt")?.Value ?? "",
+                        Type = directory.Element("Image").Attribute("type")?.Value ?? "",
+                        Url = directory.Element("Image").Attribute("url")?.Value ?? ""
+                    },
+                    UltraBlurColors = new UltraBlurColors
+                    {
+                        TopLeft = directory.Element("UltraBlurColors").Attribute("topLeft")?.Value ?? "",
+                        TopRight = directory.Element("UltraBlurColors").Attribute("topRight")?.Value ?? "",
+                        BottomLeft = directory.Element("UltraBlurColors").Attribute("bottomLeft")?.Value ?? "",
+                        BottomRight = directory.Element("UltraBlurColors").Attribute("bottomRight")?.Value ?? ""
+                    }
+                };
+
+                _musicDbContext.Add(album);
+
+                return album;
             }).ToList();
 
         var albums = (await Task.WhenAll(items)).ToList();
@@ -419,64 +378,51 @@ public class Plex
         var items = mediaContainer.Elements("Directory")
             .Select(async directory =>
             {
-                Bitmap? thumbBitmap = null;
-                if (directory.Attribute("thumb")?.Value != null)
-                {
-                    thumbBitmap =
-                        await GetBitmapImage(
-                            $"{uri}{directory.Attribute("thumb")?.Value}?X-Plex-Token={_plexToken}");
-                }
-
                 return new Artist
-                (
-                    RatingKey: directory.Attribute("ratingKey")?.Value ?? "",
-                    Key: directory.Attribute("key")?.Value ?? "",
-                    Guid: directory.Attribute("guid")?.Value ?? "",
-                    Type: directory.Attribute("type")?.Value ?? "",
-                    Title: directory.Attribute("title")?.Value ?? "",
-                    Index: directory.Attribute("index")?.Value ?? "",
-                    UserRating: directory.Attribute("userRating")?.Value ?? "",
-                    ViewCount: directory.Attribute("viewCount")?.Value ?? "",
-                    SkipCount: directory.Attribute("skipCount")?.Value ?? "",
-                    LastViewedAt: directory.Attribute("lastViewedAt")?.Value ?? "",
-                    LastRatedAt: directory.Attribute("lastRatedAt")?.Value ?? "",
-                    // Thumb: uri + directory.Attribute("thumb")?.Value ?? "",
-                    Thumb: thumbBitmap,
-                    AddedAt: directory.Attribute("addedAt")?.Value ?? "",
-                    UpdatedAt: directory.Attribute("updatedAt")?.Value ?? "",
-                    LibraryKey: libKey,
+                {
+                    RatingKey = directory.Attribute("ratingKey")?.Value ?? "",
+                    Key = directory.Attribute("key")?.Value ?? "",
+                    Guid = directory.Attribute("guid")?.Value ?? "",
+                    Type = directory.Attribute("type")?.Value ?? "",
+                    Title = directory.Attribute("title")?.Value ?? "",
+                    Index = directory.Attribute("index")?.Value ?? "",
+                    UserRating = directory.Attribute("userRating")?.Value ?? "",
+                    ViewCount = directory.Attribute("viewCount")?.Value ?? "",
+                    SkipCount = directory.Attribute("skipCount")?.Value ?? "",
+                    LastViewedAt = directory.Attribute("lastViewedAt")?.Value ?? "",
+                    LastRatedAt = directory.Attribute("lastRatedAt")?.Value ?? "",
+                    Thumb = uri + directory.Attribute("thumb")?.Value ?? "",
+                    AddedAt = directory.Attribute("addedAt")?.Value ?? "",
+                    UpdatedAt = directory.Attribute("updatedAt")?.Value ?? "",
+                    LibraryKey = libKey,
 
-                    // Parse Image
-                    Image: directory.Element("Image") != null
+                    Image = directory.Element("Image") != null
                         ? new Image
-                        (
-                            Alt: directory.Element("Image")?.Attribute("alt")?.Value,
-                            Type: directory.Element("Image")?.Attribute("type")?.Value,
-                            Url: directory.Element("Image")?.Attribute("url")?.Value
-                        )
+                        {
+                            Alt = directory.Element("Image")?.Attribute("alt")?.Value,
+                            Type = directory.Element("Image")?.Attribute("type")?.Value,
+                            Url = directory.Element("Image")?.Attribute("url")?.Value
+                        }
                         : null,
 
-                    // Parse UltraBlurColors
-                    Ubc: directory.Element("UltraBlurColors") != null
+                    Ubc = directory.Element("UltraBlurColors") != null
                         ? new UltraBlurColors
-                        (
-                            TopLeft: directory.Element("UltraBlurColors")?.Attribute("topLeft")?.Value,
-                            TopRight: directory.Element("UltraBlurColors")?.Attribute("topRight")?.Value,
-                            BottomLeft: directory.Element("UltraBlurColors")?.Attribute("bottomLeft")?.Value,
-                            BottomRight: directory.Element("UltraBlurColors")?.Attribute("bottomRight")?.Value
-                        )
+                        {
+                            TopLeft = directory.Element("UltraBlurColors")?.Attribute("topLeft")?.Value,
+                            TopRight = directory.Element("UltraBlurColors")?.Attribute("topRight")?.Value,
+                            BottomLeft = directory.Element("UltraBlurColors")?.Attribute("bottomLeft")?.Value,
+                            BottomRight = directory.Element("UltraBlurColors")?.Attribute("bottomRight")?.Value
+                        }
                         : null,
 
-                    // Parse Genres
-                    Genres: directory.Elements("Genre")
-                        .Select(genre => new Genre(Tag: genre.Attribute("tag")?.Value))
-                        .ToArray(),
+                    // Genres = directory.Elements("Genre")
+                    //     .Select(genre => new Genre { Tag = genre.Attribute("tag")?.Value })
+                    //     .ToArray(),
 
-                    // Parse Country
-                    Country: directory.Element("Country") != null
-                        ? new Country(Tag: directory.Element("Country")?.Attribute("tag")?.Value)
+                    Country = directory.Element("Country") != null
+                        ? new Country { Tag = directory.Element("Country")?.Attribute("tag")?.Value }
                         : null
-                );
+                };
             }).ToList();
 
         return (await Task.WhenAll(items)).ToList();
@@ -517,5 +463,14 @@ public class Plex
                 }
                 : null
         };
+    }
+
+    public async ValueTask<Bitmap> GetBitmapImage(string url)
+    {
+        var imageBytes = await httpClient.GetByteArrayAsync(url);
+
+        using var memoryStream = new MemoryStream(imageBytes);
+        // In Avalonia, use DecodeToHeight instead of DecodeToWidth
+        return new Bitmap(memoryStream);
     }
 }

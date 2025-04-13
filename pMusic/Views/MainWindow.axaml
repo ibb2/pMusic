@@ -8,6 +8,6 @@
         x:Class="pMusic.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="pMusic"
-        Background="{DynamicResource RegionColor}" Padding="8 0">
+        Background="{DynamicResource SystemAltHighColor}" Padding="8 0">
     <views:MainView />
 </Window>

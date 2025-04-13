@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
+using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
 using pMusic.Services;
@@ -24,9 +26,13 @@ namespace pMusic.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    private MusicDbContext _musicDbContext;
+
     private readonly Plex _plex;
     private readonly IAudioPlayerService _audioPlayer;
+
     public MusicPlayer MusicPlayer { get; }
+    public Sidebar Sidebar { get; }
 
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
 
@@ -40,17 +46,39 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private ViewModelBase _currentPage;
 
-    public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer)
+    public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer,
+        MusicDbContext musicDbContext, Sidebar sidebar)
     {
         _plex = plex;
         MusicPlayer = musicPlayer;
         _audioPlayer = audioPlayer;
+        _musicDbContext = musicDbContext;
+        Sidebar = sidebar;
+
+        _ = LoadPinnedAlbumsThumbnails();
     }
 
     public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),
-        Ioc.Default.GetRequiredService<IAudioPlayerService>())
+        Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
+        Ioc.Default.GetRequiredService<Sidebar>())
     {
     }
+
+    public async ValueTask LoadPinnedAlbumsThumbnails()
+    {
+        // Empty Pinned Albums 
+        Sidebar.PinnedAlbum.Clear();
+
+        // Add new pinned albums
+        var pinnedAlbums = _musicDbContext.Albums.Where(a => a.IsPinned).ToList();
+        var viewModels = pinnedAlbums.Select(pa => new DisplayAlbumViewModel(pa, _plex)).ToList();
+
+        await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
+
+        foreach (var pinnedAlbum in viewModels)
+            Sidebar.PinnedAlbum.Add(pinnedAlbum);
+    }
+
 
     public void CheckLoginStatus()
     {
