@@ -7,6 +7,7 @@
              xmlns:views="clr-namespace:pMusic.Views"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:converter="clr-namespace:pMusic.Converter"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -102,71 +103,75 @@
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="200, 4, *">
             <!-- Sidebar -->
-            <Border
-                Classes="Panel"
-                CornerRadius="8"
-                Padding="4"
-                HorizontalAlignment="Stretch">
-                <StackPanel Grid.Column="0" Spacing="8" HorizontalAlignment="Stretch">
-                    <Grid ColumnDefinitions="Auto, Auto" VerticalAlignment="Center">
-                        <Button Content="{LucideIconContent Kind=Library}" Background="Transparent" />
-                        <TextBlock Grid.Column="1" Text="Your Library" FontSize="18" VerticalAlignment="Center" />
-                    </Grid>
-                    <!-- <StackPanel><TextBlock>Library Filter Tabs</TextBlock></StackPanel> -->
-                    <!-- <StackPanel><TextBlock>Library Search</TextBlock></StackPanel> -->
-                    <!-- List of library items -->
-                    <ListBox ItemsSource="{Binding Sidebar.PinnedAlbum}" Padding="0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border CornerRadius="4" ClipToBounds="True">
-                                    <StackPanel Orientation="Horizontal" PointerPressed="GoToAlbum"
-                                                Classes="SidePanel-Item" Background="{DynamicResource RegionColor}">
-                                        <Border Padding="8" CornerRadius="4">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <Border ClipToBounds="True" CornerRadius="5">
-                                                    <Image
-                                                        Source="{Binding Thumb}"
-                                                        Width="50">
-                                                    </Image>
-                                                </Border>
-                                                <StackPanel Spacing="4" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Title}"></TextBlock>
-                                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                                        <!-- Pinned Icon -->
-                                                        <TextBlock FontSize="12">Album</TextBlock>
-                                                        <TextBlock FontSize="12" Text="{Binding Artist}"></TextBlock>
+            <suki:GlassCard>
+                <Border
+                    Classes="Panel"
+                    CornerRadius="8"
+                    Padding="4"
+                    HorizontalAlignment="Stretch">
+                    <StackPanel Grid.Column="0" Spacing="8" HorizontalAlignment="Stretch">
+                        <Grid ColumnDefinitions="Auto, Auto" VerticalAlignment="Center">
+                            <Button Content="{LucideIconContent Kind=Library}" Background="Transparent" />
+                            <TextBlock Grid.Column="1" Text="Your Library" FontSize="18" VerticalAlignment="Center" />
+                        </Grid>
+                        <!-- <StackPanel><TextBlock>Library Filter Tabs</TextBlock></StackPanel> -->
+                        <!-- <StackPanel><TextBlock>Library Search</TextBlock></StackPanel> -->
+                        <!-- List of library items -->
+                        <ListBox ItemsSource="{Binding Sidebar.PinnedAlbum}" Padding="0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" ClipToBounds="True">
+                                        <StackPanel Orientation="Horizontal" PointerPressed="GoToAlbum"
+                                                    Classes="SidePanel-Item" Background="{DynamicResource RegionColor}">
+                                            <Border Padding="8" CornerRadius="4">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Border ClipToBounds="True" CornerRadius="5">
+                                                        <Image
+                                                            Source="{Binding Thumb}"
+                                                            Width="50">
+                                                        </Image>
+                                                    </Border>
+                                                    <StackPanel Spacing="4" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Title}"></TextBlock>
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <!-- Pinned Icon -->
+                                                            <TextBlock FontSize="12">Album</TextBlock>
+                                                            <TextBlock FontSize="12" Text="{Binding Artist}"></TextBlock>
+                                                        </StackPanel>
                                                     </StackPanel>
                                                 </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-            </Border>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+            </suki:GlassCard>
             <!-- <GridSplitter Grid.Column="1" Grid.Row="0" Background="Transparent" -->
             <!--               ResizeDirection="Columns" Width="8" /> -->
             <!-- Main Content -->
-            <Border Grid.Column="2" Classes="Panel" CornerRadius="8">
-                <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
-                    <ContentControl.DataTemplates>
-                        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
-                            <views:HomeView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type vm:AlbumViewModel}">
-                            <views:AlbumView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type vm:ArtistViewModel}">
-                            <views:ArtistView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type vm:TrackViewModel}">
-                            <views:TrackView />
-                        </DataTemplate>
-                    </ContentControl.DataTemplates>
-                </UserControl>
-            </Border>
+            <suki:GlassCard Grid.Column="2">
+                <Border Grid.Column="2" Classes="Panel" CornerRadius="8">
+                    <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
+                        <ContentControl.DataTemplates>
+                            <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+                                <views:HomeView />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:AlbumViewModel}">
+                                <views:AlbumView />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:ArtistViewModel}">
+                                <views:ArtistView />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:TrackViewModel}">
+                                <views:TrackView />
+                            </DataTemplate>
+                        </ContentControl.DataTemplates>
+                    </UserControl>
+                </Border>
+            </suki:GlassCard>
         </Grid>
         <Grid Grid.Row="2" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
             <!-- Bottom Music Player -->
