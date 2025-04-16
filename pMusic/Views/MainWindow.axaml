@@ -9,7 +9,8 @@
                    x:Class="pMusic.Views.MainWindow"
                    Icon="/Assets/avalonia-logo.ico"
                    Title="pMusic"
-                   Padding="8 0"
                    ShowTitlebarBackground="False">
-    <views:MainView />
+    <Border Padding="16">
+        <views:MainView />
+    </Border>
 </sukiUi:SukiWindow>
