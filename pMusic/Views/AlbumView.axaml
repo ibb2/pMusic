@@ -75,20 +75,22 @@
                         </Grid>
                         <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
                             <StackPanel Orientation="Horizontal">
-                                <Button Classes="Basic Icon" Content="{LucideIconContent Play}"></Button>
-                                <Button Classes="Basic Icon" Content="{LucideIconContent Shuffle}">
+                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Play}"></Button>
+                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Shuffle}">
                                 </Button>
-                                <Button Classes="Basic Icon" Content="{LucideIconContent CirclePlus}"
+                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent CirclePlus}"
                                         Command="{Binding AddToLibraryCommand}"
                                         CommandParameter="{Binding Album}">
                                 </Button>
-                                <Button Classes="Basic Icon" Content="{LucideIconContent Download}">
+                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Download}">
                                 </Button>
                             </StackPanel>
-                            <TextBlock Grid.Column="1">
-                                List
-                                <Button Classes="Basic Icon" Content="{LucideIconContent List}"></Button>
-                            </TextBlock>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock>
+                                    List
+                                </TextBlock>
+                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent List}"></Button>
+                            </StackPanel>
                         </Grid>
                         <DataGrid Grid.Row="2" Name="Tracklist" ItemsSource="{Binding TrackList}" IsReadOnly="True"
                                   CanUserResizeColumns="True">
@@ -103,7 +105,7 @@
                                         <DataTemplate>
                                             <Panel>
                                                 <!-- Button that appears on hover -->
-                                                <Button Content="{LucideIconContent Play}"
+                                                <Button Classes="Basic Icon" Content="{LucideIconContent Play}"
                                                         IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}"
                                                         Command="{Binding ((vm:AlbumViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding }"
