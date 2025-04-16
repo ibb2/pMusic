@@ -6,13 +6,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using pMusic.Models;
 using pMusic.Services;
 
 namespace pMusic.ViewModels;
 
-public class HomeViewModel : ViewModelBase
+public partial class HomeViewModel : ViewModelBase
 {
     private IMusic _music;
     private Plex _plex;
@@ -135,5 +136,11 @@ public class HomeViewModel : ViewModelBase
                 Playlists.Add(playlist);
             }
         });
+    }
+
+    [RelayCommand]
+    public void GoToAlbumPage(Album album)
+    {
+        GoToAlbum(album);
     }
 }
