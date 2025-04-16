@@ -12,6 +12,7 @@ using Avalonia.VisualTree;
 using KeySharp;
 using pMusic.Models;
 using pMusic.ViewModels;
+using SukiUI.Controls;
 
 namespace pMusic.Views;
 
@@ -157,18 +158,20 @@ public partial class MainView : UserControl
         }
     }
 
-    public void GoToAlbum(object? sender, PointerEventArgs pointerEventArgs)
+    private void GoToAlbum(object? sender, PointerPressedEventArgs e)
     {
-        if (sender is not Border border)
+        if (sender is not SukiSideMenuItem sukiSideMenuItem)
             return;
 
-        if (border.DataContext is not AlbumViewModel albumVm)
+        if (sukiSideMenuItem.DataContext is not DisplayAlbumViewModel displayAlbumViewModel)
             return;
 
-        if (albumVm.Album is null)
+        if (displayAlbumViewModel.Album is null)
             return;
 
         if (DataContext is not MainViewModel viewModel)
             return;
+
+        viewModel.GoToAlbumDetialsPage(displayAlbumViewModel.Album);
     }
 }

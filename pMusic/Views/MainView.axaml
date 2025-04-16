@@ -108,57 +108,74 @@
                 </Button>
             </StackPanel>
         </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="200, 4, *">
+        <Grid Grid.Row="1" ColumnDefinitions="Auto, *">
             <!-- Sidebar -->
-            <suki:GlassCard CornerRadius="8" ClipToBounds="True">
-                <StackPanel Grid.Column="0" Spacing="8" HorizontalAlignment="Stretch">
-                    <Grid ColumnDefinitions="Auto, Auto" VerticalAlignment="Center">
-                        <TextBlock Grid.Column="1" Text="Your Library" FontSize="18" VerticalAlignment="Center" />
-                    </Grid>
-                    <!-- <StackPanel><TextBlock>Library Filter Tabs</TextBlock></StackPanel> -->
-                    <!-- <StackPanel><TextBlock>Library Search</TextBlock></StackPanel> -->
-                    <!-- List of library items -->
-                    <ItemsControl x:Name="PinnedAlbumList" ItemsSource="{Binding Sidebar.PinnedAlbum}" Padding="0">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border CornerRadius="4" ClipToBounds="True" Padding="8"
-                                        VerticalAlignment="Stretch"
-                                        HorizontalAlignment="Stretch">
-                                    <Border.Styles>
-                                        <Style Selector="Border:pointerover">
-                                            <Setter Property="Background"
-                                                    Value="{DynamicResource SukiLightBorderBrush}" />
-                                        </Style>
-                                    </Border.Styles>
-                                    <Button
-                                        Classes="Basic"
-                                        Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).GoToAlbumDetialsPageCommand}"
-                                        CommandParameter="{Binding Album}">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <Border ClipToBounds="True" CornerRadius="5">
-                                                <Image Source="{Binding Thumb}" Width="50" />
-                                            </Border>
-                                            <StackPanel Spacing="4" VerticalAlignment="Center">
-                                                <TextBlock Foreground="{DynamicResource SukiText}"
-                                                           Text="{Binding Title}" />
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <TextBlock FontSize="12" Foreground="{DynamicResource SukiText}">Album</TextBlock>
-                                                    <TextBlock FontSize="12" Foreground="{DynamicResource SukiText}"
-                                                               Text="{Binding Artist}" />
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Button>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </suki:GlassCard>
-            <!-- <GridSplitter Grid.Column="1" Grid.Row="0" Background="Transparent" -->
-            <!--               ResizeDirection="Columns" Width="8" /> -->
+            <suki:SukiSideMenu IsSearchEnabled="True"
+                               ItemsSource="{Binding Sidebar.PinnedAlbum}"
+                               IsContentVisible="False" Margin="0">
+                <suki:SukiSideMenu.Styles>
+                    <Style Selector="Image.AppIcon">
+                        <Setter Property="Transitions">
+                            <Transitions>
+                                <DoubleTransition Property="Opacity" Duration="0.1" />
+                            </Transitions>
+                        </Setter>
+                        <Style Selector="^:pointerover">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Style>
+                    </Style>
+                </suki:SukiSideMenu.Styles>
+                <suki:SukiSideMenu.ItemTemplate>
+                    <DataTemplate>
+                        <suki:SukiSideMenuItem Header="{Binding Title}" PointerPressed="GoToAlbum">
+                            <suki:SukiSideMenuItem.Icon>
+                                <Image Source="{Binding Thumb}" Width="50" />
+                            </suki:SukiSideMenuItem.Icon>
+                        </suki:SukiSideMenuItem>
+                    </DataTemplate>
+                </suki:SukiSideMenu.ItemTemplate>
+
+                <suki:SukiSideMenu.HeaderContent>
+                    <!-- <Image Width="80" -->
+                    <!--        Height="80" -->
+                    <!--        Margin="30,10,30,30" -->
+                    <!--        Classes="AppIcon" -->
+                    <!--        IsVisible="{Binding $parent[suki:SukiWindow].((demo:SukiUIDemoViewModel)DataContext).TitleBarVisible}" -->
+                    <!--        PointerPressed="InputElement_OnPointerPressed" -->
+                    <!--        Source="Assets/OIG.N5o-removebg-preview.png" -->
+                    <!--        ToolTip.Tip="Click To Toggle Top Menu." /> -->
+                </suki:SukiSideMenu.HeaderContent>
+                <suki:SukiSideMenu.FooterContent>
+                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                        <StackPanel.Styles>
+                            <Style Selector="Button">
+                                <!-- <Setter Property="Command" Value="{Binding OpenUrlCommand}" /> -->
+                            </Style>
+                            <Style Selector="LucideIcon">
+                                <Setter Property="Width" Value="25" />
+                                <Setter Property="Height" Value="25" />
+                            </Style>
+                        </StackPanel.Styles>
+                        <Button Classes="Basic"
+                                CommandParameter="https://github.com/kikipoulet/SukiUI"
+                                ToolTip.Tip="Open On GitHub.">
+                            <LucideIcon Kind="Github" />
+                        </Button>
+                        <Button Classes="Basic"
+                                CommandParameter="https://www.nuget.org/packages/SukiUI"
+                                ToolTip.Tip="View On NuGet.">
+                            <LucideIcon Kind="Package" />
+                        </Button>
+                        <Button Classes="Basic"
+                                CommandParameter="https://github.com/kikipoulet/CherylUI"
+                                ToolTip.Tip="CheryUI - For Mobile">
+                            <LucideIcon Kind="Cat" />
+                        </Button>
+                    </StackPanel>
+                </suki:SukiSideMenu.FooterContent>
+            </suki:SukiSideMenu>
             <!-- Main Content -->
-            <suki:GlassCard Grid.Column="2" CornerRadius="8" Padding="0">
+            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 10 10">
                 <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
                     <ContentControl.DataTemplates>
                         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
