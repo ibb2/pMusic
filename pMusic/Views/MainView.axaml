@@ -64,7 +64,7 @@
             <Setter Property="Padding" Value="8" />
         </Style>
     </UserControl.Styles>
-    <Grid RowDefinitions="Auto, *, 150">
+    <Grid RowDefinitions="Auto, *, 100">
         <Grid ColumnDefinitions="Auto, *, Auto" Margin="0, 8 0 2">
             <StackPanel Orientation="Horizontal">
                 <Button Content="{LucideIconContent Kind=ChevronLeft}" Command="{Binding GoBack}"
@@ -197,7 +197,7 @@
             </StackPanel>
             <StackPanel Grid.Column="1" VerticalAlignment="Stretch">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Spacing="4">
+                            Spacing="8">
                     <Button
                         Classes="No-Hover"
                         Content="{LucideIconContent Kind=Rewind, StrokeWidth=2, 

@@ -10,7 +10,7 @@
                    Icon="/Assets/avalonia-logo.ico"
                    Title="pMusic"
                    ShowTitlebarBackground="False">
-    <Border Padding="16">
+    <Border Padding="8 0">
         <views:MainView />
     </Border>
 </sukiUi:SukiWindow>
