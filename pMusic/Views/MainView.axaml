@@ -158,7 +158,7 @@
             <!-- <GridSplitter Grid.Column="1" Grid.Row="0" Background="Transparent" -->
             <!--               ResizeDirection="Columns" Width="8" /> -->
             <!-- Main Content -->
-            <suki:GlassCard Grid.Column="2" CornerRadius="8">
+            <suki:GlassCard Grid.Column="2" CornerRadius="8" Padding="0">
                 <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
                     <ContentControl.DataTemplates>
                         <DataTemplate DataType="{x:Type vm:HomeViewModel}">

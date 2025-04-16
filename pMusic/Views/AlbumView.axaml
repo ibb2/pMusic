@@ -27,9 +27,8 @@
             </Style>
         </Style>
     </UserControl.Styles>
-    <ScrollViewer ClipToBounds="True" CornerRadius="8">
+    <ScrollViewer ClipToBounds="True" CornerRadius="8" VerticalScrollBarVisibility="Hidden">
         <Border CornerRadius="8" ClipToBounds="True">
-
             <cc:FourCornerGradientBlur TopLeftColor="{Binding Album.UltraBlurColors.TopLeft}"
                                        TopRightColor="{Binding Album.UltraBlurColors.TopRight}"
                                        BottomLeftColor="{Binding Album.UltraBlurColors.BottomLeft}"
@@ -76,23 +75,19 @@
                         </Grid>
                         <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
                             <StackPanel Orientation="Horizontal">
-                                <Button Content="{LucideIconContent Play}" Height="50" Width="50" CornerRadius="1000"></Button>
-                                <Button Content="{LucideIconContent Shuffle}" Height="50" Width="50"
-                                        CornerRadius="1000">
+                                <Button Classes="Basic Icon" Content="{LucideIconContent Play}"></Button>
+                                <Button Classes="Basic Icon" Content="{LucideIconContent Shuffle}">
                                 </Button>
-                                <Button Content="{LucideIconContent CirclePlus}"
+                                <Button Classes="Basic Icon" Content="{LucideIconContent CirclePlus}"
                                         Command="{Binding AddToLibraryCommand}"
-                                        CommandParameter="{Binding Album}"
-                                        Height="50" Width="50"
-                                        CornerRadius="1000">
+                                        CommandParameter="{Binding Album}">
                                 </Button>
-                                <Button Content="{LucideIconContent Download}" Height="50" Width="50"
-                                        CornerRadius="1000">
+                                <Button Classes="Basic Icon" Content="{LucideIconContent Download}">
                                 </Button>
                             </StackPanel>
                             <TextBlock Grid.Column="1">
                                 List
-                                <Button Content="{LucideIconContent List}"></Button>
+                                <Button Classes="Basic Icon" Content="{LucideIconContent List}"></Button>
                             </TextBlock>
                         </Grid>
                         <DataGrid Grid.Row="2" Name="Tracklist" ItemsSource="{Binding TrackList}" IsReadOnly="True"

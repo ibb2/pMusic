@@ -38,7 +38,7 @@
             <!-- </Style> -->
         </Style>
     </UserControl.Styles>
-    <ScrollViewer IsScrollChainingEnabled="True" Padding="32 0">
+    <ScrollViewer IsScrollChainingEnabled="True" VerticalScrollBarVisibility="Hidden" Padding="20">
         <Grid Grid.RowDefinitions="*, *, *, *">
             <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
             <!-- Recently Played -->
