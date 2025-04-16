@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Web;
@@ -7,6 +8,7 @@ using System.Xml.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using KeySharp;
 using pMusic.Models;
 using pMusic.ViewModels;
@@ -155,18 +157,18 @@ public partial class MainView : UserControl
         }
     }
 
-    public void GoToAlbum(object? sender, PointerPressedEventArgs pointerPressedEvent)
+    public void GoToAlbum(object? sender, PointerEventArgs pointerEventArgs)
     {
-        Console.WriteLine("Pressed event");
-        var album = ((StackPanel)sender).DataContext as DisplayAlbumViewModel;
-        Console.WriteLine($"Go to album: {album.Title}");
+        if (sender is not Border border)
+            return;
 
-        if (pointerPressedEvent.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-        {
-            var vm = (MainViewModel)DataContext;
-            vm.GoToAlbum(album.Album);
-        }
+        if (border.DataContext is not AlbumViewModel albumVm)
+            return;
 
-        pointerPressedEvent.Handled = true;
+        if (albumVm.Album is null)
+            return;
+
+        if (DataContext is not MainViewModel viewModel)
+            return;
     }
 }
