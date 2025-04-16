@@ -67,31 +67,29 @@
     <Grid RowDefinitions="Auto, *, 100">
         <Grid ColumnDefinitions="Auto, *, Auto" Margin="0, 8 0 2">
             <StackPanel Orientation="Horizontal">
-                <Button Content="{LucideIconContent Kind=ChevronLeft}" Command="{Binding GoBack}"
-                        Background="Transparent" Foreground="Gray">
+                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Kind=ChevronLeft}"
+                        Command="{Binding GoBack}" Foreground="{DynamicResource SukiAccentColor5}">
                 </Button>
-                <Button Content="{LucideIconContent Kind=ChevronRight}" Command="{Binding GoForward}"
-                        Background="Transparent" Foreground="Gray">
+                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Kind=ChevronRight}"
+                        Command="{Binding GoForward}"
+                        Foreground="{DynamicResource SukiAccentColor5}">
                 </Button>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Classes="Home"
+                <Button Classes="Home Flat Basic Accent Icon"
                         Content="{LucideIconContent Kind=House}"
-                        Command="{Binding GoHome}"
-                        Background="{DynamicResource AccentButtonBackground}"
-                        Foreground="{DynamicResource AccentButtonForeground}"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Padding="0">
+                        Command="{Binding GoHome}">
                 </Button>
-                <TextBox Grid.Column="1" Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
+                <TextBox Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
-            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <Button Content="{LucideIconContent Kind=Bell}" Width="40" Height="40"
-                        Margin="0 0 8 0" CornerRadius=" 100" />
-                <Button Width="40" Height="40" Margin="0 0 8 0" Padding="0" CornerRadius="100">
-                    <Border ClipToBounds="True" CornerRadius="100">
-                        <Image Source="{Binding ThumbnailUrl}" Width="100">
-                        </Image>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                <Button Classes="Basic" Content="{LucideIconContent Kind=Bell}" />
+                <Button Classes="Icon">
+                    <Border CornerRadius="100" ClipToBounds="True">
+                        <Viewbox StretchDirection="DownOnly" Stretch="UniformToFill">
+                            <Image Source="{Binding ThumbnailUrl}">
+                            </Image>
+                        </Viewbox>
                     </Border>
                     <Button.Flyout>
                         <Flyout>
