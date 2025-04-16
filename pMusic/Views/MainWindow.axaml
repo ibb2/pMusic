@@ -7,10 +7,81 @@
                    xmlns:views="clr-namespace:pMusic.Views"
                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                    x:Class="pMusic.Views.MainWindow"
+                   x:DataType="vm:MainViewModel"
                    Icon="/Assets/avalonia-logo.ico"
                    Title="pMusic"
                    ShowTitlebarBackground="False">
-    <Border Padding="8 0">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <DockPanel>
+        <sukiUi:SukiSideMenu IsSearchEnabled="True"
+                             ItemsSource="{Binding Sidebar.PinnedAlbum}"
+                             IsContentVisible="False">
+            <sukiUi:SukiSideMenu.Styles>
+                <Style Selector="Image.AppIcon">
+                    <Setter Property="Transitions">
+                        <Transitions>
+                            <DoubleTransition Property="Opacity" Duration="0.1" />
+                        </Transitions>
+                    </Setter>
+                    <Style Selector="^:pointerover">
+                        <Setter Property="Opacity" Value="0.5" />
+                    </Style>
+                </Style>
+            </sukiUi:SukiSideMenu.Styles>
+            <sukiUi:SukiSideMenu.ItemTemplate>
+                <DataTemplate>
+                    <sukiUi:SukiSideMenuItem Header="{Binding Title}" PointerPressed="GoToAlbum">
+                        <sukiUi:SukiSideMenuItem.Icon>
+                            <Image Source="{Binding Thumb}" Width="50" />
+                        </sukiUi:SukiSideMenuItem.Icon>
+                    </sukiUi:SukiSideMenuItem>
+                </DataTemplate>
+            </sukiUi:SukiSideMenu.ItemTemplate>
+
+            <sukiUi:SukiSideMenu.HeaderContent>
+                <!-- <Image Width="80" -->
+                <!--        Height="80" -->
+                <!--        Margin="30,10,30,30" -->
+                <!--        Classes="AppIcon" -->
+                <!--        IsVisible="{Binding $parent[suki:SukiWindow].((demo:SukiUIDemoViewModel)DataContext).TitleBarVisible}" -->
+                <!--        PointerPressed="InputElement_OnPointerPressed" -->
+                <!--        Source="Assets/OIG.N5o-removebg-preview.png" -->
+                <!--        ToolTip.Tip="Click To Toggle Top Menu." /> -->
+            </sukiUi:SukiSideMenu.HeaderContent>
+            <sukiUi:SukiSideMenu.FooterContent>
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                    <StackPanel.Styles>
+                        <Style Selector="Button">
+                            <!-- <Setter Property="Command" Value="{Binding OpenUrlCommand}" /> -->
+                        </Style>
+                        <Style Selector="LucideIcon">
+                            <Setter Property="Width" Value="25" />
+                            <Setter Property="Height" Value="25" />
+                        </Style>
+                    </StackPanel.Styles>
+                    <Button Classes="Basic"
+                            CommandParameter="https://github.com/kikipoulet/SukiUI"
+                            ToolTip.Tip="Open On GitHub.">
+                        <LucideIcon Kind="Github" />
+                    </Button>
+                    <Button Classes="Basic"
+                            CommandParameter="https://www.nuget.org/packages/SukiUI"
+                            ToolTip.Tip="View On NuGet.">
+                        <LucideIcon Kind="Package" />
+                    </Button>
+                    <Button Classes="Basic"
+                            CommandParameter="https://github.com/kikipoulet/CherylUI"
+                            ToolTip.Tip="CheryUI - For Mobile">
+                        <LucideIcon Kind="Cat" />
+                    </Button>
+                </StackPanel>
+            </sukiUi:SukiSideMenu.FooterContent>
+        </sukiUi:SukiSideMenu>
         <views:MainView />
-    </Border>
+    </DockPanel>
 </sukiUi:SukiWindow>
