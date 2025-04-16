@@ -199,42 +199,36 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="8">
                     <Button
-                        Classes="No-Hover"
+                        Classes="Icon"
                         Content="{LucideIconContent Kind=Rewind, StrokeWidth=2, 
                         Size=20}"
-                        Foreground="{DynamicResource AccentButtonForegroundDisabled}"
-                        Background="Transparent" CornerRadius="100" Width="40" Height="40">
+                        BorderThickness="0">
                     </Button>
                     <Grid>
-                        <Button Content="{LucideIconContent Kind=Play, Size=25, StrokeWidth=2}"
-                                HorizontalAlignment="Center"
+                        <Button Content="{LucideIconContent Kind=Play, StrokeWidth=2}"
+                                Classes="Home Flat Icon"
                                 Foreground="{DynamicResource SystemAltHighColor}"
                                 Background="{DynamicResource SystemBaseHighColor}"
                                 Command="{Binding PlayPause}"
                                 IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
-                                Classes="Home"
                                 Padding="0"
-                                HorizontalContentAlignment="Center"
                                 VerticalAlignment="Center">
                         </Button>
-                        <Button Content="{LucideIconContent Kind=Pause, Size=25, StrokeWidth=2}"
+                        <Button Content="{LucideIconContent Kind=Pause, StrokeWidth=2}"
+                                Classes="Home Flat Icon"
                                 Foreground="{DynamicResource SystemAltHighColor}"
                                 Background="{DynamicResource SystemBaseHighColor}"
-                                Width="40" Height="40" HorizontalAlignment="Center"
                                 Command="{Binding PlayPause}"
                                 IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
-                                Classes="Home"
                                 Padding="0"
-                                HorizontalContentAlignment="Center"
                                 VerticalAlignment="Center">
                         </Button>
                     </Grid>
                     <Button
-                        Classes="No-Hover"
-                        Foreground="{DynamicResource ToggleButtonForegroundDisabled}"
+                        Classes="Icon"
                         Content="{LucideIconContent Kind=FastForward, StrokeWidth=2, 
                         Size=20}"
-                        Background="Transparent" CornerRadius="100" Width="40" Height="40">
+                        BorderThickness="0">
                     </Button>
                 </StackPanel>
                 <Grid ColumnDefinitions="30, 250, *"
