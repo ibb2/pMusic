@@ -65,7 +65,7 @@
         </Style>
     </UserControl.Styles>
     <Grid RowDefinitions="Auto, *, 100">
-        <Grid ColumnDefinitions="Auto, *, Auto" Margin="0, 8 0 2">
+        <Grid ColumnDefinitions="Auto, *, Auto" Margin="8, 8 8 2">
             <StackPanel Orientation="Horizontal">
                 <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Kind=ChevronLeft}"
                         Command="{Binding GoBack}" Foreground="{DynamicResource SukiAccentColor5}">
