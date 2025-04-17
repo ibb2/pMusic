@@ -17,7 +17,6 @@ namespace pMusic;
 
 public class App : Application
 {
-
     public static ServiceProvider? ServiceProvider { get; set; }
 
     public override void Initialize()
@@ -39,9 +38,9 @@ public class App : Application
             // Creates a ServiceProvider containing services from the provided IServiceCollection
             var services = collection.BuildServiceProvider();
             ServiceProvider = services;
-            
+
             Ioc.Default.ConfigureServices(services);
-            
+
             var music = services.GetService<IMusic>();
             var plex = services.GetService<Plex>();
             var homeVM = services.GetService<HomeViewModel>();
@@ -51,17 +50,13 @@ public class App : Application
             Console.WriteLine($"HomeViewModel resolved: {homeVM != null}");
 
 
-
             var vm = services.GetRequiredService<MainViewModel>();
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
-                desktop.MainWindow = new MainWindow
-                {
-                    DataContext = vm
-                };
+                desktop.MainWindow = new LoginWindow();
             }
             else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
             {
@@ -76,15 +71,15 @@ public class App : Application
     }
 
     private void DisableAvaloniaDataAnnotationValidation()
-        {
-            // Get an array of plugins to remove
-            var dataValidationPluginsToRemove =
-                BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
+    {
+        // Get an array of plugins to remove
+        var dataValidationPluginsToRemove =
+            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
 
-            // remove each entry found
-            foreach (var plugin in dataValidationPluginsToRemove)
-            {
-                BindingPlugins.DataValidators.Remove(plugin);
-            }
+        // remove each entry found
+        foreach (var plugin in dataValidationPluginsToRemove)
+        {
+            BindingPlugins.DataValidators.Remove(plugin);
         }
     }
+}
