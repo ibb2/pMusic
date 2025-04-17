@@ -17,11 +17,22 @@ public partial class HomeViewModel : ViewModelBase
 {
     private IMusic _music;
     private Plex _plex;
+    private ObservableCollection<DisplayPlaylistViewModel> _playlists = new();
 
     public ObservableCollection<DisplayAlbumViewModel> Albums { get; } = new();
     public ObservableCollection<DisplayAlbumViewModel> TopEight { get; set; } = new();
     public ObservableCollection<DisplayAlbumViewModel> RecentlyAddedAlbums { get; set; } = new();
-    public ObservableCollection<DisplayPlaylistViewModel> Playlists { get; set; } = new();
+
+    public ObservableCollection<DisplayPlaylistViewModel> Playlists
+    {
+        get => _playlists;
+        set
+        {
+            if (Equals(value, _playlists)) return;
+            _playlists = value;
+            OnPropertyChanged();
+        }
+    }
 
 
     public HomeViewModel(IMusic music, Plex plex)
@@ -46,7 +57,7 @@ public partial class HomeViewModel : ViewModelBase
     {
         await LoadHomepageAlbumsAsync();
         await LoadHomepageRecentlyAddedAlbumsAsync();
-        await LoadPlaylistsAsync(CancellationToken.None);
+        await LoadPlaylistsAsync();
         Console.WriteLine("Content loaded");
     }
 
@@ -120,10 +131,10 @@ public partial class HomeViewModel : ViewModelBase
     //     });
     // }
 
-    public async Task LoadPlaylistsAsync(CancellationToken ct)
+    public async Task LoadPlaylistsAsync()
     {
         Playlists = new();
-        var playlists = await _music.GetPlaylists(ct, _plex);
+        var playlists = await _music.GetPlaylists(CancellationToken.None, _plex);
         var viewModels = playlists.Select(a => new DisplayPlaylistViewModel(a, _plex))
             .ToList();
 
