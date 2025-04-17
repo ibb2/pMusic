@@ -28,13 +28,6 @@ public partial class HomeViewModel : ViewModelBase
     {
         _music = music;
         _plex = plex;
-
-        Console.WriteLine($"Plex {plex} and {music}");
-
-        // _ = LoadAlbumsAsync(CancellationToken.None);
-        _ = LoadHomepageAlbumsAsync();
-        _ = LoadHomepageRecentlyAddedAlbumsAsync();
-        _ = LoadPlaylistsAsync(CancellationToken.None);
     }
 
     public HomeViewModel()
@@ -47,6 +40,14 @@ public partial class HomeViewModel : ViewModelBase
         Debug.Assert(_music != null, "IMusic is null");
         Debug.Assert(_plex != null, "Plex is null");
         Console.WriteLine($"HomeViewModel resolved: Plex: {_plex}, Music: {_music}");
+    }
+
+    public async ValueTask LoadContent()
+    {
+        await LoadHomepageAlbumsAsync();
+        await LoadHomepageRecentlyAddedAlbumsAsync();
+        await LoadPlaylistsAsync(CancellationToken.None);
+        Console.WriteLine("Content loaded");
     }
 
     public async Task LoadHomepageAlbumsAsync()

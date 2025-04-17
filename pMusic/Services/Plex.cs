@@ -27,10 +27,9 @@ namespace pMusic.Services;
 public class Plex
 {
     public readonly HttpClient httpClient;
-    private static string _serverUrl;
     private readonly MusicDbContext _musicDbContext;
     private readonly string _plexClientIdentifier;
-    private string _plexToken;
+    private string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
 
     private static readonly string _plexSessionIdentifier =
         Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
@@ -39,7 +38,7 @@ public class Plex
     private static readonly string _plexDeviceName = "Desktop";
     private static readonly string _plexPlatform = "Desktop";
 
-    private static PlexAPI _plexApi;
+    private PlexAPI? _plexApi;
 
 
     public Plex(HttpClient httpClient, MusicDbContext musicDbContext)
@@ -57,18 +56,16 @@ public class Plex
 
     private string GetOrCreateClientIdentifier()
     {
-        var clientIdentifier = "";
-        try
+        var clientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+        if (clientIdentifier.Length > 0)
         {
-            clientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+            return clientIdentifier;
         }
-        catch (Exception ex)
-        {
-            // Initial Setup create the Client Identifier and store for later use
-            var guid = Guid.NewGuid().ToString();
-            clientIdentifier = guid;
-            Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", guid);
-        }
+
+        // Initial Setup create the Client Identifier and store for later use
+        var guid = Guid.NewGuid().ToString();
+        clientIdentifier = guid;
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", guid);
 
         return clientIdentifier;
     }
@@ -171,12 +168,14 @@ public class Plex
         Console.WriteLine($"Redirecting");
     }
 
-    public async ValueTask Login()
+    public void SetInformation()
     {
+        _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
     }
 
     public async ValueTask<Bitmap> GetUserProfilePicture()
     {
+        SetInformation();
         var url = "https://plex.tv/api/v2/user";
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("X-Plex-Token", _plexToken);
@@ -191,12 +190,12 @@ public class Plex
 
     public async ValueTask<String> GetServerCapabilitiesAsync()
     {
+        SetInformation();
         var uri = "https://plex.tv/api/v2/resources?" + "X-Plex-Client-Identifier=" + _plexClientIdentifier +
                   "&X-Plex-Token=" + _plexToken;
         var serversXmlRes = await httpClient.GetStringAsync(uri);
         var serverUri = XElement.Parse(serversXmlRes).Descendants("connection").First().Attribute("uri").Value;
         Console.WriteLine($"{serverUri} -> Server Response");
-        _serverUrl = serverUri;
         return serverUri;
     }
 

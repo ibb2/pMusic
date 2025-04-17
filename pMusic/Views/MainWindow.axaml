@@ -5,6 +5,7 @@
                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                    xmlns:sukiUi="clr-namespace:SukiUI.Controls;assembly=SukiUI"
                    xmlns:views="clr-namespace:pMusic.Views"
+                   xmlns:local="clr-namespace:pMusic.Interface"
                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                    x:Class="pMusic.Views.MainWindow"
                    x:DataType="vm:MainViewModel"
@@ -16,5 +17,14 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainViewModel />
     </Design.DataContext>
-    <views:MainView />
+    <UserControl Content="{Binding CurrentPage, Source={x:Static local:Navigation.Instance}}">
+        <ContentControl.DataTemplates>
+            <DataTemplate DataType="{x:Type vm:MainViewModel}">
+                <views:MainView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+                <views:LoginView />
+            </DataTemplate>
+        </ContentControl.DataTemplates>
+    </UserControl>
 </sukiUi:SukiWindow>

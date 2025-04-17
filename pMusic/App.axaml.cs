@@ -51,6 +51,18 @@ public class App : Application
             Console.WriteLine($"Plex resolved: {plex != null}");
             Console.WriteLine($"HomeViewModel resolved: {homeVM != null}");
 
+            try
+            {
+                Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+            }
+            catch (Exception ex)
+            {
+                Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", "");
+                Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", "");
+                Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", "");
+                Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", "");
+            }
+
 
             var vm = services.GetRequiredService<MainViewModel>();
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -59,40 +71,35 @@ public class App : Application
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
 
+                var authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+
+                if (authToken.Length > 0)
+                {
+                    desktop.MainWindow = new MainWindow
+                    {
+                        DataContext = vm
+                    };
+                    return;
+                }
+
+                var loginWindow = new LoginWindow();
+                var loginViewModel = new LoginViewModel();
+
+                loginWindow.DataContext = loginViewModel;
+                desktop.MainWindow = loginWindow;
+
                 try
                 {
-                    var authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
-
-                    if (authToken != null)
-                    {
-                        desktop.MainWindow = new MainWindow
-                        {
-                            DataContext = vm
-                        };
-                        return;
-                    }
+                    await Task.Delay(Timeout.Infinite, cancellationToken: loginViewModel.cancellationToken);
                 }
-                catch
+                catch (TaskCanceledException ex)
                 {
-                    var loginWindow = new LoginWindow();
-                    var loginViewModel = new LoginViewModel();
+                    var mainWindow = new MainWindow();
+                    desktop.MainWindow = mainWindow;
 
-                    loginWindow.DataContext = loginViewModel;
-                    desktop.MainWindow = loginWindow;
-
-                    try
-                    {
-                        await Task.Delay(Timeout.Infinite, cancellationToken: loginViewModel.cancellationToken);
-                    }
-                    catch (TaskCanceledException ex)
-                    {
-                        var mainWindow = new MainWindow();
-                        desktop.MainWindow = mainWindow;
-
-                        mainWindow.Show();
-                        loginWindow.Close();
-                        return;
-                    }
+                    mainWindow.Show();
+                    loginWindow.Close();
+                    return;
                 }
             }
             else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)

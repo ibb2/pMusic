@@ -17,6 +17,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
+using Microsoft.EntityFrameworkCore;
 using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
@@ -112,19 +113,13 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     public async Task Logout()
     {
-        Keyring.DeletePassword("com.ib.pmusic", "pMusic", "cIdentifier");
-        Keyring.DeletePassword("com.ib.pmusic", "pMusic", "id");
-        Keyring.DeletePassword("com.ib.pmusic", "pMusic", "code");
-        Keyring.DeletePassword("com.ib.pmusic", "pMusic", "authToken");
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", "");
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", "");
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", "");
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", "");
 
-        await _musicDbContext.Database.EnsureDeletedAsync();
-        await _musicDbContext.Database.EnsureCreatedAsync();
-
-        _musicDbContext.ChangeTracker.Clear();
-
-        await _musicDbContext.SaveChangesAsync();
-
-        OpenNewWindow();
+        // OpenNewWindow();
+        ToLoginWindow();
     }
 
     public void PlayPause()
@@ -160,4 +155,6 @@ public partial class MainViewModel : ViewModelBase
         newWindow.Show(); // Opens the window non-modally
         mainWindow.Close();
     }
+
+    private void ToLoginWindow() => GoToLoginWindow();
 }

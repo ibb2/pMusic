@@ -49,7 +49,8 @@ public partial class LoginViewModel : ViewModelBase
     private async Task Redirect()
     {
         await _cts.CancelAsync();
-        OpenNewWindow();
+        ToMainWindow();
+        // OpenNewWindow();
     }
 
     private void OpenNewWindow()
@@ -61,4 +62,6 @@ public partial class LoginViewModel : ViewModelBase
         newWindow.Show(); // Opens the window non-modally
         mainWindow.Close();
     }
+
+    private void ToMainWindow() => GoToMainWindow();
 }
