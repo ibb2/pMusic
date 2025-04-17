@@ -86,14 +86,14 @@
                                 </Button>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock>
+                                <TextBlock VerticalAlignment="Center">
                                     List
                                 </TextBlock>
                                 <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent List}"></Button>
                             </StackPanel>
                         </Grid>
                         <DataGrid Grid.Row="2" Name="Tracklist" ItemsSource="{Binding TrackList}" IsReadOnly="True"
-                                  CanUserResizeColumns="True">
+                                  CanUserResizeColumns="True" VerticalScrollBarVisibility="Auto">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.HeaderTemplate>

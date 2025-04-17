@@ -51,6 +51,8 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Button
+                            Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
+                            CommandParameter="{Binding Album}"
                             Width="250" Margin="8" CornerRadius="8"
                             Background="{DynamicResource SukiPrimaryColor10}"
                             BorderThickness="0"
@@ -101,6 +103,8 @@
                             <DataTemplate>
                                 <Button
                                     Classes="Flat"
+                                    Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
+                                    CommandParameter="{Binding Album}"
                                     Padding="8"
                                     Background="Transparent">
                                     <Button.Styles>
@@ -161,6 +165,8 @@
                             <DataTemplate>
                                 <Button
                                     Classes="Flat"
+                                    Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
+                                    CommandParameter="{Binding Album}"
                                     Padding="8"
                                     Background="Transparent">
                                     <Button.Styles>
