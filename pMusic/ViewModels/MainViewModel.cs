@@ -55,6 +55,7 @@ public partial class MainViewModel : ViewModelBase
         _musicDbContext = musicDbContext;
         Sidebar = sidebar;
 
+        _ = CheckLoginStatus();
         _ = LoadPinnedAlbumsThumbnails();
     }
 
@@ -80,7 +81,7 @@ public partial class MainViewModel : ViewModelBase
     }
 
 
-    public void CheckLoginStatus()
+    public async ValueTask CheckLoginStatus()
     {
         string? authToken = null;
 
@@ -98,17 +99,12 @@ public partial class MainViewModel : ViewModelBase
         if (!string.IsNullOrEmpty(authToken))
         {
             IsLoggedIn = true;
+            await GetUserInfo();
         }
         else
         {
             IsLoggedIn = false;
         }
-    }
-
-    public async Task GetUserInfo()
-    {
-        ThumbnailUrl = await _plex.GetUserProfilePicture();
-        Console.WriteLine($"thumbnail url {ThumbnailUrl}");
     }
 
     public void PlayPause()
@@ -127,5 +123,11 @@ public partial class MainViewModel : ViewModelBase
     public void GoToAlbumDetialsPage(Album album)
     {
         GoToAlbum(album);
+    }
+
+    private async Task GetUserInfo()
+    {
+        ThumbnailUrl = await _plex.GetUserProfilePicture();
+        Console.WriteLine($"thumbnail url {ThumbnailUrl}");
     }
 }

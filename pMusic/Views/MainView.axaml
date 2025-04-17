@@ -94,7 +94,6 @@
                     <Button.Flyout>
                         <Flyout>
                             <StackPanel>
-                                <Button Click="Login" IsVisible="{Binding IsLoggedInTrue}">Login</Button>
                                 <!-- Or Account -->
                                 <Button IsVisible="{Binding IsLoggedIn}">Log out</Button>
                                 <!-- Profile -->
