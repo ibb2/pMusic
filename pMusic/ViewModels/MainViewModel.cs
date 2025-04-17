@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -20,6 +21,7 @@ using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
 using pMusic.Services;
+using pMusic.Views;
 using SoundFlow.Enums;
 
 namespace pMusic.ViewModels;
@@ -107,6 +109,24 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    public async Task Logout()
+    {
+        Keyring.DeletePassword("com.ib.pmusic", "pMusic", "cIdentifier");
+        Keyring.DeletePassword("com.ib.pmusic", "pMusic", "id");
+        Keyring.DeletePassword("com.ib.pmusic", "pMusic", "code");
+        Keyring.DeletePassword("com.ib.pmusic", "pMusic", "authToken");
+
+        await _musicDbContext.Database.EnsureDeletedAsync();
+        await _musicDbContext.Database.EnsureCreatedAsync();
+
+        _musicDbContext.ChangeTracker.Clear();
+
+        await _musicDbContext.SaveChangesAsync();
+
+        OpenNewWindow();
+    }
+
     public void PlayPause()
     {
         if (MusicPlayer.PlaybackState == PlaybackState.Playing)
@@ -129,5 +149,15 @@ public partial class MainViewModel : ViewModelBase
     {
         ThumbnailUrl = await _plex.GetUserProfilePicture();
         Console.WriteLine($"thumbnail url {ThumbnailUrl}");
+    }
+
+    private void OpenNewWindow()
+    {
+        var mainWindow = ((IClassicDesktopStyleApplicationLifetime)Application.Current.ApplicationLifetime).MainWindow;
+        var newWindow = new LoginWindow();
+        newWindow.DataContext = new LoginViewModel();
+
+        newWindow.Show(); // Opens the window non-modally
+        mainWindow.Close();
     }
 }

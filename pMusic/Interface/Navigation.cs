@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using pMusic.Services;
 using pMusic.ViewModels;
+using pMusic.Views;
 
 namespace pMusic.Interface;
 

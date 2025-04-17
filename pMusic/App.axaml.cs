@@ -59,35 +59,40 @@ public class App : Application
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
 
-                var authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
-
-                if (authToken != null)
-                {
-                    desktop.MainWindow = new MainWindow
-                    {
-                        DataContext = vm
-                    };
-                    return;
-                }
-
-                var loginWindow = new LoginWindow();
-                var loginViewModel = new LoginViewModel();
-
-                loginWindow.DataContext = loginViewModel;
-                desktop.MainWindow = loginWindow;
-
                 try
                 {
-                    await Task.Delay(Timeout.Infinite, cancellationToken: loginViewModel.cancellationToken);
-                }
-                catch (TaskCanceledException ex)
-                {
-                    var mainWindow = new MainWindow();
-                    desktop.MainWindow = mainWindow;
+                    var authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
 
-                    mainWindow.Show();
-                    loginWindow.Close();
-                    return;
+                    if (authToken != null)
+                    {
+                        desktop.MainWindow = new MainWindow
+                        {
+                            DataContext = vm
+                        };
+                        return;
+                    }
+                }
+                catch
+                {
+                    var loginWindow = new LoginWindow();
+                    var loginViewModel = new LoginViewModel();
+
+                    loginWindow.DataContext = loginViewModel;
+                    desktop.MainWindow = loginWindow;
+
+                    try
+                    {
+                        await Task.Delay(Timeout.Infinite, cancellationToken: loginViewModel.cancellationToken);
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        var mainWindow = new MainWindow();
+                        desktop.MainWindow = mainWindow;
+
+                        mainWindow.Show();
+                        loginWindow.Close();
+                        return;
+                    }
                 }
             }
             else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)

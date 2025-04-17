@@ -30,7 +30,7 @@ public class Plex
     private static string _serverUrl;
     private readonly MusicDbContext _musicDbContext;
     private readonly string _plexClientIdentifier;
-    private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+    private string _plexToken;
 
     private static readonly string _plexSessionIdentifier =
         Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
@@ -39,8 +39,7 @@ public class Plex
     private static readonly string _plexDeviceName = "Desktop";
     private static readonly string _plexPlatform = "Desktop";
 
-    private static readonly PlexAPI _plexApi =
-        new PlexAPI(Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken"));
+    private static PlexAPI _plexApi;
 
 
     public Plex(HttpClient httpClient, MusicDbContext musicDbContext)
@@ -157,7 +156,7 @@ public class Plex
             if (parsedToken.Length != 0 || !string.IsNullOrEmpty(parsedToken))
             {
                 authToken = parsedToken;
-                Keyring.SetPassword("com.ib.pmusic", "pMusic-Avalonia", "authToken", authToken);
+                Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", authToken);
                 isPinPolling = false;
                 Console.WriteLine("Successfully Authenticated");
             }
@@ -167,6 +166,8 @@ public class Plex
             }
         } while (isPinPolling && authToken == null);
 
+        _plexToken = authToken;
+        _plexApi = new PlexAPI(Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken"));
         Console.WriteLine($"Redirecting");
     }
 

@@ -5,6 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using pMusic.Services;
+using pMusic.Views;
 
 namespace pMusic.ViewModels;
 
@@ -48,5 +49,16 @@ public partial class LoginViewModel : ViewModelBase
     private async Task Redirect()
     {
         await _cts.CancelAsync();
+        OpenNewWindow();
+    }
+
+    private void OpenNewWindow()
+    {
+        var mainWindow = ((IClassicDesktopStyleApplicationLifetime)Application.Current.ApplicationLifetime).MainWindow;
+        var newWindow = new MainWindow();
+        newWindow.DataContext = new MainViewModel();
+
+        newWindow.Show(); // Opens the window non-modally
+        mainWindow.Close();
     }
 }

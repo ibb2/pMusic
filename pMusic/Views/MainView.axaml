@@ -95,7 +95,7 @@
                         <Flyout>
                             <StackPanel>
                                 <!-- Or Account -->
-                                <Button IsVisible="{Binding IsLoggedIn}">Log out</Button>
+                                <Button IsVisible="{Binding IsLoggedIn}" Command="{Binding LogoutCommand}">Log out</Button>
                                 <!-- Profile -->
                                 <!-- Support -->
                                 <!-- Private Session -->
