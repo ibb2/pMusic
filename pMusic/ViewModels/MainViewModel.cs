@@ -122,4 +122,10 @@ public partial class MainViewModel : ViewModelBase
             _audioPlayer.ResumeAudio();
         }
     }
+
+    [RelayCommand]
+    public void GoToAlbumDetialsPage(Album album)
+    {
+        GoToAlbum(album);
+    }
 }

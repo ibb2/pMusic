@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Web;
@@ -7,9 +8,11 @@ using System.Xml.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using KeySharp;
 using pMusic.Models;
 using pMusic.ViewModels;
+using SukiUI.Controls;
 
 namespace pMusic.Views;
 
@@ -155,18 +158,20 @@ public partial class MainView : UserControl
         }
     }
 
-    public void GoToAlbum(object? sender, PointerPressedEventArgs pointerPressedEvent)
+    private void GoToAlbum(object? sender, PointerPressedEventArgs e)
     {
-        Console.WriteLine("Pressed event");
-        var album = ((StackPanel)sender).DataContext as Album;
-        Console.WriteLine($"Go to album: {album.Title}");
+        if (sender is not SukiSideMenuItem sukiSideMenuItem)
+            return;
 
-        if (pointerPressedEvent.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-        {
-            var vm = (MainViewModel)DataContext;
-            vm.GoToAlbum(album);
-        }
+        if (sukiSideMenuItem.DataContext is not DisplayAlbumViewModel displayAlbumViewModel)
+            return;
 
-        pointerPressedEvent.Handled = true;
+        if (displayAlbumViewModel.Album is null)
+            return;
+
+        if (DataContext is not MainViewModel viewModel)
+            return;
+
+        viewModel.GoToAlbumDetialsPage(displayAlbumViewModel.Album);
     }
 }

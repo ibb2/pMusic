@@ -1,5 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sukiUi="clr-namespace:SukiUI;assembly=SukiUI"
              xmlns:local="using:pMusic"
              x:Class="pMusic.App"
              RequestedThemeVariant="Default">
@@ -10,30 +11,31 @@
     </Application.DataTemplates>
 
     <Application.Styles>
+        <sukiUi:SukiTheme ThemeColor="Blue" />
         <!-- <FluentTheme /> -->
-        <FluentTheme>
-            <FluentTheme.Palettes>
-                <ColorPaletteResources x:Key="Light" Accent="#ff6da2a0" AltHigh="White" AltLow="White"
-                                       AltMedium="White" AltMediumHigh="White" AltMediumLow="White" BaseHigh="Black"
-                                       BaseLow="#ffebf0f0" BaseMedium="#ff7eaaab" BaseMediumHigh="#ff367b7d"
-                                       BaseMediumLow="#ff5a9294" ChromeAltLow="#ff367b7d" ChromeBlackHigh="Black"
-                                       ChromeBlackLow="#ffebf0f0" ChromeBlackMedium="#ff367b7d"
-                                       ChromeBlackMediumLow="#ff7eaaab" ChromeDisabledHigh="#ffebf0f0"
-                                       ChromeDisabledLow="#ff7eaaab" ChromeGray="#ff5a9294" ChromeHigh="#ffebf0f0"
-                                       ChromeLow="#ffe9fdfd" ChromeMedium="#ffe9fafa" ChromeMediumLow="#ffe9fdfd"
-                                       ChromeWhite="White" ListLow="#ffe9fafa" ListMedium="#ffebf0f0"
-                                       RegionColor="#fffcfdfd" />
-                <ColorPaletteResources x:Key="Dark" Accent="#ff5d9290" AltHigh="Black" AltLow="Black" AltMedium="Black"
-                                       AltMediumHigh="Black" AltMediumLow="Black" BaseHigh="White" BaseLow="#ff0f1414"
-                                       BaseMedium="#ff7d8d8e" BaseMediumHigh="#ff98abac" BaseMediumLow="#ff465051"
-                                       ChromeAltLow="#ff98abac" ChromeBlackHigh="Black" ChromeBlackLow="#ff98abac"
-                                       ChromeBlackMedium="Black" ChromeBlackMediumLow="Black"
-                                       ChromeDisabledHigh="#ff0f1414" ChromeDisabledLow="#ff7d8d8e"
-                                       ChromeGray="#ff616f6f" ChromeHigh="#ff616f6f" ChromeLow="#ff031111"
-                                       ChromeMedium="#ff061212" ChromeMediumLow="#ff0c1313" ChromeWhite="White"
-                                       ListLow="#ff061212" ListMedium="#ff0f1414" RegionColor="#ff020303" />
-            </FluentTheme.Palettes>
-        </FluentTheme>
+        <!-- <FluentTheme> -->
+        <!--     <FluentTheme.Palettes> -->
+        <!--         <ColorPaletteResources x:Key="Light" Accent="#ff6da2a0" AltHigh="White" AltLow="White" -->
+        <!--                                AltMedium="White" AltMediumHigh="White" AltMediumLow="White" BaseHigh="Black" -->
+        <!--                                BaseLow="#ffebf0f0" BaseMedium="#ff7eaaab" BaseMediumHigh="#ff367b7d" -->
+        <!--                                BaseMediumLow="#ff5a9294" ChromeAltLow="#ff367b7d" ChromeBlackHigh="Black" -->
+        <!--                                ChromeBlackLow="#ffebf0f0" ChromeBlackMedium="#ff367b7d" -->
+        <!--                                ChromeBlackMediumLow="#ff7eaaab" ChromeDisabledHigh="#ffebf0f0" -->
+        <!--                                ChromeDisabledLow="#ff7eaaab" ChromeGray="#ff5a9294" ChromeHigh="#ffebf0f0" -->
+        <!--                                ChromeLow="#ffe9fdfd" ChromeMedium="#ffe9fafa" ChromeMediumLow="#ffe9fdfd" -->
+        <!--                                ChromeWhite="White" ListLow="#ffe9fafa" ListMedium="#ffebf0f0" -->
+        <!--                                RegionColor="#fffcfdfd" /> -->
+        <!--         <ColorPaletteResources x:Key="Dark" Accent="#ff5d9290" AltHigh="Black" AltLow="Black" AltMedium="Black" -->
+        <!--                                AltMediumHigh="Black" AltMediumLow="Black" BaseHigh="White" BaseLow="#ff0f1414" -->
+        <!--                                BaseMedium="#ff7d8d8e" BaseMediumHigh="#ff98abac" BaseMediumLow="#ff465051" -->
+        <!--                                ChromeAltLow="#ff98abac" ChromeBlackHigh="Black" ChromeBlackLow="#ff98abac" -->
+        <!--                                ChromeBlackMedium="Black" ChromeBlackMediumLow="Black" -->
+        <!--                                ChromeDisabledHigh="#ff0f1414" ChromeDisabledLow="#ff7d8d8e" -->
+        <!--                                ChromeGray="#ff616f6f" ChromeHigh="#ff616f6f" ChromeLow="#ff031111" -->
+        <!--                                ChromeMedium="#ff061212" ChromeMediumLow="#ff0c1313" ChromeWhite="White" -->
+        <!--                                ListLow="#ff061212" ListMedium="#ff0f1414" RegionColor="#ff020303" /> -->
+        <!--     </FluentTheme.Palettes> -->
+        <!-- </FluentTheme> -->
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
     </Application.Styles>
 </Application>

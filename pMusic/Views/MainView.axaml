@@ -7,6 +7,7 @@
              xmlns:views="clr-namespace:pMusic.Views"
              xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:converter="clr-namespace:pMusic.Converter"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -46,42 +47,49 @@
         <Style Selector="ListBoxItem">
             <Setter Property="Padding" Value="0"></Setter>
         </Style>
-        <Style Selector="StackPanel.SidePanel-Item:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource SystemChromeHighColor}" />
+        <Style Selector="ItemsControl /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
         </Style>
+        <Style Selector="ItemsControl:pointerover /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background"
+                    Value="{DynamicResource SystemChromeHighColor}">
+            </Setter>
+        </Style>
+        <!-- <Style Selector="StackPanel.SidePanel-Item:pointerover"> -->
+        <!--     <Setter Property="Background" -->
+        <!--             Value="{DynamicResource SystemChromeHighColor}" /> -->
+        <!-- </Style> -->
         <Style Selector="StackPanel.SidePanel-Item:pointerover /template/ ContentPresenter">
             <Setter Property="Padding" Value="8" />
         </Style>
     </UserControl.Styles>
-    <Grid RowDefinitions="Auto, *, 150">
-        <Grid ColumnDefinitions="Auto, *, Auto" Margin="0, 8 0 2">
+    <Grid RowDefinitions="Auto, *, 100">
+        <Grid ColumnDefinitions="Auto, *, Auto" Margin="8, 8 8 2">
             <StackPanel Orientation="Horizontal">
-                <Button Content="{LucideIconContent Kind=ChevronLeft}" Command="{Binding GoBack}"
-                        Background="Transparent" Foreground="Gray">
+                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Kind=ChevronLeft}"
+                        Command="{Binding GoBack}" Foreground="{DynamicResource SukiText}">
                 </Button>
-                <Button Content="{LucideIconContent Kind=ChevronRight}" Command="{Binding GoForward}"
-                        Background="Transparent" Foreground="Gray">
+                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Kind=ChevronRight}"
+                        Command="{Binding GoForward}"
+                        Foreground="{DynamicResource SukiText}">
                 </Button>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Classes="Home"
+                <Button Classes="Home Flat Basic Accent Icon"
                         Content="{LucideIconContent Kind=House}"
-                        Command="{Binding GoHome}"
-                        Background="{DynamicResource AccentButtonBackground}"
-                        Foreground="{DynamicResource AccentButtonForeground}"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" Padding="0">
+                        Command="{Binding GoHome}">
                 </Button>
-                <TextBox Grid.Column="1" Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
+                <TextBox Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
-            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <Button Content="{LucideIconContent Kind=Bell}" Width="40" Height="40"
-                        Margin="0 0 8 0" CornerRadius=" 100" />
-                <Button Width="40" Height="40" Margin="0 0 8 0" Padding="0" CornerRadius="100">
-                    <Border ClipToBounds="True" CornerRadius="100">
-                        <Image Source="{Binding ThumbnailUrl}" Width="100">
-                        </Image>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                <Button Classes="Basic" Content="{LucideIconContent Kind=Bell}" />
+                <Button Classes="Icon" BorderThickness="0">
+                    <Border CornerRadius="100" ClipToBounds="True">
+                        <Viewbox StretchDirection="DownOnly" Stretch="UniformToFill">
+                            <Image Source="{Binding ThumbnailUrl}">
+                            </Image>
+                        </Viewbox>
                     </Border>
                     <Button.Flyout>
                         <Flyout>
@@ -100,56 +108,46 @@
                 </Button>
             </StackPanel>
         </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="200, 4, *">
+        <Grid Grid.Row="1" ColumnDefinitions="Auto, *">
             <!-- Sidebar -->
-            <Border
-                Classes="Panel"
-                CornerRadius="8"
-                Padding="4"
-                HorizontalAlignment="Stretch">
-                <StackPanel Grid.Column="0" Spacing="8" HorizontalAlignment="Stretch">
-                    <Grid ColumnDefinitions="Auto, Auto" VerticalAlignment="Center">
-                        <Button Content="{LucideIconContent Kind=Library}" Background="Transparent" />
-                        <TextBlock Grid.Column="1" Text="Your Library" FontSize="18" VerticalAlignment="Center" />
-                    </Grid>
-                    <!-- <StackPanel><TextBlock>Library Filter Tabs</TextBlock></StackPanel> -->
-                    <!-- <StackPanel><TextBlock>Library Search</TextBlock></StackPanel> -->
-                    <!-- List of library items -->
-                    <ListBox ItemsSource="{Binding Sidebar.PinnedAlbum}" Padding="0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border CornerRadius="4" ClipToBounds="True">
-                                    <StackPanel Orientation="Horizontal" PointerPressed="GoToAlbum"
-                                                Classes="SidePanel-Item" Background="{DynamicResource RegionColor}">
-                                        <Border Padding="8" CornerRadius="4">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <Border ClipToBounds="True" CornerRadius="5">
-                                                    <Image
-                                                        Source="{Binding Thumb}"
-                                                        Width="50">
-                                                    </Image>
-                                                </Border>
-                                                <StackPanel Spacing="4" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Title}"></TextBlock>
-                                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                                        <!-- Pinned Icon -->
-                                                        <TextBlock FontSize="12">Album</TextBlock>
-                                                        <TextBlock FontSize="12" Text="{Binding Artist}"></TextBlock>
-                                                    </StackPanel>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-            </Border>
-            <!-- <GridSplitter Grid.Column="1" Grid.Row="0" Background="Transparent" -->
-            <!--               ResizeDirection="Columns" Width="8" /> -->
+            <suki:SukiSideMenu IsSearchEnabled="True"
+                               ItemsSource="{Binding Sidebar.PinnedAlbum}"
+                               IsContentVisible="False" Margin="0">
+                <suki:SukiSideMenu.Styles>
+                    <Style Selector="Image.AppIcon">
+                        <Setter Property="Transitions">
+                            <Transitions>
+                                <DoubleTransition Property="Opacity" Duration="0.1" />
+                            </Transitions>
+                        </Setter>
+                        <Style Selector="^:pointerover">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Style>
+                    </Style>
+                </suki:SukiSideMenu.Styles>
+                <suki:SukiSideMenu.ItemTemplate>
+                    <DataTemplate>
+                        <suki:SukiSideMenuItem Header="{Binding Title}" PointerPressed="GoToAlbum">
+                            <suki:SukiSideMenuItem.Icon>
+                                <Image Source="{Binding Thumb}" Width="50" />
+                            </suki:SukiSideMenuItem.Icon>
+                        </suki:SukiSideMenuItem>
+                    </DataTemplate>
+                </suki:SukiSideMenu.ItemTemplate>
+
+                <suki:SukiSideMenu.HeaderContent>
+                    <!-- <Image Width="80" -->
+                    <!--        Height="80" -->
+                    <!--        Margin="30,10,30,30" -->
+                    <!--        Classes="AppIcon" -->
+                    <!--        IsVisible="{Binding $parent[suki:SukiWindow].((demo:SukiUIDemoViewModel)DataContext).TitleBarVisible}" -->
+                    <!--        PointerPressed="InputElement_OnPointerPressed" -->
+                    <!--        Source="Assets/OIG.N5o-removebg-preview.png" -->
+                    <!--        ToolTip.Tip="Click To Toggle Top Menu." /> -->
+                </suki:SukiSideMenu.HeaderContent>
+            </suki:SukiSideMenu>
             <!-- Main Content -->
-            <Border Grid.Column="2" Classes="Panel" CornerRadius="8">
+            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 10 10" Padding="0">
                 <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
                     <ContentControl.DataTemplates>
                         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
@@ -166,7 +164,7 @@
                         </DataTemplate>
                     </ContentControl.DataTemplates>
                 </UserControl>
-            </Border>
+            </suki:GlassCard>
         </Grid>
         <Grid Grid.Row="2" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
             <!-- Bottom Music Player -->
@@ -186,44 +184,38 @@
             </StackPanel>
             <StackPanel Grid.Column="1" VerticalAlignment="Stretch">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Spacing="4">
+                            Spacing="8">
                     <Button
-                        Classes="No-Hover"
+                        Classes="Icon"
                         Content="{LucideIconContent Kind=Rewind, StrokeWidth=2, 
                         Size=20}"
-                        Foreground="{DynamicResource AccentButtonForegroundDisabled}"
-                        Background="Transparent" CornerRadius="100" Width="40" Height="40">
+                        BorderThickness="0">
                     </Button>
                     <Grid>
-                        <Button Content="{LucideIconContent Kind=Play, Size=25, StrokeWidth=2}"
-                                HorizontalAlignment="Center"
+                        <Button Content="{LucideIconContent Kind=Play, StrokeWidth=2}"
+                                Classes="Home Flat Icon"
                                 Foreground="{DynamicResource SystemAltHighColor}"
                                 Background="{DynamicResource SystemBaseHighColor}"
                                 Command="{Binding PlayPause}"
                                 IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
-                                Classes="Home"
                                 Padding="0"
-                                HorizontalContentAlignment="Center"
                                 VerticalAlignment="Center">
                         </Button>
-                        <Button Content="{LucideIconContent Kind=Pause, Size=25, StrokeWidth=2}"
+                        <Button Content="{LucideIconContent Kind=Pause, StrokeWidth=2}"
+                                Classes="Home Flat Icon"
                                 Foreground="{DynamicResource SystemAltHighColor}"
                                 Background="{DynamicResource SystemBaseHighColor}"
-                                Width="40" Height="40" HorizontalAlignment="Center"
                                 Command="{Binding PlayPause}"
                                 IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
-                                Classes="Home"
                                 Padding="0"
-                                HorizontalContentAlignment="Center"
                                 VerticalAlignment="Center">
                         </Button>
                     </Grid>
                     <Button
-                        Classes="No-Hover"
-                        Foreground="{DynamicResource ToggleButtonForegroundDisabled}"
+                        Classes="Icon"
                         Content="{LucideIconContent Kind=FastForward, StrokeWidth=2, 
                         Size=20}"
-                        Background="Transparent" CornerRadius="100" Width="40" Height="40">
+                        BorderThickness="0">
                     </Button>
                 </StackPanel>
                 <Grid ColumnDefinitions="30, 250, *"
