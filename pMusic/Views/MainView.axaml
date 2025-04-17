@@ -68,11 +68,11 @@
         <Grid ColumnDefinitions="Auto, *, Auto" Margin="8, 8 8 2">
             <StackPanel Orientation="Horizontal">
                 <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Kind=ChevronLeft}"
-                        Command="{Binding GoBack}" Foreground="{DynamicResource SukiAccentColor5}">
+                        Command="{Binding GoBack}" Foreground="{DynamicResource SukiText}">
                 </Button>
                 <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Kind=ChevronRight}"
                         Command="{Binding GoForward}"
-                        Foreground="{DynamicResource SukiAccentColor5}">
+                        Foreground="{DynamicResource SukiText}">
                 </Button>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
@@ -84,7 +84,7 @@
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                 <Button Classes="Basic" Content="{LucideIconContent Kind=Bell}" />
-                <Button Classes="Icon">
+                <Button Classes="Icon" BorderThickness="0">
                     <Border CornerRadius="100" ClipToBounds="True">
                         <Viewbox StretchDirection="DownOnly" Stretch="UniformToFill">
                             <Image Source="{Binding ThumbnailUrl}">
@@ -147,7 +147,7 @@
                 </suki:SukiSideMenu.HeaderContent>
             </suki:SukiSideMenu>
             <!-- Main Content -->
-            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 10 10">
+            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 10 10" Padding="0">
                 <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
                     <ContentControl.DataTemplates>
                         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
