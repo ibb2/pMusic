@@ -4,9 +4,11 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using KeySharp;
 using Microsoft.Extensions.DependencyInjection;
 using pMusic.DI;
 using pMusic.Services;
@@ -24,7 +26,7 @@ public class App : Application
         AvaloniaXamlLoader.Load(this);
     }
 
-    public override void OnFrameworkInitializationCompleted()
+    public override async void OnFrameworkInitializationCompleted()
     {
         {
             // If you use CommunityToolkit, line below is needed to remove Avalonia data validation.
@@ -56,7 +58,37 @@ public class App : Application
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
-                desktop.MainWindow = new LoginWindow();
+
+                var authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+
+                if (authToken != null)
+                {
+                    desktop.MainWindow = new MainWindow
+                    {
+                        DataContext = vm
+                    };
+                    return;
+                }
+
+                var loginWindow = new LoginWindow();
+                var loginViewModel = new LoginViewModel();
+
+                loginWindow.DataContext = loginViewModel;
+                desktop.MainWindow = loginWindow;
+
+                try
+                {
+                    await Task.Delay(Timeout.Infinite, cancellationToken: loginViewModel.cancellationToken);
+                }
+                catch (TaskCanceledException ex)
+                {
+                    var mainWindow = new MainWindow();
+                    desktop.MainWindow = mainWindow;
+
+                    mainWindow.Show();
+                    loginWindow.Close();
+                    return;
+                }
             }
             else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
             {
