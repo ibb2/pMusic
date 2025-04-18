@@ -1,22 +1,16 @@
 using System;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
+using CommunityToolkit.Mvvm.ComponentModel;
 using KeySharp;
 using pMusic.Models;
 using pMusic.Services;
 
 namespace pMusic.ViewModels;
 
-using CommunityToolkit.Mvvm.ComponentModel;
-using System.Net.Http;
-using Avalonia.Media.Imaging;
-
 public partial class DisplayAlbumViewModel : ObservableObject
 {
     private readonly Plex _plex;
-    public string Title { get; }
-    public string Artist { get; }
-    public string ThumbUrl { get; }
-    public Album Album { get; }
 
     [ObservableProperty] private Bitmap? thumb;
 
@@ -25,9 +19,14 @@ public partial class DisplayAlbumViewModel : ObservableObject
         _plex = plex;
         Album = album;
         Title = album.Title;
-        Artist = album.Artist;
+        Artist = album.Artist.Title;
         ThumbUrl = album.Thumb;
     }
+
+    public string Title { get; }
+    public string Artist { get; }
+    public string ThumbUrl { get; }
+    public Album Album { get; }
 
     public async Task LoadThumbAsync()
     {

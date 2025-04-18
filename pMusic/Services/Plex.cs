@@ -236,34 +236,55 @@ public class Plex
 
     public async ValueTask<IImmutableList<Artist>> GetArtists(String uri)
     {
-        // TODO Get artists from plex web api
-        var libUri = uri + "/library/sections/";
-        var librariesXml = await httpClient.GetStringAsync(libUri);
-        var directory = XElement.Parse(librariesXml).Descendants("Directory")
-            .FirstOrDefault(c => c.Attribute("agent")?.Value == "tv.plex.agents.music");
-        var lib = ParseDirectory(directory);
-        Console.WriteLine($"Music Library {lib}");
+        try
+        {
+            var artistsFromDb = _musicDbContext.Artists.Where(a => a.UserId == _plexId).ToList();
 
-        var libDetailsUri = uri + "/library/sections/" + lib.Key;
-        var libDetailsXml = await httpClient.GetStringAsync(libDetailsUri);
+            // Fetch Music library from Plex
+            var libraryUrl = uri + "/library/sections/";
+            var librariesXml = await httpClient.GetStringAsync(libraryUrl);
+            var directory = XElement.Parse(librariesXml).Descendants("Directory")
+                .FirstOrDefault(c => c.Attribute("agent")?.Value == "tv.plex.agents.music");
+            var lib = ParseDirectory(directory);
+            Console.WriteLine($"Music Library {lib}");
 
-        var artistUri = uri + "/library/sections/" + lib.Key + "/all";
-        var artistsDetailsXml = await httpClient.GetStringAsync(artistUri);
-        var artists = await ParseArtists(XElement.Parse(artistsDetailsXml), lib.Key, uri);
-        var i = 1;
+            // Fetch artists from Music library
+            var artistUri = uri + "/library/sections/" + lib.Key + "/all";
+            var artistsDetailsXml = await httpClient.GetStringAsync(artistUri);
+            var artistXElement = XElement.Parse(artistsDetailsXml);
 
-        return artists.ToImmutableList();
+            if (artistXElement.DescendantsAndSelf("Directory").Count() == artistsFromDb.Count)
+            {
+                Console.WriteLine($"Returning all artists from db");
+                return artistsFromDb.ToImmutableList();
+            }
+
+            Console.WriteLine($"Getting new artists from plex");
+            var dbArtistsGuid = _musicDbContext.Artists.Select(a => a.Guid).ToList();
+            var artistsToParse = artistXElement.DescendantsAndSelf("Directory")
+                .Where(a => !dbArtistsGuid.Contains(a.Attribute("guid").Value)).ToList();
+
+            var artists = await ParseArtists(artistsToParse, lib.Key, uri);
+            _musicDbContext.Artists.AddRange(artists);
+            await _musicDbContext.SaveChangesAsync();
+
+            return artists.ToImmutableList();
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Error retrieving artists: {ex.Message}");
+            return ImmutableList<Artist>.Empty;
+        }
     }
 
-    public async ValueTask<IImmutableList<Album>> GetArtistAlbums(string uri, int libraryId, string artistKey,
-        string artist)
+    public async ValueTask<IImmutableList<Album>> GetArtistAlbums(string uri, Artist artist)
     {
-        var albumsInDbCount = _musicDbContext.Albums.Count(a => a.Artist == artist & a.UserId == _plexId);
+        var albumsInDbCount = _musicDbContext.Albums.Count(a => a.ArtistId == artist.Id & a.UserId == _plexId);
 
         try
         {
             var albumUrl =
-                uri + "/library/sections/" + libraryId + "/all?artist.id=" + artistKey +
+                uri + "/library/sections/" + artist.LibraryKey + "/all?artist.id=" + artist.RatingKey +
                 "&type=9&"; // "includeGuids={include_guids}&{filter}"
             var albumXml = await httpClient.GetStringAsync(albumUrl);
             var albumXElement = XElement.Parse(albumXml);
@@ -271,17 +292,19 @@ public class Plex
             if (albumXElement.DescendantsAndSelf("Directory").Count() == albumsInDbCount)
             {
                 Console.WriteLine($"Returning {artist}'s albums from db");
-                return _musicDbContext.Albums.Where(a => a.Artist == artist & a.UserId == _plexId).ToImmutableList();
+                return _musicDbContext.Albums.Where(a => a.ArtistId == artist.Id & a.UserId == _plexId)
+                    .ToImmutableList();
             }
 
             var dbAlbumsGuid = _musicDbContext.Albums.Select(a => a.Guid).ToList();
             if (albumXElement.DescendantsAndSelf("Directory").Count() != albumsInDbCount)
             {
-                Console.WriteLine($"Getting {artist.ToUpper()}'s new albums from plex");
+                Console.WriteLine($"Getting {artist.Title.ToUpper()}'s new albums from plex");
                 var albumsToParse = albumXElement.DescendantsAndSelf("Directory")
                     .Where(a => !dbAlbumsGuid.Contains(a.Attribute("guid").Value)).ToList();
 
                 var albums = await ParseAlbums(albumsToParse, uri, artist);
+
                 await _musicDbContext.SaveChangesAsync();
 
                 return albums.ToImmutableList();
@@ -306,7 +329,7 @@ public class Plex
     {
         // Check if a track exists in db. If they do, return them.
         var trackExists = _musicDbContext.Tracks.Any(t => t.UserId == _plexId && t.ParentGuid == albumGuid);
-        ;
+
         if (trackExists) return _musicDbContext.Tracks.Where(t => t.UserId == _plexId).ToImmutableList();
 
         // If not, get them from plex and save them to the db.
@@ -400,7 +423,7 @@ public class Plex
 
         foreach (Artist artist in artists)
         {
-            var album = await GetArtistAlbums(uri, artist.LibraryKey, artist.RatingKey, artist.Title);
+            var album = await GetArtistAlbums(uri, artist);
             albums.AddRange(album);
         }
 
@@ -522,7 +545,7 @@ public class Plex
         };
     }
 
-    public async ValueTask<List<Album>> ParseAlbums(List<XElement> albums, string uri, string artist)
+    public async ValueTask<List<Album>> ParseAlbums(List<XElement> albums, string uri, Artist artist)
     {
         var newAlbums = new List<Album>();
 
@@ -556,7 +579,6 @@ public class Plex
                 Index = album.Attribute("index")?.Value ?? "",
                 Thumb = uri + album.Attribute("thumb")?.Value ?? "",
                 Title = album.Attribute("title")?.Value ?? "",
-                Artist = artist,
                 Type = album.Attribute("type")?.Value ?? "",
                 UpdatedAt = DateTimeOffset
                     .FromUnixTimeSeconds(long.Parse(album.Attribute("updatedAt")?.Value ?? "0")).LocalDateTime,
@@ -577,8 +599,11 @@ public class Plex
                     BottomRight = album.Element("UltraBlurColors").Attribute("bottomRight")?.Value ?? ""
                 },
                 UserId = _plexId,
+                ArtistId = artist.Id,
+                Artist = artist
             };
 
+            artist.Albums.Add(a);
             newAlbums.Add(a);
             _musicDbContext.Add(a);
         }
@@ -586,61 +611,62 @@ public class Plex
         return newAlbums;
     }
 
-    public async ValueTask<List<Artist>> ParseArtists(XElement mediaContainer, int libKey, string uri)
+    public async ValueTask<List<Artist>> ParseArtists(List<XElement> artists, int libKey, string uri)
     {
-        if (mediaContainer == null) return new List<Artist>();
+        var newArtists = new List<Artist>();
 
-        var items = mediaContainer.Elements("Directory")
-            .Select(async directory =>
+        foreach (var artist in artists)
+        {
+            newArtists.Add(new Artist
             {
-                return new Artist
-                {
-                    RatingKey = directory.Attribute("ratingKey")?.Value ?? "",
-                    Key = directory.Attribute("key")?.Value ?? "",
-                    Guid = directory.Attribute("guid")?.Value ?? "",
-                    Type = directory.Attribute("type")?.Value ?? "",
-                    Title = directory.Attribute("title")?.Value ?? "",
-                    Index = directory.Attribute("index")?.Value ?? "",
-                    UserRating = directory.Attribute("userRating")?.Value ?? "",
-                    ViewCount = directory.Attribute("viewCount")?.Value ?? "",
-                    SkipCount = directory.Attribute("skipCount")?.Value ?? "",
-                    LastViewedAt = directory.Attribute("lastViewedAt")?.Value ?? "",
-                    LastRatedAt = directory.Attribute("lastRatedAt")?.Value ?? "",
-                    Thumb = uri + directory.Attribute("thumb")?.Value ?? "",
-                    AddedAt = directory.Attribute("addedAt")?.Value ?? "",
-                    UpdatedAt = directory.Attribute("updatedAt")?.Value ?? "",
-                    LibraryKey = libKey,
+                RatingKey = artist.Attribute("ratingKey")?.Value ?? "",
+                Key = artist.Attribute("key")?.Value ?? "",
+                Guid = artist.Attribute("guid")?.Value ?? "",
+                Type = artist.Attribute("type")?.Value ?? "",
+                Title = artist.Attribute("title")?.Value ?? "",
+                Index = artist.Attribute("index")?.Value ?? "",
+                UserRating = artist.Attribute("userRating")?.Value ?? "",
+                ViewCount = artist.Attribute("viewCount")?.Value ?? "",
+                SkipCount = artist.Attribute("skipCount")?.Value ?? "",
+                LastViewedAt = artist.Attribute("lastViewedAt")?.Value ?? "",
+                LastRatedAt = artist.Attribute("lastRatedAt")?.Value ?? "",
+                Thumb = uri + artist.Attribute("thumb")?.Value ?? "",
+                AddedAt = artist.Attribute("addedAt")?.Value ?? "",
+                UpdatedAt = artist.Attribute("updatedAt")?.Value ?? "",
+                LibraryKey = libKey,
 
-                    Image = directory.Element("Image") != null
-                        ? new Image
-                        {
-                            Alt = directory.Element("Image")?.Attribute("alt")?.Value,
-                            Type = directory.Element("Image")?.Attribute("type")?.Value,
-                            Url = directory.Element("Image")?.Attribute("url")?.Value
-                        }
-                        : null,
+                Image = artist.Element("Image") != null
+                    ? new Image
+                    {
+                        Alt = artist.Element("Image")?.Attribute("alt")?.Value,
+                        Type = artist.Element("Image")?.Attribute("type")?.Value,
+                        Url = artist.Element("Image")?.Attribute("url")?.Value
+                    }
+                    : null,
 
-                    Ubc = directory.Element("UltraBlurColors") != null
-                        ? new UltraBlurColors
-                        {
-                            TopLeft = directory.Element("UltraBlurColors")?.Attribute("topLeft")?.Value,
-                            TopRight = directory.Element("UltraBlurColors")?.Attribute("topRight")?.Value,
-                            BottomLeft = directory.Element("UltraBlurColors")?.Attribute("bottomLeft")?.Value,
-                            BottomRight = directory.Element("UltraBlurColors")?.Attribute("bottomRight")?.Value
-                        }
-                        : null,
+                Ubc = artist.Element("UltraBlurColors") != null
+                    ? new UltraBlurColors
+                    {
+                        TopLeft = artist.Element("UltraBlurColors")?.Attribute("topLeft")?.Value,
+                        TopRight = artist.Element("UltraBlurColors")?.Attribute("topRight")?.Value,
+                        BottomLeft = artist.Element("UltraBlurColors")?.Attribute("bottomLeft")?.Value,
+                        BottomRight = artist.Element("UltraBlurColors")?.Attribute("bottomRight")?.Value
+                    }
+                    : null,
 
-                    // Genres = directory.Elements("Genre")
-                    //     .Select(genre => new Genre { Tag = genre.Attribute("tag")?.Value })
-                    //     .ToArray(),
+                // Genres = artist.Elements("Genre")
+                //     .Select(genre => new Genre { Tag = genre.Attribute("tag")?.Value })
+                //     .ToArray(),
 
-                    Country = directory.Element("Country") != null
-                        ? new Country { Tag = directory.Element("Country")?.Attribute("tag")?.Value }
-                        : null
-                };
-            }).ToList();
+                Country = artist.Element("Country") != null
+                    ? new Country { Tag = artist.Element("Country")?.Attribute("tag")?.Value }
+                    : null,
 
-        return (await Task.WhenAll(items)).ToList();
+                UserId = _plexId,
+            });
+        }
+
+        return newArtists;
     }
 
     public static LibraryDir ParseDirectory(XElement directoryElement)

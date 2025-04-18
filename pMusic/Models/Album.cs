@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Avalonia.Media.Imaging;
 using Microsoft.EntityFrameworkCore;
 
 namespace pMusic.Models;
@@ -31,7 +30,6 @@ public class Album
     public string? Index { get; set; }
     public string Thumb { get; set; }
     public string? Title { get; set; }
-    public string? Artist { get; set; }
     public string? Type { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public string? UserRating { get; set; }
@@ -43,6 +41,8 @@ public class Album
 
     // Relations
     public List<Track> Tracks { get; set; } = null!;
+    public int ArtistId { get; set; }
+    public Artist Artist { get; set; } = null!;
 
     // Custom Properties
     public bool IsPinned { get; set; } = false;
