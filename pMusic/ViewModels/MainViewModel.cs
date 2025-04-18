@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -16,10 +17,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
+using Microsoft.EntityFrameworkCore;
 using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
 using pMusic.Services;
+using pMusic.Views;
 using SoundFlow.Enums;
 
 namespace pMusic.ViewModels;
@@ -36,11 +39,9 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
 
-    [ObservableProperty] private bool _isLoggedIn =
-        !string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+    [ObservableProperty] private bool _isLoggedIn = false;
 
-    [ObservableProperty] private bool _isLoggedInTrue =
-        string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+    [ObservableProperty] private bool _isLoggedInTrue = true;
 
     [ObservableProperty] private Bitmap _thumbnailUrl;
     [ObservableProperty] private bool _isLoading;
@@ -55,6 +56,7 @@ public partial class MainViewModel : ViewModelBase
         _musicDbContext = musicDbContext;
         Sidebar = sidebar;
 
+        _ = CheckLoginStatus();
         _ = LoadPinnedAlbumsThumbnails();
     }
 
@@ -80,13 +82,13 @@ public partial class MainViewModel : ViewModelBase
     }
 
 
-    public void CheckLoginStatus()
+    public async ValueTask CheckLoginStatus()
     {
         string? authToken = null;
 
         try
         {
-            authToken = Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken");
+            authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
         }
         catch (Exception ex)
         {
@@ -98,17 +100,29 @@ public partial class MainViewModel : ViewModelBase
         if (!string.IsNullOrEmpty(authToken))
         {
             IsLoggedIn = true;
+            IsLoggedInTrue = false;
+            await GetUserInfo();
         }
         else
         {
             IsLoggedIn = false;
+            IsLoggedInTrue = true;
         }
     }
 
-    public async Task GetUserInfo()
+    [RelayCommand]
+    public async Task Logout()
     {
-        ThumbnailUrl = await _plex.GetUserProfilePicture();
-        Console.WriteLine($"thumbnail url {ThumbnailUrl}");
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", "");
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", "");
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", "");
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", "");
+
+        IsLoggedIn = false;
+        IsLoggedInTrue = true;
+
+        // OpenNewWindow();
+        ToLoginWindow();
     }
 
     public void PlayPause()
@@ -128,4 +142,22 @@ public partial class MainViewModel : ViewModelBase
     {
         GoToAlbum(album);
     }
+
+    private async Task GetUserInfo()
+    {
+        ThumbnailUrl = await _plex.GetUserProfilePicture();
+        Console.WriteLine($"thumbnail url {ThumbnailUrl}");
+    }
+
+    private void OpenNewWindow()
+    {
+        var mainWindow = ((IClassicDesktopStyleApplicationLifetime)Application.Current.ApplicationLifetime).MainWindow;
+        var newWindow = new LoginWindow();
+        newWindow.DataContext = new LoginViewModel();
+
+        newWindow.Show(); // Opens the window non-modally
+        mainWindow.Close();
+    }
+
+    private void ToLoginWindow() => GoToLoginWindow();
 }

@@ -12,8 +12,10 @@ public partial class HomeView : UserControl
     public HomeView()
     {
         InitializeComponent();
-        DataContext = Ioc.Default.GetRequiredService<HomeViewModel>();
+        var dc = Ioc.Default.GetRequiredService<HomeViewModel>();
+        DataContext = dc;
 
+        this.Loaded += async (_, _) => await dc.LoadContent();
         // this.DataContextChanged += async (_, _) =>
         // {
         //     if (DataContext is HomeViewModel vm)

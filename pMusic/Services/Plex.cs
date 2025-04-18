@@ -5,7 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml.Linq;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using KeySharp;
 using LukeHagar.PlexAPI.SDK;
@@ -25,26 +27,42 @@ namespace pMusic.Services;
 public class Plex
 {
     public readonly HttpClient httpClient;
-    private static string _serverUrl;
     private readonly MusicDbContext _musicDbContext;
-    private readonly string _plexClientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
-    private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+    private readonly string _plexClientIdentifier;
+    private string _plexToken;
 
-    private static readonly string _plexSessionIdentifier =
-        Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+    private static string _plexSessionIdentifier;
 
     private static readonly string _plexProduct = "pMusic";
     private static readonly string _plexDeviceName = "Desktop";
     private static readonly string _plexPlatform = "Desktop";
 
-    private static readonly PlexAPI _plexApi =
-        new PlexAPI(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+    private PlexAPI? _plexApi;
 
 
     public Plex(HttpClient httpClient, MusicDbContext musicDbContext)
     {
         this.httpClient = httpClient;
         _musicDbContext = musicDbContext;
+        _plexClientIdentifier = GetOrCreateClientIdentifier();
+        try
+        {
+            _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error retrieving token: {ex.Message}");
+            return;
+        }
+
+        try
+        {
+            _plexSessionIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+        } catch (KeyringException ex)
+        {
+            _plexClientIdentifier = Guid.NewGuid().ToString();
+
+        }
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Token", _plexToken);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Client-Identifier", _plexClientIdentifier);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Session-Identifier", _plexSessionIdentifier);
@@ -53,8 +71,144 @@ public class Plex
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Platform", _plexPlatform);
     }
 
+    private string GetOrCreateClientIdentifier()
+    {
+        var clientIdentifier = "";
+        try
+        {
+            clientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+        }catch (KeyringException ex)
+        {
+            Console.WriteLine("Cannot find Client Identifier");
+        }
+
+        if (clientIdentifier.Length > 0)
+        {
+            return clientIdentifier;
+        }
+
+        // Initial Setup create the Client Identifier and store for later use
+        var guid = Guid.NewGuid().ToString();
+        clientIdentifier = guid;
+        Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", guid);
+
+        return clientIdentifier;
+    }
+
+    public async ValueTask<(string id, string code)> GeneratePin()
+    {
+        var plexPinUri = new Uri("https://plex.tv/api/v2/pins");
+
+        var contents = new FormUrlEncodedContent([
+            new KeyValuePair<string, string>("strong", "true"),
+            new KeyValuePair<string, string>("X-Plex-Product", "pMusic"),
+            new KeyValuePair<string, string>("X-Plex-Client-Identifier", _plexClientIdentifier)
+        ]);
+
+        var results = await httpClient.PostAsync(plexPinUri, contents);
+
+        var id = "";
+        var code = "";
+
+        if (results.IsSuccessStatusCode)
+        {
+            var responseBody = results.Content.ReadAsStringAsync().Result;
+            var incomingXml = XElement.Parse(responseBody);
+
+            id = incomingXml.Attribute("id").ToString().Split('"')[1];
+            code = incomingXml.Attribute("code").ToString().Split('"')[1];
+
+            Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", id);
+            Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", code);
+
+            Console.WriteLine("Successfully generated pin");
+        }
+        else
+        {
+            Console.WriteLine("Failed to get generated pin");
+        }
+
+        return (id, code);
+    }
+
+    public async ValueTask<Uri> CheckPin(string code)
+    {
+        var queryParams = new Dictionary<string, string>
+        {
+            { "clientID", _plexClientIdentifier },
+            { "code", code },
+            // { "forwardUrl", "https://localhost" },
+            { "context[device][product]", "pMusic" } // Flattened for URL encoding
+        };
+
+        // HttpUtility.UrlPathEncode(queryParams);
+        static string EncodeFormUrlEncoded(Dictionary<string, string> data)
+        {
+            var keyValuePairs = new List<string>();
+            foreach (var item in data)
+            {
+                keyValuePairs.Add($"{HttpUtility.UrlEncode(item.Key)}={HttpUtility.UrlEncode(item.Value)}");
+            }
+
+            return string.Join("&", keyValuePairs);
+        }
+
+        var encodedValues = EncodeFormUrlEncoded(queryParams);
+
+        var authAppUrl = new Uri(
+                "https://app.plex.tv/auth#?" + encodedValues)
+            ;
+
+        return authAppUrl;
+    }
+
+    public async ValueTask PollPin(string id, string code)
+    {
+        var isPinPolling = true;
+        string? authToken = null;
+
+        do
+        {
+            var plexPinPoll =
+                new Uri(
+                    $"https://plex.tv/api/v2/pins/{id}?code={Uri.EscapeDataString(code)}&X-Plex-Client-Identifier={Uri.EscapeDataString(_plexClientIdentifier)}");
+            var pinResults = await httpClient.GetStringAsync(plexPinPoll);
+            var pinIncomingResults = XElement.Parse(pinResults);
+            var parsedToken = pinIncomingResults.Attribute("authToken").ToString().Split('"')[1];
+            if (parsedToken.Length != 0 || !string.IsNullOrEmpty(parsedToken))
+            {
+                authToken = parsedToken;
+                Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", authToken);
+                isPinPolling = false;
+                Console.WriteLine("Successfully Authenticated");
+            }
+            else
+            {
+                Console.WriteLine("Waiting");
+            }
+        } while (isPinPolling && authToken == null);
+
+        _plexToken = authToken;
+        _plexApi = new PlexAPI(Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken"));
+        Console.WriteLine($"Redirecting");
+    }
+
+    public void SetInformation()
+    {
+        try
+        {
+            _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+        }
+        catch (KeyringException ex)
+        {
+            Console.WriteLine($"Error retrieving token: {ex.Message}");
+            return;
+        }
+    }
+
     public async ValueTask<Bitmap> GetUserProfilePicture()
     {
+        SetInformation();
         var url = "https://plex.tv/api/v2/user";
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("X-Plex-Token", _plexToken);
@@ -69,12 +223,12 @@ public class Plex
 
     public async ValueTask<String> GetServerCapabilitiesAsync()
     {
+        SetInformation();
         var uri = "https://plex.tv/api/v2/resources?" + "X-Plex-Client-Identifier=" + _plexClientIdentifier +
                   "&X-Plex-Token=" + _plexToken;
         var serversXmlRes = await httpClient.GetStringAsync(uri);
         var serverUri = XElement.Parse(serversXmlRes).Descendants("connection").First().Attribute("uri").Value;
         Console.WriteLine($"{serverUri} -> Server Response");
-        _serverUrl = serverUri;
         return serverUri;
     }
 
@@ -309,63 +463,62 @@ public class Plex
 
         var directory1 = mediaContainer.Element("Directory");
 
-        var items = mediaContainer.Elements("Directory").Select(
-            async directory =>
+        var items = mediaContainer.Elements("Directory").Select(async directory =>
+        {
+            var album = new Album
             {
-                var album = new Album
+                AddedAt = DateTimeOffset
+                    .FromUnixTimeSeconds(long.Parse(directory.Attribute("addedAt")?.Value ?? "0")).LocalDateTime,
+                Guid = directory.Attribute("guid")?.Value ?? "",
+                Key = directory.Attribute("key")?.Value ?? "",
+                LastRatedAt = DateTimeOffset
+                    .FromUnixTimeSeconds(long.Parse(directory.Attribute("lastRatedAt")?.Value ?? "0"))
+                    .LocalDateTime,
+                LastViewedAt = DateTimeOffset
+                    .FromUnixTimeSeconds(long.Parse(directory.Attribute("lastViewedAt")?.Value ?? "0"))
+                    .LocalDateTime,
+                LoudnessAnalysisVersion = directory.Attribute("loudnessAnalysisVersion")?.Value ?? "",
+                OriginallyAvailableAt = DateTime.Parse(directory.Attribute("originallyAvailableAt")!.Value),
+                MusicAnalysisVersion = directory.Attribute("musicAnalysisVersion")?.Value ?? "",
+                ParentGuid = directory.Attribute("parentGuid")?.Value ?? "",
+                ParentKey = directory.Attribute("parentKey")?.Value ?? "",
+                ParentRatingKey = directory.Attribute("parentRatingKey")?.Value ?? "",
+                ParentThumb = directory.Attribute("parentThumb")?.Value ?? "0",
+                ParentTitle = directory.Attribute("parentTitle")?.Value ?? "",
+                Rating = directory.Attribute("rating")?.Value ?? "0",
+                RatingKey = directory.Attribute("ratingKey")?.Value ?? "",
+                SkipCount = directory.Attribute("skipCount")?.Value ?? "",
+                Studio = directory.Attribute("studio")?.Value ?? "",
+                Summary = directory.Attribute("summary")?.Value ?? "",
+                Index = directory.Attribute("index")?.Value ?? "",
+                Thumb = uri + directory.Attribute("thumb")?.Value ?? "",
+                Title = directory.Attribute("title")?.Value ?? "",
+                Artist = artist,
+                Type = directory.Attribute("type")?.Value ?? "",
+                UpdatedAt = DateTimeOffset
+                    .FromUnixTimeSeconds(long.Parse(directory.Attribute("updatedAt")?.Value ?? "0")).LocalDateTime,
+                UserRating = directory.Attribute("userRating")?.Value ?? "0",
+                ViewCount = directory.Attribute("viewCount")?.Value ?? "0",
+                Year = directory.Attribute("year")?.Value ?? "",
+                Image = new Image
                 {
-                    AddedAt = DateTimeOffset
-                        .FromUnixTimeSeconds(long.Parse(directory.Attribute("addedAt")?.Value ?? "0")).LocalDateTime,
-                    Guid = directory.Attribute("guid")?.Value ?? "",
-                    Key = directory.Attribute("key")?.Value ?? "",
-                    LastRatedAt = DateTimeOffset
-                        .FromUnixTimeSeconds(long.Parse(directory.Attribute("lastRatedAt")?.Value ?? "0"))
-                        .LocalDateTime,
-                    LastViewedAt = DateTimeOffset
-                        .FromUnixTimeSeconds(long.Parse(directory.Attribute("lastViewedAt")?.Value ?? "0"))
-                        .LocalDateTime,
-                    LoudnessAnalysisVersion = directory.Attribute("loudnessAnalysisVersion")?.Value ?? "",
-                    OriginallyAvailableAt = DateTime.Parse(directory.Attribute("originallyAvailableAt")!.Value),
-                    MusicAnalysisVersion = directory.Attribute("musicAnalysisVersion")?.Value ?? "",
-                    ParentGuid = directory.Attribute("parentGuid")?.Value ?? "",
-                    ParentKey = directory.Attribute("parentKey")?.Value ?? "",
-                    ParentRatingKey = directory.Attribute("parentRatingKey")?.Value ?? "",
-                    ParentThumb = directory.Attribute("parentThumb")?.Value ?? "0",
-                    ParentTitle = directory.Attribute("parentTitle")?.Value ?? "",
-                    Rating = directory.Attribute("rating")?.Value ?? "0",
-                    RatingKey = directory.Attribute("ratingKey")?.Value ?? "",
-                    SkipCount = directory.Attribute("skipCount")?.Value ?? "",
-                    Studio = directory.Attribute("studio")?.Value ?? "",
-                    Summary = directory.Attribute("summary")?.Value ?? "",
-                    Index = directory.Attribute("index")?.Value ?? "",
-                    Thumb = uri + directory.Attribute("thumb")?.Value ?? "",
-                    Title = directory.Attribute("title")?.Value ?? "",
-                    Artist = artist,
-                    Type = directory.Attribute("type")?.Value ?? "",
-                    UpdatedAt = DateTimeOffset
-                        .FromUnixTimeSeconds(long.Parse(directory.Attribute("updatedAt")?.Value ?? "0")).LocalDateTime,
-                    UserRating = directory.Attribute("userRating")?.Value ?? "0",
-                    ViewCount = directory.Attribute("viewCount")?.Value ?? "0",
-                    Year = directory.Attribute("year")?.Value ?? "",
-                    Image = new Image
-                    {
-                        Alt = directory.Element("Image").Attribute("alt")?.Value ?? "",
-                        Type = directory.Element("Image").Attribute("type")?.Value ?? "",
-                        Url = directory.Element("Image").Attribute("url")?.Value ?? ""
-                    },
-                    UltraBlurColors = new UltraBlurColors
-                    {
-                        TopLeft = directory.Element("UltraBlurColors").Attribute("topLeft")?.Value ?? "",
-                        TopRight = directory.Element("UltraBlurColors").Attribute("topRight")?.Value ?? "",
-                        BottomLeft = directory.Element("UltraBlurColors").Attribute("bottomLeft")?.Value ?? "",
-                        BottomRight = directory.Element("UltraBlurColors").Attribute("bottomRight")?.Value ?? ""
-                    }
-                };
+                    Alt = directory.Element("Image").Attribute("alt")?.Value ?? "",
+                    Type = directory.Element("Image").Attribute("type")?.Value ?? "",
+                    Url = directory.Element("Image").Attribute("url")?.Value ?? ""
+                },
+                UltraBlurColors = new UltraBlurColors
+                {
+                    TopLeft = directory.Element("UltraBlurColors").Attribute("topLeft")?.Value ?? "",
+                    TopRight = directory.Element("UltraBlurColors").Attribute("topRight")?.Value ?? "",
+                    BottomLeft = directory.Element("UltraBlurColors").Attribute("bottomLeft")?.Value ?? "",
+                    BottomRight = directory.Element("UltraBlurColors").Attribute("bottomRight")?.Value ?? ""
+                }
+            };
 
-                _musicDbContext.Add(album);
+            _musicDbContext.Add(album);
 
-                return album;
-            }).ToList();
+            return album;
+        }).ToList();
 
         var albums = (await Task.WhenAll(items)).ToList();
         return albums;
