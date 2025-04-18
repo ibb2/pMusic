@@ -7,15 +7,12 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
-using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using KeySharp;
 using LukeHagar.PlexAPI.SDK;
-using LukeHagar.PlexAPI.SDK.Models.Requests;
 using pMusic.Database;
 using pMusic.Models;
 using Country = pMusic.Models.Country;
-using Genre = pMusic.Models.Genre;
 using Image = pMusic.Models.Image;
 using Media = pMusic.Models.Media;
 using Part = pMusic.Models.Part;
@@ -26,19 +23,18 @@ namespace pMusic.Services;
 
 public class Plex
 {
-    public readonly HttpClient httpClient;
-    private readonly MusicDbContext _musicDbContext;
-    private readonly string _plexClientIdentifier;
-    private string _plexToken;
-    private string _plexId;
-
     private static string _plexSessionIdentifier;
 
     private static readonly string _plexProduct = "pMusic";
     private static readonly string _plexDeviceName = "Desktop";
     private static readonly string _plexPlatform = "Desktop";
+    private readonly MusicDbContext _musicDbContext;
+    private readonly string _plexClientIdentifier;
+    public readonly HttpClient httpClient;
 
     private PlexAPI? _plexApi;
+    private string _plexId;
+    private string _plexToken;
 
 
     public Plex(HttpClient httpClient, MusicDbContext musicDbContext)
@@ -306,13 +302,23 @@ public class Plex
         return ImmutableList<Album>.Empty;
     }
 
-    public async ValueTask<IImmutableList<Track>> GetTrackList(string uri, string albumKey, string artist)
+    public async ValueTask<IImmutableList<Track>> GetTrackList(string uri, string albumGuid)
     {
-        var trackUri = uri + "/library/metadata/" + albumKey + "/children";
+        // Check if a track exists in db. If they do, return them.
+        var trackExists = _musicDbContext.Tracks.Any(t => t.UserId == _plexId && t.ParentGuid == albumGuid);
+        ;
+        if (trackExists) return _musicDbContext.Tracks.Where(t => t.UserId == _plexId).ToImmutableList();
+
+        // If not, get them from plex and save them to the db.
+        var album = _musicDbContext.Albums.FirstOrDefault(a => a.Guid == albumGuid);
+
+        var trackUri = uri + "/library/metadata/" + album.RatingKey + "/children";
         var trackXml = await httpClient.GetStringAsync(trackUri);
 
-        var tracks = await ParseTracks(XElement.Parse(trackXml), uri, artist);
-        var empty = ImmutableList<Track>.Empty;
+        var tracks = await ParseTracks(XElement.Parse(trackXml), uri, album);
+
+        _musicDbContext.Tracks.AddRange(tracks);
+        await _musicDbContext.SaveChangesAsync();
 
         return tracks.ToImmutableList();
     }
@@ -439,11 +445,11 @@ public class Plex
         return newPlaylists;
     }
 
-    public async Task<List<Track>> ParseTracks(XElement mediaContainer, string uri, string artist)
+    public async Task<List<Track>> ParseTracks(XElement mediaContainer, string uri, Album? album)
     {
         if (mediaContainer == null) return new List<Track>();
 
-        var items = mediaContainer.Elements("Track").Select(async track =>
+        var items = mediaContainer.Elements("Track").Select(track =>
         {
             return new Track
             {
@@ -457,7 +463,6 @@ public class Plex
                 ParentStudio = track.Attribute("parentStudio")?.Value ?? "",
                 Type = track.Attribute("type")?.Value ?? "",
                 Title = track.Attribute("title")?.Value ?? "",
-                Artist = artist,
                 GrandparentKey = track.Attribute("grandparentKey")?.Value ?? "",
                 ParentKey = track.Attribute("parentKey")?.Value ?? "",
                 GrandparentTitle = track.Attribute("grandparentTitle")?.Value ?? "",
@@ -476,11 +481,14 @@ public class Plex
                 AddedAt = int.Parse(track.Attribute("addedAt")?.Value ?? "0"),
                 UpdatedAt = int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
                 MusicAnalysisVersion = int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
-                Media = ParseMedia(track.Element("Media")!)
+                Media = ParseMedia(track.Element("Media")!),
+                UserId = _plexId,
+                AlbumId = album.Id,
+                Album = album,
             };
         }).ToList();
 
-        return (await Task.WhenAll(items)).ToList();
+        return items.ToList();
     }
 
     private static Media ParseMedia(XElement mediaElement)

@@ -1,5 +1,5 @@
 using System;
-using Avalonia.Media.Imaging;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace pMusic.Models;
@@ -18,7 +18,6 @@ public class Track
     public string ParentStudio { get; set; }
     public string Type { get; set; }
     public string Title { get; set; }
-    public string Artist { get; set; }
     public string GrandparentKey { get; set; }
     public string ParentKey { get; set; }
     public string GrandparentTitle { get; set; }
@@ -39,6 +38,9 @@ public class Track
     public int MusicAnalysisVersion { get; set; }
 
     public Media Media { get; set; }
+
+    // Custom
+    [MaxLength(20)] public string UserId { get; set; }
 
     // Relations 
     public int AlbumId { get; set; }

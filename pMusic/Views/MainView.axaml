@@ -170,7 +170,7 @@
                 <StackPanel>
                     <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Title}"
                                VerticalAlignment="Center" Margin="8 4" />
-                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Artist}"
+                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Album.Artist}"
                                VerticalAlignment="Center" Margin="8 4" />
                 </StackPanel>
             </StackPanel>
