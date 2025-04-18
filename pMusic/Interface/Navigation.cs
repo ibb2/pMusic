@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using KeySharp;
 using pMusic.Services;
 using pMusic.ViewModels;
+using pMusic.Views;
 
 namespace pMusic.Interface;
 
@@ -22,6 +24,7 @@ public partial class Navigation : ObservableObject
     [ObservableProperty] private Stack<ViewModelBase> _navStack = new();
     [ObservableProperty] private Stack<ViewModelBase> _popStack = new();
     [ObservableProperty] private object? _currentView;
+    [ObservableProperty] private object? _currentPage;
 
     private readonly Dictionary<Type, ViewModelBase> _viewModels = new();
 
@@ -36,14 +39,35 @@ public partial class Navigation : ObservableObject
         _music = music;
         _plex = plex;
         CurrentView = Ioc.Default.GetRequiredService<HomeViewModel>();
+
+
+        if (Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken").Length > 0)
+        {
+            CurrentPage = Ioc.Default.GetRequiredService<MainViewModel>();
+        }
+        else
+        {
+            CurrentPage = Ioc.Default.GetRequiredService<LoginViewModel>();
+        }
     }
 
-    public void GoToView<T>(Action<T> intializer) where T : ViewModelBase, new()
+    public void GoToView<T>(Action<T>? intializer) where T : ViewModelBase, new()
     {
         var viewModel = GetViewModel<T>();
-        intializer(viewModel);
+        if (intializer != null)
+            intializer(viewModel);
         CurrentView = viewModel;
         PushToNavStack(viewModel);
+    }
+
+    public void GoToPage<T>(Action<T>? intializer) where T : ViewModelBase, new()
+    {
+        var viewModel = GetViewModel<T>();
+        if (intializer != null)
+            intializer(viewModel);
+        CurrentPage = viewModel;
+        NavStack.Clear();
+        PopStack.Clear();
     }
 
     // Factory method to get view model instances

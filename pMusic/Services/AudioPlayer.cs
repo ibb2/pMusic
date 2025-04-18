@@ -27,8 +27,6 @@ public interface IAudioPlayerService
 
 public partial class AudioPlayer : IAudioPlayerService
 {
-    private readonly string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
-
     public bool IsPlaying = false;
     public SoundPlayer? SoundPlayer = null;
     public double PlaybackPosition;

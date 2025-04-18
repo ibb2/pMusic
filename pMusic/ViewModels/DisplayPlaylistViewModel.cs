@@ -33,7 +33,7 @@ public partial class DisplayPlaylistViewModel : ObservableObject
         try
         {
             var ThumbnailUrl = ThumbUrl + "?X-Plex-Token=" +
-                               Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken");
+                               Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
             Composite = await _plex.GetBitmapImage(ThumbnailUrl);
         }
         catch

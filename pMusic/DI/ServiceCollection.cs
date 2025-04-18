@@ -22,11 +22,13 @@ public static class ServiceCollectionExtensions
         collection.AddSingleton<MusicPlayer>();
         collection.AddSingleton<Sidebar>();
         collection.AddTransient<IMusic, Music>();
+        collection.AddTransient<LoginViewModel>();
         collection.AddTransient<MainViewModel>();
         collection.AddTransient<HomeViewModel>();
         collection.AddTransient<AlbumViewModel>();
         collection.AddTransient<ArtistViewModel>();
         collection.AddTransient<MainWindow>();
+        collection.AddTransient<LoginWindow>();
         collection.AddTransient<HomeView>();
     }
 }

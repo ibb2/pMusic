@@ -17,24 +17,28 @@ public partial class HomeViewModel : ViewModelBase
 {
     private IMusic _music;
     private Plex _plex;
+    private ObservableCollection<DisplayPlaylistViewModel> _playlists = new();
 
     public ObservableCollection<DisplayAlbumViewModel> Albums { get; } = new();
     public ObservableCollection<DisplayAlbumViewModel> TopEight { get; set; } = new();
     public ObservableCollection<DisplayAlbumViewModel> RecentlyAddedAlbums { get; set; } = new();
-    public ObservableCollection<DisplayPlaylistViewModel> Playlists { get; set; } = new();
+
+    public ObservableCollection<DisplayPlaylistViewModel> Playlists
+    {
+        get => _playlists;
+        set
+        {
+            if (Equals(value, _playlists)) return;
+            _playlists = value;
+            OnPropertyChanged();
+        }
+    }
 
 
     public HomeViewModel(IMusic music, Plex plex)
     {
         _music = music;
         _plex = plex;
-
-        Console.WriteLine($"Plex {plex} and {music}");
-
-        // _ = LoadAlbumsAsync(CancellationToken.None);
-        _ = LoadHomepageAlbumsAsync();
-        _ = LoadHomepageRecentlyAddedAlbumsAsync();
-        _ = LoadPlaylistsAsync(CancellationToken.None);
     }
 
     public HomeViewModel()
@@ -47,6 +51,14 @@ public partial class HomeViewModel : ViewModelBase
         Debug.Assert(_music != null, "IMusic is null");
         Debug.Assert(_plex != null, "Plex is null");
         Console.WriteLine($"HomeViewModel resolved: Plex: {_plex}, Music: {_music}");
+    }
+
+    public async ValueTask LoadContent()
+    {
+        await LoadHomepageAlbumsAsync();
+        await LoadHomepageRecentlyAddedAlbumsAsync();
+        await LoadPlaylistsAsync();
+        Console.WriteLine("Content loaded");
     }
 
     public async Task LoadHomepageAlbumsAsync()
@@ -119,10 +131,10 @@ public partial class HomeViewModel : ViewModelBase
     //     });
     // }
 
-    public async Task LoadPlaylistsAsync(CancellationToken ct)
+    public async Task LoadPlaylistsAsync()
     {
         Playlists = new();
-        var playlists = await _music.GetPlaylists(ct, _plex);
+        var playlists = await _music.GetPlaylists(CancellationToken.None, _plex);
         var viewModels = playlists.Select(a => new DisplayPlaylistViewModel(a, _plex))
             .ToList();
 

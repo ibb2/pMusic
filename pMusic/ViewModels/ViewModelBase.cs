@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
+using pMusic.Views;
 
 namespace pMusic.ViewModels;
 
@@ -63,5 +64,15 @@ public abstract partial class ViewModelBase : ObservableObject
     public void GoHome()
     {
         Navigation.GoHome();
+    }
+
+    public void GoToMainWindow()
+    {
+        Navigation.GoToPage<MainViewModel>(null);
+    }
+
+    public void GoToLoginWindow()
+    {
+        Navigation.GoToPage<LoginViewModel>(null);
     }
 }

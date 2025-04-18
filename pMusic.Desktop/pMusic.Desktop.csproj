@@ -40,8 +40,4 @@
     <ItemGroup>
         <None Include="bin\Debug\net9.0\music.db"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="bin\Debug\net9.0\"/>
-    </ItemGroup>
 </Project>
