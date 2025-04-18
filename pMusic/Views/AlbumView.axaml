@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:cc="clr-namespace:pMusic.Controls"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
              xmlns:local="clr-namespace:pMusic.Views"
@@ -67,23 +68,32 @@
                                 </StackPanel>
                             </Grid>
                         </Grid>
-                        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 20 0 8">
-                            <StackPanel Orientation="Horizontal">
-                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Play}"></Button>
-                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Shuffle}">
+                        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
+                            <StackPanel Orientation="Horizontal" Spacing="20">
+                                <Button Classes="Flat Icon" HorizontalContentAlignment="Center">
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiInformationForeground}"
+                                                        Type="Play"
+                                                        Kind="Solid" Min="True" Margin="4 0 0 0">
+                                    </heroIcons:HeroIcon>
                                 </Button>
-                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent CirclePlus}"
-                                        Command="{Binding AddToLibraryCommand}"
-                                        CommandParameter="{Binding Album}">
+                                <Button Classes="Basic Icon">
+                                    <heroIcons:HeroIcon Type="ArrowsRightLeft"></heroIcons:HeroIcon>
                                 </Button>
-                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Download}">
+                                <Button Classes="Basic Icon"
+                                        Command="{Binding AddToLibraryCommand}" CommandParameter="{Binding Album}">
+                                    <heroIcons:HeroIcon Type="Plus"></heroIcons:HeroIcon>
+                                </Button>
+                                <Button Classes="Basic Icon">
+                                    <heroIcons:HeroIcon Type="CloudArrowDown"></heroIcons:HeroIcon>
                                 </Button>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock VerticalAlignment="Center">
                                     List
                                 </TextBlock>
-                                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent List}"></Button>
+                                <Button Classes="Basic Icon" VerticalAlignment="Center">
+                                    <heroIcons:HeroIcon Type="ListBullet"></heroIcons:HeroIcon>
+                                </Button>
                             </StackPanel>
                         </Grid>
                         <DataGrid Grid.Row="2" Name="Tracklist" ItemsSource="{Binding TrackList}" IsReadOnly="True"
@@ -99,12 +109,14 @@
                                         <DataTemplate>
                                             <Panel>
                                                 <!-- Button that appears on hover -->
-                                                <Button Classes="Basic Icon" Content="{LucideIconContent Play}"
+                                                <Button Classes="Basic Icon"
                                                         IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}"
                                                         Command="{Binding ((vm:AlbumViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding }"
                                                         Width="{Binding $parent[DataGridCell].Bounds.Width}"
-                                                        Height="{Binding $parent[DataGridCell].Bounds.Height}" />
+                                                        Height="{Binding $parent[DataGridCell].Bounds.Height}">
+                                                    <heroIcons:HeroIcon Type="Play" Kind="Solid"></heroIcons:HeroIcon>
+                                                </Button>
                                                 <!-- Text that shows by default -->
                                                 <TextBlock Text="{Binding Index}"
                                                            IsVisible="{Binding !$parent[DataGridCellsPresenter].IsPointerOver}"

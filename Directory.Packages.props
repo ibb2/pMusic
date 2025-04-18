@@ -16,9 +16,8 @@
         <PackageVersion Include="Avalonia.Browser" Version="11.2.7"/>
         <PackageVersion Include="Avalonia.Android" Version="11.2.7"/>
         <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
+        <PackageVersion Include="HeroIcons.Avalonia" Version="1.0.4"/>
         <PackageVersion Include="KeySharp" Version="1.0.5"/>
-        <PackageVersion Include="Lucide.Avalonia" Version="0.1.19"/>
-        <PackageVersion Include="LucideAvalonia" Version="1.6.1"/>
         <PackageVersion Include="LukeHagar.PlexAPI.SDK" Version="0.14.7"/>
         <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.4"/>
         <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4"/>

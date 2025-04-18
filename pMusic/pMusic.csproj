@@ -29,9 +29,8 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm"/>
+        <PackageReference Include="HeroIcons.Avalonia"/>
         <PackageReference Include="KeySharp"/>
-        <PackageReference Include="Lucide.Avalonia"/>
-        <PackageReference Include="LucideAvalonia"/>
         <PackageReference Include="LukeHagar.PlexAPI.SDK"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
