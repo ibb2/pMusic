@@ -55,16 +55,16 @@ public partial class HomeViewModel : ViewModelBase
 
     public async ValueTask LoadContent()
     {
-        await LoadHomepageAlbumsAsync();
-        await LoadHomepageRecentlyAddedAlbumsAsync();
+        var allAlbums = await _music.GetAllAlbums(CancellationToken.None, _plex);
+        await LoadHomepageAlbumsAsync(allAlbums);
+        await LoadHomepageRecentlyAddedAlbumsAsync(allAlbums);
         await LoadPlaylistsAsync();
         Console.WriteLine("Content loaded");
     }
 
-    public async Task LoadHomepageAlbumsAsync()
+    public async Task LoadHomepageAlbumsAsync(IImmutableList<Album> allAlbums)
     {
-        var rawAlbums = await _music.GetAllAlbums(CancellationToken.None, _plex);
-        var viewModels = rawAlbums.Select(a => new DisplayAlbumViewModel(a, _plex)).ToList();
+        var viewModels = allAlbums.Select(a => new DisplayAlbumViewModel(a, _plex)).ToList();
 
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
 
@@ -75,10 +75,9 @@ public partial class HomeViewModel : ViewModelBase
         Console.WriteLine($"Albums loaded: {Albums.Count}");
     }
 
-    public async Task LoadHomepageRecentlyAddedAlbumsAsync()
+    public async Task LoadHomepageRecentlyAddedAlbumsAsync(IImmutableList<Album> allAlbums)
     {
-        var rawAlbums = await _music.GetAllAlbums(CancellationToken.None, _plex);
-        var viewModels = rawAlbums.OrderByDescending(a => a.AddedAt).Select(a => new DisplayAlbumViewModel(a, _plex))
+        var viewModels = allAlbums.OrderByDescending(a => a.AddedAt).Select(a => new DisplayAlbumViewModel(a, _plex))
             .ToList();
 
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
