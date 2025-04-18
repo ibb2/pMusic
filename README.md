@@ -19,9 +19,9 @@ There are 2 different methods to install pMusic
 - Cross platform (macos, windows, linux)
 
 ## Screenshots
+<img width="1246" alt="Screenshot 2025-04-18 at 3 59 37 PM" src="https://github.com/user-attachments/assets/3db5ccea-f0e3-404d-b228-54c5fa45a5c5" />
 
-<img width="1385" alt="Screenshot 2025-04-10 at 10 21 32 PM" src="https://github.com/user-attachments/assets/b7b04f4c-505f-4ded-9af3-e4bcfc302de4" />
-<img width="1385" alt="Screenshot 2025-04-10 at 10 21 50 PM" src="https://github.com/user-attachments/assets/cbbfc703-4301-41bf-89a3-1c57bf7f8c6a" />
+<img width="1246" alt="Screenshot 2025-04-18 at 3 59 46 PM" src="https://github.com/user-attachments/assets/4a299610-2c45-4551-b316-8adf1787016c" />
 
 ## Roadmap
 (Probably in order)
