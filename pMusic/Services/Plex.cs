@@ -343,8 +343,10 @@ public class Plex
         return memoryStream;
     }
 
-    public async ValueTask<IImmutableList<Playlist>> GetPlaylists(string uri)
+    public async ValueTask<IImmutableList<Playlist>> GetPlaylists(string uri, bool loaded = false)
     {
+        if (loaded) return _musicDbContext.Playlists.Where(a => a.UserId == _plexId).ToImmutableList();
+
         try
         {
             var pCount = _musicDbContext.Playlists.Count(p => p.UserId == _plexId);
@@ -382,8 +384,10 @@ public class Plex
         return ImmutableList<Playlist>.Empty;
     }
 
-    public async ValueTask<IImmutableList<Album>> GetAllAlbums(string uri)
+    public async ValueTask<IImmutableList<Album>> GetAllAlbums(string uri, bool loaded = false)
     {
+        if (loaded) return _musicDbContext.Albums.Where(a => a.UserId == _plexId).ToImmutableList();
+
         var artists = await GetArtists(uri);
 
         var albums = new List<Album>();

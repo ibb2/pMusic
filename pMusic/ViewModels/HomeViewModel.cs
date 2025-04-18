@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using pMusic.Models;
@@ -34,6 +35,8 @@ public partial class HomeViewModel : ViewModelBase
         }
     }
 
+    [ObservableProperty] public static bool isLoaded = false;
+
 
     public HomeViewModel(IMusic music, Plex plex)
     {
@@ -53,13 +56,15 @@ public partial class HomeViewModel : ViewModelBase
         Console.WriteLine($"HomeViewModel resolved: Plex: {_plex}, Music: {_music}");
     }
 
-    public async ValueTask LoadContent()
+    public async ValueTask LoadContent(bool isLoaded)
     {
-        var allAlbums = await _music.GetAllAlbums(CancellationToken.None, _plex);
+        var allAlbums = await _music.GetAllAlbums(CancellationToken.None, _plex, isLoaded);
         await LoadHomepageAlbumsAsync(allAlbums);
         await LoadHomepageRecentlyAddedAlbumsAsync(allAlbums);
-        await LoadPlaylistsAsync();
+        await LoadPlaylistsAsync(isLoaded);
         Console.WriteLine("Content loaded");
+
+        IsLoaded = true;
     }
 
     public async Task LoadHomepageAlbumsAsync(IImmutableList<Album> allAlbums)
@@ -133,10 +138,10 @@ public partial class HomeViewModel : ViewModelBase
     //     });
     // }
 
-    public async Task LoadPlaylistsAsync()
+    public async Task LoadPlaylistsAsync(bool isLoaded)
     {
         Playlists = new();
-        var playlists = await _music.GetPlaylists(CancellationToken.None, _plex);
+        var playlists = await _music.GetPlaylists(CancellationToken.None, _plex, isLoaded);
         var viewModels = playlists.Select(a => new DisplayPlaylistViewModel(a, _plex))
             .ToList();
 

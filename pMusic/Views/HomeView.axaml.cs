@@ -15,7 +15,13 @@ public partial class HomeView : UserControl
         var dc = Ioc.Default.GetRequiredService<HomeViewModel>();
         DataContext = dc;
 
-        this.Loaded += async (_, _) => await dc.LoadContent();
+        this.Loaded += async (_, _) =>
+        {
+            var vm = (HomeViewModel)DataContext;
+            var isLoaded = vm.IsLoaded;
+            Console.WriteLine($"Is loaded: {isLoaded}");
+            await dc.LoadContent(isLoaded);
+        };
         // this.DataContextChanged += async (_, _) =>
         // {
         //     if (DataContext is HomeViewModel vm)
