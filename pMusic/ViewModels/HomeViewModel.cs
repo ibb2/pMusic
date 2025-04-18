@@ -69,6 +69,7 @@ public partial class HomeViewModel : ViewModelBase
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
 
         Albums.Clear();
+
         foreach (var vm in viewModels)
             Albums.Add(vm);
 
@@ -84,6 +85,7 @@ public partial class HomeViewModel : ViewModelBase
 
         RecentlyAddedAlbums.Clear();
         var count = 0;
+
         foreach (var vm in viewModels)
         {
             if (count < 8)
@@ -95,6 +97,7 @@ public partial class HomeViewModel : ViewModelBase
 
             RecentlyAddedAlbums.Add(vm);
         }
+
 
         Console.WriteLine($"Recently Added Albums loaded: {Albums.Count}");
     }
