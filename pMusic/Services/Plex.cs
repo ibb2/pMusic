@@ -345,17 +345,41 @@ public class Plex
 
     public async ValueTask<IImmutableList<Playlist>> GetPlaylists(string uri)
     {
-        if (_musicDbContext.Playlists.Any())
+        try
         {
-            return _musicDbContext.Playlists.ToImmutableList();
+            var pCount = _musicDbContext.Playlists.Count(p => p.UserId == _plexId);
+
+            var playlistsXml = await httpClient.GetStringAsync(uri + "/playlists");
+            var playlistXElement = XElement.Parse(playlistsXml);
+
+            if (playlistXElement.DescendantsAndSelf("Playlist")
+                    .Count(p => p.Attribute("playlistType").Value == "audio") == pCount)
+            {
+                Console.WriteLine($"Returning all Playlists from db");
+                return _musicDbContext.Playlists.Where(p => p.UserId == _plexId).ToImmutableList();
+            }
+
+            var dbPlaylistsGuid = _musicDbContext.Playlists.Select(a => a.Guid).ToList();
+            if (playlistXElement.DescendantsAndSelf("Playlist").Count() != pCount)
+            {
+                var newPlaylistsToParse = playlistXElement.DescendantsAndSelf("Playlist")
+                    .Where(p => !dbPlaylistsGuid.Contains(p.Attribute("guid").Value)).ToList();
+
+                var playlists = ParsePlaylists(newPlaylistsToParse, uri);
+
+                await _musicDbContext.SaveChangesAsync();
+
+                return ImmutableList<Playlist>.Empty;
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Error retrieving playlists: {ex.Message}, Returning Playlists from database");
+            return _musicDbContext.Playlists.Where(p => p.UserId == _plexId).ToImmutableList();
         }
 
-        var playlistsXml = await httpClient.GetStringAsync(uri + "/playlists");
-        var playlists = await ParsePlaylists(XElement.Parse(playlistsXml), uri);
-
-        await _musicDbContext.SaveChangesAsync();
-
-        return playlists.ToImmutableList();
+        Console.WriteLine($"No Playlists found, Returning empty list");
+        return ImmutableList<Playlist>.Empty;
     }
 
     public async ValueTask<IImmutableList<Album>> GetAllAlbums(string uri)
@@ -373,46 +397,42 @@ public class Plex
         return albums.ToImmutableList();
     }
 
-    public async ValueTask<List<Playlist>> ParsePlaylists(XElement? mediaContainer, string uri)
+    public List<Playlist> ParsePlaylists(IEnumerable<XElement> playlists, string uri)
     {
-        if (mediaContainer is null) return new List<Playlist>();
-
-        var tasks = mediaContainer.Elements("Playlist")
-            .Where(playlist => playlist.Attribute("playlistType")?.Value == "audio")
-            .Select(async playlist =>
+        var newPlaylists = new List<Playlist>();
+        foreach (var playlist in playlists)
+        {
+            var p = new Playlist
             {
-                var p = new Playlist
-                {
-                    RatingKey = playlist.Attribute("ratingKey")?.Value ?? "",
-                    Key = playlist.Attribute("key")?.Value ?? "",
-                    Guid = playlist.Attribute("guid")?.Value ?? "",
-                    Type = playlist.Attribute("type")?.Value ?? "",
-                    Title = playlist.Attribute("title")?.Value ?? "",
-                    Summary = playlist.Attribute("summary")?.Value ?? "",
-                    Smart = int.Parse(playlist.Attribute("smart")?.Value ?? "0"),
-                    PlaylistType = playlist.Attribute("playlistType")?.Value ?? "",
-                    Composite = uri + playlist.Attribute("composite")?.Value ?? "",
-                    Icon = playlist.Attribute("icon")?.Value ?? "",
-                    ViewCount = int.Parse(playlist.Attribute("viewCount")?.Value ?? "0"),
-                    LastViewedAt = DateTimeOffset
-                        .FromUnixTimeSeconds(long.Parse(playlist.Attribute("lastViewedAt")?.Value ?? "0"))
-                        .LocalDateTime,
-                    Duration = TimeSpan.FromMilliseconds(int.Parse(playlist.Attribute("duration")?.Value ?? "0")),
-                    LeafCount = int.Parse(playlist.Attribute("leafCount")?.Value ?? "0"),
-                    AddedAt = DateTimeOffset
-                        .FromUnixTimeSeconds(long.Parse(playlist.Attribute("addedAt")?.Value ?? "0"))
-                        .LocalDateTime,
-                    UpdatedAt = DateTimeOffset
-                        .FromUnixTimeSeconds(long.Parse(playlist.Attribute("updatedAt")?.Value ?? "0")).LocalDateTime
-                };
+                RatingKey = playlist.Attribute("ratingKey")?.Value ?? "",
+                Key = playlist.Attribute("key")?.Value ?? "",
+                Guid = playlist.Attribute("guid")?.Value ?? "",
+                Type = playlist.Attribute("type")?.Value ?? "",
+                Title = playlist.Attribute("title")?.Value ?? "",
+                Summary = playlist.Attribute("summary")?.Value ?? "",
+                Smart = int.Parse(playlist.Attribute("smart")?.Value ?? "0"),
+                PlaylistType = playlist.Attribute("playlistType")?.Value ?? "",
+                Composite = uri + playlist.Attribute("composite")?.Value ?? "",
+                Icon = playlist.Attribute("icon")?.Value ?? "",
+                ViewCount = int.Parse(playlist.Attribute("viewCount")?.Value ?? "0"),
+                LastViewedAt = DateTimeOffset
+                    .FromUnixTimeSeconds(long.Parse(playlist.Attribute("lastViewedAt")?.Value ?? "0"))
+                    .LocalDateTime,
+                Duration = TimeSpan.FromMilliseconds(int.Parse(playlist.Attribute("duration")?.Value ?? "0")),
+                LeafCount = int.Parse(playlist.Attribute("leafCount")?.Value ?? "0"),
+                AddedAt = DateTimeOffset
+                    .FromUnixTimeSeconds(long.Parse(playlist.Attribute("addedAt")?.Value ?? "0"))
+                    .LocalDateTime,
+                UpdatedAt = DateTimeOffset
+                    .FromUnixTimeSeconds(long.Parse(playlist.Attribute("updatedAt")?.Value ?? "0"))
+                    .LocalDateTime,
+                UserId = _plexId
+            };
 
-                _musicDbContext.Playlists.Add(p);
-                return p;
-            }).ToList();
+            _musicDbContext.Playlists.Add(p);
+        }
 
-        // Wait for all tasks to complete and return the results
-        var results = await Task.WhenAll(tasks);
-        return results.ToList();
+        return newPlaylists;
     }
 
     public async Task<List<Track>> ParseTracks(XElement mediaContainer, string uri, string artist)

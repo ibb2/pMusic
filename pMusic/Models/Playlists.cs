@@ -1,8 +1,11 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using Avalonia.Media.Imaging;
+using Microsoft.EntityFrameworkCore;
 
 namespace pMusic.Models;
 
+[Index(nameof(Guid), IsUnique = true)]
 public class Playlist
 {
     public int Id { get; set; } // EF Core primary key
@@ -25,4 +28,5 @@ public class Playlist
 
     // Custom Properties
     public bool IsPinned { get; set; } = false;
+    [MaxLength(20)] public required string UserId { get; set; }
 }
