@@ -76,20 +76,20 @@
                         </Grid>
                         <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
                             <StackPanel Orientation="Horizontal" Spacing="20">
-                                <Button Classes="Flat Icon" CornerRadius="1000" HorizontalContentAlignment="Center">
-                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}"
+                                <Button Classes="Flat Icon" HorizontalContentAlignment="Center">
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiInformationForeground}"
                                                         Type="Play"
-                                                        Kind="Solid" Min="True">
+                                                        Kind="Solid" Min="True" Margin="4 0 0 0">
                                     </heroIcons:HeroIcon>
                                 </Button>
-                                <Button Classes="Basic Icon" CornerRadius="1000">
+                                <Button Classes="Basic Icon">
                                     <heroIcons:HeroIcon Type="ArrowsRightLeft"></heroIcons:HeroIcon>
                                 </Button>
-                                <Button Classes="Basic Icon" CornerRadius="1000"
+                                <Button Classes="Basic Icon"
                                         Command="{Binding AddToLibraryCommand}" CommandParameter="{Binding Album}">
                                     <heroIcons:HeroIcon Type="Plus"></heroIcons:HeroIcon>
                                 </Button>
-                                <Button Classes="Basic Icon" CornerRadius="1000">
+                                <Button Classes="Basic Icon">
                                     <heroIcons:HeroIcon Type="CloudArrowDown"></heroIcons:HeroIcon>
                                 </Button>
                             </StackPanel>

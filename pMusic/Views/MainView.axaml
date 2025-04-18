@@ -29,16 +29,6 @@
             <Setter Property="Background" Value="{DynamicResource SystemChromeHighColor}"></Setter>
             <!-- <Setter Property="Background" Value="{DynamicResource RegionColor}"></Setter> -->
         </Style>
-        <Style Selector="Button.Home">
-            <Setter Property="CornerRadius">100</Setter>
-            <Setter Property="Height">40</Setter>
-            <Setter Property="Width">40</Setter>
-        </Style>
-        <Style Selector="Button.No-Hover:pointerover">
-        </Style>
-        <Style Selector="Button.No-Hover:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
         <Style Selector="StackPanel.SidePanel">
             <!-- <Setter Property="">100</Setter> -->
             <Setter Property="Height">40</Setter>
@@ -189,34 +179,34 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="8">
                     <Button
-                        Classes="Icon"
+                        Classes="Basic Icon"
                         BorderThickness="0">
                         <heroIcons:HeroIcon Type="Backward"></heroIcons:HeroIcon>
                     </Button>
                     <Grid>
                         <Button
-                            Classes="Home Flat Icon"
-                            Foreground="{DynamicResource SystemAltHighColor}"
-                            Background="{DynamicResource SystemBaseHighColor}"
+                            Classes="Flat Icon"
                             Command="{Binding PlayPause}"
                             IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
-                            Padding="0"
                             VerticalAlignment="Center">
-                            <heroIcons:HeroIcon Type="Play" Kind="Solid"></heroIcons:HeroIcon>
+                            <heroIcons:HeroIcon Foreground="{DynamicResource SukiInformationForeground}" Type="Play"
+                                                Kind="Solid" Min="True" Margin="2 0 0 0">
+                            </heroIcons:HeroIcon>
                         </Button>
                         <Button
-                            Classes="Home Flat Icon"
-                            Foreground="{DynamicResource SystemAltHighColor}"
-                            Background="{DynamicResource SystemBaseHighColor}"
+                            Classes="Flat Icon"
                             Command="{Binding PlayPause}"
                             IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
                             Padding="0"
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Center">
-                            <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Pause" Kind="Solid"></heroIcons:HeroIcon>
+                            <heroIcons:HeroIcon Foreground="{DynamicResource SukiInformationForeground}" Type="Pause"
+                                                Kind="Solid" Min="True">
+                            </heroIcons:HeroIcon>
                         </Button>
                     </Grid>
                     <Button
-                        Classes="Icon"
+                        Classes="Basic Icon"
                         BorderThickness="0">
                         <heroIcons:HeroIcon Type="Forward"></heroIcons:HeroIcon>
                     </Button>
