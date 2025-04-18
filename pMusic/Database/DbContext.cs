@@ -13,6 +13,13 @@ public class MusicDbContext : DbContext
     public DbSet<Playlist> Playlists { get; set; }
     public DbSet<Track> Tracks { get; set; }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // One-to-many relationship between Album and Track
+        modelBuilder.Entity<Album>().HasMany(t => t.Tracks).WithOne(t => t.Album).HasForeignKey(t => t.AlbumId)
+            .HasPrincipalKey(t => t.Id);
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);

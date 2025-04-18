@@ -1,8 +1,10 @@
 using System;
 using Avalonia.Media.Imaging;
+using Microsoft.EntityFrameworkCore;
 
 namespace pMusic.Models;
 
+[Index(nameof(ParentGuid))]
 public class Track
 {
     public int Id { get; set; } // EF Core primary key
@@ -37,6 +39,10 @@ public class Track
     public int MusicAnalysisVersion { get; set; }
 
     public Media Media { get; set; }
+
+    // Relations 
+    public int AlbumId { get; set; }
+    public Album Album { get; set; }
 }
 
 public class Media

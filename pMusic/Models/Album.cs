@@ -41,6 +41,9 @@ public class Album
     public UltraBlurColors? UltraBlurColors { get; set; }
     public List<Genre>? Genres { get; set; } = new();
 
+    // Relations
+    public List<Track> Tracks { get; set; } = null!;
+
     // Custom Properties
     public bool IsPinned { get; set; } = false;
     [MaxLength(20)] public required string UserId { get; set; }
