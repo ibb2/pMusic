@@ -72,7 +72,7 @@ public partial class HomeViewModel : ViewModelBase
         foreach (var vm in viewModels)
             Albums.Add(vm);
 
-        Console.WriteLine($"Albums loaded: {Albums.Count}");
+        Console.WriteLine($"All Albums loaded: {Albums.Count}");
     }
 
     public async Task LoadHomepageRecentlyAddedAlbumsAsync(IImmutableList<Album> allAlbums)
@@ -96,7 +96,7 @@ public partial class HomeViewModel : ViewModelBase
             RecentlyAddedAlbums.Add(vm);
         }
 
-        Console.WriteLine($"Albums loaded: {Albums.Count}");
+        Console.WriteLine($"Recently Added Albums loaded: {Albums.Count}");
     }
 
 
