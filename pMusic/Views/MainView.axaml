@@ -5,7 +5,7 @@
              xmlns:vm="clr-namespace:pMusic.ViewModels"
              xmlns:local="clr-namespace:pMusic.Interface"
              xmlns:views="clr-namespace:pMusic.Views"
-             xmlns:lucideAvalonia="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+             xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              xmlns:converter="clr-namespace:pMusic.Converter"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -67,23 +67,26 @@
     <Grid RowDefinitions="Auto, *, 100">
         <Grid ColumnDefinitions="Auto, *, Auto" Margin="8, 8 8 2">
             <StackPanel Orientation="Horizontal">
-                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Kind=ChevronLeft}"
-                        Command="{Binding GoBack}" Foreground="{DynamicResource SukiText}">
+                <Button Classes="Icon" BorderThickness="0" Command="{Binding GoBack}"
+                        Foreground="{DynamicResource SukiText}">
+                    <heroIcons:HeroIcon Type="ChevronLeft" Min="True" />
                 </Button>
-                <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Kind=ChevronRight}"
+                <Button Classes="Icon" BorderThickness="0"
                         Command="{Binding GoForward}"
                         Foreground="{DynamicResource SukiText}">
+                    <heroIcons:HeroIcon Type="ChevronRight" Min="True"></heroIcons:HeroIcon>
                 </Button>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Classes="Home Flat Basic Accent Icon"
-                        Content="{LucideIconContent Kind=House}"
-                        Command="{Binding GoHome}">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+                <Button Classes="Home Flat Basic Accent Icon" Command="{Binding GoHome}">
+                    <heroIcons:HeroIcon Type="Home" Kind="Solid" Margin="0 0 0 4"></heroIcons:HeroIcon>
                 </Button>
                 <TextBox Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                <Button Classes="Basic" Content="{LucideIconContent Kind=Bell}" />
+                <Button Classes="Basic">
+                    <heroIcons:HeroIcon Type="Bell"></heroIcons:HeroIcon>
+                </Button>
                 <Button Classes="Icon" BorderThickness="0">
                     <Border CornerRadius="100" ClipToBounds="True">
                         <Viewbox StretchDirection="DownOnly" Stretch="UniformToFill">
@@ -187,35 +190,35 @@
                             Spacing="8">
                     <Button
                         Classes="Icon"
-                        Content="{LucideIconContent Kind=Rewind, StrokeWidth=2, 
-                        Size=20}"
                         BorderThickness="0">
+                        <heroIcons:HeroIcon Type="Backward"></heroIcons:HeroIcon>
                     </Button>
                     <Grid>
-                        <Button Content="{LucideIconContent Kind=Play, StrokeWidth=2}"
-                                Classes="Home Flat Icon"
-                                Foreground="{DynamicResource SystemAltHighColor}"
-                                Background="{DynamicResource SystemBaseHighColor}"
-                                Command="{Binding PlayPause}"
-                                IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
-                                Padding="0"
-                                VerticalAlignment="Center">
+                        <Button
+                            Classes="Home Flat Icon"
+                            Foreground="{DynamicResource SystemAltHighColor}"
+                            Background="{DynamicResource SystemBaseHighColor}"
+                            Command="{Binding PlayPause}"
+                            IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
+                            Padding="0"
+                            VerticalAlignment="Center">
+                            <heroIcons:HeroIcon Type="Play" Kind="Solid"></heroIcons:HeroIcon>
                         </Button>
-                        <Button Content="{LucideIconContent Kind=Pause, StrokeWidth=2}"
-                                Classes="Home Flat Icon"
-                                Foreground="{DynamicResource SystemAltHighColor}"
-                                Background="{DynamicResource SystemBaseHighColor}"
-                                Command="{Binding PlayPause}"
-                                IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
-                                Padding="0"
-                                VerticalAlignment="Center">
+                        <Button
+                            Classes="Home Flat Icon"
+                            Foreground="{DynamicResource SystemAltHighColor}"
+                            Background="{DynamicResource SystemBaseHighColor}"
+                            Command="{Binding PlayPause}"
+                            IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
+                            Padding="0"
+                            VerticalAlignment="Center">
+                            <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Pause" Kind="Solid"></heroIcons:HeroIcon>
                         </Button>
                     </Grid>
                     <Button
                         Classes="Icon"
-                        Content="{LucideIconContent Kind=FastForward, StrokeWidth=2, 
-                        Size=20}"
                         BorderThickness="0">
+                        <heroIcons:HeroIcon Type="Forward"></heroIcons:HeroIcon>
                     </Button>
                 </StackPanel>
                 <Grid ColumnDefinitions="30, 250, *"
