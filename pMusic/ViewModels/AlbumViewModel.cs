@@ -92,7 +92,7 @@ public partial class AlbumViewModel : ViewModelBase
     public async Task LoadAlbumThumbnail()
     {
         var url = Album.Thumb + "?X-Plex-Token=" +
-                  Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken");
+                  Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
         Image = await _plex.GetBitmapImage(url);
     }
 }

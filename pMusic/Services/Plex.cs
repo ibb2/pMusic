@@ -29,10 +29,9 @@ public class Plex
     public readonly HttpClient httpClient;
     private readonly MusicDbContext _musicDbContext;
     private readonly string _plexClientIdentifier;
-    private string _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+    private string _plexToken;
 
-    private static readonly string _plexSessionIdentifier =
-        Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+    private static string _plexSessionIdentifier;
 
     private static readonly string _plexProduct = "pMusic";
     private static readonly string _plexDeviceName = "Desktop";
@@ -46,6 +45,24 @@ public class Plex
         this.httpClient = httpClient;
         _musicDbContext = musicDbContext;
         _plexClientIdentifier = GetOrCreateClientIdentifier();
+        try
+        {
+            _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error retrieving token: {ex.Message}");
+            return;
+        }
+
+        try
+        {
+            _plexSessionIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+        } catch (KeyringException ex)
+        {
+            _plexClientIdentifier = Guid.NewGuid().ToString();
+
+        }
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Token", _plexToken);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Client-Identifier", _plexClientIdentifier);
         this.httpClient.DefaultRequestHeaders.Add("X-Plex-Session-Identifier", _plexSessionIdentifier);
@@ -56,7 +73,15 @@ public class Plex
 
     private string GetOrCreateClientIdentifier()
     {
-        var clientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+        var clientIdentifier = "";
+        try
+        {
+            clientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+        }catch (KeyringException ex)
+        {
+            Console.WriteLine("Cannot find Client Identifier");
+        }
+
         if (clientIdentifier.Length > 0)
         {
             return clientIdentifier;
@@ -170,7 +195,15 @@ public class Plex
 
     public void SetInformation()
     {
-        _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+        try
+        {
+            _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+        }
+        catch (KeyringException ex)
+        {
+            Console.WriteLine($"Error retrieving token: {ex.Message}");
+            return;
+        }
     }
 
     public async ValueTask<Bitmap> GetUserProfilePicture()

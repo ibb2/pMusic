@@ -39,11 +39,9 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
 
-    [ObservableProperty] private bool _isLoggedIn =
-        !string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+    [ObservableProperty] private bool _isLoggedIn = false;
 
-    [ObservableProperty] private bool _isLoggedInTrue =
-        string.IsNullOrEmpty(Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken"));
+    [ObservableProperty] private bool _isLoggedInTrue = true;
 
     [ObservableProperty] private Bitmap _thumbnailUrl;
     [ObservableProperty] private bool _isLoading;
@@ -90,7 +88,7 @@ public partial class MainViewModel : ViewModelBase
 
         try
         {
-            authToken = Keyring.GetPassword("com.ib.pmusic-avalonia", "pMusic-Avalonia", "authToken");
+            authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
         }
         catch (Exception ex)
         {
@@ -102,11 +100,13 @@ public partial class MainViewModel : ViewModelBase
         if (!string.IsNullOrEmpty(authToken))
         {
             IsLoggedIn = true;
+            IsLoggedInTrue = false;
             await GetUserInfo();
         }
         else
         {
             IsLoggedIn = false;
+            IsLoggedInTrue = true;
         }
     }
 
@@ -117,6 +117,9 @@ public partial class MainViewModel : ViewModelBase
         Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", "");
         Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", "");
         Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", "");
+
+        IsLoggedIn = false;
+        IsLoggedInTrue = true;
 
         // OpenNewWindow();
         ToLoginWindow();

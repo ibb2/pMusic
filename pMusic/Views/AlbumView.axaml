@@ -35,15 +35,9 @@
                                        BottomRightColor="{Binding Album.UltraBlurColors.BottomRight}" CornerRadius="8"
                                        ClipToBounds="True">
                 <Border Padding="16 8" Margin="0 4 8 2" CornerRadius="8" ClipToBounds="True">
-                    <Grid RowDefinitions="*, Auto, *">
+                    <Grid RowDefinitions="Auto, Auto, *">
                         <Grid>
-                            <StackPanel>
-                                <TextBlock Text="{Binding Album.UltraBlurColors.TopLeft}"></TextBlock>
-                                <TextBlock Text="{Binding Album.UltraBlurColors.TopRight}"></TextBlock>
-                                <TextBlock Text="{Binding Album.UltraBlurColors.BottomLeft}"></TextBlock>
-                                <TextBlock Text="{Binding Album.UltraBlurColors.BottomRight}"></TextBlock>
-                            </StackPanel>
-                            <Grid ColumnDefinitions="Auto, *">
+                            <Grid ColumnDefinitions="Auto, *" VerticalAlignment="Top">
                                 <Grid>
                                     <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
                                         <Image Source="/Assets/Images/blank_playlist.png" Width="300" />
@@ -54,7 +48,7 @@
                                 </Grid>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock>Album</TextBlock>
-                                    <Viewbox Stretch="Fill" StretchDirection="Both">
+                                    <Viewbox Stretch="Fill" StretchDirection="Both" MaxWidth="500" HorizontalAlignment="Left">
                                         <TextBlock Classes="h1" Text="{Binding Album.Title}"></TextBlock>
                                     </Viewbox>
                                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
@@ -73,7 +67,7 @@
                                 </StackPanel>
                             </Grid>
                         </Grid>
-                        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
+                        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 20 0 8">
                             <StackPanel Orientation="Horizontal">
                                 <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Play}"></Button>
                                 <Button Classes="Icon" BorderThickness="0" Content="{LucideIconContent Shuffle}">
@@ -98,7 +92,7 @@
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.HeaderTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="#" HorizontalAlignment="Center"></TextBlock>
+                                            <TextBlock Text="#" HorizontalAlignment="Center" Foreground="{DynamicResource SukiText}"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.HeaderTemplate>
                                     <DataGridTemplateColumn.CellTemplate>
@@ -120,16 +114,22 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Title" Width="*" Binding="{Binding Title}" />
+								<DataGridTextColumn Width="*" Binding="{Binding Title}">
+									<DataGridTextColumn.HeaderTemplate>
+										<DataTemplate>
+											<TextBlock Text="Title" Foreground="{DynamicResource SukiText}"></TextBlock>
+										</DataTemplate>
+									</DataGridTextColumn.HeaderTemplate>
+								</DataGridTextColumn>
                                 <!--The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"-->
                                 <!-- <DataGridTextColumn Header="Rating" Binding="{Binding RatingCount}"></DataGridTextColumn> -->
                                 <DataGridTextColumn
-                                    Binding="{Binding Duration, Converter={StaticResource TimeSpanToMinSecConverter}}"
+                                    Binding="{Binding Duration, Converter={StaticResource TimeSpanToMinSecConverter}, Mode=OneWay}"
                                     CellStyleClasses="right">
                                     <DataGridTextColumn.HeaderTemplate>
                                         <!-- Simply use a HeaderTemplate -->
                                         <DataTemplate>
-                                            <TextBlock Text="Length" HorizontalAlignment="Right"></TextBlock>
+                                            <TextBlock Text="Length" HorizontalAlignment="Right" Foreground="{DynamicResource SukiText}"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTextColumn.HeaderTemplate>
                                 </DataGridTextColumn>
