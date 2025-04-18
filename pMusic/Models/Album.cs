@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Avalonia.Media.Imaging;
+using Microsoft.EntityFrameworkCore;
 
 namespace pMusic.Models;
 
+[Index(nameof(Guid), IsUnique = true)]
 public class Album
 {
     public int Id { get; set; } // EF Core primary key
@@ -41,4 +43,5 @@ public class Album
 
     // Custom Properties
     public bool IsPinned { get; set; } = false;
+    [MaxLength(20)] public required string UserId { get; set; }
 }

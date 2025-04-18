@@ -105,6 +105,11 @@ namespace pMusic.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("UserRating")
                         .HasColumnType("TEXT");
 
@@ -115,6 +120,9 @@ namespace pMusic.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Guid")
+                        .IsUnique();
 
                     b.HasIndex("ImageId");
 
