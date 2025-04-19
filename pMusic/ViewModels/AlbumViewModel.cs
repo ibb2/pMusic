@@ -65,7 +65,7 @@ public partial class AlbumViewModel : ViewModelBase
     public async Task Play(Track track)
     {
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
-        var url = serverUri + track.Media.Part.Key;
+        var url = serverUri;
         _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 

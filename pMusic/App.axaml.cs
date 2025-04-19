@@ -1,14 +1,14 @@
 using System;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using KeySharp;
+using ManagedBass;
 using Microsoft.Extensions.DependencyInjection;
 using pMusic.DI;
 using pMusic.Services;
@@ -29,6 +29,15 @@ public class App : Application
     public override async void OnFrameworkInitializationCompleted()
     {
         {
+            if (!Bass.Init())
+            {
+                Console.WriteLine("BASS initialization failed.");
+            }
+            else
+            {
+                Console.WriteLine("BASS initialized successfully.");
+            }
+
             // If you use CommunityToolkit, line below is needed to remove Avalonia data validation.
             // Without this line you will get duplicate validations from both Avalonia and CT
             BindingPlugins.DataValidators.RemoveAt(0);
