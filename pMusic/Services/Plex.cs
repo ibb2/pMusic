@@ -400,7 +400,7 @@ public class Plex
 
                 await _musicDbContext.SaveChangesAsync();
 
-                return ImmutableList<Playlist>.Empty;
+                return playlists.ToImmutableList();
             }
         }
         catch (HttpRequestException ex)
