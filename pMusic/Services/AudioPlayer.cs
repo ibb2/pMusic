@@ -60,8 +60,11 @@ public partial class AudioPlayer : IAudioPlayerService
 
             // var musicMemoryStream = await Plex.GetPlaybackStream(uri);
 
-            string filePath = "/Users/ibrahim/Downloads/File from Plex.flac";
-            int stream = BassFlac.CreateStream(filePath);
+            string filePath =
+                "http://192.168.50.58:32400/library/parts/4699/1713150270/file.flac?X-Plex-Token=iBqhLDuwtKyvw_fss6Ef";
+            int stream =
+                BassFlac.CreateStream(
+                    Url: filePath, 0, BassFlags.Default, null);
 
             if (stream == 0)
             {
