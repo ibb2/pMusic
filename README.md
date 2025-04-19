@@ -32,7 +32,7 @@ There are 2 different methods to install pMusic
 - [ ]  Queue's
 - [ ]  Offline support
 - [ ]  Caching
-- [ ]  Database support
+- [x]  Database support
 - [ ]  Lyrics
 ## Contributing
 **Ignore anything written in this section for now**

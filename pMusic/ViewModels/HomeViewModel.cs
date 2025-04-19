@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using pMusic.Models;
@@ -34,6 +35,8 @@ public partial class HomeViewModel : ViewModelBase
         }
     }
 
+    [ObservableProperty] public static bool isLoaded = false;
+
 
     public HomeViewModel(IMusic music, Plex plex)
     {
@@ -53,38 +56,41 @@ public partial class HomeViewModel : ViewModelBase
         Console.WriteLine($"HomeViewModel resolved: Plex: {_plex}, Music: {_music}");
     }
 
-    public async ValueTask LoadContent()
+    public async ValueTask LoadContent(bool isLoaded)
     {
-        await LoadHomepageAlbumsAsync();
-        await LoadHomepageRecentlyAddedAlbumsAsync();
-        await LoadPlaylistsAsync();
+        var allAlbums = await _music.GetAllAlbums(CancellationToken.None, _plex, isLoaded);
+        await LoadHomepageAlbumsAsync(allAlbums);
+        await LoadHomepageRecentlyAddedAlbumsAsync(allAlbums);
+        await LoadPlaylistsAsync(isLoaded);
         Console.WriteLine("Content loaded");
+
+        IsLoaded = true;
     }
 
-    public async Task LoadHomepageAlbumsAsync()
+    public async Task LoadHomepageAlbumsAsync(IImmutableList<Album> allAlbums)
     {
-        var rawAlbums = await _music.GetAllAlbums(CancellationToken.None, _plex);
-        var viewModels = rawAlbums.Select(a => new DisplayAlbumViewModel(a, _plex)).ToList();
+        var viewModels = allAlbums.Select(a => new DisplayAlbumViewModel(a, _plex)).ToList();
 
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
 
         Albums.Clear();
+
         foreach (var vm in viewModels)
             Albums.Add(vm);
 
-        Console.WriteLine($"Albums loaded: {Albums.Count}");
+        Console.WriteLine($"All Albums loaded: {Albums.Count}");
     }
 
-    public async Task LoadHomepageRecentlyAddedAlbumsAsync()
+    public async Task LoadHomepageRecentlyAddedAlbumsAsync(IImmutableList<Album> allAlbums)
     {
-        var rawAlbums = await _music.GetAllAlbums(CancellationToken.None, _plex);
-        var viewModels = rawAlbums.OrderByDescending(a => a.AddedAt).Select(a => new DisplayAlbumViewModel(a, _plex))
+        var viewModels = allAlbums.OrderByDescending(a => a.AddedAt).Select(a => new DisplayAlbumViewModel(a, _plex))
             .ToList();
 
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
 
         RecentlyAddedAlbums.Clear();
         var count = 0;
+
         foreach (var vm in viewModels)
         {
             if (count < 8)
@@ -97,7 +103,8 @@ public partial class HomeViewModel : ViewModelBase
             RecentlyAddedAlbums.Add(vm);
         }
 
-        Console.WriteLine($"Albums loaded: {Albums.Count}");
+
+        Console.WriteLine($"Recently Added Albums loaded: {Albums.Count}");
     }
 
 
@@ -131,10 +138,10 @@ public partial class HomeViewModel : ViewModelBase
     //     });
     // }
 
-    public async Task LoadPlaylistsAsync()
+    public async Task LoadPlaylistsAsync(bool isLoaded)
     {
         Playlists = new();
-        var playlists = await _music.GetPlaylists(CancellationToken.None, _plex);
+        var playlists = await _music.GetPlaylists(CancellationToken.None, _plex, isLoaded);
         var viewModels = playlists.Select(a => new DisplayPlaylistViewModel(a, _plex))
             .ToList();
 

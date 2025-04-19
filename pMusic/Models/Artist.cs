@@ -1,5 +1,5 @@
-using Avalonia.Media.Imaging;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace pMusic.Models;
 
@@ -25,6 +25,12 @@ public class Artist
     public UltraBlurColors? Ubc { get; set; }
     public List<Genre>? Genres { get; set; }
     public Country? Country { get; set; }
+
+    // Custom
+    [MaxLength(20)] public required string UserId { get; set; }
+
+    // Relations
+    public List<Album> Albums { get; set; } = [];
 }
 
 public class Image

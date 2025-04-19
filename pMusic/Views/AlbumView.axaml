@@ -49,7 +49,8 @@
                                 </Grid>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock>Album</TextBlock>
-                                    <Viewbox Stretch="Fill" StretchDirection="Both" MaxWidth="500" HorizontalAlignment="Left">
+                                    <Viewbox Stretch="Fill" StretchDirection="Both" MaxWidth="500"
+                                             HorizontalAlignment="Left">
                                         <TextBlock Classes="h1" Text="{Binding Album.Title}"></TextBlock>
                                     </Viewbox>
                                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
@@ -71,20 +72,20 @@
                         <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
                             <StackPanel Orientation="Horizontal" Spacing="20">
                                 <Button Classes="Flat Icon" HorizontalContentAlignment="Center">
-                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiInformationForeground}"
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}"
                                                         Type="Play"
                                                         Kind="Solid" Min="True" Margin="4 0 0 0">
                                     </heroIcons:HeroIcon>
                                 </Button>
                                 <Button Classes="Basic Icon">
-                                    <heroIcons:HeroIcon Type="ArrowsRightLeft"></heroIcons:HeroIcon>
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ArrowsRightLeft"></heroIcons:HeroIcon>
                                 </Button>
                                 <Button Classes="Basic Icon"
                                         Command="{Binding AddToLibraryCommand}" CommandParameter="{Binding Album}">
-                                    <heroIcons:HeroIcon Type="Plus"></heroIcons:HeroIcon>
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Plus"></heroIcons:HeroIcon>
                                 </Button>
                                 <Button Classes="Basic Icon">
-                                    <heroIcons:HeroIcon Type="CloudArrowDown"></heroIcons:HeroIcon>
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="CloudArrowDown"></heroIcons:HeroIcon>
                                 </Button>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -92,7 +93,7 @@
                                     List
                                 </TextBlock>
                                 <Button Classes="Basic Icon" VerticalAlignment="Center">
-                                    <heroIcons:HeroIcon Type="ListBullet"></heroIcons:HeroIcon>
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ListBullet"></heroIcons:HeroIcon>
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -102,7 +103,9 @@
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.HeaderTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="#" HorizontalAlignment="Center" Foreground="{DynamicResource SukiText}"></TextBlock>
+                                            <TextBlock Text="#" HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource SukiText}">
+                                            </TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.HeaderTemplate>
                                     <DataGridTemplateColumn.CellTemplate>
@@ -115,7 +118,9 @@
                                                         CommandParameter="{Binding }"
                                                         Width="{Binding $parent[DataGridCell].Bounds.Width}"
                                                         Height="{Binding $parent[DataGridCell].Bounds.Height}">
-                                                    <heroIcons:HeroIcon Type="Play" Kind="Solid"></heroIcons:HeroIcon>
+                                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}"
+                                                                        Type="Play" Kind="Solid">
+                                                    </heroIcons:HeroIcon>
                                                 </Button>
                                                 <!-- Text that shows by default -->
                                                 <TextBlock Text="{Binding Index}"
@@ -126,13 +131,13 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-								<DataGridTextColumn Width="*" Binding="{Binding Title}">
-									<DataGridTextColumn.HeaderTemplate>
-										<DataTemplate>
-											<TextBlock Text="Title" Foreground="{DynamicResource SukiText}"></TextBlock>
-										</DataTemplate>
-									</DataGridTextColumn.HeaderTemplate>
-								</DataGridTextColumn>
+                                <DataGridTextColumn Width="*" Binding="{Binding Title}">
+                                    <DataGridTextColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="Title" Foreground="{DynamicResource SukiText}"></TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTextColumn.HeaderTemplate>
+                                </DataGridTextColumn>
                                 <!--The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"-->
                                 <!-- <DataGridTextColumn Header="Rating" Binding="{Binding RatingCount}"></DataGridTextColumn> -->
                                 <DataGridTextColumn
@@ -141,7 +146,9 @@
                                     <DataGridTextColumn.HeaderTemplate>
                                         <!-- Simply use a HeaderTemplate -->
                                         <DataTemplate>
-                                            <TextBlock Text="Length" HorizontalAlignment="Right" Foreground="{DynamicResource SukiText}"></TextBlock>
+                                            <TextBlock Text="Length" HorizontalAlignment="Right"
+                                                       Foreground="{DynamicResource SukiText}">
+                                            </TextBlock>
                                         </DataTemplate>
                                     </DataGridTextColumn.HeaderTemplate>
                                 </DataGridTextColumn>

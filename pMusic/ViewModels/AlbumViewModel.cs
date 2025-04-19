@@ -16,20 +16,18 @@ namespace pMusic.ViewModels;
 
 public partial class AlbumViewModel : ViewModelBase
 {
-    private IMusic _music;
-    private Plex _plex;
-    private IAudioPlayerService _audioPlayerService;
-    private MusicDbContext _musicDbContext;
-    private Sidebar _sidebar;
-
     [ObservableProperty] public Album? _Album = null;
-    [ObservableProperty] public Bitmap? _Image = null;
-    public ObservableCollection<Track?> TrackList { get; set; } = new();
     [ObservableProperty] public string _albumArtist = "Playboi Carti";
     [ObservableProperty] public string _albumDuration = "1h 16m";
     [ObservableProperty] public string _albumReleaseDate = "2025";
     [ObservableProperty] public string _albumTitle = "MUSIC";
     [ObservableProperty] public string _albumTrackLength = "30";
+    private IAudioPlayerService _audioPlayerService;
+    [ObservableProperty] public Bitmap? _Image = null;
+    private IMusic _music;
+    private MusicDbContext _musicDbContext;
+    private Plex _plex;
+    private Sidebar _sidebar;
     [ObservableProperty] public string _title = "Album";
 
     public AlbumViewModel(IMusic music, Plex plex, IAudioPlayerService audioPlayerService,
@@ -48,9 +46,14 @@ public partial class AlbumViewModel : ViewModelBase
     {
     }
 
+    public ObservableCollection<Track?> TrackList { get; set; } = new();
+
     public async ValueTask GetTracks()
     {
-        var tracks = await _music.GetTrackList(CancellationToken.None, _plex, Album.RatingKey, Album.Artist);
+        if (Album?.Guid == null) return;
+
+        var tracks =
+            await _music.GetTrackList(CancellationToken.None, _plex, Album.Guid);
 
         foreach (var track in tracks)
         {

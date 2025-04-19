@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Avalonia.Media.Imaging;
+using Microsoft.EntityFrameworkCore;
 
 namespace pMusic.Models;
 
+[Index(nameof(Guid), IsUnique = true)]
 public class Album
 {
     public int Id { get; set; } // EF Core primary key
@@ -29,7 +30,6 @@ public class Album
     public string? Index { get; set; }
     public string Thumb { get; set; }
     public string? Title { get; set; }
-    public string? Artist { get; set; }
     public string? Type { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public string? UserRating { get; set; }
@@ -39,6 +39,12 @@ public class Album
     public UltraBlurColors? UltraBlurColors { get; set; }
     public List<Genre>? Genres { get; set; } = new();
 
+    // Relations
+    public List<Track> Tracks { get; set; } = null!;
+    public int ArtistId { get; set; }
+    public Artist Artist { get; set; } = null!;
+
     // Custom Properties
     public bool IsPinned { get; set; } = false;
+    [MaxLength(20)] public required string UserId { get; set; }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using pMusic.Models;
 
@@ -12,6 +11,17 @@ public class MusicDbContext : DbContext
     public DbSet<Artist> Artists { get; set; }
     public DbSet<Playlist> Playlists { get; set; }
     public DbSet<Track> Tracks { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // One-to-many relationship between Album and Track
+        modelBuilder.Entity<Album>().HasMany(t => t.Tracks).WithOne(t => t.Album).HasForeignKey(t => t.AlbumId)
+            .HasPrincipalKey(t => t.Id);
+
+        // One-to-many relationship between Artist and Album
+        modelBuilder.Entity<Artist>().HasMany(t => t.Albums).WithOne(t => t.Artist).HasForeignKey(t => t.ArtistId)
+            .HasPrincipalKey(t => t.Id);
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
