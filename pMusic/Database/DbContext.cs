@@ -21,6 +21,12 @@ public class MusicDbContext : DbContext
         // One-to-many relationship between Artist and Album
         modelBuilder.Entity<Artist>().HasMany(t => t.Albums).WithOne(t => t.Artist).HasForeignKey(t => t.ArtistId)
             .HasPrincipalKey(t => t.Id);
+        
+        // One-to-one relationship between Track and Media
+        modelBuilder.Entity<Track>().HasOne(t => t.Media).WithOne(t=> t.Track).HasForeignKey<Media>(t => t.TrackId).IsRequired();
+        
+        // One-to-one relationship between Media and Part
+        modelBuilder.Entity<Media>().HasOne(t => t.Part).WithOne(t => t.Media).HasForeignKey<Part>(t => t.MediaId).IsRequired();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
