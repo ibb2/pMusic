@@ -10,6 +10,7 @@ using System.Xml.Linq;
 using Avalonia.Media.Imaging;
 using KeySharp;
 using LukeHagar.PlexAPI.SDK;
+using Microsoft.EntityFrameworkCore;
 using pMusic.Database;
 using pMusic.Models;
 using Country = pMusic.Models.Country;
@@ -330,7 +331,27 @@ public class Plex
         // Check if a track exists in db. If they do, return them.
         var trackExists = _musicDbContext.Tracks.Any(t => t.UserId == _plexId && t.ParentGuid == albumGuid);
 
-        if (trackExists) return _musicDbContext.Tracks.Where(t => t.UserId == _plexId).ToImmutableList();
+        if (trackExists)
+        {
+            // _logger.LogInformation("Tracks found in DB for Album GUID {AlbumGuid}, retrieving with related data.", albumGuid); // Added logging for clarity
+
+            // Use Include() to load Media, and ThenInclude() to load Part from Media
+            var tracksFromDb = _musicDbContext.Tracks
+                .Include(t => t.Media) // Tell EF Core to load the Media navigation property
+                .ThenInclude(m => m.Part) // For each Media loaded, also load its Part navigation property
+                .Where(t => t.UserId == _plexId && t.ParentGuid == albumGuid) // Filter by UserId AND AlbumGuid
+                .ToImmutableList();
+
+            // _logger.LogInformation("Retrieved {TrackCount} tracks from DB.", tracksFromDb.Count);
+            // Optional: Check if Media/Part are loaded for the first track (for debugging)
+            // if (tracksFromDb.Any() && tracksFromDb.First().Media == null) {
+            //     _logger.LogWarning("First track from DB still has null Media. Check Include/ThenInclude logic and DB data.");
+            // } else if (tracksFromDb.Any() && tracksFromDb.First().Media?.Part == null) {
+            //     _logger.LogWarning("First track from DB has Media but null Part. Check ThenInclude logic and DB data.");
+            // }
+
+            return tracksFromDb;
+        }
 
         // If not, get them from plex and save them to the db.
         var album = _musicDbContext.Albums.FirstOrDefault(a => a.Guid == albumGuid);
@@ -343,6 +364,7 @@ public class Plex
         _musicDbContext.Tracks.AddRange(tracks);
         await _musicDbContext.SaveChangesAsync();
 
+        Console.WriteLine($"Tracks {tracks.Count}");
         return tracks.ToImmutableList();
     }
 
@@ -474,7 +496,7 @@ public class Plex
 
         var items = mediaContainer.Elements("Track").Select(track =>
         {
-            return new Track
+            var nTrack = new Track
             {
                 RatingKey = track.Attribute("ratingKey")?.Value ?? "",
                 Key = track.Attribute("key")?.Value ?? "",
@@ -504,21 +526,23 @@ public class Plex
                 AddedAt = int.Parse(track.Attribute("addedAt")?.Value ?? "0"),
                 UpdatedAt = int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
                 MusicAnalysisVersion = int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
-                Media = ParseMedia(track.Element("Media")!),
                 UserId = _plexId,
                 AlbumId = album.Id,
                 Album = album,
             };
+
+            nTrack.Media = ParseMedia(track.Element("Media"), nTrack);
+            return nTrack;
         }).ToList();
 
         return items.ToList();
     }
 
-    private static Media ParseMedia(XElement mediaElement)
+    private Media ParseMedia(XElement mediaElement, Track track)
     {
         if (mediaElement == null) return null;
 
-        return new Media
+        var media = new Media
         {
             MediaId = mediaElement.Attribute("id")?.Value ?? "",
             Duration = int.Parse(mediaElement.Attribute("duration")?.Value ?? "0"),
@@ -526,23 +550,36 @@ public class Plex
             AudioChannels = double.Parse(mediaElement.Attribute("audioChannels")?.Value ?? "0"),
             AudioCodec = mediaElement.Attribute("audioCodec")?.Value ?? "",
             Container = mediaElement.Attribute("container")?.Value ?? "",
-            Part = ParsePart(mediaElement.Element("Part"))
+            UserId = _plexId,
+            TrackId = track.Id,
+            Track = track
         };
+
+        media.Part = ParsePart(mediaElement.Element("Part"), media);
+        _musicDbContext.Medias.Add(media);
+
+        return media;
     }
 
-    private static Part ParsePart(XElement partElement)
+    private Part ParsePart(XElement partElement, Media media)
     {
         if (partElement == null) return null;
 
-        return new Part
+        var part = new Part
         {
             PartId = partElement.Attribute("id")?.Value ?? "",
             Key = partElement.Attribute("key")?.Value ?? "",
             Duration = int.Parse(partElement.Attribute("duration")?.Value ?? "0"),
             File = partElement.Attribute("file")?.Value ?? "",
             Size = long.Parse(partElement.Attribute("size")?.Value ?? "0"),
-            Container = partElement.Attribute("container")?.Value ?? ""
+            Container = partElement.Attribute("container")?.Value ?? "",
+            UserId = _plexId,
+            MediaId = media.Id,
+            Media = media
         };
+
+        _musicDbContext.Parts.Add(part);
+        return part;
     }
 
     public async ValueTask<List<Album>> ParseAlbums(List<XElement> albums, string uri, Artist artist)

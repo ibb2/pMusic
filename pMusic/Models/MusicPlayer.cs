@@ -1,29 +1,28 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using ManagedBass;
 using SoundFlow.Components;
-using SoundFlow.Enums;
 
 namespace pMusic.Models;
 
 public partial class MusicPlayer : ObservableObject
 {
-    [ObservableProperty] public SoundPlayer soundPlayer;
-    [ObservableProperty] public PlaybackState playbackState;
-    [ObservableProperty] public ManagedBass.PlaybackState mPlaybackState;
+    [ObservableProperty] public Track? currentlyPlayingTrack = null;
+    [ObservableProperty] public long duration;
     [ObservableProperty] public bool isPlaying;
     [ObservableProperty] public bool isStopped;
-    [ObservableProperty] public Track? currentlyPlayingTrack = null;
+    [ObservableProperty] public PlaybackState mPlaybackState;
+    [ObservableProperty] public SoundFlow.Enums.PlaybackState playbackState;
     [ObservableProperty] public float? position = null;
+    [ObservableProperty] public SoundPlayer soundPlayer;
     [ObservableProperty] public float volume;
-    [ObservableProperty] public long duration;
 
     public MusicPlayer()
     {
     }
 
-    partial void OnPositionChanged(float? value)
-    {
-        if (value.HasValue)
-            SoundPlayer.Seek((float)value);
-    }
+    // partial void OnPositionChanged(float? value)
+    // {
+    //     if (value.HasValue)
+    //         SoundPlayer.Seek((float)value);
+    // }
 }

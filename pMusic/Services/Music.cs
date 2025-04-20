@@ -43,9 +43,10 @@ public class Music : IMusic
         await Task.Delay(TimeSpan.FromSeconds(1), ct);
 
         var serverUrl = await plex.GetServerCapabilitiesAsync();
-        var albums = await plex.GetTrackList(serverUrl!, albumGuid);
+        var tracks = await plex.GetTrackList(serverUrl!, albumGuid);
 
-        return albums;
+        var i = 0;
+        return tracks;
     }
 
     public async ValueTask<ImmutableList<Playlist>> GetPlaylists(CancellationToken ct, Plex plex, bool loaded = false)

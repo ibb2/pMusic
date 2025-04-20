@@ -37,11 +37,11 @@ public class Track
     public long UpdatedAt { get; set; }
     public int MusicAnalysisVersion { get; set; }
 
-    
+
     public Media? Media { get; set; }
 
     // Custom
-    [MaxLength(20)] public string UserId { get; set; }
+    [MaxLength(20)] public required string UserId { get; set; }
 
     // Relations 
     public int AlbumId { get; set; }
@@ -59,7 +59,10 @@ public class Media
     public string Container { get; set; }
 
     public Part Part { get; set; }
-    
+
+    // Custom
+    [MaxLength(20)] public required string UserId { get; set; }
+
     // Relations
     public int TrackId { get; set; }
     public Track? Track { get; set; } = null!;
@@ -74,7 +77,10 @@ public class Part
     public string File { get; set; }
     public long Size { get; set; }
     public string Container { get; set; }
-    
+
+    // Custom
+    [MaxLength(20)] public required string UserId { get; set; }
+
     // Relations
     public int MediaId { get; set; }
     public Media? Media { get; set; } = null!;
