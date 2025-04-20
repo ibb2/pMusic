@@ -136,8 +136,11 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     public void Mute(bool muteState)
     {
-        MusicPlayer.Muted = !muteState;
-        MusicPlayer.MutedOpposite = muteState;
+        if (MusicPlayer.IsPlaying)
+        {
+            MusicPlayer.Muted = !muteState;
+            MusicPlayer.MutedOpposite = muteState;
+        }
     }
 
     [RelayCommand]

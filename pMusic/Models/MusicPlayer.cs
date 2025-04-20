@@ -59,7 +59,7 @@ public partial class MusicPlayer : ObservableObject
 
     partial void OnMutedChanged(bool oldValue, bool newValue)
     {
-        if (oldValue == newValue || AudioBackend == null) return;
+        if (oldValue == newValue) return;
 
         if (newValue)
         {
