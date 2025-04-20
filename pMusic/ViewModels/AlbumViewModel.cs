@@ -17,6 +17,7 @@ namespace pMusic.ViewModels;
 
 public partial class AlbumViewModel : ViewModelBase
 {
+    private readonly AudioPlayerFactory _audioPlayerFactory;
     [ObservableProperty] public Album? _Album = null;
     [ObservableProperty] public string _albumArtist = "Playboi Carti";
     [ObservableProperty] public string _albumDuration = "1h 16m";
@@ -30,22 +31,21 @@ public partial class AlbumViewModel : ViewModelBase
     private Plex _plex;
     private Sidebar _sidebar;
     [ObservableProperty] public string _title = "Album";
-    private readonly AudioPlayerManager _audioPlayerManager;
 
     public AlbumViewModel(IMusic music, Plex plex, IAudioPlayerService audioPlayerService,
-        MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerManager audioPlayerManager)
+        MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory)
     {
         _music = music;
         _plex = plex;
         _audioPlayerService = audioPlayerService;
-        _audioPlayerManager = audioPlayerManager;
+        _audioPlayerFactory = audioPlayerFactory;
         _musicDbContext = musicDbContext;
         _sidebar = sidebar;
     }
 
     public AlbumViewModel() : this(Ioc.Default.GetRequiredService<IMusic>(), Ioc.Default.GetRequiredService<Plex>(),
         Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
-        Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerManager>())
+        Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerFactory>())
     {
     }
 
@@ -66,7 +66,7 @@ public partial class AlbumViewModel : ViewModelBase
     {
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
         var url = serverUri + track.Media.Part.Key;
-        _audioPlayerManager.PlayAudio(track, url);
+        _audioPlayerFactory.PlayAudio(track, url);
         // _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 

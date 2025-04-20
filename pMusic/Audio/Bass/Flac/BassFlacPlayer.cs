@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using KeySharp;
 using ManagedBass;
 using ManagedBass.Flac;
@@ -15,17 +14,17 @@ public class BassFlacPlayer : IAudioPlayer
     private Plex _plex;
     private int _stream;
 
-    public bool Initialize(Plex plex, MusicPlayer musicPlayer)
+    public bool Initialize(Plex plex, MusicPlayer musicPlayer, IAudioBackend audioBackend)
     {
         _plex = plex;
         _musicPlayer = musicPlayer;
-        _playback = new Playback(plex, musicPlayer);
+        _playback = new Playback(plex, musicPlayer, audioBackend);
         return ManagedBass.Bass.Init();
     }
 
     public bool Play(Track track, string url)
     {
-        // Create stream.
+        // Create a stream.
         var filePath = url + "?X-Plex-Token=" + Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
 
         _stream =
@@ -47,12 +46,8 @@ public class BassFlacPlayer : IAudioPlayer
         _musicPlayer.CurrentlyPlayingTrack = track;
 
         ManagedBass.Bass.ChannelPlay(_stream);
-        do
-        {
-            Thread.Sleep(100); // Sleep for 100 milliseconds
-        } while (ManagedBass.Bass.ChannelIsActive(_stream) == PlaybackState.Playing);
 
-        // _playback.StartPlayback(track, filePath, _stream);
+        _playback.StartPlayback(track, filePath, _stream);
         return true;
     }
 

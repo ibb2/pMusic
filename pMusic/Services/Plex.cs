@@ -381,6 +381,7 @@ public class Plex
         var timelineUri = uri + "/:/timeline?type=music&key=" + key + "&state=" + state + "&ratingKey=" + ratingKey +
                           "&time=" + time + "&playbackTime=" + time + "&duration=" + cleanedDecimal;
         await httpClient.GetAsync(timelineUri);
+        var i = 1;
     }
 
     public async ValueTask<MemoryStream> GetPlaybackStream(string uri)

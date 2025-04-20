@@ -51,4 +51,8 @@
         <PackageReference Include="SukiUI"/>
         <PackageReference Include="System.Net.Http"/>
     </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Audio\Interface\"/>
+    </ItemGroup>
 </Project>
