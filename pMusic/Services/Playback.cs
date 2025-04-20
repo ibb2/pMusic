@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using pMusic.Interface;
@@ -29,12 +30,14 @@ public class Playback
         _serverUrl = serverUrl;
 
         _musicPlayer.PlaybackState = PlaybackState.Playing;
-
+        _musicPlayer.Stream = stream;
         _stream = stream;
 
-        var position = _audioBackend.GetPosition(stream);
-
-        _timer = new Timer(async _ => { await UpdateTimeline("playing"); }, null, 0, 1000
+        _timer = new Timer(async _ =>
+            {
+                _musicPlayer.Position = _audioBackend.GetRawPosition(stream);
+                await UpdateTimeline("playing");
+            }, null, 0, 1000
         );
     }
 

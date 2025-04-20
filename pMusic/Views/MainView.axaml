@@ -207,7 +207,9 @@
                         VerticalAlignment="Center" />
                     <Slider Grid.Column="1" Maximum="{Binding MusicPlayer.Track.Duration}"
                             Value="{Binding MusicPlayer.Position}" Width="250" Padding="4 0"
-                            VerticalAlignment="Center" />
+                            Thumb.DragCompleted="Thumb_OnDragCompleted" x:Name="MySlider"
+                            VerticalAlignment="Center" AttachedToVisualTree="Slider_AttachedToVisualTree" />
+
                     <TextBlock Grid.Column="2"
                                Text="{Binding MusicPlayer.Track.Duration, Converter={StaticResource SecondsToMinutesConverter}}"
                                VerticalAlignment="Center" />

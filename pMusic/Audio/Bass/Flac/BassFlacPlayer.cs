@@ -14,11 +14,13 @@ public class BassFlacPlayer : IAudioPlayer
     private Playback _playback;
     private Plex _plex;
     private int _stream;
+    private IAudioBackend _audioBackend;
 
     public bool Initialize(Plex plex, MusicPlayer musicPlayer, IAudioBackend audioBackend)
     {
         _plex = plex;
         _musicPlayer = musicPlayer;
+        _audioBackend = audioBackend;
         _playback = new Playback(plex, musicPlayer, audioBackend);
         return ManagedBass.Bass.Init();
     }
@@ -46,6 +48,7 @@ public class BassFlacPlayer : IAudioPlayer
         _musicPlayer.MPlaybackState = PlaybackState.Playing;
         _musicPlayer.IsPlaying = true;
         _musicPlayer.Track = track;
+        _musicPlayer.AudioBackend = _audioBackend;
 
         var play = ManagedBass.Bass.ChannelPlay(_stream);
 
