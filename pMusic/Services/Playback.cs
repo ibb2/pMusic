@@ -9,55 +9,36 @@ namespace pMusic.Services;
 
 public class Playback
 {
+    private readonly MusicPlayer _musicPlayer;
     private readonly Plex _plex;
-    private readonly string _baseUri;
-    private readonly Mixer _mixer;
-    private string _key;
-    private string _ratingKey;
-    private decimal _duration;
+    private string _url;
+    private int _stream;
     private Timer _timer;
-    private SoundPlayer _player;
-    private readonly SoundPlayer _soundPlayerState;
-    private readonly double _currentTimeState;
-    private readonly Track _track;
-    private MusicPlayer _musicPlayer;
+    private Track _track;
 
-    public Playback(Plex plex, string uri, Mixer mixer, SoundPlayer soundPlayerState,
-        double currentTimeState, MusicPlayer musicPlayer, Track track)
+    public Playback(Plex plex, MusicPlayer musicPlayer)
     {
         _plex = plex;
-        _baseUri = uri;
-        _mixer = mixer;
-        _soundPlayerState = soundPlayerState;
-        _currentTimeState = currentTimeState;
         _musicPlayer = musicPlayer;
-        _track = track;
-        _track = track;
     }
 
-    public void StartPlayback(SoundPlayer player, string key, string ratingKey, decimal duration,
-        SoundPlayer state, double playbackPosition)
+    public void StartPlayback(Track track, string url, int stream)
     {
-        _player = player;
-        _key = key;
-        _ratingKey = ratingKey;
-        _duration = duration;
+        _track = track;
+        _url = url;
 
         _musicPlayer.Position = 0;
         _musicPlayer.PlaybackState = PlaybackState.Playing;
-        _musicPlayer.CurrentlyPlayingTrack = _track;
+
+        _stream = stream;
+
+        var player = ManagedBass.Bass.ChannelGetPosition(stream);
 
         _timer = new Timer(async _ =>
             {
-                await UpdateTimeline("playing");
-                var formattedTime = decimal.Round((decimal)_player.Time);
+                await UpdateTimeline("Playing");
+                var formattedTime = decimal.Round(player);
                 _musicPlayer.Position = (float)formattedTime;
-                // await state.UpdateAsync(_ => player);
-                // var val = await state;
-                // await _soundPlayerState.UpdateAsync(_ => val);
-                // await playbackPosition.UpdateAsync(_ =>
-                //     (double)Decimal.Round((decimal)player.Time, 2)); // Update the playbackPosition state
-                // Console.Write($"Current time {player.Time}");
             }, null, 0, 1000
         );
     }
@@ -82,23 +63,23 @@ public class Playback
 
     private async Task UpdateTimeline(string state)
     {
-        if (_player.State is PlaybackState.Stopped)
+        var playerPosition = ManagedBass.Bass.ChannelGetPosition(_stream);
+        var playerTimeRounded = decimal.Round(playerPosition);
+        var trackDuration = ManagedBass.Bass.ChannelGetLength(_stream);
+
+        if (_musicPlayer.MPlaybackState is ManagedBass.PlaybackState.Stopped)
         {
             await _timer.DisposeAsync();
-            _mixer.RemoveComponent(_player);
-            if (decimal.Round((decimal)_player.Time) / (decimal)_player.Duration * 100 > 90)
-                await TrackCompleted(_ratingKey);
+            if (playerTimeRounded / _musicPlayer.Duration * 100 > 90)
+                await TrackCompleted(_track.RatingKey);
 
             return;
         }
 
-        // Console.WriteLine($"Track Progress {_player.Time}");
-        var formattedTime = decimal.Round((decimal)_player.Time) * 1000;
-        // Console.WriteLine($"Rounded Track Progess {formattedTime}");
+        var playerTimeRoundedMillseconds = playerTimeRounded * 1000;
         await Task.Delay(1000);
-        // await Plex.UpdateTrackProgress(ratingKey: ratingKey, progress: Player.Time);
-        await _plex.UpdateSession(uri: _baseUri, key: _key, state: state, ratingKey: _ratingKey, formattedTime,
-            duration: _duration);
+        await _plex.UpdateSession(_url, _track.Key, state, _track.RatingKey, playerTimeRoundedMillseconds,
+            trackDuration);
     }
 
     private async ValueTask TrackCompleted(string ratingKey)

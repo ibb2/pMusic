@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
         collection.AddDbContext<MusicDbContext>();
         collection.AddSingleton<Navigation>();
         collection.AddSingleton<IAudioPlayerService, AudioPlayer>();
+        collection.AddSingleton<AudioPlayerManager>();
         collection.AddSingleton<MusicPlayer>();
         collection.AddSingleton<Sidebar>();
         collection.AddTransient<IMusic, Music>();

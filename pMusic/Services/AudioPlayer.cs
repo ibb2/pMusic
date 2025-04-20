@@ -52,8 +52,8 @@ public partial class AudioPlayer : IAudioPlayerService
         {
             _currentTrack = track;
 
-            _playback = new Playback(plex: Plex, uri: baseUri, mixer: Mixer.Master, SoundPlayer, PlaybackPosition,
-                musicPlayer: _musicPlayer, track: track);
+            // _playback = new Playback(plex: Plex, uri: baseUri, mixer: Mixer.Master, SoundPlayer, PlaybackPosition,
+            //     musicPlayer: _musicPlayer, track: track);
 
             // Initialize the audio engine with the MiniAudio backend.
             if (_audioEngine is null) _audioEngine = new MiniAudioEngine(44100, Capability.Playback);
