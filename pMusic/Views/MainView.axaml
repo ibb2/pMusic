@@ -182,11 +182,11 @@
                         BorderThickness="0">
                         <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Backward"></heroIcons:HeroIcon>
                     </Button>
-                    <Grid>
+                    <Grid HorizontalAlignment="Center">
                         <Button
                             Classes="Flat Icon"
                             Command="{Binding PlayPause}"
-                            IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
+                            IsVisible="{Binding MusicPlayer.MPlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
                             VerticalAlignment="Center">
                             <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Play"
                                                 Kind="Solid" Min="True" Margin="5 0 0 0">
@@ -195,7 +195,7 @@
                         <Button
                             Classes="Flat Icon"
                             Command="{Binding PlayPause}"
-                            IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
+                            IsVisible="{Binding MusicPlayer.MPlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
                             Padding="0"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center">

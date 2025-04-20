@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
 using pMusic.Database;
+using pMusic.Interface;
 using pMusic.Models;
 using pMusic.Services;
 using pMusic.Views;
@@ -20,6 +21,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly IAudioPlayerService _audioPlayer;
 
     private readonly Plex _plex;
+    private AudioPlayerFactory _audioPlayerFactory;
     [ObservableProperty] private ViewModelBase _currentPage;
 
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
@@ -33,11 +35,12 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private Bitmap _thumbnailUrl;
 
     public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer,
-        MusicDbContext musicDbContext, Sidebar sidebar)
+        MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory)
     {
         _plex = plex;
         MusicPlayer = musicPlayer;
         _audioPlayer = audioPlayer;
+        _audioPlayerFactory = audioPlayerFactory;
         _musicDbContext = musicDbContext;
         Sidebar = sidebar;
 
@@ -47,7 +50,7 @@ public partial class MainViewModel : ViewModelBase
 
     public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),
         Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
-        Ioc.Default.GetRequiredService<Sidebar>())
+        Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerFactory>())
     {
     }
 
@@ -113,16 +116,16 @@ public partial class MainViewModel : ViewModelBase
         ToLoginWindow();
     }
 
-    public void PlayPause()
+    public async ValueTask PlayPause()
     {
-        // if (MusicPlayer.PlaybackState == PlaybackState.Playing)
-        // {
-        //     _audioPlayer.PauseAudio();
-        // }
-        // else
-        // {
-        //     _audioPlayer.ResumeAudio();
-        // }
+        if (MusicPlayer.IsPlaying)
+        {
+            await _audioPlayerFactory.PauseAudio();
+        }
+        else
+        {
+            await _audioPlayerFactory.ResumeAudio();
+        }
     }
 
     [RelayCommand]

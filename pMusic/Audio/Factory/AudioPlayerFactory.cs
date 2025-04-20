@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using pMusic.Interface.Bass;
 using pMusic.Models;
 using pMusic.Services;
@@ -7,11 +8,14 @@ namespace pMusic.Interface;
 
 public class AudioPlayerFactory
 {
-    private readonly MusicPlayer _musicPlayer;
     private readonly Plex _plex;
     private IAudioBackend _audioBackend;
     private AudioBackendFactory _audioBackendFactory;
+
+    private MusicPlayer _musicPlayer;
     private IAudioPlayer _player;
+
+    private string _url;
 
     public AudioPlayerFactory(Plex plex, MusicPlayer musicPlayer, AudioBackendFactory audioBackendFactory)
     {
@@ -24,6 +28,7 @@ public class AudioPlayerFactory
     {
         _player?.Dispose();
 
+        _url = url;
         if (url.EndsWith(".flac"))
         {
             _player = new BassFlacPlayer();
@@ -38,6 +43,10 @@ public class AudioPlayerFactory
 
         if (!_player.Play(track, url, serverUrl)) Console.WriteLine("Failed to play audio.");
     }
+
+    public async ValueTask PauseAudio() => await _player.Pause();
+
+    public async ValueTask ResumeAudio() => await _player.Resume();
 
     public void StopAudio()
     {

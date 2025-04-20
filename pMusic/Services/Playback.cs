@@ -38,17 +38,18 @@ public class Playback
         );
     }
 
-    // public async ValueTask UnPausePlayback()
-    // {
-    //     _timer.Change(0, 1000);
-    //     await UpdateTimeline("playing");
-    // }
+    public async ValueTask UnPausePlayback()
+    {
+        _timer.Change(0, 1000);
+        await UpdateTimeline("playing");
+    }
+
     //
-    // public async ValueTask PausePlayback()
-    // {
-    //     _timer.Change(Timeout.Infinite, Timeout.Infinite);
-    //     await UpdateTimeline("paused");
-    // }
+    public async ValueTask PausePlayback()
+    {
+        _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        await UpdateTimeline("paused");
+    }
     //
     // public async ValueTask StopPlayback()
     // {
