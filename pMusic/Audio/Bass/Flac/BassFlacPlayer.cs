@@ -45,7 +45,7 @@ public class BassFlacPlayer : IAudioPlayer
         _musicPlayer.Duration = ManagedBass.Bass.ChannelGetLength(_stream);
         _musicPlayer.MPlaybackState = PlaybackState.Playing;
         _musicPlayer.IsPlaying = true;
-        _musicPlayer.CurrentlyPlayingTrack = track;
+        _musicPlayer.Track = track;
 
         var play = ManagedBass.Bass.ChannelPlay(_stream);
 
@@ -57,6 +57,7 @@ public class BassFlacPlayer : IAudioPlayer
     {
         var playState = ManagedBass.Bass.ChannelPause(_stream);
         _musicPlayer.MPlaybackState = PlaybackState.Paused;
+        _musicPlayer.IsPlaying = false;
         await _playback.PausePlayback();
         return playState;
     }
@@ -65,6 +66,7 @@ public class BassFlacPlayer : IAudioPlayer
     {
         var playState = ManagedBass.Bass.ChannelPlay(_stream);
         _musicPlayer.MPlaybackState = PlaybackState.Playing;
+        _musicPlayer.IsPlaying = true;
         await _playback.UnPausePlayback();
         return playState;
     }

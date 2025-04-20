@@ -18,6 +18,7 @@ namespace pMusic.ViewModels;
 public partial class AlbumViewModel : ViewModelBase
 {
     private readonly AudioPlayerFactory _audioPlayerFactory;
+    private MusicPlayer _musicPlayer;
     [ObservableProperty] public Album? _Album = null;
     [ObservableProperty] public string _albumArtist = "Playboi Carti";
     [ObservableProperty] public string _albumDuration = "1h 16m";
@@ -33,19 +34,21 @@ public partial class AlbumViewModel : ViewModelBase
     [ObservableProperty] public string _title = "Album";
 
     public AlbumViewModel(IMusic music, Plex plex, IAudioPlayerService audioPlayerService,
-        MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory)
+        MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory, MusicPlayer musicPlayer)
     {
         _music = music;
         _plex = plex;
         _audioPlayerService = audioPlayerService;
         _audioPlayerFactory = audioPlayerFactory;
+        _musicPlayer = musicPlayer;
         _musicDbContext = musicDbContext;
         _sidebar = sidebar;
     }
 
     public AlbumViewModel() : this(Ioc.Default.GetRequiredService<IMusic>(), Ioc.Default.GetRequiredService<Plex>(),
         Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
-        Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerFactory>())
+        Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerFactory>(),
+        Ioc.Default.GetRequiredService<MusicPlayer>())
     {
     }
 
@@ -66,6 +69,8 @@ public partial class AlbumViewModel : ViewModelBase
     {
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
         var url = serverUri + track.Media.Part.Key;
+        _musicPlayer.Album = Album;
+        _musicPlayer.Artist = Album.Artist;
         _audioPlayerFactory.PlayAudio(track, url, serverUri);
         // _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }

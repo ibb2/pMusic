@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
+using ManagedBass;
 using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
@@ -119,13 +120,9 @@ public partial class MainViewModel : ViewModelBase
     public async ValueTask PlayPause()
     {
         if (MusicPlayer.IsPlaying)
-        {
             await _audioPlayerFactory.PauseAudio();
-        }
         else
-        {
             await _audioPlayerFactory.ResumeAudio();
-        }
     }
 
     [RelayCommand]
@@ -150,5 +147,8 @@ public partial class MainViewModel : ViewModelBase
         mainWindow.Close();
     }
 
-    private void ToLoginWindow() => GoToLoginWindow();
+    private void ToLoginWindow()
+    {
+        GoToLoginWindow();
+    }
 }

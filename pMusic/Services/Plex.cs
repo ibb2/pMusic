@@ -82,10 +82,7 @@ public class Plex
             Console.WriteLine("Cannot find Client Identifier");
         }
 
-        if (clientIdentifier.Length > 0)
-        {
-            return clientIdentifier;
-        }
+        if (clientIdentifier.Length > 0) return clientIdentifier;
 
         // Initial Setup create the Client Identifier and store for later use
         var guid = Guid.NewGuid().ToString();
@@ -148,9 +145,7 @@ public class Plex
         {
             var keyValuePairs = new List<string>();
             foreach (var item in data)
-            {
                 keyValuePairs.Add($"{HttpUtility.UrlEncode(item.Key)}={HttpUtility.UrlEncode(item.Value)}");
-            }
 
             return string.Join("&", keyValuePairs);
         }
@@ -209,7 +204,7 @@ public class Plex
         }
     }
 
-    public async ValueTask<Bitmap> GetUserProfilePicture()
+    public async Task<Bitmap> GetUserProfilePicture()
     {
         SetInformation();
         var url = "https://plex.tv/api/v2/user";
@@ -224,7 +219,7 @@ public class Plex
         return thumbnail;
     }
 
-    public async ValueTask<String> GetServerCapabilitiesAsync()
+    public async ValueTask<string> GetServerCapabilitiesAsync()
     {
         SetInformation();
         var uri = "https://plex.tv/api/v2/resources?" + "X-Plex-Client-Identifier=" + _plexClientIdentifier +
@@ -235,7 +230,7 @@ public class Plex
         return serverUri;
     }
 
-    public async ValueTask<IImmutableList<Artist>> GetArtists(String uri)
+    public async ValueTask<IImmutableList<Artist>> GetArtists(string uri)
     {
         try
         {
@@ -280,7 +275,7 @@ public class Plex
 
     public async ValueTask<IImmutableList<Album>> GetArtistAlbums(string uri, Artist artist)
     {
-        var albumsInDbCount = _musicDbContext.Albums.Count(a => a.ArtistId == artist.Id & a.UserId == _plexId);
+        var albumsInDbCount = _musicDbContext.Albums.Count(a => (a.ArtistId == artist.Id) & (a.UserId == _plexId));
 
         try
         {
@@ -293,7 +288,7 @@ public class Plex
             if (albumXElement.DescendantsAndSelf("Directory").Count() == albumsInDbCount)
             {
                 Console.WriteLine($"Returning {artist}'s albums from db");
-                return _musicDbContext.Albums.Where(a => a.ArtistId == artist.Id & a.UserId == _plexId)
+                return _musicDbContext.Albums.Where(a => (a.ArtistId == artist.Id) & (a.UserId == _plexId))
                     .ToImmutableList();
             }
 
@@ -317,7 +312,8 @@ public class Plex
             if (albumsInDbCount > 0)
             {
                 Console.WriteLine($"{ex.Message} -> Returning {artist}'s albums from db");
-                return _musicDbContext.Albums.Where(a => a.Artist == artist & a.UserId == _plexId).ToImmutableList();
+                return _musicDbContext.Albums.Where(a => (a.Artist == artist) & (a.UserId == _plexId))
+                    .ToImmutableList();
             }
 
             return ImmutableList<Album>.Empty;
@@ -370,12 +366,12 @@ public class Plex
 
     public async ValueTask MarkTrackAsPlayed(double ratingKey)
     {
-        var res = await _plexApi.Media.MarkPlayedAsync(key: ratingKey);
+        var res = await _plexApi.Media.MarkPlayedAsync(ratingKey);
         Console.WriteLine($"Mark Played Response: {res}");
     }
 
-    public async ValueTask UpdateSession(string uri, string key, string state, string ratingKey, Decimal time,
-        Decimal duration)
+    public async ValueTask UpdateSession(string uri, string key, string state, string ratingKey, decimal time,
+        decimal duration)
     {
         var timelineUri = uri + "/:/timeline?type=music&key=" + key + "&state=" + state + "&ratingKey=" + ratingKey +
                           "&time=" + time + "&playbackTime=" + time + "&duration=" + duration + "&X-Plex-Token=" +
@@ -444,7 +440,7 @@ public class Plex
 
         var albums = new List<Album>();
 
-        foreach (Artist artist in artists)
+        foreach (var artist in artists)
         {
             var album = await GetArtistAlbums(uri, artist);
             albums.AddRange(album);
@@ -529,7 +525,7 @@ public class Plex
                 MusicAnalysisVersion = int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
                 UserId = _plexId,
                 AlbumId = album.Id,
-                Album = album,
+                Album = album
             };
 
             nTrack.Media = ParseMedia(track.Element("Media"), nTrack);
@@ -654,7 +650,6 @@ public class Plex
         var newArtists = new List<Artist>();
 
         foreach (var artist in artists)
-        {
             newArtists.Add(new Artist
             {
                 RatingKey = artist.Attribute("ratingKey")?.Value ?? "",
@@ -691,18 +686,15 @@ public class Plex
                         BottomRight = artist.Element("UltraBlurColors")?.Attribute("bottomRight")?.Value
                     }
                     : null,
-
                 // Genres = artist.Elements("Genre")
                 //     .Select(genre => new Genre { Tag = genre.Attribute("tag")?.Value })
                 //     .ToArray(),
-
                 Country = artist.Element("Country") != null
                     ? new Country { Tag = artist.Element("Country")?.Attribute("tag")?.Value }
                     : null,
 
-                UserId = _plexId,
+                UserId = _plexId
             });
-        }
 
         return newArtists;
     }
