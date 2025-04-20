@@ -152,7 +152,7 @@
                 </UserControl>
             </suki:GlassCard>
         </Grid>
-        <Grid Grid.Row="2" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
+        <Grid Grid.Row="2" ShowGridLines="True" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
             <!-- Bottom Music Player -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
                 <Border CornerRadius="8" ClipToBounds="True" VerticalAlignment="Center">
@@ -214,10 +214,9 @@
                                Text="{Binding MusicPlayer.Track.Duration, Converter={StaticResource SecondsToMinutesConverter}}"
                                VerticalAlignment="Center" />
                 </Grid>
-                <!-- <ProgressBar Minimum="0" Maximum="100" Value="35" Height="5" /> -->
             </StackPanel>
-            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <!-- <ProgressBar Minimum="0" Maximum="25" Value="5" Height="5" Width="25" /> -->
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                <Slider Minimum="0" Maximum="1" Value="{Binding MusicPlayer.Volume}" MinWidth="100" />
             </StackPanel>
         </Grid>
     </Grid>

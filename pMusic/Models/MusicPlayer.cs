@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ManagedBass;
@@ -12,22 +11,22 @@ namespace pMusic.Models;
 public partial class MusicPlayer : ObservableObject
 {
     private readonly Plex _plex;
-    [ObservableProperty] public Artist artist;
     [ObservableProperty] public Album album;
-    [ObservableProperty] public Track track;
-    [ObservableProperty] public Bitmap image;
+    [ObservableProperty] public Artist artist;
+    [ObservableProperty] public IAudioBackend audioBackend;
+    [ObservableProperty] public IAudioPlayer audioPlayer;
     [ObservableProperty] public long duration;
+    [ObservableProperty] public Bitmap image;
     [ObservableProperty] public bool isPlaying;
     [ObservableProperty] public bool isStopped;
     [ObservableProperty] public PlaybackState mPlaybackState;
     [ObservableProperty] public SoundFlow.Enums.PlaybackState playbackState;
-    [ObservableProperty] public double position;
+    [ObservableProperty] public double? position = null;
     [ObservableProperty] public long realPosition;
     [ObservableProperty] public SoundPlayer soundPlayer;
-    [ObservableProperty] public float volume;
-    [ObservableProperty] public IAudioBackend audioBackend;
-    [ObservableProperty] public IAudioPlayer audioPlayer;
     [ObservableProperty] public int stream;
+    [ObservableProperty] public Track track;
+    [ObservableProperty] public float volume = 1;
 
     public MusicPlayer(Plex plex)
     {
@@ -39,20 +38,27 @@ public partial class MusicPlayer : ObservableObject
         Image = await _plex.GetBitmapImage(newValue.Thumb);
     }
 
-    partial void OnPositionChanged(double oldValue, double newValue)
+    partial void OnPositionChanged(double? oldValue, double? newValue)
     {
+        if (!oldValue.HasValue || !newValue.HasValue) return;
         var oldPosition = (double)decimal.Round((decimal)oldValue, 0);
         var newPosition = (double)decimal.Round((decimal)newValue, 0);
         Console.WriteLine($"{oldPosition} -> {newPosition}");
 
         // Return early if it's natural playback (new position is exactly 1 ahead of old)
         // or if it's the initial position
-        if ((isPlaying && oldPosition + 1 == newPosition) || oldPosition == 0 || oldPosition -== newPosition)
+        if ((isPlaying && oldPosition + 1 == newPosition) || oldPosition == 0 || oldPosition == newPosition)
             return;
 
         Console.WriteLine($"Position: {newValue}");
-        audioBackend.Seek(newValue);
+        audioBackend.Seek((double)newValue);
         Position = newValue;
+    }
+
+    partial void OnVolumeChanged(float oldValue, float newValue)
+    {
+        AudioBackend.AdjustVolume(newValue);
+        throw new NotImplementedException();
     }
 
     // MediaPlayer.Handle

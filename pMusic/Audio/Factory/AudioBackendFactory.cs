@@ -4,8 +4,9 @@ namespace pMusic.Interface;
 
 public class AudioBackendFactory
 {
-    public IAudioBackend Create(string backend)
+    public IAudioBackend Create(string type)
     {
-        return new BassFlacBackend();
+        var backend = new BassFlacBackend();
+        return backend;
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using pMusic.Interface;
@@ -35,8 +34,8 @@ public class Playback
 
         _timer = new Timer(async _ =>
             {
-                _musicPlayer.Position = _audioBackend.GetRawPosition(stream);
                 await UpdateTimeline("playing");
+                _musicPlayer.Position = _audioBackend.GetRawPosition();
             }, null, 0, 1000
         );
     }
@@ -62,10 +61,10 @@ public class Playback
 
     private async Task UpdateTimeline(string state)
     {
-        var playerPosition = _audioBackend.GetPosition(_stream);
-        var trackDuration = _audioBackend.GetLength(_stream);
+        var playerPosition = _audioBackend.GetPosition();
+        var trackDuration = _audioBackend.GetLength();
 
-        var bassState = _audioBackend.GetState(_stream);
+        var bassState = _audioBackend.GetState();
 
         if (bassState is ManagedBass.PlaybackState.Stopped)
         {

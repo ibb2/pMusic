@@ -10,11 +10,11 @@ namespace pMusic.Interface.Bass;
 
 public class BassFlacPlayer : IAudioPlayer
 {
+    private IAudioBackend _audioBackend;
     private MusicPlayer _musicPlayer;
     private Playback _playback;
     private Plex _plex;
     private int _stream;
-    private IAudioBackend _audioBackend;
 
     public bool Initialize(Plex plex, MusicPlayer musicPlayer, IAudioBackend audioBackend)
     {
@@ -40,6 +40,7 @@ public class BassFlacPlayer : IAudioPlayer
             return false;
         }
 
+        _audioBackend.Init(_stream);
         ManagedBass.Bass.ChannelIsActive(_stream);
 
         // Set MusicPlayer information (Accessible in UI)

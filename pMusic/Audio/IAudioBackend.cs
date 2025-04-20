@@ -4,10 +4,12 @@ namespace pMusic.Interface;
 
 public interface IAudioBackend
 {
-    double GetRawPosition(int stream);
-    decimal GetPosition(int stream);
-    long GetRawLength(int stream);
-    decimal GetLength(int stream);
+    void Init(int stream);
+    double GetRawPosition();
+    decimal GetPosition();
+    long GetRawLength();
+    decimal GetLength();
     void Seek(double pos);
-    PlaybackState GetState(int stream);
+    bool AdjustVolume(float volume);
+    PlaybackState GetState();
 }
