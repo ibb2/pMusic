@@ -20,7 +20,7 @@ public class AudioPlayerFactory
         _audioBackendFactory = audioBackendFactory;
     }
 
-    public void PlayAudio(Track track, string url)
+    public void PlayAudio(Track track, string url, string serverUrl)
     {
         _player?.Dispose();
 
@@ -36,7 +36,7 @@ public class AudioPlayerFactory
 
         _player.Initialize(_plex, _musicPlayer, _audioBackend);
 
-        if (!_player.Play(track, url)) Console.WriteLine("Failed to play audio.");
+        if (!_player.Play(track, url, serverUrl)) Console.WriteLine("Failed to play audio.");
     }
 
     public void StopAudio()

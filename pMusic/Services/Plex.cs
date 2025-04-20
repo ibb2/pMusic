@@ -377,10 +377,10 @@ public class Plex
     public async ValueTask UpdateSession(string uri, string key, string state, string ratingKey, Decimal time,
         Decimal duration)
     {
-        var cleanedDecimal = Decimal.Round(duration, MidpointRounding.ToZero);
         var timelineUri = uri + "/:/timeline?type=music&key=" + key + "&state=" + state + "&ratingKey=" + ratingKey +
-                          "&time=" + time + "&playbackTime=" + time + "&duration=" + cleanedDecimal;
-        await httpClient.GetAsync(timelineUri);
+                          "&time=" + time + "&playbackTime=" + time + "&duration=" + duration + "&X-Plex-Token=" +
+                          _plexToken;
+        var result = await httpClient.GetAsync(timelineUri);
         var i = 1;
     }
 

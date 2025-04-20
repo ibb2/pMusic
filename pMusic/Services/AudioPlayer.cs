@@ -9,7 +9,6 @@ using SoundFlow.Backends.MiniAudio;
 using SoundFlow.Components;
 using SoundFlow.Enums;
 using PlaybackState = ManagedBass.PlaybackState;
-using SFPlaybackState = SoundFlow.Enums.PlaybackState;
 
 namespace pMusic.Services;
 
@@ -20,9 +19,9 @@ public interface IAudioPlayerService
     // public double PlaybackPosition { get; }
 
     ValueTask PlayAudio(string uri, string baseUri, Track track);
-    ValueTask PauseAudio();
-
-    ValueTask ResumeAudio();
+    // ValueTask PauseAudio();
+    //
+    // ValueTask ResumeAudio();
     // ValueTask Stop();
 }
 
@@ -117,25 +116,25 @@ public partial class AudioPlayer : IAudioPlayerService
         }
     }
 
-    public async ValueTask ResumeAudio()
-    {
-        Player?.Play();
-        _musicPlayer.PlaybackState = SFPlaybackState.Playing;
-        await _playback.UnPausePlayback();
-    }
-
-    public async ValueTask PauseAudio()
-    {
-        Player?.Pause();
-        _musicPlayer.PlaybackState = SFPlaybackState.Paused;
-        await _playback.PausePlayback();
-    }
-
-    public async ValueTask Stop()
-    {
-        Player?.Stop();
-        _musicPlayer.PlaybackState = SFPlaybackState.Stopped;
-        _musicPlayer.CurrentlyPlayingTrack = null;
-        await _playback.StopPlayback();
-    }
+    // public async ValueTask ResumeAudio()
+    // {
+    //     Player?.Play();
+    //     _musicPlayer.PlaybackState = SFPlaybackState.Playing;
+    //     await _playback.UnPausePlayback();
+    // }
+    //
+    // public async ValueTask PauseAudio()
+    // {
+    //     Player?.Pause();
+    //     _musicPlayer.PlaybackState = SFPlaybackState.Paused;
+    //     await _playback.PausePlayback();
+    // }
+    //
+    // public async ValueTask Stop()
+    // {
+    //     Player?.Stop();
+    //     _musicPlayer.PlaybackState = SFPlaybackState.Stopped;
+    //     _musicPlayer.CurrentlyPlayingTrack = null;
+    //     await _playback.StopPlayback();
+    // }
 }

@@ -9,6 +9,7 @@ namespace pMusic.Interface.Bass;
 
 public class BassFlacPlayer : IAudioPlayer
 {
+    public MediaPlayer _mediaPlayer;
     private MusicPlayer _musicPlayer;
     private Playback _playback;
     private Plex _plex;
@@ -18,11 +19,12 @@ public class BassFlacPlayer : IAudioPlayer
     {
         _plex = plex;
         _musicPlayer = musicPlayer;
+        _mediaPlayer = new MediaPlayer();
         _playback = new Playback(plex, musicPlayer, audioBackend);
         return ManagedBass.Bass.Init();
     }
 
-    public bool Play(Track track, string url)
+    public bool Play(Track track, string url, string serverUrl)
     {
         // Create a stream.
         var filePath = url + "?X-Plex-Token=" + Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
@@ -47,7 +49,7 @@ public class BassFlacPlayer : IAudioPlayer
 
         ManagedBass.Bass.ChannelPlay(_stream);
 
-        _playback.StartPlayback(track, filePath, _stream);
+        _playback.StartPlayback(track, serverUrl, _stream);
         return true;
     }
 
