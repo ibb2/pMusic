@@ -20,6 +20,8 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public bool isPlaying;
     [ObservableProperty] public bool isStopped;
     [ObservableProperty] public PlaybackState mPlaybackState;
+    [ObservableProperty] public bool muted = false;
+    [ObservableProperty] public bool mutedOpposite = true;
     [ObservableProperty] public SoundFlow.Enums.PlaybackState playbackState;
     [ObservableProperty] public double? position = null;
     [ObservableProperty] public long realPosition;
@@ -55,33 +57,51 @@ public partial class MusicPlayer : ObservableObject
         Position = newValue;
     }
 
+    partial void OnMutedChanged(bool oldValue, bool newValue)
+    {
+        if (oldValue == newValue || AudioBackend == null) return;
+
+        if (newValue)
+        {
+            var muteVal = 0f;
+            AudioBackend.AdjustVolume(muteVal);
+            Muted = true;
+            MutedOpposite = false;
+        }
+        else
+        {
+            AudioBackend.AdjustVolume(volume);
+            Muted = false;
+            MutedOpposite = true;
+        }
+    }
+
     partial void OnVolumeChanged(float oldValue, float newValue)
     {
         AudioBackend.AdjustVolume(newValue);
-        throw new NotImplementedException();
     }
 
-    // MediaPlayer.Handle
-    //     MediaPlayer.Disposed
-    // MediaPlayer.MediaEnded
-    //     MediaPlayer.MediaFailed
-    // MediaPlayer.Frequency
-    //     MediaPlayer.Balance
-    // MediaPlayer.Device
-    //     MediaPlayer.Volume
-    // MediaPlayer.Loop
-    //     MediaPlayer.Title
-    // MediaPlayer.Artist
-    //     MediaPlayer.Album
-    // MediaPlayer.State
-    //     MediaPlayer.Play()
-    // MediaPlayer.Pause()
-    //     MediaPlayer.Stop()
-    // MediaPlayer.Duration
-    //     MediaPlayer.Position
-    // MediaPlayer.LoadAsync(String)
-    //     MediaPlayer.MediaLoaded
-    // MediaPlayer.Dispose()
-    //     MediaPlayer.PropertyChanged
-    // MediaPlayer.OnPropertyChanged(String)
+// MediaPlayer.Handle
+//     MediaPlayer.Disposed
+// MediaPlayer.MediaEnded
+//     MediaPlayer.MediaFailed
+// MediaPlayer.Frequency
+//     MediaPlayer.Balance
+// MediaPlayer.Device
+//     MediaPlayer.Volume
+// MediaPlayer.Loop
+//     MediaPlayer.Title
+// MediaPlayer.Artist
+//     MediaPlayer.Album
+// MediaPlayer.State
+//     MediaPlayer.Play()
+// MediaPlayer.Pause()
+//     MediaPlayer.Stop()
+// MediaPlayer.Duration
+//     MediaPlayer.Position
+// MediaPlayer.LoadAsync(String)
+//     MediaPlayer.MediaLoaded
+// MediaPlayer.Dispose()
+//     MediaPlayer.PropertyChanged
+// MediaPlayer.OnPropertyChanged(String)
 }

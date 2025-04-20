@@ -8,7 +8,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
-using ManagedBass;
 using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
@@ -34,6 +33,8 @@ public partial class MainViewModel : ViewModelBase
     private MusicDbContext _musicDbContext;
 
     [ObservableProperty] private Bitmap _thumbnailUrl;
+    [ObservableProperty] public bool muted;
+
 
     public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer,
         MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory)
@@ -44,6 +45,7 @@ public partial class MainViewModel : ViewModelBase
         _audioPlayerFactory = audioPlayerFactory;
         _musicDbContext = musicDbContext;
         Sidebar = sidebar;
+        muted = MusicPlayer.Muted;
 
         _ = CheckLoginStatus();
         _ = LoadPinnedAlbumsThumbnails();
@@ -57,6 +59,7 @@ public partial class MainViewModel : ViewModelBase
 
     public MusicPlayer MusicPlayer { get; }
     public Sidebar Sidebar { get; }
+
 
     public async ValueTask LoadPinnedAlbumsThumbnails()
     {
@@ -128,6 +131,13 @@ public partial class MainViewModel : ViewModelBase
     public void Seek(double value)
     {
         MusicPlayer.AudioBackend.Seek(value);
+    }
+
+    [RelayCommand]
+    public void Mute(bool muteState)
+    {
+        MusicPlayer.Muted = !muteState;
+        MusicPlayer.MutedOpposite = muteState;
     }
 
     [RelayCommand]

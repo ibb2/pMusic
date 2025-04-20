@@ -215,8 +215,19 @@
                                VerticalAlignment="Center" />
                 </Grid>
             </StackPanel>
-            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                <Slider Minimum="0" Maximum="1" Value="{Binding MusicPlayer.Volume}" MinWidth="100" />
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Classes="Basic Icon" Command="{Binding MuteCommand}" VerticalAlignment="Center"
+                        CommandParameter="{Binding MusicPlayer.Muted}"
+                        IsVisible="{Binding MusicPlayer.MutedOpposite}">
+                    <heroIcons:HeroIcon Type="SpeakerWave" Min="True" Foreground="{DynamicResource SukiText}"></heroIcons:HeroIcon>
+                </Button>
+                <Button Classes="Basic Icon" Command="{Binding MuteCommand}" VerticalAlignment="Center"
+                        CommandParameter="{Binding MusicPlayer.Muted}"
+                        IsVisible="{Binding MusicPlayer.Muted}">
+                    <heroIcons:HeroIcon Type="SpeakerXMark" Min="True" Foreground="{DynamicResource SukiText}"></heroIcons:HeroIcon>
+                </Button>
+                <Slider Minimum="0" Maximum="1" Value="{Binding MusicPlayer.Volume}" MinWidth="100"
+                        VerticalAlignment="Center" />
             </StackPanel>
         </Grid>
     </Grid>
