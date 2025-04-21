@@ -155,7 +155,7 @@
                           Grid.Column="2">
             </GridSplitter>
             <suki:GlassCard Grid.Column="3" CornerRadius="17" Margin="0 5 10 10" Padding="0"
-                            IsVisible="{Binding IsSidecarOpen}" MinWidth="200">
+                            IsVisible="{Binding IsSidecarOpen}" MinWidth="250">
                 <views:SidecarView />
             </suki:GlassCard>
         </Grid>
