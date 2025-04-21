@@ -29,7 +29,7 @@
             </StackPanel>
 
             <Border Height="20"></Border>
-            <StackPanel Spacing="16">
+            <StackPanel Spacing="16" IsVisible="{Binding !!MusicPlayer.Album}">
                 <TextBlock Text="Up Next"></TextBlock>
                 <ListBox ItemsSource="{Binding MusicPlayer.UpcomingTracksBacking}">
                     <ListBox.ItemTemplate>
