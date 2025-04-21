@@ -66,6 +66,8 @@ public partial class AlbumViewModel : ViewModelBase
     public async Task QueueAlbum()
     {
         if (TrackList.Count == 0) return;
+        _musicPlayer.PlayedTracks.Clear();
+        _musicPlayer.UpcomingTracks.Clear();
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
         _musicPlayer.Album = Album;
         _musicPlayer.Artist = Album.Artist;
