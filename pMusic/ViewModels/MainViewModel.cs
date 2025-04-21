@@ -28,6 +28,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _isLoggedIn = false;
 
     [ObservableProperty] private bool _isLoggedInTrue = true;
+    [ObservableProperty] private bool _isSidecarOpen = false;
     private MusicDbContext _musicDbContext;
 
     [ObservableProperty] private Bitmap _thumbnailUrl;
@@ -57,6 +58,8 @@ public partial class MainViewModel : ViewModelBase
     public MusicPlayer MusicPlayer { get; }
     public Sidebar Sidebar { get; }
 
+    [RelayCommand]
+    public void ToggleSidecar() => IsSidecarOpen = !IsSidecarOpen;
 
     public async ValueTask LoadPinnedAlbumsThumbnails()
     {
