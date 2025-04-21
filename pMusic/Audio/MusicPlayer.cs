@@ -18,6 +18,7 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public IAudioBackend audioBackend;
     [ObservableProperty] public IAudioPlayer audioPlayer;
     [ObservableProperty] public long duration;
+    [ObservableProperty] public Queue<Track> highPriorityTracks = new();
     [ObservableProperty] public Bitmap image;
     [ObservableProperty] public bool isPlaying;
     [ObservableProperty] public bool isStopped;
@@ -28,7 +29,6 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public Stack<Track> playedTracks = new();
     [ObservableProperty] public double? position = null;
     [ObservableProperty] public long realPosition;
-
     [ObservableProperty] public string serverUrl;
     [ObservableProperty] public SoundPlayer soundPlayer;
     [ObservableProperty] public int stream;
@@ -57,7 +57,7 @@ public partial class MusicPlayer : ObservableObject
         Track? upcomingTrack;
         try
         {
-            upcomingTrack = UpcomingTracks.Dequeue();
+            upcomingTrack = HighPriorityTracks.Count > 0 ? HighPriorityTracks.Dequeue() : UpcomingTracks.Dequeue();
         }
         catch (InvalidOperationException ex)
         {
@@ -69,9 +69,28 @@ public partial class MusicPlayer : ObservableObject
     }
 
     //
-    // public void PreviousTrack()
-    // {
-    // }
+    public void PreviousTrack()
+    {
+        if (PlayedTracks.Count == 0) return;
+
+        // Rewind to the beginning of the track first before playing the previous track.
+        // UX design wise, this may be the intended behavior users expect.
+        if (Position > 5) AudioBackend.Seek(0);
+
+        Track? prevTrack;
+
+        try
+        {
+            prevTrack = PlayedTracks.Pop();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return;
+        }
+
+        HighPriorityTracks.Enqueue(Track);
+        _audioPlayerFactory.PlayAudio(this, prevTrack, ServerUrl);
+    }
 
 
     async partial void OnTrackChanging(Track newValue)

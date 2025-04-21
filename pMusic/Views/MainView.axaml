@@ -171,6 +171,7 @@
                             Spacing="8">
                     <Button
                         Classes="Basic Icon"
+                        Command="{Binding PrevTrack}"
                         BorderThickness="0">
                         <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Backward" />
                     </Button>
