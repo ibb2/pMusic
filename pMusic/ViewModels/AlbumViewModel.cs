@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
 using pMusic.Database;
+using pMusic.Interface;
 using pMusic.Models;
 using pMusic.Services;
 
@@ -16,6 +17,8 @@ namespace pMusic.ViewModels;
 
 public partial class AlbumViewModel : ViewModelBase
 {
+    private readonly AudioPlayerFactory _audioPlayerFactory;
+    private MusicPlayer _musicPlayer;
     [ObservableProperty] public Album? _Album = null;
     [ObservableProperty] public string _albumArtist = "Playboi Carti";
     [ObservableProperty] public string _albumDuration = "1h 16m";
@@ -31,18 +34,21 @@ public partial class AlbumViewModel : ViewModelBase
     [ObservableProperty] public string _title = "Album";
 
     public AlbumViewModel(IMusic music, Plex plex, IAudioPlayerService audioPlayerService,
-        MusicDbContext musicDbContext, Sidebar sidebar)
+        MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory, MusicPlayer musicPlayer)
     {
         _music = music;
         _plex = plex;
         _audioPlayerService = audioPlayerService;
+        _audioPlayerFactory = audioPlayerFactory;
+        _musicPlayer = musicPlayer;
         _musicDbContext = musicDbContext;
         _sidebar = sidebar;
     }
 
     public AlbumViewModel() : this(Ioc.Default.GetRequiredService<IMusic>(), Ioc.Default.GetRequiredService<Plex>(),
         Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
-        Ioc.Default.GetRequiredService<Sidebar>())
+        Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerFactory>(),
+        Ioc.Default.GetRequiredService<MusicPlayer>())
     {
     }
 
@@ -55,10 +61,7 @@ public partial class AlbumViewModel : ViewModelBase
         var tracks =
             await _music.GetTrackList(CancellationToken.None, _plex, Album.Guid);
 
-        foreach (var track in tracks)
-        {
-            TrackList.Add(track);
-        }
+        foreach (var track in tracks) TrackList.Add(track);
     }
 
     [RelayCommand]
@@ -66,13 +69,16 @@ public partial class AlbumViewModel : ViewModelBase
     {
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
         var url = serverUri + track.Media.Part.Key;
-        _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
+        _musicPlayer.Album = Album;
+        _musicPlayer.Artist = Album.Artist;
+        _audioPlayerFactory.PlayAudio(track, url, serverUri);
+        // _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 
     [RelayCommand]
     public async Task AddToLibrary(Album currentAlbum)
     {
-        _sidebar.PinnedAlbum = new();
+        _sidebar.PinnedAlbum = new ObservableCollection<DisplayAlbumViewModel>();
 
         // No need to re-fetch or attach
         currentAlbum.IsPinned = !currentAlbum.IsPinned;
@@ -84,10 +90,7 @@ public partial class AlbumViewModel : ViewModelBase
         var albums = _musicDbContext.Albums.Where(x => x.IsPinned).ToList();
         var viewModels = albums.Select(a => new DisplayAlbumViewModel(a, _plex)).ToList();
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
-        foreach (var a in viewModels)
-        {
-            _sidebar.PinnedAlbum.Add(a);
-        }
+        foreach (var a in viewModels) _sidebar.PinnedAlbum.Add(a);
     }
 
 

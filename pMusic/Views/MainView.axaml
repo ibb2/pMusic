@@ -18,15 +18,12 @@
     </Design.DataContext>
     <UserControl.Resources>
         <converter:PlayingConverter x:Key="PlaybackStateToBooleanConverter" />
-        <converter:HalfWidth x:Key="HalfWidth" />
         <converter:Seconds x:Key="SecondsToMinutesConverter" />
-        <converter:Int x:Key="IntToBoolConverter" />
-        <converter:Thumbnail x:Key="Thumbnail" />
     </UserControl.Resources>
 
     <UserControl.Styles>
         <Style Selector="Border.Panel">
-            <Setter Property="Background" Value="{DynamicResource SystemChromeHighColor}"></Setter>
+            <Setter Property="Background" Value="{DynamicResource SystemChromeHighColor}" />
             <!-- <Setter Property="Background" Value="{DynamicResource RegionColor}"></Setter> -->
         </Style>
         <Style Selector="StackPanel.SidePanel">
@@ -35,7 +32,7 @@
             <Setter Property="Width">40</Setter>
         </Style>
         <Style Selector="ListBoxItem">
-            <Setter Property="Padding" Value="0"></Setter>
+            <Setter Property="Padding" Value="0" />
         </Style>
         <Style Selector="ItemsControl /template/ ContentPresenter">
             <Setter Property="Background" Value="Transparent" />
@@ -43,8 +40,7 @@
         <Style Selector="ItemsControl:pointerover /template/ ContentPresenter">
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="Background"
-                    Value="{DynamicResource SystemChromeHighColor}">
-            </Setter>
+                    Value="{DynamicResource SystemChromeHighColor}" />
         </Style>
         <!-- <Style Selector="StackPanel.SidePanel-Item:pointerover"> -->
         <!--     <Setter Property="Background" -->
@@ -62,26 +58,24 @@
                 </Button>
                 <Button Classes="Icon" BorderThickness="0"
                         Command="{Binding GoForward}">
-                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ChevronRight" Min="True"></heroIcons:HeroIcon>
+                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ChevronRight" Min="True" />
                 </Button>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
                 <Button Classes="Home Flat Basic Accent Icon" Command="{Binding GoHome}">
                     <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Home" Kind="Solid"
-                                        Margin="0 0 0 4">
-                    </heroIcons:HeroIcon>
+                                        Margin="0 0 0 4" />
                 </Button>
                 <TextBox Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                 <Button Classes="Basic">
-                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Bell"></heroIcons:HeroIcon>
+                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Bell" />
                 </Button>
                 <Button Classes="Icon" BorderThickness="0">
                     <Border CornerRadius="100" ClipToBounds="True">
                         <Viewbox StretchDirection="DownOnly" Stretch="UniformToFill">
-                            <Image Source="{Binding ThumbnailUrl}">
-                            </Image>
+                            <Image Source="{Binding ThumbnailUrl}" />
                         </Viewbox>
                     </Border>
                     <Button.Flyout>
@@ -158,19 +152,17 @@
                 </UserControl>
             </suki:GlassCard>
         </Grid>
-        <Grid Grid.Row="2" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
+        <Grid Grid.Row="2" ShowGridLines="True" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
             <!-- Bottom Music Player -->
-            <StackPanel Orientation="Horizontal">
-                <Grid>
-                    <Border CornerRadius="5" ClipToBounds="True">
-                        <Image Source="{Binding MusicPlayer.CurrentlyPlayingTrack.Thumb}" Width="50"
-                               ClipToBounds="True" />
-                    </Border>
-                </Grid>
-                <StackPanel>
-                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Title}"
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
+                <Border CornerRadius="8" ClipToBounds="True" VerticalAlignment="Center">
+                    <Image Source="{Binding MusicPlayer.Image}" Width="75" ClipToBounds="True"
+                           VerticalAlignment="Center" />
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="{Binding MusicPlayer.Track.Title}"
                                VerticalAlignment="Center" Margin="8 4" />
-                    <TextBlock Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Album.Artist}"
+                    <TextBlock Text="{Binding MusicPlayer.Artist.Title}"
                                VerticalAlignment="Center" Margin="8 4" />
                 </StackPanel>
             </StackPanel>
@@ -180,55 +172,62 @@
                     <Button
                         Classes="Basic Icon"
                         BorderThickness="0">
-                        <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Backward"></heroIcons:HeroIcon>
+                        <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Backward" />
                     </Button>
-                    <Grid>
+                    <Grid HorizontalAlignment="Center">
                         <Button
                             Classes="Flat Icon"
                             Command="{Binding PlayPause}"
-                            IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
+                            IsVisible="{Binding MusicPlayer.MPlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
                             VerticalAlignment="Center">
                             <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Play"
-                                                Kind="Solid" Min="True" Margin="5 0 0 0">
-                            </heroIcons:HeroIcon>
+                                                Kind="Solid" Min="True" Margin="2 0 0 0" />
                         </Button>
                         <Button
                             Classes="Flat Icon"
                             Command="{Binding PlayPause}"
-                            IsVisible="{Binding MusicPlayer.PlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
+                            IsVisible="{Binding MusicPlayer.MPlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
                             Padding="0"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center">
                             <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Pause"
-                                                Kind="Solid" Min="True" Margin="5 0 0 0">
-                            </heroIcons:HeroIcon>
+                                                Kind="Solid" Min="True" />
                         </Button>
                     </Grid>
                     <Button
                         Classes="Basic Icon"
                         BorderThickness="0">
-                        <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Forward"></heroIcons:HeroIcon>
+                        <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Forward" />
                     </Button>
                 </StackPanel>
                 <Grid ColumnDefinitions="30, 250, *"
                       VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock
                         Text="{Binding MusicPlayer.Position, Converter={StaticResource SecondsToMinutesConverter}}"
-                        VerticalAlignment="Center">
-                    </TextBlock>
-                    <Slider Grid.Column="1" Maximum="{Binding MusicPlayer.CurrentlyPlayingTrack.Duration}"
+                        VerticalAlignment="Center" />
+                    <Slider Grid.Column="1" Maximum="{Binding MusicPlayer.Track.Duration}"
                             Value="{Binding MusicPlayer.Position}" Width="250" Padding="4 0"
-                            VerticalAlignment="Center">
-                    </Slider>
+                            Thumb.DragCompleted="Thumb_OnDragCompleted" x:Name="MySlider"
+                            VerticalAlignment="Center" AttachedToVisualTree="Slider_AttachedToVisualTree" />
+
                     <TextBlock Grid.Column="2"
-                               Text="{Binding MusicPlayer.CurrentlyPlayingTrack.Duration, Converter={StaticResource SecondsToMinutesConverter}}"
-                               VerticalAlignment="Center">
-                    </TextBlock>
+                               Text="{Binding MusicPlayer.Track.Duration, Converter={StaticResource SecondsToMinutesConverter}}"
+                               VerticalAlignment="Center" />
                 </Grid>
-                <!-- <ProgressBar Minimum="0" Maximum="100" Value="35" Height="5" /> -->
             </StackPanel>
-            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <!-- <ProgressBar Minimum="0" Maximum="25" Value="5" Height="5" Width="25" /> -->
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Classes="Basic Icon" Command="{Binding MuteCommand}" VerticalAlignment="Center"
+                        CommandParameter="{Binding MusicPlayer.Muted}"
+                        IsVisible="{Binding MusicPlayer.MutedOpposite}">
+                    <heroIcons:HeroIcon Type="SpeakerWave" Min="True" Foreground="{DynamicResource SukiText}"></heroIcons:HeroIcon>
+                </Button>
+                <Button Classes="Basic Icon" Command="{Binding MuteCommand}" VerticalAlignment="Center"
+                        CommandParameter="{Binding MusicPlayer.Muted}"
+                        IsVisible="{Binding MusicPlayer.Muted}">
+                    <heroIcons:HeroIcon Type="SpeakerXMark" Min="True" Foreground="{DynamicResource SukiText}"></heroIcons:HeroIcon>
+                </Button>
+                <Slider Minimum="0" Maximum="1" Value="{Binding MusicPlayer.Volume}" MinWidth="100"
+                        VerticalAlignment="Center" />
             </StackPanel>
         </Grid>
     </Grid>

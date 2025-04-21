@@ -1,60 +1,51 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-using System.Windows.Input;
-using System.Xml.Linq;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
-using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using KeySharp;
-using Microsoft.EntityFrameworkCore;
 using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
 using pMusic.Services;
 using pMusic.Views;
-using SoundFlow.Enums;
 
 namespace pMusic.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private MusicDbContext _musicDbContext;
-
-    private readonly Plex _plex;
     private readonly IAudioPlayerService _audioPlayer;
 
-    public MusicPlayer MusicPlayer { get; }
-    public Sidebar Sidebar { get; }
+    private readonly Plex _plex;
+    private AudioPlayerFactory _audioPlayerFactory;
+    [ObservableProperty] private ViewModelBase _currentPage;
 
     [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
+    [ObservableProperty] private bool _isLoading;
 
     [ObservableProperty] private bool _isLoggedIn = false;
 
     [ObservableProperty] private bool _isLoggedInTrue = true;
+    private MusicDbContext _musicDbContext;
 
     [ObservableProperty] private Bitmap _thumbnailUrl;
-    [ObservableProperty] private bool _isLoading;
-    [ObservableProperty] private ViewModelBase _currentPage;
+    [ObservableProperty] public bool muted;
+
 
     public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer,
-        MusicDbContext musicDbContext, Sidebar sidebar)
+        MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory)
     {
         _plex = plex;
         MusicPlayer = musicPlayer;
         _audioPlayer = audioPlayer;
+        _audioPlayerFactory = audioPlayerFactory;
         _musicDbContext = musicDbContext;
         Sidebar = sidebar;
+        muted = MusicPlayer.Muted;
 
         _ = CheckLoginStatus();
         _ = LoadPinnedAlbumsThumbnails();
@@ -62,9 +53,13 @@ public partial class MainViewModel : ViewModelBase
 
     public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),
         Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
-        Ioc.Default.GetRequiredService<Sidebar>())
+        Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerFactory>())
     {
     }
+
+    public MusicPlayer MusicPlayer { get; }
+    public Sidebar Sidebar { get; }
+
 
     public async ValueTask LoadPinnedAlbumsThumbnails()
     {
@@ -125,15 +120,26 @@ public partial class MainViewModel : ViewModelBase
         ToLoginWindow();
     }
 
-    public void PlayPause()
+    public async ValueTask PlayPause()
     {
-        if (MusicPlayer.PlaybackState == PlaybackState.Playing)
-        {
-            _audioPlayer.PauseAudio();
-        }
+        if (MusicPlayer.IsPlaying)
+            await _audioPlayerFactory.PauseAudio();
         else
+            await _audioPlayerFactory.ResumeAudio();
+    }
+
+    public void Seek(double value)
+    {
+        MusicPlayer.AudioBackend.Seek(value);
+    }
+
+    [RelayCommand]
+    public void Mute(bool muteState)
+    {
+        if (MusicPlayer.IsPlaying)
         {
-            _audioPlayer.ResumeAudio();
+            MusicPlayer.Muted = !muteState;
+            MusicPlayer.MutedOpposite = muteState;
         }
     }
 
@@ -159,5 +165,8 @@ public partial class MainViewModel : ViewModelBase
         mainWindow.Close();
     }
 
-    private void ToLoginWindow() => GoToLoginWindow();
+    private void ToLoginWindow()
+    {
+        GoToLoginWindow();
+    }
 }

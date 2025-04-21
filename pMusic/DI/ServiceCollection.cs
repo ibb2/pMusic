@@ -1,7 +1,4 @@
-using System.Net.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using pMusic.Converter;
 using pMusic.Database;
 using pMusic.Interface;
 using pMusic.Models;
@@ -19,6 +16,8 @@ public static class ServiceCollectionExtensions
         collection.AddDbContext<MusicDbContext>();
         collection.AddSingleton<Navigation>();
         collection.AddSingleton<IAudioPlayerService, AudioPlayer>();
+        collection.AddSingleton<AudioPlayerFactory>();
+        collection.AddSingleton<AudioBackendFactory>();
         collection.AddSingleton<MusicPlayer>();
         collection.AddSingleton<Sidebar>();
         collection.AddTransient<IMusic, Music>();

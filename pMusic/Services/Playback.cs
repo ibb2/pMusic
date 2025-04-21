@@ -1,63 +1,41 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
+using pMusic.Interface;
 using pMusic.Models;
-using SoundFlow.Components;
 using SoundFlow.Enums;
 
 namespace pMusic.Services;
 
 public class Playback
 {
+    private readonly IAudioBackend _audioBackend;
+    private readonly MusicPlayer _musicPlayer;
     private readonly Plex _plex;
-    private readonly string _baseUri;
-    private readonly Mixer _mixer;
-    private string _key;
-    private string _ratingKey;
-    private decimal _duration;
+    private string _serverUrl;
+    private int _stream;
     private Timer _timer;
-    private SoundPlayer _player;
-    private readonly SoundPlayer _soundPlayerState;
-    private readonly double _currentTimeState;
-    private readonly Track _track;
-    private MusicPlayer _musicPlayer;
+    private Track _track;
 
-    public Playback(Plex plex, string uri, Mixer mixer, SoundPlayer soundPlayerState,
-        double currentTimeState, MusicPlayer musicPlayer, Track track)
+    public Playback(Plex plex, MusicPlayer musicPlayer, IAudioBackend audioBackend)
     {
         _plex = plex;
-        _baseUri = uri;
-        _mixer = mixer;
-        _soundPlayerState = soundPlayerState;
-        _currentTimeState = currentTimeState;
         _musicPlayer = musicPlayer;
-        _track = track;
-        _track = track;
+        _audioBackend = audioBackend;
     }
 
-    public void StartPlayback(SoundPlayer player, string key, string ratingKey, decimal duration,
-        SoundPlayer state, double playbackPosition)
+    public void StartPlayback(Track track, string serverUrl, int stream)
     {
-        _player = player;
-        _key = key;
-        _ratingKey = ratingKey;
-        _duration = duration;
+        _track = track;
+        _serverUrl = serverUrl;
 
-        _musicPlayer.Position = 0;
         _musicPlayer.PlaybackState = PlaybackState.Playing;
-        _musicPlayer.CurrentlyPlayingTrack = _track;
+        _musicPlayer.Stream = stream;
+        _stream = stream;
 
         _timer = new Timer(async _ =>
             {
                 await UpdateTimeline("playing");
-                var formattedTime = decimal.Round((decimal)_player.Time);
-                _musicPlayer.Position = (float)formattedTime;
-                // await state.UpdateAsync(_ => player);
-                // var val = await state;
-                // await _soundPlayerState.UpdateAsync(_ => val);
-                // await playbackPosition.UpdateAsync(_ =>
-                //     (double)Decimal.Round((decimal)player.Time, 2)); // Update the playbackPosition state
-                // Console.Write($"Current time {player.Time}");
+                _musicPlayer.Position = _audioBackend.GetRawPosition();
             }, null, 0, 1000
         );
     }
@@ -68,37 +46,38 @@ public class Playback
         await UpdateTimeline("playing");
     }
 
+    //
     public async ValueTask PausePlayback()
     {
         _timer.Change(Timeout.Infinite, Timeout.Infinite);
         await UpdateTimeline("paused");
     }
-
-    public async ValueTask StopPlayback()
-    {
-        await _timer.DisposeAsync();
-        await UpdateTimeline("paused");
-    }
+    //
+    // public async ValueTask StopPlayback()
+    // {
+    //     await _timer.DisposeAsync();
+    //     await UpdateTimeline("paused");
+    // }
 
     private async Task UpdateTimeline(string state)
     {
-        if (_player.State is PlaybackState.Stopped)
+        var playerPosition = _audioBackend.GetPosition();
+        var trackDuration = _audioBackend.GetLength();
+
+        var bassState = _audioBackend.GetState();
+
+        if (bassState is ManagedBass.PlaybackState.Stopped)
         {
             await _timer.DisposeAsync();
-            _mixer.RemoveComponent(_player);
-            if (decimal.Round((decimal)_player.Time) / (decimal)_player.Duration * 100 > 90)
-                await TrackCompleted(_ratingKey);
+            if (playerPosition / _musicPlayer.Duration * 100 > 90)
+                await TrackCompleted(_track.RatingKey);
 
             return;
         }
 
-        // Console.WriteLine($"Track Progress {_player.Time}");
-        var formattedTime = decimal.Round((decimal)_player.Time) * 1000;
-        // Console.WriteLine($"Rounded Track Progess {formattedTime}");
         await Task.Delay(1000);
-        // await Plex.UpdateTrackProgress(ratingKey: ratingKey, progress: Player.Time);
-        await _plex.UpdateSession(uri: _baseUri, key: _key, state: state, ratingKey: _ratingKey, formattedTime,
-            duration: _duration);
+        await _plex.UpdateSession(_serverUrl, _track.Key, state, _track.RatingKey, playerPosition,
+            trackDuration);
     }
 
     private async ValueTask TrackCompleted(string ratingKey)

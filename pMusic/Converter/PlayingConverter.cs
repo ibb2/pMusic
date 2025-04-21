@@ -1,10 +1,7 @@
 using System;
 using System.Globalization;
-using Avalonia.Data;
 using Avalonia.Data.Converters;
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using SoundFlow.Enums;
+using ManagedBass;
 
 namespace pMusic.Converter;
 
