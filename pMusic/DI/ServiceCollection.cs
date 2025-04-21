@@ -15,7 +15,6 @@ public static class ServiceCollectionExtensions
         collection.AddHttpClient<Plex>();
         collection.AddDbContext<MusicDbContext>();
         collection.AddSingleton<Navigation>();
-        collection.AddSingleton<IAudioPlayerService, AudioPlayer>();
         collection.AddSingleton<AudioPlayerFactory>();
         collection.AddSingleton<AudioBackendFactory>();
         collection.AddSingleton<MusicPlayer>();

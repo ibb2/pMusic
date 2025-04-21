@@ -25,7 +25,6 @@ public partial class AlbumViewModel : ViewModelBase
     [ObservableProperty] public string _albumReleaseDate = "2025";
     [ObservableProperty] public string _albumTitle = "MUSIC";
     [ObservableProperty] public string _albumTrackLength = "30";
-    private IAudioPlayerService _audioPlayerService;
     [ObservableProperty] public Bitmap? _Image = null;
     private IMusic _music;
     private MusicDbContext _musicDbContext;
@@ -33,12 +32,11 @@ public partial class AlbumViewModel : ViewModelBase
     private Sidebar _sidebar;
     [ObservableProperty] public string _title = "Album";
 
-    public AlbumViewModel(IMusic music, Plex plex, IAudioPlayerService audioPlayerService,
+    public AlbumViewModel(IMusic music, Plex plex,
         MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory, MusicPlayer musicPlayer)
     {
         _music = music;
         _plex = plex;
-        _audioPlayerService = audioPlayerService;
         _audioPlayerFactory = audioPlayerFactory;
         _musicPlayer = musicPlayer;
         _musicDbContext = musicDbContext;
@@ -46,7 +44,7 @@ public partial class AlbumViewModel : ViewModelBase
     }
 
     public AlbumViewModel() : this(Ioc.Default.GetRequiredService<IMusic>(), Ioc.Default.GetRequiredService<Plex>(),
-        Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
+        Ioc.Default.GetRequiredService<MusicDbContext>(),
         Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerFactory>(),
         Ioc.Default.GetRequiredService<MusicPlayer>())
     {
