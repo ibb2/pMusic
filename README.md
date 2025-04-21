@@ -39,6 +39,7 @@ There are 2 different methods to install pMusic
 - [ ]  Transcoding
 - [ ]  Sync
 - [ ]  TV Support
+- [ ]  Settings Page
 
 ## Contributing
 **Ignore anything written in this section for now**
