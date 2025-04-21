@@ -25,8 +25,10 @@ public static class ServiceCollectionExtensions
         collection.AddTransient<HomeViewModel>();
         collection.AddTransient<AlbumViewModel>();
         collection.AddTransient<ArtistViewModel>();
+        collection.AddTransient<SidecarViewModel>();
         collection.AddTransient<MainWindow>();
         collection.AddTransient<LoginWindow>();
         collection.AddTransient<HomeView>();
+        collection.AddTransient<SidecarView>();
     }
 }

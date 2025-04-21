@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ManagedBass;
+using pMusic.Classes;
 using pMusic.Interface;
 using pMusic.Services;
 using SoundFlow.Components;
@@ -18,7 +20,8 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public IAudioBackend audioBackend;
     [ObservableProperty] public IAudioPlayer audioPlayer;
     [ObservableProperty] public long duration;
-    [ObservableProperty] public Queue<Track> highPriorityTracks = new();
+    [ObservableProperty] ObservableQueue<Track> highPriorityTracks = new();
+    [ObservableProperty] ObservableCollection<Track> highPriorityTracksBacking = new();
     [ObservableProperty] public Bitmap image;
     [ObservableProperty] public bool isPlaying;
     [ObservableProperty] public bool isStopped;
@@ -26,14 +29,16 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public bool muted = false;
     [ObservableProperty] public bool mutedOpposite = true;
     [ObservableProperty] public SoundFlow.Enums.PlaybackState playbackState;
-    [ObservableProperty] public Stack<Track> playedTracks = new();
+    [ObservableProperty] ObservableStack<Track> playedTracks = new();
+    [ObservableProperty] ObservableCollection<Track> playedTracksBacking = new();
     [ObservableProperty] public double? position = null;
     [ObservableProperty] public long realPosition;
     [ObservableProperty] public string serverUrl;
     [ObservableProperty] public SoundPlayer soundPlayer;
     [ObservableProperty] public int stream;
     [ObservableProperty] public Track track;
-    [ObservableProperty] public Queue<Track> upcomingTracks = new();
+    [ObservableProperty] ObservableQueue<Track> upcomingTracks = new();
+    [ObservableProperty] ObservableCollection<Track> upcomingTracksBacking = new();
     [ObservableProperty] public float volume = 1;
 
     public MusicPlayer(Plex plex, AudioPlayerFactory audioPlayerFactory)
@@ -47,7 +52,10 @@ public partial class MusicPlayer : ObservableObject
         if (tracks.Count == 0) return;
 
         foreach (var t in tracks)
+        {
+            UpcomingTracksBacking.Add(t);
             UpcomingTracks.Enqueue(t);
+        }
     }
 
     public void NextTrack(bool force = false)
@@ -57,7 +65,16 @@ public partial class MusicPlayer : ObservableObject
         Track? upcomingTrack;
         try
         {
-            upcomingTrack = HighPriorityTracks.Count > 0 ? HighPriorityTracks.Dequeue() : UpcomingTracks.Dequeue();
+            if (HighPriorityTracks.Count > 0)
+            {
+                upcomingTrack = HighPriorityTracks.Dequeue();
+                HighPriorityTracksBacking.RemoveAt(0);
+            }
+            else
+            {
+                upcomingTrack = UpcomingTracks.Dequeue();
+                UpcomingTracksBacking.RemoveAt(0);
+            }
         }
         catch (InvalidOperationException ex)
         {
@@ -65,6 +82,7 @@ public partial class MusicPlayer : ObservableObject
         }
 
         PlayedTracks.Push(Track);
+        PlayedTracksBacking.Add(Track);
         _audioPlayerFactory.PlayAudio(this, upcomingTrack, ServerUrl);
     }
 
@@ -82,6 +100,7 @@ public partial class MusicPlayer : ObservableObject
         try
         {
             prevTrack = PlayedTracks.Pop();
+            PlayedTracksBacking.RemoveAt(PlayedTracks.Count);
         }
         catch (InvalidOperationException ex)
         {
@@ -89,6 +108,7 @@ public partial class MusicPlayer : ObservableObject
         }
 
         HighPriorityTracks.Enqueue(Track);
+        HighPriorityTracksBacking.Add(Track);
         _audioPlayerFactory.PlayAudio(this, prevTrack, ServerUrl);
     }
 
