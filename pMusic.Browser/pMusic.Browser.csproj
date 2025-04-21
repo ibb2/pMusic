@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AsyncImageLoader.Avalonia"/>
         <PackageReference Include="Avalonia.Browser"/>
         <PackageReference Include="HeroIcons.Avalonia"/>
         <PackageReference Include="ManagedBass"/>
