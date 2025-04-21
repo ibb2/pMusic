@@ -18,7 +18,6 @@ namespace pMusic.ViewModels;
 public partial class AlbumViewModel : ViewModelBase
 {
     private readonly AudioPlayerFactory _audioPlayerFactory;
-    private MusicPlayer _musicPlayer;
     [ObservableProperty] public Album? _Album = null;
     [ObservableProperty] public string _albumArtist = "Playboi Carti";
     [ObservableProperty] public string _albumDuration = "1h 16m";
@@ -28,6 +27,7 @@ public partial class AlbumViewModel : ViewModelBase
     [ObservableProperty] public Bitmap? _Image = null;
     private IMusic _music;
     private MusicDbContext _musicDbContext;
+    private MusicPlayer _musicPlayer;
     private Plex _plex;
     private Sidebar _sidebar;
     [ObservableProperty] public string _title = "Album";
@@ -63,13 +63,25 @@ public partial class AlbumViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    public async Task QueueAlbum()
+    {
+        if (TrackList.Count == 0) return;
+        var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
+        _musicPlayer.Album = Album;
+        _musicPlayer.Artist = Album.Artist;
+        _musicPlayer.ServerUrl = serverUri;
+        _musicPlayer.Queue(TrackList.ToList()!);
+        _musicPlayer.NextTrack();
+    }
+
+    [RelayCommand]
     public async Task Play(Track track)
     {
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
-        var url = serverUri + track.Media.Part.Key;
         _musicPlayer.Album = Album;
         _musicPlayer.Artist = Album.Artist;
-        _audioPlayerFactory.PlayAudio(track, url, serverUri);
+        _musicPlayer.ServerUrl = serverUri;
+        _audioPlayerFactory.PlayAudio(_musicPlayer, track, serverUri);
         // _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 

@@ -196,6 +196,7 @@
                     </Grid>
                     <Button
                         Classes="Basic Icon"
+                        Command="{Binding NextTrack}"
                         BorderThickness="0">
                         <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Forward" />
                     </Button>

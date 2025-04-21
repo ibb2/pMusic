@@ -125,6 +125,11 @@ public partial class MainViewModel : ViewModelBase
             await _audioPlayerFactory.ResumeAudio();
     }
 
+    public void NextTrack()
+    {
+        MusicPlayer.NextTrack();
+    }
+
     public void Seek(double value)
     {
         MusicPlayer.AudioBackend.Seek(value);

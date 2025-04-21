@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ManagedBass;
@@ -11,6 +12,7 @@ namespace pMusic.Models;
 public partial class MusicPlayer : ObservableObject
 {
     private readonly Plex _plex;
+    private AudioPlayerFactory _audioPlayerFactory;
     [ObservableProperty] public Album album;
     [ObservableProperty] public Artist artist;
     [ObservableProperty] public IAudioBackend audioBackend;
@@ -23,17 +25,54 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public bool muted = false;
     [ObservableProperty] public bool mutedOpposite = true;
     [ObservableProperty] public SoundFlow.Enums.PlaybackState playbackState;
+    [ObservableProperty] public Stack<Track> playedTracks = new();
     [ObservableProperty] public double? position = null;
     [ObservableProperty] public long realPosition;
+
+    [ObservableProperty] public string serverUrl;
     [ObservableProperty] public SoundPlayer soundPlayer;
     [ObservableProperty] public int stream;
     [ObservableProperty] public Track track;
+    [ObservableProperty] public Queue<Track> upcomingTracks = new();
     [ObservableProperty] public float volume = 1;
 
-    public MusicPlayer(Plex plex)
+    public MusicPlayer(Plex plex, AudioPlayerFactory audioPlayerFactory)
     {
         _plex = plex;
+        _audioPlayerFactory = audioPlayerFactory;
     }
+
+    public void Queue(List<Track> tracks)
+    {
+        if (tracks.Count == 0) return;
+
+        foreach (var t in tracks)
+            UpcomingTracks.Enqueue(t);
+    }
+
+    public void NextTrack(bool force = false)
+    {
+        if (UpcomingTracks.Count == 0) return;
+
+        Track? upcomingTrack;
+        try
+        {
+            upcomingTrack = UpcomingTracks.Dequeue();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return;
+        }
+
+        PlayedTracks.Push(Track);
+        _audioPlayerFactory.PlayAudio(this, upcomingTrack, ServerUrl);
+    }
+
+    //
+    // public void PreviousTrack()
+    // {
+    // }
+
 
     async partial void OnTrackChanging(Track newValue)
     {

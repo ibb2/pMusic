@@ -17,19 +17,20 @@ public class AudioPlayerFactory
 
     private string _url;
 
-    public AudioPlayerFactory(Plex plex, MusicPlayer musicPlayer, AudioBackendFactory audioBackendFactory)
+    public AudioPlayerFactory(Plex plex, AudioBackendFactory audioBackendFactory)
     {
         _plex = plex;
-        _musicPlayer = musicPlayer;
         _audioBackendFactory = audioBackendFactory;
     }
 
-    public void PlayAudio(Track track, string url, string serverUrl)
+    public void PlayAudio(MusicPlayer musicPlayer, Track track, string serverUrl)
     {
+        _musicPlayer = musicPlayer;
         _player?.Dispose();
 
-        _url = url;
-        if (url.EndsWith(".flac"))
+        _url = serverUrl + track.Media.Part.Key;
+
+        if (_url.EndsWith(".flac"))
         {
             _player = new BassFlacPlayer();
             _audioBackend = _audioBackendFactory.Create("flac");
@@ -41,7 +42,7 @@ public class AudioPlayerFactory
 
         _player.Initialize(_plex, _musicPlayer, _audioBackend);
 
-        if (!_player.Play(track, url, serverUrl)) Console.WriteLine("Failed to play audio.");
+        if (!_player.Play(track, _url, serverUrl)) Console.WriteLine("Failed to play audio.");
     }
 
     public async ValueTask PauseAudio() => await _player.Pause();
