@@ -32,6 +32,7 @@ There are 2 different methods to install pMusic
 - [ ]  Queue's
    - [x] Queue Albums
    - [ ] Queue individual tracks
+   - [ ] Display Queue
 - [ ]  Offline support
 - [ ]  Caching
 - [x]  Database support
