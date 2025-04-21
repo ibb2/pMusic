@@ -25,8 +25,8 @@ There are 2 different methods to install pMusic
 
 ## Roadmap
 (Probably in order)
-- [ ]  Volume Controls
-- [ ]  Add Screenshots
+- [x]  Volume Controls
+- [x]  Add Screenshots
 - [ ]  Artist page
 - [ ]  Playlist page
 - [ ]  Queue's
@@ -34,6 +34,12 @@ There are 2 different methods to install pMusic
 - [ ]  Caching
 - [x]  Database support
 - [ ]  Lyrics
+- [ ]  Performance Improvements
+- [ ]  Sever select
+- [ ]  Transcoding
+- [ ]  Sync
+- [ ]  TV Support
+
 ## Contributing
 **Ignore anything written in this section for now**
 
