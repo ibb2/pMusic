@@ -30,7 +30,11 @@
                                 </Image>
                             </Border>
                             <StackPanel Spacing="8" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding MusicPlayer.Track.Title}"></TextBlock>
+                                <TextBlock Text="{Binding MusicPlayer.Track.Title}" TextWrapping="NoWrap"
+                                           TextTrimming="CharacterEllipsis"
+                                           HorizontalAlignment="Left"
+                                           MaxWidth="50">
+                                </TextBlock>
                                 <TextBlock Text="{Binding MusicPlayer.Artist.Title}"></TextBlock>
                             </StackPanel>
                         </StackPanel>
@@ -41,35 +45,49 @@
             <Border Height="20"></Border>
             <StackPanel Spacing="16" IsVisible="{Binding !!MusicPlayer.Album}">
                 <TextBlock Text="Up Next"></TextBlock>
-                <ListBox ItemsSource="{Binding MusicPlayer.UpcomingTracksBacking}">
-                    <ListBox.ItemTemplate>
+                <ItemsControl ItemsSource="{Binding MusicPlayer.UpcomingTracksBacking}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel HorizontalAlignment="Stretch" Spacing="8"></StackPanel>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch" Spacing="12">
-                                <Border CornerRadius="8" ClipToBounds="True">
-                                    <Image
-                                        asyncImageLoader:ImageLoader.Source="{Binding Thumb, Converter={StaticResource AuthenticateThumbnail}}"
-                                        Width="50">
-                                    </Image>
-                                </Border>
-                                <StackPanel Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Title}" Foreground="{DynamicResource SukiText}"></TextBlock>
-                                    <TextBlock Text="{Binding Album.Artist.Title}"
-                                               Foreground="{DynamicResource SukiText}">
-                                    </TextBlock>
-                                </StackPanel>
-                            </StackPanel>
+                            <Border Padding="8 0">
+                                <Grid ColumnDefinitions="Auto, 12, *" HorizontalAlignment="Stretch">
+                                    <Border CornerRadius="8" ClipToBounds="True"
+                                            HorizontalAlignment="Left">
+                                        <Image
+                                            asyncImageLoader:ImageLoader.Source="{Binding Thumb, Converter={StaticResource AuthenticateThumbnail}}"
+                                            Width="50" />
+                                    </Border>
+                                    <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Stretch">
+                                        <TextBlock Text="{Binding Title}" Foreground="{DynamicResource SukiText}"
+                                                   TextWrapping="NoWrap"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   HorizontalAlignment="Left"
+                                                   MaxWidth="50">
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Album.Artist.Title}"
+                                                   Foreground="{DynamicResource SukiText}">
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
                         </DataTemplate>
-                    </ListBox.ItemTemplate>
-                    <ListBox.Styles>
-                        <Style Selector="ListBox">
-                            <Setter Property="Padding" Value="0"></Setter>
+                    </ItemsControl.ItemTemplate>
+
+                    <ItemsControl.Styles>
+                        <Style>
+                            <Setter Property="ContentPresenter.Background" Value="Transparent" />
                         </Style>
                         <Style Selector="ListBoxItem">
-                            <Setter Property="Padding" Value="0"></Setter>
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         </Style>
-                    </ListBox.Styles>
-                </ListBox>
+                    </ItemsControl.Styles>
+                </ItemsControl>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>
