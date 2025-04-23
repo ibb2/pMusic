@@ -48,6 +48,16 @@ public partial class MusicPlayer : ObservableObject
         _audioPlayerFactory = audioPlayerFactory;
     }
 
+    public void Play(Track trackToPlay)
+    {
+        UpcomingTracks.Clear();
+        PlayedTracks.Clear();
+        UpcomingTracksAndHighPriorityBacking.Clear();
+        UpcomingTracksBacking.Clear();
+        PlayedTracksBacking.Clear();
+        _audioPlayerFactory.PlayAudio(this, trackToPlay, ServerUrl);
+    }
+
     public void Queue(List<Track> tracks)
     {
         if (tracks.Count == 0) return;

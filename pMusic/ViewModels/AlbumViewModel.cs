@@ -82,8 +82,7 @@ public partial class AlbumViewModel : ViewModelBase
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
         _musicPlayer.Album = Album;
         _musicPlayer.Artist = Album.Artist;
-        _musicPlayer.ServerUrl = serverUri;
-        _audioPlayerFactory.PlayAudio(_musicPlayer, track, serverUri);
+        _musicPlayer.Play(track);
         // _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 
