@@ -18,8 +18,6 @@ namespace pMusic.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private readonly IAudioPlayerService _audioPlayer;
-
     private readonly Plex _plex;
     private AudioPlayerFactory _audioPlayerFactory;
     [ObservableProperty] private ViewModelBase _currentPage;
@@ -30,18 +28,18 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _isLoggedIn = false;
 
     [ObservableProperty] private bool _isLoggedInTrue = true;
+    [ObservableProperty] private bool _isSidecarOpen = false;
     private MusicDbContext _musicDbContext;
 
     [ObservableProperty] private Bitmap _thumbnailUrl;
     [ObservableProperty] public bool muted;
 
 
-    public MainViewModel(Plex plex, MusicPlayer musicPlayer, IAudioPlayerService audioPlayer,
-        MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory)
+    public MainViewModel(Plex plex, MusicPlayer musicPlayer, MusicDbContext musicDbContext, Sidebar sidebar,
+        AudioPlayerFactory audioPlayerFactory)
     {
         _plex = plex;
         MusicPlayer = musicPlayer;
-        _audioPlayer = audioPlayer;
         _audioPlayerFactory = audioPlayerFactory;
         _musicDbContext = musicDbContext;
         Sidebar = sidebar;
@@ -52,7 +50,7 @@ public partial class MainViewModel : ViewModelBase
     }
 
     public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),
-        Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
+        Ioc.Default.GetRequiredService<MusicDbContext>(),
         Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerFactory>())
     {
     }
@@ -60,6 +58,8 @@ public partial class MainViewModel : ViewModelBase
     public MusicPlayer MusicPlayer { get; }
     public Sidebar Sidebar { get; }
 
+    [RelayCommand]
+    public void ToggleSidecar() => IsSidecarOpen = !IsSidecarOpen;
 
     public async ValueTask LoadPinnedAlbumsThumbnails()
     {
@@ -127,6 +127,10 @@ public partial class MainViewModel : ViewModelBase
         else
             await _audioPlayerFactory.ResumeAudio();
     }
+
+    public void NextTrack() => MusicPlayer.NextTrack();
+
+    public void PrevTrack() => MusicPlayer.PreviousTrack();
 
     public void Seek(double value)
     {

@@ -18,27 +18,25 @@ namespace pMusic.ViewModels;
 public partial class AlbumViewModel : ViewModelBase
 {
     private readonly AudioPlayerFactory _audioPlayerFactory;
-    private MusicPlayer _musicPlayer;
     [ObservableProperty] public Album? _Album = null;
     [ObservableProperty] public string _albumArtist = "Playboi Carti";
     [ObservableProperty] public string _albumDuration = "1h 16m";
     [ObservableProperty] public string _albumReleaseDate = "2025";
     [ObservableProperty] public string _albumTitle = "MUSIC";
     [ObservableProperty] public string _albumTrackLength = "30";
-    private IAudioPlayerService _audioPlayerService;
     [ObservableProperty] public Bitmap? _Image = null;
     private IMusic _music;
     private MusicDbContext _musicDbContext;
+    private MusicPlayer _musicPlayer;
     private Plex _plex;
     private Sidebar _sidebar;
     [ObservableProperty] public string _title = "Album";
 
-    public AlbumViewModel(IMusic music, Plex plex, IAudioPlayerService audioPlayerService,
+    public AlbumViewModel(IMusic music, Plex plex,
         MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory, MusicPlayer musicPlayer)
     {
         _music = music;
         _plex = plex;
-        _audioPlayerService = audioPlayerService;
         _audioPlayerFactory = audioPlayerFactory;
         _musicPlayer = musicPlayer;
         _musicDbContext = musicDbContext;
@@ -46,7 +44,7 @@ public partial class AlbumViewModel : ViewModelBase
     }
 
     public AlbumViewModel() : this(Ioc.Default.GetRequiredService<IMusic>(), Ioc.Default.GetRequiredService<Plex>(),
-        Ioc.Default.GetRequiredService<IAudioPlayerService>(), Ioc.Default.GetRequiredService<MusicDbContext>(),
+        Ioc.Default.GetRequiredService<MusicDbContext>(),
         Ioc.Default.GetRequiredService<Sidebar>(), Ioc.Default.GetRequiredService<AudioPlayerFactory>(),
         Ioc.Default.GetRequiredService<MusicPlayer>())
     {
@@ -65,13 +63,26 @@ public partial class AlbumViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    public async Task QueueAlbum()
+    {
+        if (TrackList.Count == 0) return;
+        _musicPlayer.PlayedTracks.Clear();
+        _musicPlayer.UpcomingTracks.Clear();
+        var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
+        _musicPlayer.Album = Album;
+        _musicPlayer.Artist = Album.Artist;
+        _musicPlayer.ServerUrl = serverUri;
+        _musicPlayer.Queue(TrackList.ToList()!);
+        _musicPlayer.NextTrack();
+    }
+
+    [RelayCommand]
     public async Task Play(Track track)
     {
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
-        var url = serverUri + track.Media.Part.Key;
         _musicPlayer.Album = Album;
         _musicPlayer.Artist = Album.Artist;
-        _audioPlayerFactory.PlayAudio(track, url, serverUri);
+        _musicPlayer.Play(track);
         // _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 

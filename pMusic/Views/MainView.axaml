@@ -94,7 +94,7 @@
                 </Button>
             </StackPanel>
         </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="Auto, *">
+        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto, Auto">
             <!-- Sidebar -->
             <suki:SukiSideMenu IsSearchEnabled="True"
                                ItemsSource="{Binding Sidebar.PinnedAlbum}"
@@ -133,7 +133,7 @@
                 </suki:SukiSideMenu.HeaderContent>
             </suki:SukiSideMenu>
             <!-- Main Content -->
-            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 10 10" Padding="0">
+            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 0 10" Padding="0">
                 <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
                     <ContentControl.DataTemplates>
                         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
@@ -150,6 +150,13 @@
                         </DataTemplate>
                     </ContentControl.DataTemplates>
                 </UserControl>
+            </suki:GlassCard>
+            <GridSplitter ResizeDirection="Columns" Width="4" Foreground="Transparent" Background="Transparent"
+                          Grid.Column="2">
+            </GridSplitter>
+            <suki:GlassCard Grid.Column="3" CornerRadius="17" Margin="0 5 10 10" Padding="0"
+                            IsVisible="{Binding IsSidecarOpen}" MaxWidth="250">
+                <views:SidecarView />
             </suki:GlassCard>
         </Grid>
         <Grid Grid.Row="2" ShowGridLines="True" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
@@ -171,6 +178,7 @@
                             Spacing="8">
                     <Button
                         Classes="Basic Icon"
+                        Command="{Binding PrevTrack}"
                         BorderThickness="0">
                         <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Backward" />
                     </Button>
@@ -196,6 +204,7 @@
                     </Grid>
                     <Button
                         Classes="Basic Icon"
+                        Command="{Binding NextTrack}"
                         BorderThickness="0">
                         <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Forward" />
                     </Button>
@@ -216,6 +225,9 @@
                 </Grid>
             </StackPanel>
             <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Classes="Basic Icon" Command="{Binding ToggleSidecarCommand}" VerticalAlignment="Center">
+                    <heroIcons:HeroIcon Type="QueueList" Min="True" Foreground="{DynamicResource SukiText}"></heroIcons:HeroIcon>
+                </Button>
                 <Button Classes="Basic Icon" Command="{Binding MuteCommand}" VerticalAlignment="Center"
                         CommandParameter="{Binding MusicPlayer.Muted}"
                         IsVisible="{Binding MusicPlayer.MutedOpposite}">

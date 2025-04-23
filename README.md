@@ -30,6 +30,9 @@ There are 2 different methods to install pMusic
 - [ ]  Artist page
 - [ ]  Playlist page
 - [ ]  Queue's
+   - [x] Queue Albums
+   - [ ] Queue individual tracks
+   - [x] Display Queue
 - [ ]  Offline support
 - [ ]  Caching
 - [x]  Database support
@@ -40,6 +43,7 @@ There are 2 different methods to install pMusic
 - [ ]  Sync
 - [ ]  TV Support
 - [ ]  Settings Page
+- [x]  Prev and Next functionality
 
 ## Contributing
 **Ignore anything written in this section for now**

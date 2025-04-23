@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AsyncImageLoader.Avalonia"/>
         <PackageReference Include="Avalonia.iOS"/>
         <PackageReference Include="HeroIcons.Avalonia"/>
         <PackageReference Include="ManagedBass"/>

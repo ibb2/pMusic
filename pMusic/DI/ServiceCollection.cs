@@ -15,7 +15,6 @@ public static class ServiceCollectionExtensions
         collection.AddHttpClient<Plex>();
         collection.AddDbContext<MusicDbContext>();
         collection.AddSingleton<Navigation>();
-        collection.AddSingleton<IAudioPlayerService, AudioPlayer>();
         collection.AddSingleton<AudioPlayerFactory>();
         collection.AddSingleton<AudioBackendFactory>();
         collection.AddSingleton<MusicPlayer>();
@@ -26,8 +25,10 @@ public static class ServiceCollectionExtensions
         collection.AddTransient<HomeViewModel>();
         collection.AddTransient<AlbumViewModel>();
         collection.AddTransient<ArtistViewModel>();
+        collection.AddTransient<SidecarViewModel>();
         collection.AddTransient<MainWindow>();
         collection.AddTransient<LoginWindow>();
         collection.AddTransient<HomeView>();
+        collection.AddTransient<SidecarView>();
     }
 }

@@ -71,7 +71,8 @@
                         </Grid>
                         <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
                             <StackPanel Orientation="Horizontal" Spacing="20">
-                                <Button Classes="Flat Icon" HorizontalContentAlignment="Center">
+                                <Button Classes="Flat Icon" HorizontalContentAlignment="Center"
+                                        Command="{Binding QueueAlbumCommand}">
                                     <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}"
                                                         Type="Play"
                                                         Kind="Solid" Min="True" Margin="4 0 0 0">
