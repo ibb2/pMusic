@@ -13,6 +13,8 @@ public partial class SidecarViewModel : ObservableObject
     public SidecarViewModel(MusicPlayer musicPlayer)
     {
         MusicPlayer = musicPlayer;
+
+        musicPlayer.UpcomingTracksBacking.CollectionChanged += (_, _) => { GetQueue(); };
     }
 
     public SidecarViewModel() : this(Ioc.Default.GetRequiredService<MusicPlayer>())
@@ -24,5 +26,15 @@ public partial class SidecarViewModel : ObservableObject
     public void ToggleSidecar()
     {
         IsOpen = !IsOpen;
+    }
+
+    public void GetQueue()
+    {
+        var defaultQ = MusicPlayer.UpcomingTracksBacking;
+        var highPriorityQ = MusicPlayer.HighPriorityTracksBacking;
+
+        Queue.Clear();
+        Queue.AddRange(highPriorityQ);
+        Queue.AddRange(defaultQ);
     }
 }

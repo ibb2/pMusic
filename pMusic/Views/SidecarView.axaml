@@ -45,7 +45,7 @@
             <Border Height="20"></Border>
             <StackPanel Spacing="16" IsVisible="{Binding !!MusicPlayer.Album}">
                 <TextBlock Text="Up Next"></TextBlock>
-                <ItemsControl ItemsSource="{Binding MusicPlayer.UpcomingTracksBacking}">
+                <ItemsControl ItemsSource="{Binding MusicPlayer.UpcomingTracksAndHighPriorityBacking}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel HorizontalAlignment="Stretch" Spacing="8"></StackPanel>

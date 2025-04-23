@@ -38,6 +38,7 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public int stream;
     [ObservableProperty] public Track track;
     [ObservableProperty] ObservableQueue<Track> upcomingTracks = new();
+    [ObservableProperty] ObservableCollection<Track> upcomingTracksAndHighPriorityBacking = new();
     [ObservableProperty] ObservableCollection<Track> upcomingTracksBacking = new();
     [ObservableProperty] public float volume = 1;
 
@@ -54,6 +55,7 @@ public partial class MusicPlayer : ObservableObject
         foreach (var t in tracks)
         {
             UpcomingTracksBacking.Add(t);
+            UpcomingTracksAndHighPriorityBacking.Add(t);
             UpcomingTracks.Enqueue(t);
         }
     }
@@ -69,11 +71,13 @@ public partial class MusicPlayer : ObservableObject
             {
                 upcomingTrack = HighPriorityTracks.Dequeue();
                 HighPriorityTracksBacking.RemoveAt(0);
+                UpcomingTracksAndHighPriorityBacking.RemoveAt(0);
             }
             else
             {
                 upcomingTrack = UpcomingTracks.Dequeue();
                 UpcomingTracksBacking.RemoveAt(0);
+                UpcomingTracksAndHighPriorityBacking.RemoveAt(0);
             }
         }
         catch (InvalidOperationException ex)
@@ -108,6 +112,7 @@ public partial class MusicPlayer : ObservableObject
         }
 
         HighPriorityTracks.Enqueue(Track);
+        UpcomingTracksAndHighPriorityBacking.Insert(0, Track);
         HighPriorityTracksBacking.Add(Track);
         _audioPlayerFactory.PlayAudio(this, prevTrack, ServerUrl);
     }
