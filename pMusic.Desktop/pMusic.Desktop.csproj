@@ -45,6 +45,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Assets\"/>
         <Folder Include="bin\Debug\net9.0\"/>
     </ItemGroup>
 </Project>

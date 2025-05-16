@@ -36,14 +36,16 @@ public class MusicDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        // optionsBuilder.UseSqlite("Data Source=music.db");
-        // Get the directory where the application is running
+#if DEBUG
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
         string dbPath = Path.Combine(baseDir, "music.db");
-
-        // Log or debug the path to verify
+#else
+        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string appFolder = Path.Combine(appData, "pMusic");
+        Directory.CreateDirectory(appFolder);
+        string dbPath = Path.Combine(appFolder, "music.db");
+#endif
         Console.WriteLine($"Database path: {dbPath}");
-
         optionsBuilder.UseSqlite($"Data Source={dbPath}");
     }
 }
