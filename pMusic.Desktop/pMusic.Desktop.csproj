@@ -4,13 +4,30 @@
         <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
         One for Windows with net9.0-windows TFM, one for MacOS with net9.0-macos and one with net9.0 TFM for Linux.-->
         <TargetFramework>net9.0</TargetFramework>
+        <RuntimeIdentifiers>osx-arm64;osx-x64</RuntimeIdentifiers> <!-- ✅ ADD THIS -->
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <!--        Publishing-->
+        <ApplicationTitle>pMusic</ApplicationTitle>
+        <Version>0.1.0</Version>
+    </PropertyGroup>
+
+    <!--        Settings for publishing with Avalonia-->
+    <PropertyGroup>
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <PublishTrimmed>true</PublishTrimmed>
+        <PublishReadyToRun>true</PublishReadyToRun>
+        <UseAppHost>true</UseAppHost>
     </PropertyGroup>
 
     <PropertyGroup>
         <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="Assets/AppIcon.icns" Pack="true"/>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="AsyncImageLoader.Avalonia"/>
@@ -48,4 +65,7 @@
         <Folder Include="Assets\"/>
         <Folder Include="bin\Debug\net9.0\"/>
     </ItemGroup>
+
+    <!--    Macos Specific-->
+    <!-- macOS-specific metadata -->
 </Project>
