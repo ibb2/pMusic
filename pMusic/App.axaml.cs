@@ -9,7 +9,9 @@ using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using KeySharp;
 using ManagedBass;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using pMusic.Database;
 using pMusic.DI;
 using pMusic.Services;
 using pMusic.ViewModels;
@@ -51,6 +53,18 @@ public class App : Application
             ServiceProvider = services;
 
             Ioc.Default.ConfigureServices(services);
+
+            try
+            {
+                var dbContext = Ioc.Default.GetRequiredService<MusicDbContext>();
+                await dbContext.Database.MigrateAsync();
+                Console.WriteLine("Migrations applied successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions, such as logging the error or displaying a message to the user
+                Console.WriteLine($"An error occurred while applying migrations: {ex.Message}");
+            }
 
             var music = services.GetService<IMusic>();
             var plex = services.GetService<Plex>();
