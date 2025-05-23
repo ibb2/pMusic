@@ -36,7 +36,13 @@ public abstract partial class ViewModelBase : ObservableObject
     [RelayCommand]
     public void GoToPlaylist(Playlist playlist)
     {
-        Navigation.GoToView<PlaylistViewModel>(vm => vm.Playlist = playlist);
+        Navigation.GoToView<PlaylistViewModel>(vm =>
+        {
+            vm.Playlist = playlist;
+            // _ = vm.GetTracks();
+            _ = vm.LoadPlaylistComposite();
+            // _ = vm.LoadPlaylistThumbnail();
+        });
     }
 
     [RelayCommand]
