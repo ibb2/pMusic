@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         collection.AddTransient<AlbumViewModel>();
         collection.AddTransient<ArtistViewModel>();
         collection.AddTransient<SidecarViewModel>();
+        collection.AddTransient<PlaylistViewModel>();
         collection.AddTransient<MainWindow>();
         collection.AddTransient<LoginWindow>();
         collection.AddTransient<HomeView>();

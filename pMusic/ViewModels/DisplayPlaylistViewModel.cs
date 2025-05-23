@@ -11,19 +11,22 @@ namespace pMusic.ViewModels;
 public partial class DisplayPlaylistViewModel : ObservableObject
 {
     private readonly Plex _plex;
-    public string Title { get; }
-    public TimeSpan Duration { get; }
-    public string ThumbUrl { get; }
 
     [ObservableProperty] private Bitmap? composite;
 
     public DisplayPlaylistViewModel(Playlist playlist, Plex plex)
     {
         _plex = plex;
+        Playlist = playlist;
         Title = playlist.Title;
         Duration = playlist.Duration;
         ThumbUrl = playlist.Composite;
     }
+
+    public string Title { get; }
+    public Playlist Playlist { get; }
+    public TimeSpan Duration { get; }
+    public string ThumbUrl { get; }
 
     public async Task LoadThumbAsync()
     {
