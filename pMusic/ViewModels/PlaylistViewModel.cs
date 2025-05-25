@@ -27,7 +27,6 @@ public partial class PlaylistViewModel : ViewModelBase
     private Sidebar _sidebar;
     [ObservableProperty] public Playlist playlist;
 
-
     public PlaylistViewModel(IMusic music, Plex plex,
         MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory, MusicPlayer musicPlayer)
     {
@@ -53,7 +52,7 @@ public partial class PlaylistViewModel : ViewModelBase
         if (Playlist?.Guid == null) return;
 
         var tracks =
-            await _music.GetTrackList(CancellationToken.None, _plex, Playlist.Guid);
+            await _music.GetPlaylistTrackList(CancellationToken.None, _plex, Playlist.Guid);
 
         foreach (var track in tracks) TrackList.Add(track);
     }

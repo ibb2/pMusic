@@ -39,7 +39,7 @@ public abstract partial class ViewModelBase : ObservableObject
         Navigation.GoToView<PlaylistViewModel>(vm =>
         {
             vm.Playlist = playlist;
-            // _ = vm.GetTracks();
+            _ = vm.GetTracks();
             _ = vm.LoadPlaylistComposite();
             // _ = vm.LoadPlaylistThumbnail();
         });

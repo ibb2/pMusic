@@ -4,13 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
+             xmlns:views="clr-namespace:pMusic.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.PlaylistView"
-
              x:DataType="vm:PlaylistViewModel">
     <Design.DataContext>
         <vm:PlaylistViewModel />
     </Design.DataContext>
+    <UserControl.Resources>
+        <views:TimeSpanToMinSecConverter x:Key="TimeSpanToMinSecConverter" />
+    </UserControl.Resources>
     <UserControl.Styles>
         <Style>
             <Style Selector="TextBlock.h1">
@@ -96,63 +100,63 @@
                         <!--         </Button> -->
                         <!--     </StackPanel> -->
                         <!-- </Grid> -->
-                        <!-- <DataGrid Grid.Row="2" Name="Tracklist" ItemsSource="{Binding TrackList}" IsReadOnly="True" -->
-                        <!--           CanUserResizeColumns="True" VerticalScrollBarVisibility="Auto"> -->
-                        <!--     <DataGrid.Columns> -->
-                        <!--         <DataGridTemplateColumn> -->
-                        <!--             <DataGridTemplateColumn.HeaderTemplate> -->
-                        <!--                 <DataTemplate> -->
-                        <!--                     <TextBlock Text="#" HorizontalAlignment="Center" -->
-                        <!--                                Foreground="{DynamicResource SukiText}"> -->
-                        <!--                     </TextBlock> -->
-                        <!--                 </DataTemplate> -->
-                        <!--             </DataGridTemplateColumn.HeaderTemplate> -->
-                        <!--             <DataGridTemplateColumn.CellTemplate> -->
-                        <!--                 <DataTemplate> -->
-                        <!--                     <Panel> -->
-                        <!--                         ~1~ Button that appears on hover @1@ -->
-                        <!--                         <Button Classes="Basic Icon" -->
-                        <!--                                 IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}" -->
-                        <!--                                 Command="{Binding ((vm:PlaylistViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" -->
-                        <!--                                 CommandParameter="{Binding }" -->
-                        <!--                                 Width="{Binding $parent[DataGridCell].Bounds.Width}" -->
-                        <!--                                 Height="{Binding $parent[DataGridCell].Bounds.Height}"> -->
-                        <!--                             <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" -->
-                        <!--                                                 Type="Play" Kind="Solid"> -->
-                        <!--                             </heroIcons:HeroIcon> -->
-                        <!--                         </Button> -->
-                        <!--                         ~1~ Text that shows by default @1@ -->
-                        <!--                         <TextBlock Text="{Binding Index}" -->
-                        <!--                                    IsVisible="{Binding !$parent[DataGridCellsPresenter].IsPointerOver}" -->
-                        <!--                                    VerticalAlignment="Center" Padding="12 0 0 0" /> -->
-                        <!--                     </Panel> -->
-                        <!--                 </DataTemplate> -->
-                        <!--             </DataGridTemplateColumn.CellTemplate> -->
-                        <!--         </DataGridTemplateColumn> -->
-                        <!-- -->
-                        <!--         <DataGridTextColumn Width="*" Binding="{Binding Title}"> -->
-                        <!--             <DataGridTextColumn.HeaderTemplate> -->
-                        <!--                 <DataTemplate> -->
-                        <!--                     <TextBlock Text="Title" Foreground="{DynamicResource SukiText}"></TextBlock> -->
-                        <!--                 </DataTemplate> -->
-                        <!--             </DataGridTextColumn.HeaderTemplate> -->
-                        <!--         </DataGridTextColumn> -->
-                        <!--         ~1~The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"@1@ -->
-                        <!--         ~1~ <DataGridTextColumn Header="Rating" Binding="{Binding RatingCount}"></DataGridTextColumn> @1@ -->
-                        <!--         <DataGridTextColumn -->
-                        <!--             Binding="{Binding Duration, Converter={StaticResource TimeSpanToMinSecConverter}, Mode=OneWay}" -->
-                        <!--             CellStyleClasses="right"> -->
-                        <!--             <DataGridTextColumn.HeaderTemplate> -->
-                        <!--                 ~1~ Simply use a HeaderTemplate @1@ -->
-                        <!--                 <DataTemplate> -->
-                        <!--                     <TextBlock Text="Length" HorizontalAlignment="Right" -->
-                        <!--                                Foreground="{DynamicResource SukiText}"> -->
-                        <!--                     </TextBlock> -->
-                        <!--                 </DataTemplate> -->
-                        <!--             </DataGridTextColumn.HeaderTemplate> -->
-                        <!--         </DataGridTextColumn> -->
-                        <!--     </DataGrid.Columns> -->
-                        <!-- </DataGrid> -->
+                        <DataGrid Grid.Row="2" Name="Tracklist" ItemsSource="{Binding TrackList}" IsReadOnly="True"
+                                  CanUserResizeColumns="True" VerticalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn>
+                                    <DataGridTemplateColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="#" HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource SukiText}">
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.HeaderTemplate>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Panel>
+                                                <!-- Button that appears on hover -->
+                                                <Button Classes="Basic Icon"
+                                                        IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}"
+                                                        Command="{Binding ((vm:PlaylistViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding }"
+                                                        Width="{Binding $parent[DataGridCell].Bounds.Width}"
+                                                        Height="{Binding $parent[DataGridCell].Bounds.Height}">
+                                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}"
+                                                                        Type="Play" Kind="Solid">
+                                                    </heroIcons:HeroIcon>
+                                                </Button>
+                                                <!-- Text that shows by default -->
+                                                <TextBlock Text="{Binding Index}"
+                                                           IsVisible="{Binding !$parent[DataGridCellsPresenter].IsPointerOver}"
+                                                           VerticalAlignment="Center" Padding="12 0 0 0" />
+                                            </Panel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Width="*" Binding="{Binding Title}">
+                                    <DataGridTextColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="Title" Foreground="{DynamicResource SukiText}"></TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTextColumn.HeaderTemplate>
+                                </DataGridTextColumn>
+                                <!--The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"-->
+                                <!-- <DataGridTextColumn Header="Rating" Binding="{Binding RatingCount}"></DataGridTextColumn> -->
+                                <DataGridTextColumn
+                                    Binding="{Binding Duration, Converter={StaticResource TimeSpanToMinSecConverter}, Mode=OneWay}"
+                                    CellStyleClasses="right">
+                                    <DataGridTextColumn.HeaderTemplate>
+                                        <!-- Simply use a HeaderTemplate -->
+                                        <DataTemplate>
+                                            <TextBlock Text="Length" HorizontalAlignment="Right"
+                                                       Foreground="{DynamicResource SukiText}">
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTextColumn.HeaderTemplate>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </Grid>
                 </Border>
             </suki:GlassCard>
