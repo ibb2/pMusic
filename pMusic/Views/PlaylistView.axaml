@@ -71,35 +71,35 @@
                                 </StackPanel>
                             </Grid>
                         </Grid>
-                        <!-- <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32"> -->
-                        <!--     <StackPanel Orientation="Horizontal" Spacing="20"> -->
-                        <!--         <Button Classes="Flat Icon" HorizontalContentAlignment="Center" -->
-                        <!--                 Command="{Binding QueueAlbumCommand}"> -->
-                        <!--             <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" -->
-                        <!--                                 Type="Play" -->
-                        <!--                                 Kind="Solid" Min="True" Margin="4 0 0 0"> -->
-                        <!--             </heroIcons:HeroIcon> -->
-                        <!--         </Button> -->
-                        <!--         <Button Classes="Basic Icon"> -->
-                        <!--             <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ArrowsRightLeft"></heroIcons:HeroIcon> -->
-                        <!--         </Button> -->
-                        <!--         <Button Classes="Basic Icon" -->
-                        <!--                 Command="{Binding AddToLibraryCommand}" CommandParameter="{Binding Playlist}"> -->
-                        <!--             <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Plus"></heroIcons:HeroIcon> -->
-                        <!--         </Button> -->
-                        <!--         <Button Classes="Basic Icon"> -->
-                        <!--             <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="CloudArrowDown"></heroIcons:HeroIcon> -->
-                        <!--         </Button> -->
-                        <!--     </StackPanel> -->
-                        <!--     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"> -->
-                        <!--         <TextBlock VerticalAlignment="Center"> -->
-                        <!--             List -->
-                        <!--         </TextBlock> -->
-                        <!--         <Button Classes="Basic Icon" VerticalAlignment="Center"> -->
-                        <!--             <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ListBullet"></heroIcons:HeroIcon> -->
-                        <!--         </Button> -->
-                        <!--     </StackPanel> -->
-                        <!-- </Grid> -->
+                        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
+                            <StackPanel Orientation="Horizontal" Spacing="20">
+                                <Button Classes="Flat Icon" HorizontalContentAlignment="Center"
+                                        Command="{Binding QueuePlaylistCommand}">
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}"
+                                                        Type="Play"
+                                                        Kind="Solid" Min="True" Margin="4 0 0 0">
+                                    </heroIcons:HeroIcon>
+                                </Button>
+                                <Button Classes="Basic Icon">
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ArrowsRightLeft"></heroIcons:HeroIcon>
+                                </Button>
+                                <Button Classes="Basic Icon"
+                                        Command="{Binding AddToLibrary}" CommandParameter="{Binding Playlist}">
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Plus"></heroIcons:HeroIcon>
+                                </Button>
+                                <Button Classes="Basic Icon">
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="CloudArrowDown"></heroIcons:HeroIcon>
+                                </Button>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock VerticalAlignment="Center">
+                                    List
+                                </TextBlock>
+                                <Button Classes="Basic Icon" VerticalAlignment="Center">
+                                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ListBullet"></heroIcons:HeroIcon>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
                         <DataGrid Grid.Row="2" Name="Tracklist" ItemsSource="{Binding TrackList}" IsReadOnly="True"
                                   CanUserResizeColumns="True" VerticalScrollBarVisibility="Auto">
                             <DataGrid.Columns>

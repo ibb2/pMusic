@@ -1,4 +1,3 @@
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -58,14 +57,12 @@ public partial class PlaylistViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async Task QueueAlbum()
+    public async Task QueuePlaylist()
     {
         if (TrackList.Count == 0) return;
         _musicPlayer.PlayedTracks.Clear();
         _musicPlayer.UpcomingTracks.Clear();
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
-        // _musicPlayer.Album = Album;
-        // _musicPlayer.Artist = Playlist.a;
         _musicPlayer.ServerUrl = serverUri;
         _musicPlayer.Queue(TrackList.ToList()!);
         _musicPlayer.NextTrack();
@@ -82,21 +79,21 @@ public partial class PlaylistViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async Task AddToLibrary(Album currentAlbum)
+    public async Task AddToLibrary(Playlist playlist)
     {
-        _sidebar.PinnedAlbum = new ObservableCollection<DisplayAlbumViewModel>();
-
-        // No need to re-fetch or attach
-        currentAlbum.IsPinned = !currentAlbum.IsPinned;
-
-        var count = await _musicDbContext.SaveChangesAsync();
-        Console.WriteLine($"count: {count}");
-        Console.WriteLine($"currentAlbum ref: {currentAlbum.GetHashCode()}");
-
-        var albums = _musicDbContext.Albums.Where(x => x.IsPinned).ToList();
-        var viewModels = albums.Select(a => new DisplayAlbumViewModel(a, _plex)).ToList();
-        await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
-        foreach (var a in viewModels) _sidebar.PinnedAlbum.Add(a);
+        // _sidebar.PinnedAlbum = new ObservableCollection<DisplayAlbumViewModel, DisplayPlaylistViewModel>();
+        //
+        // // No need to re-fetch or attach
+        // playlist.IsPinned = !playlist.IsPinned;
+        //
+        // var count = await _musicDbContext.SaveChangesAsync();
+        // Console.WriteLine($"count: {count}");
+        // Console.WriteLine($"currentAlbum ref: {playlist.GetHashCode()}");
+        //
+        // var playlists = _musicDbContext.Playlists.Where(x => x.IsPinned).ToList();
+        // var viewModels = playlists.Select(a => new DisplayPlaylistViewModel(a, _plex)).ToList();
+        // await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
+        // foreach (var p in viewModels) _sidebar.PinnedAlbum.Add(p);
     }
 
     [RelayCommand]
