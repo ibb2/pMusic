@@ -119,7 +119,7 @@
                                     <Border CornerRadius="2" Margin="0 0 12 0" ClipToBounds="True">
                                         <Image Source="/Assets/Images/blank_playlist.png" Width="50" />
                                     </Border>
-                                    <!-- <Image Source="{Binding Image}" Width="50" /> -->
+                                    <Image Source="{Binding Image}" Width="50" />
                                 </Grid>
                             </suki:SukiSideMenuItem.Icon>
                         </suki:SukiSideMenuItem>

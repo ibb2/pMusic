@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using pMusic.ViewModels;
 using SukiUI.Controls;
 using Track = Avalonia.Controls.Primitives.Track;
@@ -16,6 +17,14 @@ public partial class MainView : UserControl
     {
         InitializeComponent();
     }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        _ = (DataContext as MainViewModel)!.LoadSidebar();
+    }
+
 
     private void GoTo(object? sender, PointerPressedEventArgs e)
     {

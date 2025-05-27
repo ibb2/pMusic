@@ -251,7 +251,6 @@ public class Plex
 
             if (artistXElement.DescendantsAndSelf("Directory").Count() == artistsFromDb.Count)
             {
-                Console.WriteLine($"Returning all artists from db");
                 return artistsFromDb.ToImmutableList();
             }
 
@@ -287,7 +286,6 @@ public class Plex
 
             if (albumXElement.DescendantsAndSelf("Directory").Count() == albumsInDbCount)
             {
-                Console.WriteLine($"Returning {artist}'s albums from db");
                 return _musicDbContext.Albums.Where(a => (a.ArtistId == artist.Id) & (a.UserId == _plexId))
                     .ToImmutableList();
             }
@@ -311,7 +309,6 @@ public class Plex
             Console.WriteLine($"Error retrieving albums: {ex.Message}");
             if (albumsInDbCount > 0)
             {
-                Console.WriteLine($"{ex.Message} -> Returning {artist}'s albums from db");
                 return _musicDbContext.Albums.Where(a => (a.Artist == artist) & (a.UserId == _plexId))
                     .ToImmutableList();
             }
@@ -453,7 +450,6 @@ public class Plex
             if (playlistXElement.DescendantsAndSelf("Playlist")
                     .Count(p => p.Attribute("playlistType").Value == "audio") == pCount)
             {
-                Console.WriteLine($"Returning all Playlists from db");
                 return _musicDbContext.Playlists.Where(p => p.UserId == _plexId).ToImmutableList();
             }
 
@@ -472,11 +468,9 @@ public class Plex
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"Error retrieving playlists: {ex.Message}, Returning Playlists from database");
             return _musicDbContext.Playlists.Where(p => p.UserId == _plexId).ToImmutableList();
         }
 
-        Console.WriteLine($"No Playlists found, Returning empty list");
         return ImmutableList<Playlist>.Empty;
     }
 
