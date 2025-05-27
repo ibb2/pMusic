@@ -104,8 +104,8 @@ public partial class MusicPlayer : ObservableObject
         PlayedTracksBacking.Add(Track);
 
         // Set music player metadata
-        Album = Track.Album;
-        Artist = Track.Album.Artist;
+        Album = upcomingTrack.Album;
+        Artist = upcomingTrack.Album.Artist;
 
         _audioPlayerFactory.PlayAudio(this, upcomingTrack, ServerUrl);
     }
