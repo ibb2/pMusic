@@ -89,7 +89,7 @@ public partial class AlbumViewModel : ViewModelBase
     [RelayCommand]
     public async Task AddToLibrary(Album currentAlbum)
     {
-        _sidebar.PinnedAlbum = new ObservableCollection<DisplayAlbumViewModel>();
+        _sidebar.Pinned.Clear();
 
         // No need to re-fetch or attach
         currentAlbum.IsPinned = !currentAlbum.IsPinned;
@@ -98,10 +98,13 @@ public partial class AlbumViewModel : ViewModelBase
         Console.WriteLine($"count: {count}");
         Console.WriteLine($"currentAlbum ref: {currentAlbum.GetHashCode()}");
 
+        var playlists = _musicDbContext.Playlists.Where(x => x.IsPinned).ToList();
+        var pViewModels = playlists.Select(a => new DisplayPlaylistViewModel(a, _plex)).ToList();
+        foreach (var p in pViewModels) _sidebar.Pinned.Add(p);
         var albums = _musicDbContext.Albums.Where(x => x.IsPinned).ToList();
         var viewModels = albums.Select(a => new DisplayAlbumViewModel(a, _plex)).ToList();
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
-        foreach (var a in viewModels) _sidebar.PinnedAlbum.Add(a);
+        foreach (var a in viewModels) _sidebar.Pinned.Add(a);
     }
 
 

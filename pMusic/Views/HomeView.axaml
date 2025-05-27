@@ -63,7 +63,7 @@
                                   Width="{Binding $parent.Width}">
                                 <Border Width="50" Height="50" CornerRadius="4" ClipToBounds="True"
                                         HorizontalAlignment="Left">
-                                    <Image Source="{Binding Thumb}" Stretch="UniformToFill" />
+                                    <Image Source="{Binding Image}" Stretch="UniformToFill" />
                                 </Border>
                                 <TextBlock Grid.Column="2" Text="{Binding Title}"
                                            FontWeight="Bold"
@@ -126,7 +126,7 @@
                                                 BorderThickness="1" HorizontalAlignment="Center">
                                             <Rectangle RadiusX="4" RadiusY="4">
                                                 <Rectangle.Fill>
-                                                    <ImageBrush Source="{Binding Thumb}" Stretch="UniformToFill" />
+                                                    <ImageBrush Source="{Binding Image}" Stretch="UniformToFill" />
                                                 </Rectangle.Fill>
                                             </Rectangle>
                                         </Border>
@@ -188,7 +188,7 @@
                                                 BorderThickness="1" HorizontalAlignment="Center">
                                             <Rectangle RadiusX="4" RadiusY="4">
                                                 <Rectangle.Fill>
-                                                    <ImageBrush Source="{Binding Thumb}" Stretch="UniformToFill" />
+                                                    <ImageBrush Source="{Binding Image}" Stretch="UniformToFill" />
                                                 </Rectangle.Fill>
                                             </Rectangle>
                                         </Border>

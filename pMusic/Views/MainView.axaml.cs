@@ -1,19 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Web;
-using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.VisualTree;
-using KeySharp;
-using pMusic.Models;
 using pMusic.ViewModels;
 using SukiUI.Controls;
 using Track = Avalonia.Controls.Primitives.Track;
@@ -27,7 +17,7 @@ public partial class MainView : UserControl
         InitializeComponent();
     }
 
-    private void GoToAlbum(object? sender, PointerPressedEventArgs e)
+    private void GoTo(object? sender, PointerPressedEventArgs e)
     {
         if (sender is not SukiSideMenuItem sukiSideMenuItem)
             return;

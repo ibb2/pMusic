@@ -64,16 +64,21 @@ public partial class MainViewModel : ViewModelBase
     public async ValueTask LoadPinnedAlbumsThumbnails()
     {
         // Empty Pinned Albums 
-        Sidebar.PinnedAlbum.Clear();
+        Sidebar.Pinned.Clear();
 
         // Add new pinned albums
         var pinnedAlbums = _musicDbContext.Albums.Where(a => a.IsPinned).ToList();
         var viewModels = pinnedAlbums.Select(pa => new DisplayAlbumViewModel(pa, _plex)).ToList();
+        var pinnedPlaylists = _musicDbContext.Playlists.Where(p => p.IsPinned).ToList();
+        var pinnedViewModels = pinnedPlaylists.Select(pa => new DisplayPlaylistViewModel(pa, _plex)).ToList();
 
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
+        await Task.WhenAll(pinnedViewModels.Select(vm => vm.LoadThumbAsync()));
 
         foreach (var pinnedAlbum in viewModels)
-            Sidebar.PinnedAlbum.Add(pinnedAlbum);
+            Sidebar.Pinned.Add(pinnedAlbum);
+
+        foreach (var pinnedPlaylist in pinnedViewModels) Sidebar.Pinned.Add(pinnedPlaylist);
     }
 
 
