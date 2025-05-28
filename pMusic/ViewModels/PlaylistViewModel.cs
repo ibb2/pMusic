@@ -72,11 +72,9 @@ public partial class PlaylistViewModel : ViewModelBase
     [RelayCommand]
     public async Task Play(Track track)
     {
-        // var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
-        // _musicPlayer.Album = Album;
-        // _musicPlayer.Artist = Album.Artist;
+        var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
+        _musicPlayer.ServerUrl = serverUri;
         _musicPlayer.Play(track);
-        // _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 
     [RelayCommand]
