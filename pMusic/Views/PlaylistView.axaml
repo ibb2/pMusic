@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:pMusic.ViewModels"
              xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              xmlns:views="clr-namespace:pMusic.Views"
+             xmlns:converter="clr-namespace:pMusic.Converter"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.PlaylistView"
              x:DataType="vm:PlaylistViewModel">
@@ -13,6 +14,7 @@
     </Design.DataContext>
     <UserControl.Resources>
         <views:TimeSpanToMinSecConverter x:Key="TimeSpanToMinSecConverter" />
+        <converter:TimespanToReadable x:Key="TimeSpanToReadableConverter" />
     </UserControl.Resources>
     <UserControl.Styles>
         <Style>
@@ -51,16 +53,17 @@
                                 <TextBlock Classes="h1" Text="{Binding Playlist.Title}"></TextBlock>
                             </Viewbox>
                             <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                <Border CornerRadius="1000" Margin="0 0 12 0" ClipToBounds="True">
-                                    <Image Source="/Assets/Images/blank_playlist.png" Width="30" Height="30" />
-                                </Border>
+                                <!-- <Border CornerRadius="1000" Margin="0 0 12 0" ClipToBounds="True"> -->
+                                <!--     <Image Source="/Assets/Images/blank_playlist.png" Width="30" Height="30" /> -->
+                                <!-- </Border> -->
                                 <!-- <TextBlock Text="{Binding Playlist}" FontWeight="SemiBold" -->
                                 <!--            VerticalAlignment="Center"> -->
                                 <!-- </TextBlock> -->
-                                <TextBlock Text="{Binding Playlist.AddedAt}"
-                                           VerticalAlignment="Center">
-                                </TextBlock>
-                                <TextBlock Text="{Binding Playlist.Duration}"></TextBlock>
+                                <!-- <TextBlock Text="{Binding Playlist.AddedAt}" -->
+                                <!--            VerticalAlignment="Center"> -->
+                                <!-- </TextBlock> -->
+                                <TextBlock
+                                    Text="{Binding Playlist.Duration, Converter={StaticResource TimeSpanToReadableConverter}}" />
                             </StackPanel>
                         </StackPanel>
                     </Grid>
