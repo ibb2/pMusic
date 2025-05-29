@@ -32,6 +32,7 @@ public partial class AlbumViewModel : ViewModelBase
     private Sidebar _sidebar;
     [ObservableProperty] public string _title = "Album";
 
+
     public AlbumViewModel(IMusic music, Plex plex,
         MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory, MusicPlayer musicPlayer)
     {
@@ -54,6 +55,8 @@ public partial class AlbumViewModel : ViewModelBase
 
     public async ValueTask GetTracks()
     {
+        TrackList.Clear();
+
         if (Album?.Guid == null) return;
 
         var tracks =

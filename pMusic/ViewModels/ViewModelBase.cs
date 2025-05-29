@@ -28,7 +28,6 @@ public abstract partial class ViewModelBase : ObservableObject
         Navigation.GoToView<AlbumViewModel>(vm =>
         {
             vm.Album = album;
-            _ = vm.GetTracks();
             _ = vm.LoadAlbumThumbnail();
         });
     }
