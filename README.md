@@ -28,7 +28,8 @@ There are 2 different methods to install pMusic
 - [x]  Volume Controls
 - [x]  Add Screenshots
 - [ ]  Artist page
-- [ ]  Playlist page
+- [x]  Playlist page
+- [ ]  Search
 - [ ]  Queue's
    - [x] Queue Albums
    - [ ] Queue individual tracks
