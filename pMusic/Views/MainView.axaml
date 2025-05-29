@@ -138,7 +138,7 @@
                 </suki:SukiSideMenu.HeaderContent>
             </suki:SukiSideMenu>
             <!-- Main Content -->
-            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 0 10" Padding="0">
+            <suki:GlassCard Grid.Column="1" IsAnimated="False" CornerRadius="17" Margin="4 5 0 10" Padding="0">
                 <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
                     <ContentControl.DataTemplates>
                         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
@@ -159,7 +159,7 @@
             <GridSplitter ResizeDirection="Columns" Width="4" Foreground="Transparent" Background="Transparent"
                           Grid.Column="2">
             </GridSplitter>
-            <suki:GlassCard Grid.Column="3" CornerRadius="17" Margin="0 5 10 10" Padding="0"
+            <suki:GlassCard Grid.Column="3" IsAnimated="False" CornerRadius="17" Margin="0 5 10 10" Padding="0"
                             IsVisible="{Binding IsSidecarOpen}" MaxWidth="250">
                 <views:SidecarView />
             </suki:GlassCard>
