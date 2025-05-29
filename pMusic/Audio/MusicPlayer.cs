@@ -52,6 +52,11 @@ public partial class MusicPlayer : ObservableObject
     {
         UpcomingTracks.Clear();
         PlayedTracks.Clear();
+
+        // Set music player metadata
+        Album = trackToPlay.Album;
+        Artist = trackToPlay.Album.Artist;
+
         UpcomingTracksAndHighPriorityBacking.Clear();
         UpcomingTracksBacking.Clear();
         PlayedTracksBacking.Clear();
@@ -97,6 +102,11 @@ public partial class MusicPlayer : ObservableObject
 
         PlayedTracks.Push(Track);
         PlayedTracksBacking.Add(Track);
+
+        // Set music player metadata
+        Album = upcomingTrack.Album;
+        Artist = upcomingTrack.Album.Artist;
+
         _audioPlayerFactory.PlayAudio(this, upcomingTrack, ServerUrl);
     }
 

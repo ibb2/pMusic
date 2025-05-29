@@ -63,7 +63,7 @@
                                   Width="{Binding $parent.Width}">
                                 <Border Width="50" Height="50" CornerRadius="4" ClipToBounds="True"
                                         HorizontalAlignment="Left">
-                                    <Image Source="{Binding Thumb}" Stretch="UniformToFill" />
+                                    <Image Source="{Binding Image}" Stretch="UniformToFill" />
                                 </Border>
                                 <TextBlock Grid.Column="2" Text="{Binding Title}"
                                            FontWeight="Bold"
@@ -126,7 +126,7 @@
                                                 BorderThickness="1" HorizontalAlignment="Center">
                                             <Rectangle RadiusX="4" RadiusY="4">
                                                 <Rectangle.Fill>
-                                                    <ImageBrush Source="{Binding Thumb}" Stretch="UniformToFill" />
+                                                    <ImageBrush Source="{Binding Image}" Stretch="UniformToFill" />
                                                 </Rectangle.Fill>
                                             </Rectangle>
                                         </Border>
@@ -188,7 +188,7 @@
                                                 BorderThickness="1" HorizontalAlignment="Center">
                                             <Rectangle RadiusX="4" RadiusY="4">
                                                 <Rectangle.Fill>
-                                                    <ImageBrush Source="{Binding Thumb}" Stretch="UniformToFill" />
+                                                    <ImageBrush Source="{Binding Image}" Stretch="UniformToFill" />
                                                 </Rectangle.Fill>
                                             </Rectangle>
                                         </Border>
@@ -213,9 +213,9 @@
                 <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
             </StackPanel>
             <StackPanel Grid.Row="3" Margin="0 0 0 60" Spacing="24">
-                <!-- Recently Added -->
+                <!-- Uniquely Yours -->
                 <TextBlock Classes="h2">Uniquely Yours</TextBlock>
-                <!-- New Releases / Recently Added? -->
+                <!-- Playlists (and other auto-generated information) -->
                 <ScrollViewer HorizontalScrollBarVisibility="Hidden">
                     <ItemsControl ItemsSource="{Binding  Playlists}"
                                   ScrollViewer.HorizontalScrollBarVisibility="Hidden" Background="Transparent">
@@ -229,7 +229,9 @@
                                 <Button
                                     Classes="Flat"
                                     Padding="8"
-                                    Background="Transparent">
+                                    Background="Transparent"
+                                    Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToPlaylistPageCommand}"
+                                    CommandParameter="{Binding Playlist}">
                                     <Button.Styles>
                                         <Style Selector="Button">
                                             <Setter Property="Background" Value="{DynamicResource SukiBackground}" />

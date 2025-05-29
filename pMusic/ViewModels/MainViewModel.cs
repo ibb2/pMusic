@@ -29,11 +29,13 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty] private bool _isLoggedInTrue = true;
     [ObservableProperty] private bool _isSidecarOpen = false;
+
+
+    [ObservableProperty] private bool _loaded;
     private MusicDbContext _musicDbContext;
 
     [ObservableProperty] private Bitmap _thumbnailUrl;
     [ObservableProperty] public bool muted;
-
 
     public MainViewModel(Plex plex, MusicPlayer musicPlayer, MusicDbContext musicDbContext, Sidebar sidebar,
         AudioPlayerFactory audioPlayerFactory)
@@ -44,9 +46,9 @@ public partial class MainViewModel : ViewModelBase
         _musicDbContext = musicDbContext;
         Sidebar = sidebar;
         muted = MusicPlayer.Muted;
+        _loaded = false;
 
         _ = CheckLoginStatus();
-        _ = LoadPinnedAlbumsThumbnails();
     }
 
     public MainViewModel() : this(Ioc.Default.GetRequiredService<Plex>(), Ioc.Default.GetRequiredService<MusicPlayer>(),
@@ -61,19 +63,25 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     public void ToggleSidecar() => IsSidecarOpen = !IsSidecarOpen;
 
-    public async ValueTask LoadPinnedAlbumsThumbnails()
+    public async ValueTask LoadSidebar()
     {
         // Empty Pinned Albums 
-        Sidebar.PinnedAlbum.Clear();
+        Sidebar.Pinned.Clear();
 
         // Add new pinned albums
         var pinnedAlbums = _musicDbContext.Albums.Where(a => a.IsPinned).ToList();
         var viewModels = pinnedAlbums.Select(pa => new DisplayAlbumViewModel(pa, _plex)).ToList();
+        var pinnedPlaylists = _musicDbContext.Playlists.Where(p => p.IsPinned).ToList();
+        var pinnedViewModels = pinnedPlaylists.Select(pp => new DisplayPlaylistViewModel(pp, _plex)).ToList();
 
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
+        await Task.WhenAll(pinnedViewModels.Select(vm => vm.LoadThumbAsync()));
 
-        foreach (var pinnedAlbum in viewModels)
-            Sidebar.PinnedAlbum.Add(pinnedAlbum);
+        foreach (var pinnedAlbum in viewModels) Sidebar.Pinned.Add(pinnedAlbum);
+        foreach (var pinnedPlaylist in pinnedViewModels) Sidebar.Pinned.Add(pinnedPlaylist);
+
+        Console.WriteLine("Loaded pinned albums");
+        _loaded = true;
     }
 
 

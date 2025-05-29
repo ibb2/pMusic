@@ -16,26 +16,10 @@ namespace pMusic.ViewModels;
 
 public partial class HomeViewModel : ViewModelBase
 {
-    private IMusic _music;
-    private Plex _plex;
-    private ObservableCollection<DisplayPlaylistViewModel> _playlists = new();
-
-    public ObservableCollection<DisplayAlbumViewModel> Albums { get; } = new();
-    public ObservableCollection<DisplayAlbumViewModel> TopEight { get; set; } = new();
-    public ObservableCollection<DisplayAlbumViewModel> RecentlyAddedAlbums { get; set; } = new();
-
-    public ObservableCollection<DisplayPlaylistViewModel> Playlists
-    {
-        get => _playlists;
-        set
-        {
-            if (Equals(value, _playlists)) return;
-            _playlists = value;
-            OnPropertyChanged();
-        }
-    }
-
     [ObservableProperty] public static bool isLoaded = false;
+    private IMusic _music;
+    private ObservableCollection<DisplayPlaylistViewModel> _playlists = new();
+    private Plex _plex;
 
 
     public HomeViewModel(IMusic music, Plex plex)
@@ -54,6 +38,21 @@ public partial class HomeViewModel : ViewModelBase
         Debug.Assert(_music != null, "IMusic is null");
         Debug.Assert(_plex != null, "Plex is null");
         Console.WriteLine($"HomeViewModel resolved: Plex: {_plex}, Music: {_music}");
+    }
+
+    public ObservableCollection<DisplayAlbumViewModel> Albums { get; } = new();
+    public ObservableCollection<DisplayAlbumViewModel> TopEight { get; set; } = new();
+    public ObservableCollection<DisplayAlbumViewModel> RecentlyAddedAlbums { get; set; } = new();
+
+    public ObservableCollection<DisplayPlaylistViewModel> Playlists
+    {
+        get => _playlists;
+        set
+        {
+            if (Equals(value, _playlists)) return;
+            _playlists = value;
+            OnPropertyChanged();
+        }
     }
 
     public async ValueTask LoadContent(bool isLoaded)
@@ -107,37 +106,6 @@ public partial class HomeViewModel : ViewModelBase
         Console.WriteLine($"Recently Added Albums loaded: {Albums.Count}");
     }
 
-
-    // public async Task LoadAlbumsAsync(CancellationToken ct)
-    // {
-    //     var albums = await _music.GetAllAlbums(ct, _plex);
-    //
-    //     var recentlyViewedAlbums = albums.OrderByDescending(a => a.LastViewedAt).ToImmutableList();
-    //     var recentlyAddedAlbums = albums.OrderByDescending(a => a.AddedAt).ToImmutableList();
-    //
-    //     // Update on UI thread
-    //     await Dispatcher.UIThread.InvokeAsync(() =>
-    //     {
-    //         Albums.Clear();
-    //         var count = 0;
-    //         foreach (var recentlyViewedAlbum in recentlyViewedAlbums)
-    //         {
-    //             Albums.Add(recentlyViewedAlbum);
-    //             if (count < 8)
-    //             {
-    //                 TopEight.Add(recentlyViewedAlbum);
-    //             }
-    //
-    //             count++;
-    //         }
-    //
-    //         foreach (var recentlyAddedAlbum in recentlyAddedAlbums)
-    //         {
-    //             RecentlyAddedAlbums.Add(recentlyAddedAlbum);
-    //         }
-    //     });
-    // }
-
     public async Task LoadPlaylistsAsync(bool isLoaded)
     {
         Playlists = new();
@@ -161,5 +129,11 @@ public partial class HomeViewModel : ViewModelBase
     public void GoToAlbumPage(Album album)
     {
         GoToAlbum(album);
+    }
+
+    [RelayCommand]
+    public void GoToPlaylistPage(Playlist playlist)
+    {
+        GoToPlaylist(playlist);
     }
 }
