@@ -43,7 +43,7 @@ public partial class PlaylistView : UserControl
             double rowHeight = Tracklist.RowHeight;
             double headerHeight = Tracklist.ColumnHeaderHeight;
 
-            var half = (itemCount * 0.22) * 30;
+            var half = (itemCount * 0.23) * 30;
             // Add some padding to account for borders and internal spacing
             double padding = 4; // Adjust this value as needed
             double totalHeight = (rowHeight * itemCount) + headerHeight + padding + half;
