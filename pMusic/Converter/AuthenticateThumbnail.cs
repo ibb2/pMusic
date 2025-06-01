@@ -14,7 +14,7 @@ public class AuthenticateThumbnail : IValueConverter
     {
         if (value is String url)
         {
-            return url + "?X-Plex-Token=" + Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+            return url + "?X-Plex-Token=" + Keyring.GetPassword("com.ib", "pmusic", "authToken");
         }
 
         return value;

@@ -45,7 +45,7 @@ public class Plex
         _plexClientIdentifier = GetOrCreateClientIdentifier();
         try
         {
-            _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+            _plexToken = Keyring.GetPassword("com.ib", "pmusic", "authToken");
         }
         catch (Exception ex)
         {
@@ -55,7 +55,7 @@ public class Plex
 
         try
         {
-            _plexSessionIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+            _plexSessionIdentifier = Keyring.GetPassword("com.ib", "pmusic", "cIdentifier");
         }
         catch (KeyringException ex)
         {
@@ -75,7 +75,7 @@ public class Plex
         var clientIdentifier = "";
         try
         {
-            clientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+            clientIdentifier = Keyring.GetPassword("com.ib", "pmusic", "cIdentifier");
         }
         catch (KeyringException ex)
         {
@@ -87,7 +87,7 @@ public class Plex
         // Initial Setup create the Client Identifier and store for later use
         var guid = Guid.NewGuid().ToString();
         clientIdentifier = guid;
-        Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", guid);
+        Keyring.SetPassword("com.ib", "pmusic", "cIdentifier", guid);
 
         return clientIdentifier;
     }
@@ -115,8 +115,8 @@ public class Plex
             id = incomingXml.Attribute("id").ToString().Split('"')[1];
             code = incomingXml.Attribute("code").ToString().Split('"')[1];
 
-            Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", id);
-            Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", code);
+            Keyring.SetPassword("com.ib", "pmusic", "id", id);
+            Keyring.SetPassword("com.ib", "pmusic", "code", code);
 
             Console.WriteLine("Successfully generated pin");
         }
@@ -175,7 +175,7 @@ public class Plex
             if (parsedToken.Length != 0 || !string.IsNullOrEmpty(parsedToken))
             {
                 authToken = parsedToken;
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", authToken);
+                Keyring.SetPassword("com.ib", "pmusic", "authToken", authToken);
                 isPinPolling = false;
                 Console.WriteLine("Successfully Authenticated");
             }
@@ -186,7 +186,7 @@ public class Plex
         } while (isPinPolling && authToken == null);
 
         _plexToken = authToken;
-        _plexApi = new PlexAPI(Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken"));
+        _plexApi = new PlexAPI(Keyring.GetPassword("com.ib", "pmusic", "authToken"));
         Console.WriteLine($"Redirecting");
     }
 
@@ -194,8 +194,8 @@ public class Plex
     {
         try
         {
-            _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
-            _plexId = Keyring.GetPassword("com.ib.pmusic", "pMusic", "id");
+            _plexToken = Keyring.GetPassword("com.ib", "pmusic", "authToken");
+            _plexId = Keyring.GetPassword("com.ib", "pmusic", "id");
         }
         catch (KeyringException ex)
         {

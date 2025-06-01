@@ -36,7 +36,7 @@ public class BassFlacPlayer : IAudioPlayer
         _isEndHandled = false;
 
         // Create a stream.
-        var filePath = url + "?X-Plex-Token=" + Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+        var filePath = url + "?X-Plex-Token=" + Keyring.GetPassword("com.ib", "pmusic", "authToken");
 
         _stream =
             BassFlac.CreateStream(

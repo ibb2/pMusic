@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using KeySharp;
 using pMusic.Models;
 using pMusic.Services;
@@ -9,6 +10,9 @@ namespace pMusic.ViewModels;
 public partial class DisplayAlbumViewModel : PinnedItemViewModelBase
 {
     private readonly Plex _plex;
+    [ObservableProperty] public Album album;
+
+    [ObservableProperty] public string artist;
 
     public DisplayAlbumViewModel(Album album, Plex plex)
     {
@@ -19,9 +23,6 @@ public partial class DisplayAlbumViewModel : PinnedItemViewModelBase
         ImageUrl = album.Thumb;
     }
 
-    public string Artist { get; }
-    public Album Album { get; }
-
     public async Task LoadThumbAsync()
     {
         if (string.IsNullOrWhiteSpace(ImageUrl))
@@ -30,7 +31,7 @@ public partial class DisplayAlbumViewModel : PinnedItemViewModelBase
         try
         {
             var ThumbnailUrl = ImageUrl + "?X-Plex-Token=" +
-                               Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+                               Keyring.GetPassword("com.ib", "pmusic", "authToken");
             Image = await _plex.GetBitmapImage(ThumbnailUrl);
         }
         catch
