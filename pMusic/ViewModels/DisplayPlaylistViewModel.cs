@@ -14,6 +14,8 @@ public partial class DisplayPlaylistViewModel : PinnedItemViewModelBase
 
     [ObservableProperty] private Bitmap? composite;
 
+    [ObservableProperty] public Playlist playlist;
+
     public DisplayPlaylistViewModel(Playlist playlist, Plex plex)
     {
         _plex = plex;
@@ -22,8 +24,6 @@ public partial class DisplayPlaylistViewModel : PinnedItemViewModelBase
         Duration = playlist.Duration;
         ImageUrl = playlist.Composite;
     }
-
-    public Playlist Playlist { get; }
 
 
     public async Task LoadThumbAsync()

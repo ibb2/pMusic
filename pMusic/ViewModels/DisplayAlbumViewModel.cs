@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using KeySharp;
 using pMusic.Models;
 using pMusic.Services;
@@ -9,6 +10,9 @@ namespace pMusic.ViewModels;
 public partial class DisplayAlbumViewModel : PinnedItemViewModelBase
 {
     private readonly Plex _plex;
+    [ObservableProperty] public Album album;
+
+    [ObservableProperty] public string artist;
 
     public DisplayAlbumViewModel(Album album, Plex plex)
     {
@@ -18,9 +22,6 @@ public partial class DisplayAlbumViewModel : PinnedItemViewModelBase
         // Artist = album.Artist.Title;
         ImageUrl = album.Thumb;
     }
-
-    public string Artist { get; }
-    public Album Album { get; }
 
     public async Task LoadThumbAsync()
     {

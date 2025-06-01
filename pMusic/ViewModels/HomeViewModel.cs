@@ -55,7 +55,7 @@ public partial class HomeViewModel : ViewModelBase
         }
     }
 
-    public async ValueTask LoadContent(bool isLoaded)
+    public async Task LoadContent()
     {
         var allAlbums = await _music.GetAllAlbums(CancellationToken.None, _plex, isLoaded);
         await LoadHomepageAlbumsAsync(allAlbums);
@@ -72,10 +72,13 @@ public partial class HomeViewModel : ViewModelBase
 
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
 
-        Albums.Clear();
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            Albums.Clear();
 
-        foreach (var vm in viewModels)
-            Albums.Add(vm);
+            foreach (var vm in viewModels)
+                Albums.Add(vm);
+        });
 
         Console.WriteLine($"All Albums loaded: {Albums.Count}");
     }
@@ -87,20 +90,23 @@ public partial class HomeViewModel : ViewModelBase
 
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
 
-        RecentlyAddedAlbums.Clear();
-        var count = 0;
-
-        foreach (var vm in viewModels)
+        await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            if (count < 8)
+            RecentlyAddedAlbums.Clear();
+            var count = 0;
+
+            foreach (var vm in viewModels)
             {
-                TopEight.Add(vm);
+                if (count < 8)
+                {
+                    TopEight.Add(vm);
+                }
+
+                count++;
+
+                RecentlyAddedAlbums.Add(vm);
             }
-
-            count++;
-
-            RecentlyAddedAlbums.Add(vm);
-        }
+        });
 
 
         Console.WriteLine($"Recently Added Albums loaded: {Albums.Count}");
@@ -108,7 +114,8 @@ public partial class HomeViewModel : ViewModelBase
 
     public async Task LoadPlaylistsAsync(bool isLoaded)
     {
-        Playlists = new();
+        Playlists.Clear();
+
         var playlists = await _music.GetPlaylists(CancellationToken.None, _plex, isLoaded);
         var viewModels = playlists.Select(a => new DisplayPlaylistViewModel(a, _plex))
             .ToList();

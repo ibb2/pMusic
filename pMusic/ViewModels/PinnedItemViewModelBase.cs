@@ -6,9 +6,9 @@ namespace pMusic.ViewModels;
 
 public partial class PinnedItemViewModelBase : ObservableObject
 {
+    [ObservableProperty] public TimeSpan duration;
     [ObservableProperty] private Bitmap? image;
-    public string Title { get; set; }
-    public string ImageUrl { get; set; }
+    [ObservableProperty] public string imageUrl;
 
-    public TimeSpan Duration { get; set; }
+    [ObservableProperty] public string title;
 }
