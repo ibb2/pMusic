@@ -91,7 +91,7 @@ public partial class MainViewModel : ViewModelBase
 
         try
         {
-            authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+            authToken = Keyring.GetPassword("com.ib", "pmusic", "authToken");
         }
         catch (Exception ex)
         {
@@ -116,10 +116,10 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     public async Task Logout()
     {
-        Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", "");
-        Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", "");
-        Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", "");
-        Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", "");
+        Keyring.SetPassword("com.ib", "pmusic", "cIdentifier", "");
+        Keyring.SetPassword("com.ib", "pmusic", "id", "");
+        Keyring.SetPassword("com.ib", "pmusic", "code", "");
+        Keyring.SetPassword("com.ib", "pmusic", "authToken", "");
 
         IsLoggedIn = false;
         IsLoggedInTrue = true;

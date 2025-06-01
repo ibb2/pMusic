@@ -30,7 +30,7 @@ public partial class DisplayAlbumViewModel : PinnedItemViewModelBase
         try
         {
             var ThumbnailUrl = ImageUrl + "?X-Plex-Token=" +
-                               Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+                               Keyring.GetPassword("com.ib", "pmusic", "authToken");
             Image = await _plex.GetBitmapImage(ThumbnailUrl);
         }
         catch

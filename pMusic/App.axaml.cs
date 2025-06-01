@@ -76,14 +76,14 @@ public class App : Application
 
             try
             {
-                Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+                Keyring.GetPassword("com.ib", "pmusic", "authToken");
             }
             catch (Exception ex)
             {
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", "");
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", "");
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", "");
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", "");
+                Keyring.SetPassword("com.ib", "pmusic", "cIdentifier", "");
+                Keyring.SetPassword("com.ib", "pmusic", "id", "");
+                Keyring.SetPassword("com.ib", "pmusic", "code", "");
+                Keyring.SetPassword("com.ib", "pmusic", "authToken", "");
             }
 
 
@@ -94,7 +94,7 @@ public class App : Application
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
 
-                var authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+                var authToken = Keyring.GetPassword("com.ib", "pmusic", "authToken");
 
                 if (authToken.Length > 0)
                 {
