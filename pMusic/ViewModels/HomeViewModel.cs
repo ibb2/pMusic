@@ -21,6 +21,10 @@ public partial class HomeViewModel : ViewModelBase
     private ObservableCollection<DisplayPlaylistViewModel> _playlists = new();
     private Plex _plex;
 
+    [ObservableProperty] public ObservableCollection<DisplayAlbumViewModel> albums = new();
+    [ObservableProperty] public ObservableCollection<DisplayAlbumViewModel> recentlyAddedAlbums = new();
+    [ObservableProperty] public ObservableCollection<DisplayAlbumViewModel> topEight = new();
+
 
     public HomeViewModel(IMusic music, Plex plex)
     {
@@ -39,10 +43,6 @@ public partial class HomeViewModel : ViewModelBase
         Debug.Assert(_plex != null, "Plex is null");
         Console.WriteLine($"HomeViewModel resolved: Plex: {_plex}, Music: {_music}");
     }
-
-    public ObservableCollection<DisplayAlbumViewModel> Albums { get; } = new();
-    public ObservableCollection<DisplayAlbumViewModel> TopEight { get; set; } = new();
-    public ObservableCollection<DisplayAlbumViewModel> RecentlyAddedAlbums { get; set; } = new();
 
     public ObservableCollection<DisplayPlaylistViewModel> Playlists
     {

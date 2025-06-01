@@ -13,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using pMusic.Database;
 using pMusic.DI;
-using pMusic.Services;
 using pMusic.ViewModels;
 using pMusic.Views;
 
@@ -66,14 +65,6 @@ public class App : Application
                 Console.WriteLine($"An error occurred while applying migrations: {ex.Message}");
             }
 
-            var music = services.GetService<IMusic>();
-            var plex = services.GetService<Plex>();
-            var homeVm = new HomeViewModel();
-
-            Console.WriteLine($"IMusic resolved: {music != null}");
-            Console.WriteLine($"Plex resolved: {plex != null}");
-            Console.WriteLine($"HomeViewModel resolved: {homeVm != null}");
-
             try
             {
                 Keyring.GetPassword("com.ib", "pmusic", "authToken");
@@ -102,9 +93,6 @@ public class App : Application
                     {
                         DataContext = vm
                     };
-
-                    desktop.MainWindow.Loaded += // Subscribe to the Loaded event
-                        async (_, __) => { Ioc.Default.GetRequiredService<HomeViewModel>(); };
 
                     return;
                 }
