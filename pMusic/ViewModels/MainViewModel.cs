@@ -157,7 +157,13 @@ public partial class MainViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public void GoToAlbumDetialsPage(Album album)
+    public void GoToAlbumPage(Album album)
+    {
+        GoToAlbum(album);
+    }
+
+    [RelayCommand]
+    public void GoToPlaylistPage(Album album)
     {
         GoToAlbum(album);
     }

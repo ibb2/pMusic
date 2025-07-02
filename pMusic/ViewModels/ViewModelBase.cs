@@ -29,6 +29,7 @@ public abstract partial class ViewModelBase : ObservableObject
         {
             vm.Album = album;
             _ = vm.LoadAlbumThumbnail();
+            _ = vm.GetTracks();
         });
     }
 
