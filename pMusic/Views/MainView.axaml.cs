@@ -31,20 +31,21 @@ public partial class MainView : UserControl
         if (sender is not SukiSideMenuItem sukiSideMenuItem)
             return;
 
+        if (DataContext is not MainViewModel viewModel) return;
+
+
         switch (sukiSideMenuItem.DataContext)
         {
             case DisplayAlbumViewModel displayAlbumViewModel:
                 if (displayAlbumViewModel.Album is null) return;
-                if (DataContext is not MainViewModel viewModel) return;
 
-                viewModel.GoToAlbumDetialsPage(displayAlbumViewModel.Album);
-                break;
+                viewModel.GoToAlbumPageCommand.Execute(displayAlbumViewModel.Album);
+                return;
             case DisplayPlaylistViewModel displayPlaylistViewModel:
                 if (displayPlaylistViewModel.Playlist is null) return;
-                if (DataContext is not MainViewModel pViewModel) return;
 
-                pViewModel.GoToPlaylist(displayPlaylistViewModel.playlist);
-                break;
+                viewModel.GoToPlaylistPageCommand.Execute(displayPlaylistViewModel.playlist);
+                return;
         }
     }
 
