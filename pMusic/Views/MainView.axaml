@@ -113,10 +113,10 @@
                 </suki:SukiSideMenu.Styles>
                 <suki:SukiSideMenu.ItemTemplate>
                     <DataTemplate>
-                        <suki:SukiSideMenuItem Header="{Binding Title}">
+                        <suki:SukiSideMenuItem Header="{Binding Title}" PointerPressed="GoTo">
                             <suki:SukiSideMenuItem.Icon>
                                 <Grid>
-                                    <Border CornerRadius="2" Margin="0 0 12 0" ClipToBounds="True">
+                                    <Border CornerRadius="2" Margin="0 0 0 0" ClipToBounds="True">
                                         <Image Source="/Assets/Images/blank_playlist.png" Width="50" />
                                     </Border>
                                     <Image Source="{Binding Image}" Width="50" />
