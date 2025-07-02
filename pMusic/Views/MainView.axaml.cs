@@ -31,16 +31,21 @@ public partial class MainView : UserControl
         if (sender is not SukiSideMenuItem sukiSideMenuItem)
             return;
 
-        if (sukiSideMenuItem.DataContext is not DisplayAlbumViewModel displayAlbumViewModel)
-            return;
+        switch (sukiSideMenuItem.DataContext)
+        {
+            case DisplayAlbumViewModel displayAlbumViewModel:
+                if (displayAlbumViewModel.Album is null) return;
+                if (DataContext is not MainViewModel viewModel) return;
 
-        if (displayAlbumViewModel.Album is null)
-            return;
+                viewModel.GoToAlbumDetialsPage(displayAlbumViewModel.Album);
+                break;
+            case DisplayPlaylistViewModel displayPlaylistViewModel:
+                if (displayPlaylistViewModel.Playlist is null) return;
+                if (DataContext is not MainViewModel pViewModel) return;
 
-        if (DataContext is not MainViewModel viewModel)
-            return;
-
-        viewModel.GoToAlbumDetialsPage(displayAlbumViewModel.Album);
+                pViewModel.GoToPlaylist(displayPlaylistViewModel.playlist);
+                break;
+        }
     }
 
     private void Thumb_OnDragCompleted(object? sender, VectorEventArgs e)
