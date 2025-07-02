@@ -178,7 +178,7 @@
                                VerticalAlignment="Center" Margin="8 4" />
                 </StackPanel>
             </StackPanel>
-            <StackPanel Grid.Column="1" VerticalAlignment="Stretch">
+            <StackPanel Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="8">
                     <Button
@@ -214,20 +214,21 @@
                         <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Forward" />
                     </Button>
                 </StackPanel>
-                <Grid ColumnDefinitions="30, 250, *"
-                      VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid ColumnDefinitions="30, *, 30" HorizontalAlignment="Stretch">
                     <TextBlock
                         Text="{Binding MusicPlayer.Position, Converter={StaticResource SecondsToMinutesConverter}}"
                         VerticalAlignment="Center" />
-                    <Slider Grid.Column="1" Maximum="{Binding MusicPlayer.Track.Duration}"
-                            Value="{Binding MusicPlayer.Position}" Width="250" Padding="4 0"
-                            Thumb.DragCompleted="Thumb_OnDragCompleted" x:Name="MySlider"
-                            VerticalAlignment="Center" AttachedToVisualTree="Slider_AttachedToVisualTree" />
-
+                    <Slider Grid.Column="1" Value="{Binding MusicPlayer.Position}"
+                            Maximum="{Binding MusicPlayer.Duration}"
+                            Width="350"
+                            Thumb.DragCompleted="Thumb_OnDragCompleted"
+                            x:Name="MySlider" VerticalAlignment="Center"
+                            AttachedToVisualTree="Slider_AttachedToVisualTree" />
                     <TextBlock Grid.Column="2"
                                Text="{Binding MusicPlayer.Track.Duration, Converter={StaticResource SecondsToMinutesConverter}}"
                                VerticalAlignment="Center" />
                 </Grid>
+
             </StackPanel>
             <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
                 <Button Classes="Basic Icon" Command="{Binding ToggleSidecarCommand}" VerticalAlignment="Center">

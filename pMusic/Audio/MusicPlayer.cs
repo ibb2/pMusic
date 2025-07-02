@@ -19,7 +19,7 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public Artist artist;
     [ObservableProperty] public IAudioBackend audioBackend;
     [ObservableProperty] public IAudioPlayer audioPlayer;
-    [ObservableProperty] public long duration;
+    [ObservableProperty] public double? duration = null;
     [ObservableProperty] ObservableQueue<Track> highPriorityTracks = new();
     [ObservableProperty] ObservableCollection<Track> highPriorityTracksBacking = new();
     [ObservableProperty] public Bitmap image;

@@ -53,7 +53,8 @@ public class BassFlacPlayer : IAudioPlayer
 
         // Set MusicPlayer information (Accessible in UI)
         _musicPlayer.Position = 0;
-        _musicPlayer.Duration = ManagedBass.Bass.ChannelGetLength(_stream);
+        _musicPlayer.Duration =
+            ManagedBass.Bass.ChannelBytes2Seconds(_stream, ManagedBass.Bass.ChannelGetLength(_stream));
         _musicPlayer.MPlaybackState = PlaybackState.Playing;
         _musicPlayer.IsPlaying = true;
         _musicPlayer.Track = track;

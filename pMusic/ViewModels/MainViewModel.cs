@@ -142,6 +142,7 @@ public partial class MainViewModel : ViewModelBase
 
     public void Seek(double value)
     {
+        if (!MusicPlayer.IsPlaying) return;
         MusicPlayer.AudioBackend.Seek(value);
     }
 
