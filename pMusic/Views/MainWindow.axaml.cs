@@ -8,4 +8,12 @@ public partial class MainWindow : SukiWindow
     {
         InitializeComponent();
     }
+
+    // protected override void OnClosing(WindowClosingEventArgs e)
+    // {
+    //     var window = this;
+    //
+    //     window.Hide();
+    //     e.Cancel = true;
+    // }
 }
