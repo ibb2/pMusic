@@ -59,6 +59,11 @@
                                         <!-- </Border> -->
                                         <TextBlock Text="{Binding Album.Artist.Title}" FontWeight="SemiBold"
                                                    VerticalAlignment="Center">
+                                            <TextBlock.Styles>
+                                                <Style Selector="TextBlock:pointerover">
+                                                    <Setter Property="TextDecorations" Value="Underline" />
+                                                </Style>
+                                            </TextBlock.Styles>
                                         </TextBlock>
                                         <TextBlock Text="{Binding Album.OriginallyAvailableAt}"
                                                    VerticalAlignment="Center">
