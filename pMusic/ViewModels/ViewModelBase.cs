@@ -51,6 +51,7 @@ public abstract partial class ViewModelBase : ObservableObject
         Navigation.GoToView<ArtistViewModel>(vm =>
         {
             vm.Artist = artist;
+            vm.LoadAlbumCover();
             vm.Title = "Updated Artist Title";
         });
     }

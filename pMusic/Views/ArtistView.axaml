@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
+             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
              x:Class="pMusic.Views.ArtistView"
@@ -14,13 +15,22 @@
     </Design.DataContext>
     <ScrollViewer>
         <Grid RowDefinitions="Auto, Auto, *">
-            <TextBlock Text="{Binding Artist.Title}"></TextBlock>
             <Grid ColumnDefinitions="Auto, *">
-                <Border ClipToBounds="True" CornerRadius="1000">
-                    <Image Source="/Assets/Images/blank_playlist.png" Width="200"></Image>
-                </Border>
+                <Grid>
+                    <Border ClipToBounds="True" CornerRadius="15">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="200" ClipToBounds="True"></Image>
+                    </Border>
+                    <Border ClipToBounds="True" CornerRadius="15">
+                        <Image asyncImageLoader:ImageLoader.Source="{Binding ImageUrl}" Width="200" ClipToBounds="True"></Image>
+                    </Border>
+                </Grid>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="36 0 0 0 ">
-                    <TextBlock VerticalAlignment="Center" FontSize="50">Kanye West</TextBlock>
+                    <Viewbox Stretch="Fill" StretchDirection="Both" MaxWidth="350"
+                             HorizontalAlignment="Left">
+                        <TextBlock VerticalAlignment="Center" FontSize="50">
+                            <Run Text="{Binding Artist.Title}" />
+                        </TextBlock>
+                    </Viewbox>
                     <!-- <TextBlock>Monthly Listeners 68,000,000</TextBlock> -->
                 </StackPanel>
             </Grid>
