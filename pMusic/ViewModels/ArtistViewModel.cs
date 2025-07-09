@@ -1,9 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using pMusic.Models;
 
 namespace pMusic.ViewModels;
 
-public partial class ArtistViewModel: ViewModelBase
+public partial class ArtistViewModel : ViewModelBase
 {
-    [ObservableProperty]
-    public string _title = "Title";
+    [ObservableProperty] public Artist _Artist;
+    [ObservableProperty] public string _title = "Title";
 }

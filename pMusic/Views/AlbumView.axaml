@@ -58,7 +58,8 @@
                                         <!--     <Image Source="/Assets/Images/blank_playlist.png" Width="30" Height="30" /> -->
                                         <!-- </Border> -->
                                         <TextBlock Text="{Binding Album.Artist.Title}" FontWeight="SemiBold"
-                                                   VerticalAlignment="Center">
+                                                   VerticalAlignment="Center"
+                                                   PointerPressed="InputElement_OnPointerPressed">
                                             <TextBlock.Styles>
                                                 <Style Selector="TextBlock:pointerover">
                                                     <Setter Property="TextDecorations" Value="Underline" />
