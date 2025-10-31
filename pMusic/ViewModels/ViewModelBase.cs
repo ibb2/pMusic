@@ -52,6 +52,7 @@ public abstract partial class ViewModelBase : ObservableObject
         {
             vm.Artist = artist;
             vm.LoadAlbumCover();
+            _ = vm.LoadArtistAlbums();
             vm.Title = "Updated Artist Title";
         });
     }
