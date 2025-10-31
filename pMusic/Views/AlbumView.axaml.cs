@@ -28,6 +28,15 @@ public partial class AlbumView : UserControl
         Console.WriteLine("Entered");
         Console.WriteLine($"{e.GetCurrentPoint(this).Position}");
     }
+
+    private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not TextBlock textBlock) return;
+
+        Console.WriteLine($"Textblock,{textBlock.Text}");
+        var vm = DataContext as AlbumViewModel;
+        vm?.GoToArtist(vm.Album!.Artist);
+    }
 }
 
 public class TimeSpanToMinSecConverter : IValueConverter
