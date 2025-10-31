@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -23,6 +24,7 @@ public partial class ArtistViewModel : ViewModelBase
     [ObservableProperty] public string _albumTitle = "MUSIC";
     [ObservableProperty] public string _albumTrackLength = "30";
     [ObservableProperty] public Artist _Artist;
+    [ObservableProperty] public Bitmap _image;
     [ObservableProperty] public string _imageUrl;
     private IMusic _music;
     private MusicDbContext _musicDbContext;
@@ -58,10 +60,11 @@ public partial class ArtistViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public void LoadAlbumCover()
+    public async Task LoadArtistCover()
     {
         ImageUrl = Artist.Thumb + "?X-Plex-Token=" +
                    Keyring.GetPassword("com.ib", "pmusic", "authToken");
+        _image = await _plex.GetBitmapImage(ImageUrl);
     }
 
     [RelayCommand]
@@ -82,5 +85,11 @@ public partial class ArtistViewModel : ViewModelBase
         });
 
         Console.WriteLine($"Artist albums loaded: {Albums.Count}");
+    }
+
+    [RelayCommand]
+    public void GoToAlbumPage(Album album)
+    {
+        GoToAlbum(album);
     }
 }

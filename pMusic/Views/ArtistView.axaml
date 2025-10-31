@@ -5,6 +5,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
              xmlns:controls="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
+             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
              x:Class="pMusic.Views.ArtistView"
              x:DataType="vm:ArtistViewModel">
     <Design.DataContext>
@@ -28,7 +29,7 @@
                                     <Image Source="/Assets/Images/blank_playlist.png" Width="300" />
                                 </Border>
                                 <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
-                                    <Image Source="{Binding ImageUrl}" Width="300" />
+                                    <Image asyncImageLoader:ImageLoader.Source="{Binding ImageUrl}" Width="300" />
                                 </Border>
                             </Grid>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -81,7 +82,7 @@
                                     <DataTemplate>
                                         <Button
                                             Classes="Flat"
-                                            Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
+                                            Command="{Binding $parent.((vm:ArtistViewModel)DataContext).GoToAlbumPageCommand}"
                                             CommandParameter="{Binding Album}"
                                             Padding="8"
                                             Background="Transparent">
