@@ -2,9 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
+             xmlns:controls="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              x:Class="pMusic.Views.ArtistView"
              x:DataType="vm:ArtistViewModel">
     <Design.DataContext>
@@ -12,32 +12,62 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:ArtistViewModel />
     </Design.DataContext>
-    <ScrollViewer>
-        <Grid RowDefinitions="Auto, Auto, *">
-            <Grid ColumnDefinitions="Auto, *">
-                <Grid>
-                    <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
-                        <Image Source="/Assets/Images/blank_playlist.png" Width="200" ClipToBounds="True"></Image>
-                    </Border>
-                    <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
-                        <Image asyncImageLoader:ImageLoader.Source="{Binding ImageUrl}" Width="200" ClipToBounds="True"></Image>
-                    </Border>
-                </Grid>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="36 0 0 0 ">
-                    <Viewbox Stretch="Fill" StretchDirection="Both" MaxWidth="350"
-                             HorizontalAlignment="Left">
-                        <TextBlock VerticalAlignment="Center" FontSize="50">
-                            <Run Text="{Binding Artist.Title}" />
-                        </TextBlock>
-                    </Viewbox>
-                    <!-- <TextBlock>Monthly Listeners 68,000,000</TextBlock> -->
-                </StackPanel>
-            </Grid>
-            <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
-                <TextBlock FontSize="28" FontWeight="SemiBold" Margin="0 8">Discography</TextBlock>
-                <StackPanel Grid.Row="1">
-                    <TextBlock FontSize="18" Margin="0 0 0 12">Albums</TextBlock>
-                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Hidden">
+    <ScrollViewer ClipToBounds="True" CornerRadius="8" VerticalScrollBarVisibility="Hidden">
+        <Border CornerRadius="8" ClipToBounds="True">
+            <!-- <cc:FourCornerGradientBlur TopLeftColor="{Binding Album.UltraBlurColors.TopLeft}" -->
+            <!--                            TopRightColor="{Binding Album.UltraBlurColors.TopRight}" -->
+            <!--                            BottomLeftColor="{Binding Album.UltraBlurColors.BottomLeft}" -->
+            <!--                            BottomRightColor="{Binding Album.UltraBlurColors.BottomRight}" CornerRadius="8" -->
+            <!--                            ClipToBounds="True"> -->
+            <Border Padding="16 8" Margin="0 4 8 2" CornerRadius="8" ClipToBounds="True">
+                <Grid RowDefinitions="Auto, Auto, *">
+                    <Grid>
+                        <Grid ColumnDefinitions="Auto, *" VerticalAlignment="Top">
+                            <Grid>
+                                <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
+                                    <Image Source="/Assets/Images/blank_playlist.png" Width="300" />
+                                </Border>
+                                <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
+                                    <Image Source="{Binding ImageUrl}" Width="300" />
+                                </Border>
+                            </Grid>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock>Artist</TextBlock>
+                                <Viewbox Stretch="Fill" StretchDirection="Both" MaxWidth="150" MaxHeight="200"
+                                         HorizontalAlignment="Left">
+                                    <TextBlock Classes="h1" Text="{Binding Artist.Title}"></TextBlock>
+                                </Viewbox>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
+                        <StackPanel Orientation="Horizontal" Spacing="20">
+                            <Button Classes="Flat Icon" HorizontalContentAlignment="Center">
+                                <controls:HeroIcon Foreground="{DynamicResource SukiText}"
+                                                   Type="Play"
+                                                   Kind="Solid" Min="True" Margin="4 0 0 0">
+                                </controls:HeroIcon>
+                            </Button>
+                            <Button Classes="Basic Icon">
+                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="ArrowsRightLeft"></controls:HeroIcon>
+                            </Button>
+                            <Button Classes="Basic Icon">
+                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="Plus"></controls:HeroIcon>
+                            </Button>
+                            <Button Classes="Basic Icon">
+                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="CloudArrowDown"></controls:HeroIcon>
+                            </Button>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock VerticalAlignment="Center">
+                                List
+                            </TextBlock>
+                            <Button Classes="Basic Icon" VerticalAlignment="Center">
+                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="ListBullet"></controls:HeroIcon>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Hidden">
                         <StackPanel Orientation="Horizontal" Spacing="24">
                             <StackPanel Spacing="8">
                                 <Border CornerRadius="10" ClipToBounds="True">
@@ -95,9 +125,9 @@
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
-                </StackPanel>
-            </Grid>
-            <!-- <Button Content="Go To Track Page" HorizontalAlignment="Stretch" Command="{Binding GoToTrack}" Height="50"></Button> -->
-        </Grid>
+                </Grid>
+            </Border>
+            <!-- </cc:FourCornerGradientBlur> -->
+        </Border>
     </ScrollViewer>
 </UserControl>
