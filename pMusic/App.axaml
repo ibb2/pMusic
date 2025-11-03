@@ -12,7 +12,7 @@
 
     <Application.Styles>
         <shadUi:ShadTheme />
-        <!-- <FluentTheme /> -->
+        <FluentTheme />
         <!-- <FluentTheme> -->
         <!--     <FluentTheme.Palettes> -->
         <!--         <ColorPaletteResources x:Key="Light" Accent="#ff6da2a0" AltHigh="White" AltLow="White" -->

@@ -143,4 +143,9 @@ public partial class HomeViewModel : ViewModelBase
     {
         GoToPlaylist(playlist);
     }
+
+    [RelayCommand]
+    private void ShowToastWithTitle()
+    {
+    }
 }
