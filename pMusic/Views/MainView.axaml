@@ -8,6 +8,7 @@
              xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              xmlns:converter="clr-namespace:pMusic.Converter"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -73,11 +74,7 @@
                     <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Bell" />
                 </Button>
                 <Button Classes="Icon" BorderThickness="0">
-                    <Border CornerRadius="100" ClipToBounds="True">
-                        <Viewbox StretchDirection="DownOnly" Stretch="UniformToFill">
-                            <Image Source="{Binding ThumbnailUrl}" />
-                        </Viewbox>
-                    </Border>
+                    <shadUi:Avatar Source="{Binding ThumbnailUrl}" />
                     <Button.Flyout>
                         <Flyout>
                             <StackPanel>
