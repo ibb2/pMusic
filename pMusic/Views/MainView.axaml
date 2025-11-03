@@ -9,6 +9,7 @@
              xmlns:converter="clr-namespace:pMusic.Converter"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
+             xmlns:converters="clr-namespace:ShadUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -70,25 +71,55 @@
                 <TextBox Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                <Button Classes="Basic">
-                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Bell" />
-                </Button>
-                <Button Classes="Icon" BorderThickness="0">
-                    <shadUi:Avatar Source="{Binding ThumbnailUrl}" />
-                    <Button.Flyout>
-                        <Flyout>
-                            <StackPanel>
-                                <!-- Or Account -->
-                                <Button IsVisible="{Binding IsLoggedIn}" Command="{Binding LogoutCommand}">Log out</Button>
-                                <!-- Profile -->
-                                <!-- Support -->
-                                <!-- Private Session -->
-                                <!-- Settings -->
-                                <!-- Log out -->
-                            </StackPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
+                <Menu HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <MenuItem
+                        CornerRadius="{DynamicResource LgCornerRadius}"
+                        shadUi:MenuItemAssist.PopupHorizontalOffset="4"
+                        shadUi:MenuItemAssist.PopupPlacement="BottomEdgeAlignedRight"
+                        shadUi:MenuItemAssist.PopupVerticalOffset="4" Padding="0">
+                        <MenuItem.Header>
+                            <shadUi:Avatar
+                                CornerRadius="{DynamicResource LgCornerRadius}"
+                                Fallback="CN"
+                                IsVisible="{Binding !$parent[shadUi:Sidebar].Expanded}"
+                                Opacity="{Binding !$parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.Opaque}}"
+                                Source="{Binding ThumbnailUrl}">
+                                <shadUi:Avatar.Transitions>
+                                    <Transitions>
+                                        <DoubleTransition Property="Opacity" Duration="0:0:0.20" />
+                                    </Transitions>
+                                </shadUi:Avatar.Transitions>
+                            </shadUi:Avatar>
+                        </MenuItem.Header>
+                        <shadUi:MenuItemAssist.Label>
+                            <TextBlock Classes="Caption Muted" Text="My Account" />
+                        </shadUi:MenuItemAssist.Label>
+                        <MenuItem
+                            Width="224"
+                            Header="Profile"
+                            InputGesture="Ctrl + Shift + P" />
+                        <MenuItem Header="Billing" InputGesture="Ctrl + B" />
+                        <MenuItem Header="Settings" InputGesture="Ctrl + S" />
+                        <MenuItem Header="Keyboard shortcuts" InputGesture="Ctrl + K" />
+                        <Separator />
+                        <MenuItem Header="Team" />
+                        <MenuItem Header="Invite users">
+                            <MenuItem Width="128" Header="Email" />
+                            <MenuItem Header="Message" />
+                            <MenuItem Header="More..." />
+                        </MenuItem>
+                        <MenuItem Header="New Team" InputGesture="Ctrl + T" />
+                        <Separator />
+                        <MenuItem Header="Github" />
+                        <MenuItem Header="Support" />
+                        <MenuItem Header="API" IsEnabled="False" />
+                        <Separator />
+                        <MenuItem Header="Log out" InputGesture="Ctrl + Shift + Q" IsVisible="{Binding IsLoggedIn}"
+                                  Command="{Binding LogoutCommand}" />
+                        <Separator />
+                        <MenuItem Classes="Destructive" Header="Delete Account" />
+                    </MenuItem>
+                </Menu>
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="Auto, 2*, Auto">
