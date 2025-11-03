@@ -138,7 +138,7 @@
                 </suki:SukiSideMenu.HeaderContent>
             </suki:SukiSideMenu>
             <!-- Main Content -->
-            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 0 10" Padding="0">
+            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 0 10" Padding="0" IsAnimated="False">
                 <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
                     <ContentControl.DataTemplates>
                         <DataTemplate DataType="{x:Type vm:HomeViewModel}">

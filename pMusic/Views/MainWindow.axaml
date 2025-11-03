@@ -1,17 +1,16 @@
-<sukiUi:SukiWindow xmlns="https://github.com/avaloniaui"
-                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                   xmlns:vm="using:pMusic.ViewModels"
-                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                   xmlns:sukiUi="clr-namespace:SukiUI.Controls;assembly=SukiUI"
-                   xmlns:views="clr-namespace:pMusic.Views"
-                   xmlns:local="clr-namespace:pMusic.Interface"
-                   mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-                   x:Class="pMusic.Views.MainWindow"
-                   x:DataType="vm:MainViewModel"
-                   Icon="/Assets/avalonia-logo.ico"
-                   Title="pMusic"
-                   IsNativeTrafficLightVisible="True">
+<husk:AppWindow xmlns="https://github.com/avaloniaui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:vm="using:pMusic.ViewModels"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                xmlns:views="clr-namespace:pMusic.Views"
+                xmlns:local="clr-namespace:pMusic.Interface"
+                xmlns:husk="https://github.com/d3ara1n/Huskui.Avalonia"
+                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                x:Class="pMusic.Views.MainWindow"
+                x:DataType="vm:MainViewModel"
+                Icon="/Assets/avalonia-logo.ico"
+                Title="pMusic">
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -27,4 +26,4 @@
             </DataTemplate>
         </ContentControl.DataTemplates>
     </UserControl>
-</sukiUi:SukiWindow>
+</husk:AppWindow>

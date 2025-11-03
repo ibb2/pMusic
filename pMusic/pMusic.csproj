@@ -31,6 +31,7 @@
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm"/>
         <PackageReference Include="HeroIcons.Avalonia"/>
+        <PackageReference Include="Huskui.Avalonia"/>
         <PackageReference Include="KeySharp"/>
         <PackageReference Include="LukeHagar.PlexAPI.SDK"/>
         <PackageReference Include="ManagedBass"/>

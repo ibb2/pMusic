@@ -10,6 +10,7 @@
         <PackageReference Include="AsyncImageLoader.Avalonia"/>
         <PackageReference Include="Avalonia.iOS"/>
         <PackageReference Include="HeroIcons.Avalonia"/>
+        <PackageReference Include="Huskui.Avalonia"/>
         <PackageReference Include="ManagedBass"/>
         <PackageReference Include="ManagedBass.Flac"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore"/>
