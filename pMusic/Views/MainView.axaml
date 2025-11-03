@@ -3,11 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
-             xmlns:local="clr-namespace:pMusic.Interface"
-             xmlns:views="clr-namespace:pMusic.Views"
              xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              xmlns:converter="clr-namespace:pMusic.Converter"
-             xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
              xmlns:converters="clr-namespace:ShadUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -123,71 +120,6 @@
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="Auto, 2*, Auto">
-            <!-- Sidebar -->
-            <suki:SukiSideMenu IsSearchEnabled="True"
-                               ItemsSource="{Binding Sidebar.Pinned}"
-                               IsContentVisible="False" Margin="0">
-                <suki:SukiSideMenu.Styles>
-                    <Style Selector="Image.AppIcon">
-                        <Setter Property="Transitions">
-                            <Transitions>
-                                <DoubleTransition Property="Opacity" Duration="0.1" />
-                            </Transitions>
-                        </Setter>
-                        <Style Selector="^:pointerover">
-                            <Setter Property="Opacity" Value="0.5" />
-                        </Style>
-                    </Style>
-                </suki:SukiSideMenu.Styles>
-                <suki:SukiSideMenu.ItemTemplate>
-                    <DataTemplate>
-                        <suki:SukiSideMenuItem Header="{Binding Title}" PointerPressed="GoTo">
-                            <suki:SukiSideMenuItem.Icon>
-                                <Grid>
-                                    <Border CornerRadius="2" Margin="0 0 0 0" ClipToBounds="True">
-                                        <Image Source="/Assets/Images/blank_playlist.png" Width="50" />
-                                    </Border>
-                                    <Image Source="{Binding Image}" Width="50" />
-                                </Grid>
-                            </suki:SukiSideMenuItem.Icon>
-                        </suki:SukiSideMenuItem>
-                    </DataTemplate>
-                </suki:SukiSideMenu.ItemTemplate>
-
-                <suki:SukiSideMenu.HeaderContent>
-                    <!-- <Image Width="80" -->
-                    <!--        Height="80" -->
-                    <!--        Margin="30,10,30,30" -->
-                    <!--        Classes="AppIcon" -->
-                    <!--        IsVisible="{Binding $parent[suki:SukiWindow].((demo:SukiUIDemoViewModel)DataContext).TitleBarVisible}" -->
-                    <!--        PointerPressed="InputElement_OnPointerPressed" -->
-                    <!--        Source="Assets/OIG.N5o-removebg-preview.png" -->
-                    <!--        ToolTip.Tip="Click To Toggle Top Menu." /> -->
-                </suki:SukiSideMenu.HeaderContent>
-            </suki:SukiSideMenu>
-            <!-- Main Content -->
-            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 0 10" Padding="0" IsAnimated="False">
-                <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
-                    <ContentControl.DataTemplates>
-                        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
-                            <views:HomeView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type vm:AlbumViewModel}">
-                            <views:AlbumView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type vm:ArtistViewModel}">
-                            <views:ArtistView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type vm:TrackViewModel}">
-                            <views:TrackView />
-                        </DataTemplate>
-                    </ContentControl.DataTemplates>
-                </UserControl>
-            </suki:GlassCard>
-            <suki:GlassCard Grid.Column="3" CornerRadius="17" Margin="4 5 10 10" Padding="0"
-                            IsVisible="{Binding IsSidecarOpen}" MinWidth="250">
-                <views:SidecarView />
-            </suki:GlassCard>
         </Grid>
         <Grid Grid.Row="2" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
             <!-- Bottom Music Player -->
@@ -243,12 +175,12 @@
                     <TextBlock
                         Text="{Binding MusicPlayer.Position, Converter={StaticResource SecondsToMinutesConverter}}"
                         VerticalAlignment="Center" />
-                    <Slider Grid.Column="1" Value="{Binding MusicPlayer.Position}"
-                            Maximum="{Binding MusicPlayer.Duration}"
-                            Width="350"
-                            Thumb.DragCompleted="Thumb_OnDragCompleted"
-                            x:Name="MySlider" VerticalAlignment="Center"
-                            AttachedToVisualTree="Slider_AttachedToVisualTree" />
+                    <!-- <Slider Grid.Column="1" Value="{Binding MusicPlayer.Position}" -->
+                    <!--         Maximum="{Binding MusicPlayer.Duration}" -->
+                    <!--         Width="350" -->
+                    <!--         Thumb.DragCompleted="Thumb_OnDragCompleted" -->
+                    <!--         x:Name="MySlider" VerticalAlignment="Center" -->
+                    <!--         AttachedToVisualTree="Slider_AttachedToVisualTree" /> -->
                     <TextBlock Grid.Column="2"
                                Text="{Binding MusicPlayer.Track.Duration, Converter={StaticResource SecondsToMinutesConverter}}"
                                VerticalAlignment="Center" />
@@ -274,6 +206,5 @@
             </StackPanel>
         </Grid>
     </Grid>
-
     <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
 </UserControl>

@@ -7,6 +7,8 @@
         xmlns:local="clr-namespace:pMusic.Interface"
         xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
         xmlns:converters="clr-namespace:ShadUI"
+        xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
+        xmlns:controls="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="pMusic.Views.MainWindow"
         x:DataType="vm:MainViewModel"
@@ -23,165 +25,143 @@
                 Grid.Column="0"
                 Width="220"
                 MinWidth="60"
-                Padding="{Binding #Toggler.IsChecked, Converter={x:Static converters:BooleanConverters.SidebarPadding}}"
+                Padding="8"
                 BorderBrush="{DynamicResource BorderColor30}"
                 BorderThickness="0,0,1,0"
-                Expanded="{Binding #Toggler.IsChecked}">
+                Expanded="True">
                 <shadUi:Sidebar.ExpandEasing>
                     <shadUi:EaseInOutBack BounceIntensity="Strong" />
                 </shadUi:Sidebar.ExpandEasing>
-                <shadUi:Sidebar.Header>
-                    <ToggleButton
-                        Name="Toggler"
-                        Width="32"
-                        Height="32"
-                        Padding="8"
-                        HorizontalAlignment="{Binding #Toggler.IsChecked, Converter={x:Static converters:BooleanConverters.SidebarTogglerHorizontalAlignment}}"
-                        CornerRadius="{DynamicResource LgCornerRadius}"
-                        Theme="{DynamicResource SideTogglerTheme}">
-                        <Viewbox>
-                            <TextBlock Classes="LucideIcon" Text="&#57646;" />
-                        </Viewbox>
-                    </ToggleButton>
-                </shadUi:Sidebar.Header>
                 <StackPanel Spacing="4">
-                    <shadUi:SidebarItemLabel AsSeparator="True" Text="Get Started" />
                     <shadUi:SidebarItem
-                        Content="Dashboard"
+                        Content="Home"
                         IsChecked="True"
-                        Route="dashboard"
-                        ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Dashboard'}">
+                        Route="dashboard">
                         <shadUi:SidebarItem.Icon>
                             <Viewbox>
-                                <TextBlock
-                                    Classes="LucideIcon"
-                                    Foreground="{DynamicResource ForegroundColor}"
-                                    Text="&#57793;" />
+                                <iconPacks:PackIconLucide Kind="House"></iconPacks:PackIconLucide>
                             </Viewbox>
                         </shadUi:SidebarItem.Icon>
                     </shadUi:SidebarItem>
                     <shadUi:SidebarItem
-                        Content="Theming"
-                        Route="theme"
-                        ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Theming'}">
+                        Content="Your Library"
+                        Route="theme">
                         <shadUi:SidebarItem.Icon>
                             <Viewbox>
-                                <TextBlock
-                                    Classes="LucideIcon"
-                                    Foreground="{DynamicResource ForegroundColor}"
-                                    Text="&#58088;" />
+                                <iconPacks:PackIconLucide Kind="Library"></iconPacks:PackIconLucide>
                             </Viewbox>
                         </shadUi:SidebarItem.Icon>
                     </shadUi:SidebarItem>
-                    <shadUi:SidebarItem
-                        Content="Typography"
-                        Route="typography"
-                        ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Typography'}">
-                        <shadUi:SidebarItem.Icon>
-                            <Viewbox>
-                                <TextBlock
-                                    Classes="LucideIcon"
-                                    Foreground="{DynamicResource ForegroundColor}"
-                                    Text="&#58887;" />
-                            </Viewbox>
-                        </shadUi:SidebarItem.Icon>
-                    </shadUi:SidebarItem>
+                    <Separator Padding="4 16"></Separator>
                     <shadUi:SidebarItemLabel
                         Margin="8,20,8,8"
                         AsSeparator="True"
-                        Text="Components" />
+                        Text="PLAYLISTS" />
                     <shadUi:SidebarItem
-                        Content="Avatar"
+                        Content="Liked Songs"
                         Route="avatar"
                         ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Avatar'}">
                         <shadUi:SidebarItem.Icon>
                             <Viewbox>
-                                <TextBlock
-                                    Classes="LucideIcon"
-                                    Foreground="{DynamicResource ForegroundColor}"
-                                    Text="&#58470;" />
-                            </Viewbox>
-                        </shadUi:SidebarItem.Icon>
-                    </shadUi:SidebarItem>
-                    <shadUi:SidebarItem
-                        Content="Badge"
-                        Route="badge"
-                        ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Badge'}">
-                        <shadUi:SidebarItem.Icon>
-                            <Viewbox>
-                                <TextBlock
-                                    Classes="LucideIcon"
-                                    Foreground="{DynamicResource ForegroundColor}"
-                                    Text="&#58416;" />
-                            </Viewbox>
-                        </shadUi:SidebarItem.Icon>
-                    </shadUi:SidebarItem>
-                    <shadUi:SidebarItem
-                        Content="Button"
-                        Route="button"
-                        ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Buttons'}">
-                        <shadUi:SidebarItem.Icon>
-                            <Viewbox>
-                                <TextBlock
-                                    Classes="LucideIcon"
-                                    Foreground="{DynamicResource ForegroundColor}"
-                                    Text="&#57636;" />
-                            </Viewbox>
-                        </shadUi:SidebarItem.Icon>
-                    </shadUi:SidebarItem>
-                    <shadUi:SidebarItem
-                        Content="Card"
-                        Route="card"
-                        ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Cards'}">
-                        <shadUi:SidebarItem.Icon>
-                            <Viewbox>
-                                <TextBlock
-                                    Classes="LucideIcon"
-                                    Foreground="{DynamicResource ForegroundColor}"
-                                    Text="&#57506;" />
-                            </Viewbox>
-                        </shadUi:SidebarItem.Icon>
-                    </shadUi:SidebarItem>
-                    <shadUi:SidebarItem
-                        Content="CheckBox"
-                        Route="checkbox"
-                        ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='CheckBox'}">
-                        <shadUi:SidebarItem.Icon>
-                            <Viewbox>
-                                <TextBlock
-                                    Classes="LucideIcon"
-                                    Foreground="{DynamicResource ForegroundColor}"
-                                    Text="&#58568;" />
-                            </Viewbox>
-                        </shadUi:SidebarItem.Icon>
-                    </shadUi:SidebarItem>
-                    <shadUi:SidebarItem
-                        Content="Color"
-                        Route="color"
-                        ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Colors'}">
-                        <shadUi:SidebarItem.Icon>
-                            <Viewbox>
-                                <TextBlock
-                                    Classes="LucideIcon"
-                                    Foreground="{DynamicResource ForegroundColor}"
-                                    Text="&#57821;" />
+                                <iconPacks:PackIconLucide Kind="Heart"></iconPacks:PackIconLucide>
                             </Viewbox>
                         </shadUi:SidebarItem.Icon>
                     </shadUi:SidebarItem>
                 </StackPanel>
             </shadUi:Sidebar>
-            <!-- <TransitioningContentControl Grid.Column="1" Content="{Binding SelectedPage}" /> -->
+            <StackPanel Grid.Column="1">
+                <Grid RowDefinitions="*, Auto">
+                    <Grid ColumnDefinitions="Auto, *, Auto" Margin="8, 8 8 2">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Classes="Icon" BorderThickness="0" Command="{Binding GoBack}">
+                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="ChevronLeft"
+                                                   Min="True" />
+                            </Button>
+                            <Button Classes="Icon" BorderThickness="0"
+                                    Command="{Binding GoForward}">
+                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="ChevronRight"
+                                                   Min="True" />
+                            </Button>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+                            <Button Classes="Home Flat Basic Accent Icon" Command="{Binding GoHome}">
+                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="Home" Kind="Solid"
+                                                   Margin="0 0 0 4" />
+                            </Button>
+                            <TextBox Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                            <Menu HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <MenuItem
+                                    CornerRadius="{DynamicResource LgCornerRadius}"
+                                    shadUi:MenuItemAssist.PopupHorizontalOffset="4"
+                                    shadUi:MenuItemAssist.PopupPlacement="BottomEdgeAlignedRight"
+                                    shadUi:MenuItemAssist.PopupVerticalOffset="4" Padding="0">
+                                    <MenuItem.Header>
+                                        <shadUi:Avatar
+                                            CornerRadius="{DynamicResource LgCornerRadius}"
+                                            Fallback="CN"
+                                            IsVisible="{Binding !$parent[shadUi:Sidebar].Expanded}"
+                                            Opacity="{Binding !$parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.Opaque}}"
+                                            Source="{Binding ThumbnailUrl}">
+                                            <shadUi:Avatar.Transitions>
+                                                <Transitions>
+                                                    <DoubleTransition Property="Opacity" Duration="0:0:0.20" />
+                                                </Transitions>
+                                            </shadUi:Avatar.Transitions>
+                                        </shadUi:Avatar>
+                                    </MenuItem.Header>
+                                    <shadUi:MenuItemAssist.Label>
+                                        <TextBlock Classes="Caption Muted" Text="My Account" />
+                                    </shadUi:MenuItemAssist.Label>
+                                    <MenuItem
+                                        Width="224"
+                                        Header="Profile"
+                                        InputGesture="Ctrl + Shift + P" />
+                                    <MenuItem Header="Billing" InputGesture="Ctrl + B" />
+                                    <MenuItem Header="Settings" InputGesture="Ctrl + S" />
+                                    <MenuItem Header="Keyboard shortcuts" InputGesture="Ctrl + K" />
+                                    <Separator />
+                                    <MenuItem Header="Team" />
+                                    <MenuItem Header="Invite users">
+                                        <MenuItem Width="128" Header="Email" />
+                                        <MenuItem Header="Message" />
+                                        <MenuItem Header="More..." />
+                                    </MenuItem>
+                                    <MenuItem Header="New Team" InputGesture="Ctrl + T" />
+                                    <Separator />
+                                    <MenuItem Header="Github" />
+                                    <MenuItem Header="Support" />
+                                    <MenuItem Header="API" IsEnabled="False" />
+                                    <Separator />
+                                    <MenuItem Header="Log out" InputGesture="Ctrl + Shift + Q"
+                                              IsVisible="{Binding IsLoggedIn}"
+                                              Command="{Binding LogoutCommand}" />
+                                    <Separator />
+                                    <MenuItem Classes="Destructive" Header="Delete Account" />
+                                </MenuItem>
+                            </Menu>
+                        </StackPanel>
+                    </Grid>
+                    <UserControl Grid.Row="1"
+                                 Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
+                        <ContentControl.DataTemplates>
+                            <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+                                <views:HomeView />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:AlbumViewModel}">
+                                <views:AlbumView />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:ArtistViewModel}">
+                                <views:ArtistView />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:TrackViewModel}">
+                                <views:TrackView />
+                            </DataTemplate>
+                        </ContentControl.DataTemplates>
+                    </UserControl>
+                </Grid>
+            </StackPanel>
         </Grid>
-        <!-- <shadUi:ToastHost Manager="{Binding ToastManager}" /> -->
-        <UserControl Content="{Binding CurrentPage, Source={x:Static local:Navigation.Instance}}">
-            <ContentControl.DataTemplates>
-                <DataTemplate DataType="{x:Type vm:MainViewModel}">
-                    <views:MainView />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:LoginViewModel}">
-                    <views:LoginView />
-                </DataTemplate>
-            </ContentControl.DataTemplates>
-        </UserControl>
     </Panel>
 </Window>

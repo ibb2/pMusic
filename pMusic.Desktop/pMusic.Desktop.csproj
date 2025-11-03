@@ -38,7 +38,7 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="HeroIcons.Avalonia"/>
-        <PackageReference Include="Huskui.Avalonia"/>
+        <PackageReference Include="IconPacks.Avalonia"/>
         <PackageReference Include="ManagedBass"/>
         <PackageReference Include="ManagedBass.Flac"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore"/>
@@ -52,7 +52,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="ShadUI"/>
-        <PackageReference Include="SukiUI"/>
     </ItemGroup>
 
     <ItemGroup>
