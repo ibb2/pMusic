@@ -51,8 +51,8 @@
                     </Button>
                 </StackPanel>
             </Grid>
-            <StackPanel Grid.Row="2">
-                <TextBlock>Albums</TextBlock>
+            <StackPanel Grid.Row="2" Margin="0 0 0 24" Spacing="4">
+                <TextBlock FontSize="24" FontWeight="Regular">Albums</TextBlock>
                 <ScrollViewer HorizontalScrollBarVisibility="Hidden">
                     <ItemsControl ItemsSource="{Binding  Albums}"
                                   ScrollViewer.HorizontalScrollBarVisibility="Hidden">
