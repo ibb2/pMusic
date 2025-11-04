@@ -51,15 +51,6 @@
                         <TextBlock Classes="h1" Text="{Binding Playlist.Title}"></TextBlock>
                     </Viewbox>
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                        <!-- <Border CornerRadius="1000" Margin="0 0 12 0" ClipToBounds="True"> -->
-                        <!--     <Image Source="/Assets/Images/blank_playlist.png" Width="30" Height="30" /> -->
-                        <!-- </Border> -->
-                        <!-- <TextBlock Text="{Binding Playlist}" FontWeight="SemiBold" -->
-                        <!--            VerticalAlignment="Center"> -->
-                        <!-- </TextBlock> -->
-                        <!-- <TextBlock Text="{Binding Playlist.AddedAt}" -->
-                        <!--            VerticalAlignment="Center"> -->
-                        <!-- </TextBlock> -->
                         <TextBlock
                             Text="{Binding Playlist.Duration, Converter={StaticResource TimeSpanToReadableConverter}}" />
                     </StackPanel>
