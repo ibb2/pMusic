@@ -8,7 +8,6 @@
         xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
         xmlns:converters="clr-namespace:ShadUI"
         xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
-        xmlns:controls="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="pMusic.Views.MainWindow"
         x:DataType="vm:MainViewModel"
@@ -85,24 +84,37 @@
             </shadui:Sidebar>
             <StackPanel Grid.Column="1">
                 <Grid RowDefinitions="*, Auto">
-                    <Grid ColumnDefinitions="Auto, *, Auto" Margin="8, 8 8 2">
+                    <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center" Margin="0 8 0 0"
+                          ColumnSpacing="8">
                         <StackPanel Orientation="Horizontal">
-                            <Button Classes="Icon" BorderThickness="0" Command="{Binding GoBack}">
-                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="ChevronLeft"
-                                                   Min="True" />
+                            <Button shadui:ElementAssist.Classes="Icon"
+                                    BorderBrush="{DynamicResource BorderColor}"
+                                    Classes="Icon"
+                                    Command="{Binding GoBack}">
+                                <shadui:ButtonAssist.Icon>
+                                    <iconPacks:PackIconLucide Kind="ChevronLeft"></iconPacks:PackIconLucide>
+                                </shadui:ButtonAssist.Icon>
                             </Button>
-                            <Button Classes="Icon" BorderThickness="0"
+                            <Button shadui:ElementAssist.Classes="Icon"
+                                    BorderBrush="{DynamicResource BorderColor}"
                                     Command="{Binding GoForward}">
-                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="ChevronRight"
-                                                   Min="True" />
+                                <shadui:ButtonAssist.Icon>
+                                    <iconPacks:PackIconLucide Kind="ChevronRight"></iconPacks:PackIconLucide>
+                                </shadui:ButtonAssist.Icon>
                             </Button>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
-                            <Button Classes="Home Flat Basic Accent Icon" Command="{Binding GoHome}">
-                                <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="Home" Kind="Solid"
-                                                   Margin="0 0 0 4" />
-                            </Button>
-                            <TextBox Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
+                        <StackPanel Grid.Column="1" MaxWidth="750">
+                            <TextBox
+                                MaxWidth="750"
+                                shadui:TextBoxAssist.Clearable="True"
+                                Watermark="Search here...">
+                                <TextBox.InnerLeftContent>
+                                    <PathIcon
+                                        Width="16"
+                                        Data="{x:Static shadui:Icons.Search}"
+                                        Opacity="0.75" Margin="8 0 0 0" />
+                                </TextBox.InnerLeftContent>
+                            </TextBox>
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                             <Menu HorizontalAlignment="Center" VerticalAlignment="Center">
