@@ -31,6 +31,7 @@
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm"/>
         <PackageReference Include="HeroIcons.Avalonia"/>
+        <PackageReference Include="Huskui.Avalonia"/>
         <PackageReference Include="IconPacks.Avalonia"/>
         <PackageReference Include="KeySharp"/>
         <PackageReference Include="LukeHagar.PlexAPI.SDK"/>
@@ -51,6 +52,8 @@
         <PackageReference Include="Microsoft.Extensions.Http.Polly"/>
         <PackageReference Include="ShadUI"/>
         <PackageReference Include="SoundFlow"/>
+        <PackageReference Include="SukiUI"/>
+        <PackageReference Include="SukiUI.Dock"/>
         <PackageReference Include="System.Net.Http"/>
     </ItemGroup>
 </Project>

@@ -21,6 +21,7 @@
         <PackageReference Include="AsyncImageLoader.Avalonia"/>
         <PackageReference Include="Avalonia.Android"/>
         <PackageReference Include="HeroIcons.Avalonia"/>
+        <PackageReference Include="Huskui.Avalonia"/>
         <PackageReference Include="IconPacks.Avalonia"/>
         <PackageReference Include="ManagedBass"/>
         <PackageReference Include="ManagedBass.Flac"/>
@@ -35,6 +36,8 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="ShadUI"/>
+        <PackageReference Include="SukiUI"/>
+        <PackageReference Include="SukiUI.Dock"/>
         <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen"/>
     </ItemGroup>
 
