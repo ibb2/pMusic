@@ -6,6 +6,7 @@
              xmlns:vm="clr-namespace:pMusic.ViewModels"
              xmlns:converter="clr-namespace:pMusic.Converter"
              xmlns:behaviours="clr-namespace:pMusic.Behaviours"
+             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
              x:Class="pMusic.Views.HomeView"
              x:DataType="vm:HomeViewModel">
     <Design.DataContext>
@@ -22,21 +23,6 @@
                 <Setter Property="FontSize" Value="22"></Setter>
                 <Setter Property="FontWeight" Value="Bold"></Setter>
             </Style>
-            <Style Selector="ListBox /template/ ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-            </Style>
-            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                <Setter Property="CornerRadius" Value="8" />
-                <Setter Property="Background"
-                        Value="{DynamicResource SystemChromeHighColor}">
-                </Setter>
-            </Style>
-            <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
-                <Setter Property="CornerRadius" Value="8" />
-            </Style>
-            <!-- <Style Selector="ListBoxItem:selected /template/ ContentPresenter"> -->
-            <!--     <Setter Property="Background" Value="Transparent"></Setter> -->
-            <!-- </Style> -->
         </Style>
     </UserControl.Styles>
 
@@ -53,7 +39,7 @@
                     <Grid
                         behaviours:ResponsiveGridBehavior.IsEnabled="True"
                         ColumnDefinitions="*,*,*,*"
-                        RowDefinitions="Auto,Auto">
+                        RowDefinitions="Auto, Auto">
                     </Grid>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
@@ -64,27 +50,20 @@
                         CommandParameter="{Binding Album}"
                         Margin="4"
                         CornerRadius="8"
-                        Background="{DynamicResource SukiPrimaryColor10}"
                         BorderThickness="0"
                         Padding="0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         HorizontalContentAlignment="Stretch"
-                        MinWidth="150">
-
-                        <Button.Styles>
-                            <Style Selector="Button:pointerover /template/ ContentPresenter">
-                                <Setter Property="Background" Value="{DynamicResource SukiPrimaryColor20}" />
-                            </Style>
-                        </Button.Styles>
-
+                        MinWidth="150"
+                        Height="60"
+                        shadui:ElementAssist.Classes="Secondary">
                         <Grid ColumnDefinitions="Auto, *" HorizontalAlignment="Stretch">
                             <Border Width="60" Height="60"
                                     CornerRadius="8,0,0,8"
                                     ClipToBounds="True">
                                 <Image Source="{Binding Image}" Stretch="UniformToFill" />
                             </Border>
-
                             <TextBlock Grid.Column="1"
                                        Text="{Binding Title}"
                                        Margin="12,0,12,0"
@@ -92,8 +71,7 @@
                                        TextWrapping="NoWrap"
                                        TextTrimming="CharacterEllipsis"
                                        VerticalAlignment="Center"
-                                       HorizontalAlignment="Left"
-                                       Foreground="{DynamicResource SukiText}" />
+                                       HorizontalAlignment="Left" />
                         </Grid>
                     </Button>
                 </DataTemplate>
