@@ -84,7 +84,7 @@
             </shadui:Sidebar>
             <StackPanel Grid.Column="1">
                 <Grid RowDefinitions="*, Auto">
-                    <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center" Margin="0 8 0 0"
+                    <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center" Margin="32 8 32 0"
                           ColumnSpacing="8">
                         <StackPanel Orientation="Horizontal">
                             <Button shadui:ElementAssist.Classes="Icon"
@@ -169,23 +169,28 @@
                             </Menu>
                         </StackPanel>
                     </Grid>
-                    <UserControl Grid.Row="1"
-                                 Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
-                        <ContentControl.DataTemplates>
-                            <DataTemplate DataType="{x:Type vm:HomeViewModel}">
-                                <views:HomeView />
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type vm:AlbumViewModel}">
-                                <views:AlbumView />
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type vm:ArtistViewModel}">
-                                <views:ArtistView />
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type vm:TrackViewModel}">
-                                <views:TrackView />
-                            </DataTemplate>
-                        </ContentControl.DataTemplates>
-                    </UserControl>
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+
+                        <UserControl Grid.Row="1"
+                                     Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
+                            <ContentControl.DataTemplates>
+                                <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+                                    <views:HomeView />
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type vm:AlbumViewModel}">
+                                    <views:AlbumView />
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type vm:ArtistViewModel}">
+                                    <views:ArtistView />
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type vm:TrackViewModel}">
+                                    <views:TrackView />
+                                </DataTemplate>
+                            </ContentControl.DataTemplates>
+                        </UserControl>
+                    </ScrollViewer>
                 </Grid>
             </StackPanel>
         </Grid>
