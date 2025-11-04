@@ -122,13 +122,13 @@
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                         <Menu HorizontalAlignment="Center" VerticalAlignment="Center">
                             <MenuItem
-                                CornerRadius="{DynamicResource LgCornerRadius}"
+                                CornerRadius="{DynamicResource FullCornerRadius}"
                                 shadui:MenuItemAssist.PopupHorizontalOffset="4"
                                 shadui:MenuItemAssist.PopupPlacement="BottomEdgeAlignedRight"
                                 shadui:MenuItemAssist.PopupVerticalOffset="4" Padding="0">
                                 <MenuItem.Header>
                                     <shadui:Avatar
-                                        CornerRadius="{DynamicResource LgCornerRadius}"
+                                        CornerRadius="{DynamicResource FullCornerRadius}"
                                         Fallback="CN"
                                         IsVisible="{Binding !$parent[shadui:Sidebar].Expanded}"
                                         Opacity="{Binding !$parent[shadui:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.Opaque}}"
