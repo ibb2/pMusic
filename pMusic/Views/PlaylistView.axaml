@@ -3,7 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
-             xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              xmlns:views="clr-namespace:pMusic.Views"
              xmlns:converter="clr-namespace:pMusic.Converter"
              xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
@@ -106,6 +105,7 @@
                   HorizontalScrollBarVisibility="Disabled"
                   RowHeight="30"
                   ColumnHeaderHeight="30"
+                  Margin="0 0 0 20"
                   HeadersVisibility="All">
             <DataGrid.Template>
                 <ControlTemplate>
@@ -126,46 +126,43 @@
             </DataGrid.Template>
 
             <DataGrid.Columns>
-                <DataGridTemplateColumn Width="Auto">
+                <DataGridTemplateColumn Width="60">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="#" HorizontalAlignment="Center">
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button
-                                Classes="Basic Icon"
-                                Command="{Binding ((vm:PlaylistViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                CommandParameter="{Binding}"
-                                Width="{Binding $parent[DataGridCell].Bounds.Width}"
-                                Height="{Binding $parent[DataGridCell].Bounds.Height}"
-                                IsVisible="{Binding $parent[DataGridRow].IsPointerOver}">
-                                <heroIcons:HeroIcon
-                                    Foreground="{DynamicResource SukiText}"
-                                    Type="Play"
-                                    Kind="Solid" />
-                            </Button>
+                            <Panel>
+                                <Button shadUi:ElementAssist.Classes="Icon"
+                                        IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}"
+                                        Command="{Binding ((vm:PlaylistViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding }"
+                                        Width="40"
+                                        Height="15">
+                                    <shadUi:ButtonAssist.Icon>
+                                        <iconPacks:PackIconLucide Kind="Play"></iconPacks:PackIconLucide>
+                                    </shadUi:ButtonAssist.Icon>
+                                </Button>
+                            </Panel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Width="*"
-                                    Binding="{Binding Title}">
+                <DataGridTextColumn Width="*" Binding="{Binding Title}">
                     <DataGridTextColumn.HeaderTemplate>
                         <DataTemplate>
-                            <TextBlock Text="Title"
-                                       Padding="12,0,0,0"
-                                       VerticalAlignment="Center"
-                                       Foreground="{DynamicResource SukiText}" />
+                            <TextBlock Text="Title"></TextBlock>
                         </DataTemplate>
                     </DataGridTextColumn.HeaderTemplate>
                 </DataGridTextColumn>
-                <!--The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"-->
-                <!-- <DataGridTextColumn Header="Rating" Binding="{Binding RatingCount}"></DataGridTextColumn> -->
                 <DataGridTextColumn
                     Binding="{Binding Duration, Converter={StaticResource TimeSpanToMinSecConverter}, Mode=OneWay}"
                     CellStyleClasses="right">
                     <DataGridTextColumn.HeaderTemplate>
-                        <!-- Simply use a HeaderTemplate -->
                         <DataTemplate>
-                            <TextBlock Text="Length" HorizontalAlignment="Right"
-                                       Foreground="{DynamicResource SukiText}">
-                            </TextBlock>
+                            <TextBlock Text="Length" HorizontalAlignment="Right"></TextBlock>
                         </DataTemplate>
                     </DataGridTextColumn.HeaderTemplate>
                 </DataGridTextColumn>

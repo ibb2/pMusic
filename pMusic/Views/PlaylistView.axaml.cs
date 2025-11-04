@@ -46,7 +46,7 @@ public partial class PlaylistView : UserControl
             var half = (itemCount * 0.23) * 30;
             // Add some padding to account for borders and internal spacing
             double padding = 4; // Adjust this value as needed
-            double totalHeight = (rowHeight * itemCount) + headerHeight + padding + half;
+            double totalHeight = (rowHeight * itemCount) + headerHeight;
 
             Tracklist.Height = totalHeight;
             Tracklist.MaxHeight = totalHeight;
