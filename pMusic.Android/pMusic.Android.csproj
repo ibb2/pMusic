@@ -20,6 +20,7 @@
     <ItemGroup>
         <PackageReference Include="AsyncImageLoader.Avalonia"/>
         <PackageReference Include="Avalonia.Android"/>
+        <PackageReference Include="AvaloniaUI.DiagnosticsSupport"/>
         <PackageReference Include="HeroIcons.Avalonia"/>
         <PackageReference Include="Huskui.Avalonia"/>
         <PackageReference Include="IconPacks.Avalonia"/>

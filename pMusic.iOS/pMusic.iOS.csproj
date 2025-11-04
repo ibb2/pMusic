@@ -9,6 +9,7 @@
     <ItemGroup>
         <PackageReference Include="AsyncImageLoader.Avalonia"/>
         <PackageReference Include="Avalonia.iOS"/>
+        <PackageReference Include="AvaloniaUI.DiagnosticsSupport"/>
         <PackageReference Include="HeroIcons.Avalonia"/>
         <PackageReference Include="Huskui.Avalonia"/>
         <PackageReference Include="IconPacks.Avalonia"/>

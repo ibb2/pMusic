@@ -25,7 +25,7 @@
             </Style>
         </Style>
     </UserControl.Styles>
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto" HorizontalAlignment="Stretch" Margin="32 0">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto" HorizontalAlignment="Stretch">
         <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
         <!-- Recently Played -->
         <ItemsControl
