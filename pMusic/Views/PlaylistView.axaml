@@ -6,6 +6,8 @@
              xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              xmlns:views="clr-namespace:pMusic.Views"
              xmlns:converter="clr-namespace:pMusic.Converter"
+             xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
+             xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.PlaylistView"
              x:DataType="vm:PlaylistViewModel">
@@ -67,23 +69,32 @@
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
             <StackPanel Orientation="Horizontal" Spacing="20">
-                <Button Classes="Flat Icon" HorizontalContentAlignment="Center"
-                        Command="{Binding QueuePlaylistCommand}">
-                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}"
-                                        Type="Play"
-                                        Kind="Solid" Min="True" Margin="4 0 0 0">
-                    </heroIcons:HeroIcon>
-                </Button>
-                <Button Classes="Basic Icon">
-                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ArrowsRightLeft"></heroIcons:HeroIcon>
-                </Button>
-                <Button Classes="Basic Icon"
-                        Command="{Binding AddToLibrary}" CommandParameter="{Binding Playlist}">
-                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Plus"></heroIcons:HeroIcon>
-                </Button>
-                <Button Classes="Basic Icon">
-                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="CloudArrowDown"></heroIcons:HeroIcon>
-                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <Button
+                        shadUi:ElementAssist.Classes="Primary"
+                        Command="{Binding QueuePlaylistCommand}"
+                        Content="Play">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Play"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
+                    </Button>
+                    <Button shadUi:ElementAssist.Classes="Icon">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Shuffle"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
+                    </Button>
+                    <Button shadUi:ElementAssist.Classes="Icon"
+                            Command="{Binding AddToLibraryCommand}" CommandParameter="{Binding Playlist}">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Plus"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
+                    </Button>
+                    <Button shadUi:ElementAssist.Classes="Icon">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Download"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
+                    </Button>
+                </StackPanel>
             </StackPanel>
         </Grid>
         <DataGrid Grid.Row="2"
