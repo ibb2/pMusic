@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:pMusic.Views"
         xmlns:local="clr-namespace:pMusic.Interface"
-        xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
+        xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
         xmlns:converters="clr-namespace:ShadUI"
         xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
         xmlns:controls="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
@@ -21,54 +21,68 @@
     </Design.DataContext>
     <Panel>
         <Grid ColumnDefinitions="Auto *">
-            <shadUi:Sidebar
+            <shadui:Sidebar
                 Grid.Column="0"
                 Width="220"
                 MinWidth="60"
-                Padding="8"
+                Padding="{Binding #Toggler.IsChecked, Converter={x:Static converters:BooleanConverters.SidebarPadding}}"
                 BorderBrush="{DynamicResource BorderColor30}"
                 BorderThickness="0,0,1,0"
-                Expanded="True">
-                <shadUi:Sidebar.ExpandEasing>
-                    <shadUi:EaseInOutBack BounceIntensity="Strong" />
-                </shadUi:Sidebar.ExpandEasing>
+                Expanded="{Binding #Toggler.IsChecked}">
+                <shadui:Sidebar.ExpandEasing>
+                    <shadui:EaseInOutBack BounceIntensity="Strong" />
+                </shadui:Sidebar.ExpandEasing>
+                <shadui:Sidebar.Header>
+                    <ToggleButton
+                        Name="Toggler"
+                        Width="32"
+                        Height="32"
+                        Padding="8"
+                        HorizontalAlignment="{Binding #Toggler.IsChecked, Converter={x:Static converters:BooleanConverters.SidebarTogglerHorizontalAlignment}}"
+                        CornerRadius="{DynamicResource LgCornerRadius}"
+                        Theme="{DynamicResource SideTogglerTheme}">
+                        <Viewbox>
+                            <iconPacks:PackIconLucide Kind="PanelLeft"></iconPacks:PackIconLucide>
+                        </Viewbox>
+                    </ToggleButton>
+                </shadui:Sidebar.Header>
                 <StackPanel Spacing="4">
-                    <shadUi:SidebarItem
+                    <shadui:SidebarItem
                         Content="Home"
                         IsChecked="True"
                         Route="dashboard">
-                        <shadUi:SidebarItem.Icon>
+                        <shadui:SidebarItem.Icon>
                             <Viewbox>
                                 <iconPacks:PackIconLucide Kind="House"></iconPacks:PackIconLucide>
                             </Viewbox>
-                        </shadUi:SidebarItem.Icon>
-                    </shadUi:SidebarItem>
-                    <shadUi:SidebarItem
+                        </shadui:SidebarItem.Icon>
+                    </shadui:SidebarItem>
+                    <shadui:SidebarItem
                         Content="Your Library"
                         Route="theme">
-                        <shadUi:SidebarItem.Icon>
+                        <shadui:SidebarItem.Icon>
                             <Viewbox>
                                 <iconPacks:PackIconLucide Kind="Library"></iconPacks:PackIconLucide>
                             </Viewbox>
-                        </shadUi:SidebarItem.Icon>
-                    </shadUi:SidebarItem>
-                    <Separator Padding="4 16"></Separator>
-                    <shadUi:SidebarItemLabel
+                        </shadui:SidebarItem.Icon>
+                    </shadui:SidebarItem>
+                    <!-- <Separator Padding="4 16"></Separator> -->
+                    <shadui:SidebarItemLabel
                         Margin="8,20,8,8"
                         AsSeparator="True"
                         Text="PLAYLISTS" />
-                    <shadUi:SidebarItem
+                    <shadui:SidebarItem
                         Content="Liked Songs"
                         Route="avatar"
-                        ToolTip.Tip="{Binding $parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Avatar'}">
-                        <shadUi:SidebarItem.Icon>
+                        ToolTip.Tip="{Binding $parent[shadui:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Avatar'}">
+                        <shadui:SidebarItem.Icon>
                             <Viewbox>
                                 <iconPacks:PackIconLucide Kind="Heart"></iconPacks:PackIconLucide>
                             </Viewbox>
-                        </shadUi:SidebarItem.Icon>
-                    </shadUi:SidebarItem>
+                        </shadui:SidebarItem.Icon>
+                    </shadui:SidebarItem>
                 </StackPanel>
-            </shadUi:Sidebar>
+            </shadui:Sidebar>
             <StackPanel Grid.Column="1">
                 <Grid RowDefinitions="*, Auto">
                     <Grid ColumnDefinitions="Auto, *, Auto" Margin="8, 8 8 2">
@@ -94,26 +108,26 @@
                             <Menu HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <MenuItem
                                     CornerRadius="{DynamicResource LgCornerRadius}"
-                                    shadUi:MenuItemAssist.PopupHorizontalOffset="4"
-                                    shadUi:MenuItemAssist.PopupPlacement="BottomEdgeAlignedRight"
-                                    shadUi:MenuItemAssist.PopupVerticalOffset="4" Padding="0">
+                                    shadui:MenuItemAssist.PopupHorizontalOffset="4"
+                                    shadui:MenuItemAssist.PopupPlacement="BottomEdgeAlignedRight"
+                                    shadui:MenuItemAssist.PopupVerticalOffset="4" Padding="0">
                                     <MenuItem.Header>
-                                        <shadUi:Avatar
+                                        <shadui:Avatar
                                             CornerRadius="{DynamicResource LgCornerRadius}"
                                             Fallback="CN"
-                                            IsVisible="{Binding !$parent[shadUi:Sidebar].Expanded}"
-                                            Opacity="{Binding !$parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.Opaque}}"
+                                            IsVisible="{Binding !$parent[shadui:Sidebar].Expanded}"
+                                            Opacity="{Binding !$parent[shadui:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.Opaque}}"
                                             Source="{Binding ThumbnailUrl}">
-                                            <shadUi:Avatar.Transitions>
+                                            <shadui:Avatar.Transitions>
                                                 <Transitions>
                                                     <DoubleTransition Property="Opacity" Duration="0:0:0.20" />
                                                 </Transitions>
-                                            </shadUi:Avatar.Transitions>
-                                        </shadUi:Avatar>
+                                            </shadui:Avatar.Transitions>
+                                        </shadui:Avatar>
                                     </MenuItem.Header>
-                                    <shadUi:MenuItemAssist.Label>
+                                    <shadui:MenuItemAssist.Label>
                                         <TextBlock Classes="Caption Muted" Text="My Account" />
-                                    </shadUi:MenuItemAssist.Label>
+                                    </shadui:MenuItemAssist.Label>
                                     <MenuItem
                                         Width="224"
                                         Header="Profile"
