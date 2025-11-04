@@ -66,14 +66,9 @@
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                <!-- <Border CornerRadius="1000" Margin="0 0 12 0" ClipToBounds="True"> -->
-                                <!--     <Image Source="/Assets/Images/blank_playlist.png" Width="30" Height="30" /> -->
-                                <!-- </Border> -->
                                 <TextBlock Text="{Binding Album.OriginallyAvailableAt}"
                                            VerticalAlignment="Center">
                                 </TextBlock>
-                                <!-- <TextBlock Text="{Binding AlbumTrackLength}"></TextBlock> -->
-                                <!-- <TextBlock Text="{Binding AlbumDuration}"></TextBlock> -->
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -127,7 +122,6 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Panel>
-                                        <!-- Button that appears on hover -->
                                         <Button shadUi:ElementAssist.Classes="Icon"
                                                 IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}"
                                                 Command="{Binding ((vm:AlbumViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
@@ -138,7 +132,6 @@
                                                 <iconPacks:PackIconLucide Kind="Play"></iconPacks:PackIconLucide>
                                             </shadUi:ButtonAssist.Icon>
                                         </Button>
-                                        <!-- Text that shows by default -->
                                         <TextBlock Text="{Binding Index}"
                                                    IsVisible="{Binding !$parent[DataGridCellsPresenter].IsPointerOver}"
                                                    VerticalAlignment="Center" Padding="12 0 0 0" />
@@ -157,7 +150,6 @@
                             Binding="{Binding Duration, Converter={StaticResource TimeSpanToMinSecConverter}, Mode=OneWay}"
                             CellStyleClasses="right">
                             <DataGridTextColumn.HeaderTemplate>
-                                <!-- Simply use a HeaderTemplate -->
                                 <DataTemplate>
                                     <TextBlock Text="Length" HorizontalAlignment="Right"></TextBlock>
                                 </DataTemplate>
