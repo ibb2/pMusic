@@ -4,9 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
-             xmlns:controls="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
              xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
+             xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
              x:Class="pMusic.Views.ArtistView"
              x:DataType="vm:ArtistViewModel">
     <Design.DataContext>
@@ -37,28 +37,17 @@
             </Grid>
             <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
                 <StackPanel Orientation="Horizontal" Spacing="20">
-                    <Button Classes="Flat Icon" HorizontalContentAlignment="Center">
-                        <controls:HeroIcon Foreground="{DynamicResource SukiText}"
-                                           Type="Play"
-                                           Kind="Solid" Min="True" Margin="4 0 0 0">
-                        </controls:HeroIcon>
+                    <Button
+                        shadUi:ElementAssist.Classes="Primary"
+                        Content="Play">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Play"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
                     </Button>
-                    <Button Classes="Basic Icon">
-                        <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="ArrowsRightLeft"></controls:HeroIcon>
-                    </Button>
-                    <Button Classes="Basic Icon">
-                        <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="Plus"></controls:HeroIcon>
-                    </Button>
-                    <Button Classes="Basic Icon">
-                        <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="CloudArrowDown"></controls:HeroIcon>
-                    </Button>
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock VerticalAlignment="Center">
-                        List
-                    </TextBlock>
-                    <Button Classes="Basic Icon" VerticalAlignment="Center">
-                        <controls:HeroIcon Foreground="{DynamicResource SukiText}" Type="ListBullet"></controls:HeroIcon>
+                    <Button shadUi:ElementAssist.Classes="Icon">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Shuffle"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
                     </Button>
                 </StackPanel>
             </Grid>
