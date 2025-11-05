@@ -49,6 +49,7 @@
                     <shadui:SidebarItem
                         Content="Home"
                         IsChecked="True"
+                        Command="{Binding GoHome}"
                         Route="dashboard">
                         <shadui:SidebarItem.Icon>
                             <Viewbox>
@@ -58,6 +59,7 @@
                     </shadui:SidebarItem>
                     <shadui:SidebarItem
                         Content="Your Library"
+                        Command="{Binding GoHome}"
                         Route="theme">
                         <shadui:SidebarItem.Icon>
                             <Viewbox>
