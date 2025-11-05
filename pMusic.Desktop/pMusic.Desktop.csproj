@@ -50,8 +50,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="ShadUI"/>
-        <PackageReference Include="SukiUI"/>
-        <PackageReference Include="SukiUI.Dock"/>
     </ItemGroup>
 
     <ItemGroup>

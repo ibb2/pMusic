@@ -49,8 +49,6 @@
         <PackageReference Include="Microsoft.Extensions.Http.Polly"/>
         <PackageReference Include="ShadUI"/>
         <PackageReference Include="SoundFlow"/>
-        <PackageReference Include="SukiUI"/>
-        <PackageReference Include="SukiUI.Dock"/>
         <PackageReference Include="System.Net.Http"/>
     </ItemGroup>
 </Project>
