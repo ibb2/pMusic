@@ -68,20 +68,20 @@
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
                     <!-- <Separator Padding="4 16"></Separator> -->
-                    <shadui:SidebarItemLabel
-                        Margin="8,20,8,8"
-                        AsSeparator="True"
-                        Text="PLAYLISTS" />
-                    <shadui:SidebarItem
-                        Content="Liked Songs"
-                        Route="avatar"
-                        ToolTip.Tip="{Binding $parent[shadui:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Avatar'}">
-                        <shadui:SidebarItem.Icon>
-                            <Viewbox>
-                                <iconPacks:PackIconLucide Kind="Heart"></iconPacks:PackIconLucide>
-                            </Viewbox>
-                        </shadui:SidebarItem.Icon>
-                    </shadui:SidebarItem>
+                    <!-- <shadui:SidebarItemLabel -->
+                    <!--     Margin="8,20,8,8" -->
+                    <!--     AsSeparator="True" -->
+                    <!--     Text="PLAYLISTS" /> -->
+                    <!-- <shadui:SidebarItem -->
+                    <!--     Content="Liked Songs" -->
+                    <!--     Route="avatar" -->
+                    <!--     ToolTip.Tip="{Binding $parent[shadui:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.NullOrString}, ConverterParameter='Avatar'}"> -->
+                    <!--     <shadui:SidebarItem.Icon> -->
+                    <!--         <Viewbox> -->
+                    <!--             <iconPacks:PackIconLucide Kind="Heart"></iconPacks:PackIconLucide> -->
+                    <!--         </Viewbox> -->
+                    <!--     </shadui:SidebarItem.Icon> -->
+                    <!-- </shadui:SidebarItem> -->
                 </StackPanel>
             </shadui:Sidebar>
             <Grid Grid.Column="1">
