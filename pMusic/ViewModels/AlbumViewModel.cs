@@ -62,6 +62,8 @@ public partial class AlbumViewModel : ViewModelBase
         var tracks =
             await _music.GetTrackList(CancellationToken.None, _plex, Album.Guid);
 
+        TrackList.Clear();
+
         foreach (var track in tracks) TrackList.Add(track);
     }
 
