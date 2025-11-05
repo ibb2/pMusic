@@ -145,31 +145,31 @@
                                 <shadui:MenuItemAssist.Label>
                                     <TextBlock Classes="Caption Muted" Text="My Account" />
                                 </shadui:MenuItemAssist.Label>
-                                <MenuItem
-                                    Width="224"
-                                    Header="Profile"
-                                    InputGesture="Ctrl + Shift + P" />
-                                <MenuItem Header="Billing" InputGesture="Ctrl + B" />
-                                <MenuItem Header="Settings" InputGesture="Ctrl + S" />
-                                <MenuItem Header="Keyboard shortcuts" InputGesture="Ctrl + K" />
-                                <Separator />
-                                <MenuItem Header="Team" />
-                                <MenuItem Header="Invite users">
-                                    <MenuItem Width="128" Header="Email" />
-                                    <MenuItem Header="Message" />
-                                    <MenuItem Header="More..." />
-                                </MenuItem>
-                                <MenuItem Header="New Team" InputGesture="Ctrl + T" />
-                                <Separator />
-                                <MenuItem Header="Github" />
-                                <MenuItem Header="Support" />
-                                <MenuItem Header="API" IsEnabled="False" />
-                                <Separator />
-                                <MenuItem Header="Log out" InputGesture="Ctrl + Shift + Q"
+                                <!-- <MenuItem -->
+                                <!--     Width="224" -->
+                                <!--     Header="Profile" -->
+                                <!--     InputGesture="Ctrl + Shift + P" /> -->
+                                <!-- <MenuItem Header="Billing" InputGesture="Ctrl + B" /> -->
+                                <!-- <MenuItem Header="Settings" InputGesture="Ctrl + S" /> -->
+                                <!-- <MenuItem Header="Keyboard shortcuts" InputGesture="Ctrl + K" /> -->
+                                <!-- <Separator /> -->
+                                <!-- <MenuItem Header="Team" /> -->
+                                <!-- <MenuItem Header="Invite users"> -->
+                                <!--     <MenuItem Width="128" Header="Email" /> -->
+                                <!--     <MenuItem Header="Message" /> -->
+                                <!--     <MenuItem Header="More..." /> -->
+                                <!-- </MenuItem> -->
+                                <!-- <MenuItem Header="New Team" InputGesture="Ctrl + T" /> -->
+                                <!-- <Separator /> -->
+                                <!-- <MenuItem Header="Github" /> -->
+                                <!-- <MenuItem Header="Support" /> -->
+                                <!-- <MenuItem Header="API" IsEnabled="False" /> -->
+                                <!-- <Separator /> -->
+                                <MenuItem Header="Log out"
                                           IsVisible="{Binding IsLoggedIn}"
                                           Command="{Binding LogoutCommand}" />
-                                <Separator />
-                                <MenuItem Classes="Destructive" Header="Delete Account" />
+                                <!-- <Separator /> -->
+                                <!-- <MenuItem Classes="Destructive" Header="Delete Account" /> -->
                             </MenuItem>
                         </Menu>
                     </StackPanel>
