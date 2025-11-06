@@ -13,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using pMusic.Database;
 using pMusic.DI;
-using pMusic.Services;
 using pMusic.ViewModels;
 using pMusic.Views;
 
@@ -26,6 +25,10 @@ public class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+
+#if DEBUG
+        this.AttachDeveloperTools();
+#endif
     }
 
     public override async void OnFrameworkInitializationCompleted()
@@ -66,24 +69,16 @@ public class App : Application
                 Console.WriteLine($"An error occurred while applying migrations: {ex.Message}");
             }
 
-            var music = services.GetService<IMusic>();
-            var plex = services.GetService<Plex>();
-            var homeVM = services.GetService<HomeViewModel>();
-
-            Console.WriteLine($"IMusic resolved: {music != null}");
-            Console.WriteLine($"Plex resolved: {plex != null}");
-            Console.WriteLine($"HomeViewModel resolved: {homeVM != null}");
-
             try
             {
-                Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+                Keyring.GetPassword("com.ib", "pmusic", "authToken");
             }
             catch (Exception ex)
             {
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", "");
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", "");
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", "");
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", "");
+                Keyring.SetPassword("com.ib", "pmusic", "cIdentifier", "");
+                Keyring.SetPassword("com.ib", "pmusic", "id", "");
+                Keyring.SetPassword("com.ib", "pmusic", "code", "");
+                Keyring.SetPassword("com.ib", "pmusic", "authToken", "");
             }
 
 
@@ -94,7 +89,7 @@ public class App : Application
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
 
-                var authToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+                var authToken = Keyring.GetPassword("com.ib", "pmusic", "authToken");
 
                 if (authToken.Length > 0)
                 {
@@ -102,6 +97,7 @@ public class App : Application
                     {
                         DataContext = vm
                     };
+
                     return;
                 }
 

@@ -3,11 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
-             xmlns:local="clr-namespace:pMusic.Interface"
-             xmlns:views="clr-namespace:pMusic.Views"
              xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              xmlns:converter="clr-namespace:pMusic.Converter"
-             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
+             xmlns:converters="clr-namespace:ShadUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -69,97 +68,60 @@
                 <TextBox Padding="20 12" CornerRadius="30" VerticalAlignment="Center">Search for your musics'</TextBox>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                <Button Classes="Basic">
-                    <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Bell" />
-                </Button>
-                <Button Classes="Icon" BorderThickness="0">
-                    <Border CornerRadius="100" ClipToBounds="True">
-                        <Viewbox StretchDirection="DownOnly" Stretch="UniformToFill">
-                            <Image Source="{Binding ThumbnailUrl}" />
-                        </Viewbox>
-                    </Border>
-                    <Button.Flyout>
-                        <Flyout>
-                            <StackPanel>
-                                <!-- Or Account -->
-                                <Button IsVisible="{Binding IsLoggedIn}" Command="{Binding LogoutCommand}">Log out</Button>
-                                <!-- Profile -->
-                                <!-- Support -->
-                                <!-- Private Session -->
-                                <!-- Settings -->
-                                <!-- Log out -->
-                            </StackPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
+                <Menu HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <MenuItem
+                        CornerRadius="{DynamicResource LgCornerRadius}"
+                        shadUi:MenuItemAssist.PopupHorizontalOffset="4"
+                        shadUi:MenuItemAssist.PopupPlacement="BottomEdgeAlignedRight"
+                        shadUi:MenuItemAssist.PopupVerticalOffset="4" Padding="0">
+                        <MenuItem.Header>
+                            <shadUi:Avatar
+                                CornerRadius="{DynamicResource LgCornerRadius}"
+                                Fallback="CN"
+                                IsVisible="{Binding !$parent[shadUi:Sidebar].Expanded}"
+                                Opacity="{Binding !$parent[shadUi:Sidebar].Expanded, Converter={x:Static converters:BooleanConverters.Opaque}}"
+                                Source="{Binding ThumbnailUrl}">
+                                <shadUi:Avatar.Transitions>
+                                    <Transitions>
+                                        <DoubleTransition Property="Opacity" Duration="0:0:0.20" />
+                                    </Transitions>
+                                </shadUi:Avatar.Transitions>
+                            </shadUi:Avatar>
+                        </MenuItem.Header>
+                        <shadUi:MenuItemAssist.Label>
+                            <TextBlock Classes="Caption Muted" Text="My Account" />
+                        </shadUi:MenuItemAssist.Label>
+                        <MenuItem
+                            Width="224"
+                            Header="Profile"
+                            InputGesture="Ctrl + Shift + P" />
+                        <MenuItem Header="Billing" InputGesture="Ctrl + B" />
+                        <MenuItem Header="Settings" InputGesture="Ctrl + S" />
+                        <MenuItem Header="Keyboard shortcuts" InputGesture="Ctrl + K" />
+                        <Separator />
+                        <MenuItem Header="Team" />
+                        <MenuItem Header="Invite users">
+                            <MenuItem Width="128" Header="Email" />
+                            <MenuItem Header="Message" />
+                            <MenuItem Header="More..." />
+                        </MenuItem>
+                        <MenuItem Header="New Team" InputGesture="Ctrl + T" />
+                        <Separator />
+                        <MenuItem Header="Github" />
+                        <MenuItem Header="Support" />
+                        <MenuItem Header="API" IsEnabled="False" />
+                        <Separator />
+                        <MenuItem Header="Log out" InputGesture="Ctrl + Shift + Q" IsVisible="{Binding IsLoggedIn}"
+                                  Command="{Binding LogoutCommand}" />
+                        <Separator />
+                        <MenuItem Classes="Destructive" Header="Delete Account" />
+                    </MenuItem>
+                </Menu>
             </StackPanel>
         </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto, Auto">
-            <!-- Sidebar -->
-            <suki:SukiSideMenu IsSearchEnabled="True"
-                               ItemsSource="{Binding Sidebar.PinnedAlbum}"
-                               IsContentVisible="False" Margin="0">
-                <suki:SukiSideMenu.Styles>
-                    <Style Selector="Image.AppIcon">
-                        <Setter Property="Transitions">
-                            <Transitions>
-                                <DoubleTransition Property="Opacity" Duration="0.1" />
-                            </Transitions>
-                        </Setter>
-                        <Style Selector="^:pointerover">
-                            <Setter Property="Opacity" Value="0.5" />
-                        </Style>
-                    </Style>
-                </suki:SukiSideMenu.Styles>
-                <suki:SukiSideMenu.ItemTemplate>
-                    <DataTemplate>
-                        <suki:SukiSideMenuItem Header="{Binding Title}" PointerPressed="GoToAlbum">
-                            <suki:SukiSideMenuItem.Icon>
-                                <Image Source="{Binding Thumb}" Width="50" />
-                            </suki:SukiSideMenuItem.Icon>
-                        </suki:SukiSideMenuItem>
-                    </DataTemplate>
-                </suki:SukiSideMenu.ItemTemplate>
-
-                <suki:SukiSideMenu.HeaderContent>
-                    <!-- <Image Width="80" -->
-                    <!--        Height="80" -->
-                    <!--        Margin="30,10,30,30" -->
-                    <!--        Classes="AppIcon" -->
-                    <!--        IsVisible="{Binding $parent[suki:SukiWindow].((demo:SukiUIDemoViewModel)DataContext).TitleBarVisible}" -->
-                    <!--        PointerPressed="InputElement_OnPointerPressed" -->
-                    <!--        Source="Assets/OIG.N5o-removebg-preview.png" -->
-                    <!--        ToolTip.Tip="Click To Toggle Top Menu." /> -->
-                </suki:SukiSideMenu.HeaderContent>
-            </suki:SukiSideMenu>
-            <!-- Main Content -->
-            <suki:GlassCard Grid.Column="1" CornerRadius="17" Margin="4 5 0 10" Padding="0">
-                <UserControl Content="{Binding CurrentView, Source={x:Static local:Navigation.Instance}}">
-                    <ContentControl.DataTemplates>
-                        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
-                            <views:HomeView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type vm:AlbumViewModel}">
-                            <views:AlbumView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type vm:ArtistViewModel}">
-                            <views:ArtistView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type vm:TrackViewModel}">
-                            <views:TrackView />
-                        </DataTemplate>
-                    </ContentControl.DataTemplates>
-                </UserControl>
-            </suki:GlassCard>
-            <GridSplitter ResizeDirection="Columns" Width="4" Foreground="Transparent" Background="Transparent"
-                          Grid.Column="2">
-            </GridSplitter>
-            <suki:GlassCard Grid.Column="3" CornerRadius="17" Margin="0 5 10 10" Padding="0"
-                            IsVisible="{Binding IsSidecarOpen}" MaxWidth="250">
-                <views:SidecarView />
-            </suki:GlassCard>
+        <Grid Grid.Row="1" ColumnDefinitions="Auto, 2*, Auto">
         </Grid>
-        <Grid Grid.Row="2" ShowGridLines="True" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
+        <Grid Grid.Row="2" ColumnDefinitions="*, *, *" VerticalAlignment="Center" Margin="8 0">
             <!-- Bottom Music Player -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
                 <Border CornerRadius="8" ClipToBounds="True" VerticalAlignment="Center">
@@ -173,7 +135,7 @@
                                VerticalAlignment="Center" Margin="8 4" />
                 </StackPanel>
             </StackPanel>
-            <StackPanel Grid.Column="1" VerticalAlignment="Stretch">
+            <StackPanel Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="8">
                     <Button
@@ -209,20 +171,21 @@
                         <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Forward" />
                     </Button>
                 </StackPanel>
-                <Grid ColumnDefinitions="30, 250, *"
-                      VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid ColumnDefinitions="30, *, 30" HorizontalAlignment="Stretch">
                     <TextBlock
                         Text="{Binding MusicPlayer.Position, Converter={StaticResource SecondsToMinutesConverter}}"
                         VerticalAlignment="Center" />
-                    <Slider Grid.Column="1" Maximum="{Binding MusicPlayer.Track.Duration}"
-                            Value="{Binding MusicPlayer.Position}" Width="250" Padding="4 0"
-                            Thumb.DragCompleted="Thumb_OnDragCompleted" x:Name="MySlider"
-                            VerticalAlignment="Center" AttachedToVisualTree="Slider_AttachedToVisualTree" />
-
+                    <!-- <Slider Grid.Column="1" Value="{Binding MusicPlayer.Position}" -->
+                    <!--         Maximum="{Binding MusicPlayer.Duration}" -->
+                    <!--         Width="350" -->
+                    <!--         Thumb.DragCompleted="Thumb_OnDragCompleted" -->
+                    <!--         x:Name="MySlider" VerticalAlignment="Center" -->
+                    <!--         AttachedToVisualTree="Slider_AttachedToVisualTree" /> -->
                     <TextBlock Grid.Column="2"
                                Text="{Binding MusicPlayer.Track.Duration, Converter={StaticResource SecondsToMinutesConverter}}"
                                VerticalAlignment="Center" />
                 </Grid>
+
             </StackPanel>
             <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
                 <Button Classes="Basic Icon" Command="{Binding ToggleSidecarCommand}" VerticalAlignment="Center">
@@ -243,6 +206,5 @@
             </StackPanel>
         </Grid>
     </Grid>
-
     <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
 </UserControl>

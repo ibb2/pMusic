@@ -8,32 +8,33 @@ using pMusic.Services;
 
 namespace pMusic.ViewModels;
 
-public partial class DisplayPlaylistViewModel : ObservableObject
+public partial class DisplayPlaylistViewModel : PinnedItemViewModelBase
 {
     private readonly Plex _plex;
-    public string Title { get; }
-    public TimeSpan Duration { get; }
-    public string ThumbUrl { get; }
 
     [ObservableProperty] private Bitmap? composite;
+
+    [ObservableProperty] public Playlist playlist;
 
     public DisplayPlaylistViewModel(Playlist playlist, Plex plex)
     {
         _plex = plex;
+        Playlist = playlist;
         Title = playlist.Title;
         Duration = playlist.Duration;
-        ThumbUrl = playlist.Composite;
+        ImageUrl = playlist.Composite;
     }
+
 
     public async Task LoadThumbAsync()
     {
-        if (string.IsNullOrWhiteSpace(ThumbUrl))
+        if (string.IsNullOrWhiteSpace(ImageUrl))
             return;
 
         try
         {
-            var ThumbnailUrl = ThumbUrl + "?X-Plex-Token=" +
-                               Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+            var ThumbnailUrl = ImageUrl + "?X-Plex-Token=" +
+                               Keyring.GetPassword("com.ib", "pmusic", "authToken");
             Composite = await _plex.GetBitmapImage(ThumbnailUrl);
         }
         catch

@@ -19,7 +19,7 @@ public partial class MusicPlayer : ObservableObject
     [ObservableProperty] public Artist artist;
     [ObservableProperty] public IAudioBackend audioBackend;
     [ObservableProperty] public IAudioPlayer audioPlayer;
-    [ObservableProperty] public long duration;
+    [ObservableProperty] public double? duration = null;
     [ObservableProperty] ObservableQueue<Track> highPriorityTracks = new();
     [ObservableProperty] ObservableCollection<Track> highPriorityTracksBacking = new();
     [ObservableProperty] public Bitmap image;
@@ -52,6 +52,11 @@ public partial class MusicPlayer : ObservableObject
     {
         UpcomingTracks.Clear();
         PlayedTracks.Clear();
+
+        // Set music player metadata
+        Album = trackToPlay.Album;
+        Artist = trackToPlay.Album.Artist;
+
         UpcomingTracksAndHighPriorityBacking.Clear();
         UpcomingTracksBacking.Clear();
         PlayedTracksBacking.Clear();
@@ -97,6 +102,11 @@ public partial class MusicPlayer : ObservableObject
 
         PlayedTracks.Push(Track);
         PlayedTracksBacking.Add(Track);
+
+        // Set music player metadata
+        Album = upcomingTrack.Album;
+        Artist = upcomingTrack.Album.Artist;
+
         _audioPlayerFactory.PlayAudio(this, upcomingTrack, ServerUrl);
     }
 

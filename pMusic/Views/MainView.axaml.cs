@@ -1,22 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Web;
-using System.Xml.Linq;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.VisualTree;
-using KeySharp;
-using pMusic.Models;
 using pMusic.ViewModels;
-using SukiUI.Controls;
-using Track = Avalonia.Controls.Primitives.Track;
 
 namespace pMusic.Views;
 
@@ -27,22 +13,36 @@ public partial class MainView : UserControl
         InitializeComponent();
     }
 
-    private void GoToAlbum(object? sender, PointerPressedEventArgs e)
+    protected override void OnLoaded(RoutedEventArgs e)
     {
-        if (sender is not SukiSideMenuItem sukiSideMenuItem)
-            return;
+        base.OnLoaded(e);
 
-        if (sukiSideMenuItem.DataContext is not DisplayAlbumViewModel displayAlbumViewModel)
-            return;
-
-        if (displayAlbumViewModel.Album is null)
-            return;
-
-        if (DataContext is not MainViewModel viewModel)
-            return;
-
-        viewModel.GoToAlbumDetialsPage(displayAlbumViewModel.Album);
+        _ = (DataContext as MainViewModel)!.LoadSidebar();
     }
+
+
+    // private void GoTo(object? sender, PointerPressedEventArgs e)
+    // {
+    //     if (sender is not SukiSideMenuItem sukiSideMenuItem)
+    //         return;
+    //
+    //     if (DataContext is not MainViewModel viewModel) return;
+    //
+    //
+    //     switch (sukiSideMenuItem.DataContext)
+    //     {
+    //         case DisplayAlbumViewModel displayAlbumViewModel:
+    //             if (displayAlbumViewModel.Album is null) return;
+    //
+    //             viewModel.GoToAlbumPageCommand.Execute(displayAlbumViewModel.Album);
+    //             return;
+    //         case DisplayPlaylistViewModel displayPlaylistViewModel:
+    //             if (displayPlaylistViewModel.Playlist is null) return;
+    //
+    //             viewModel.GoToPlaylistPageCommand.Execute(displayPlaylistViewModel.playlist);
+    //             return;
+    //     }
+    // }
 
     private void Thumb_OnDragCompleted(object? sender, VectorEventArgs e)
     {
@@ -57,31 +57,31 @@ public partial class MainView : UserControl
     }
 
 
-    private void Slider_AttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
-    {
-        if (MySlider.GetTemplateChildren()
-                .OfType<Track>()
-                .FirstOrDefault() is Track track)
-            track.PointerPressed += Track_PointerPressed;
-    }
-
-    private void Track_PointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (sender is not Track track)
-            return;
-
-        var position = e.GetPosition(track);
-        var slider = MySlider;
-
-        // Horizontal only; adapt for vertical if needed
-        var percent = position.X / track.Bounds.Width;
-        var newValue = slider.Minimum + (slider.Maximum - slider.Minimum) * percent;
-
-        slider.Value = newValue;
-
-        // Your callback here
-        OnTrackClicked(newValue);
-    }
+    // private void Slider_AttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
+    // {
+    //     if (MySlider.GetTemplateChildren()
+    //             .OfType<Track>()
+    //             .FirstOrDefault() is Track track)
+    //         track.PointerPressed += Track_PointerPressed;
+    // }
+    //
+    // private void Track_PointerPressed(object? sender, PointerPressedEventArgs e)
+    // {
+    //     if (sender is not Track track)
+    //         return;
+    //
+    //     var position = e.GetPosition(track);
+    //     var slider = MySlider;
+    //
+    //     // Horizontal only; adapt for vertical if needed
+    //     var percent = position.X / track.Bounds.Width;
+    //     var newValue = slider.Minimum + (slider.Maximum - slider.Minimum) * percent;
+    //
+    //     slider.Value = newValue;
+    //
+    //     // Your callback here
+    //     OnTrackClicked(newValue);
+    // }
 
     private void OnTrackClicked(double value)
     {

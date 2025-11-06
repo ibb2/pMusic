@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using KeySharp;
 using pMusic.Services;
 using pMusic.ViewModels;
-using pMusic.Views;
 
 namespace pMusic.Interface;
 
@@ -21,18 +20,12 @@ public partial class Navigation : ObservableObject
     private static IMusic _music;
     private static Plex _plex;
 
+    private readonly Dictionary<Type, ViewModelBase> _viewModels = new();
+    [ObservableProperty] private object? _currentPage;
+    [ObservableProperty] private object? _currentView;
+
     [ObservableProperty] private Stack<ViewModelBase> _navStack = new();
     [ObservableProperty] private Stack<ViewModelBase> _popStack = new();
-    [ObservableProperty] private object? _currentView;
-    [ObservableProperty] private object? _currentPage;
-
-    private readonly Dictionary<Type, ViewModelBase> _viewModels = new();
-
-    // Singleton instance
-    public static Navigation Instance { get; } = new(
-        music: Ioc.Default.GetRequiredService<IMusic>(),
-        plex: Ioc.Default.GetRequiredService<Plex>()
-    );
 
     private Navigation(IMusic music, Plex plex)
     {
@@ -41,7 +34,7 @@ public partial class Navigation : ObservableObject
         CurrentView = Ioc.Default.GetRequiredService<HomeViewModel>();
 
 
-        if (Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken").Length > 0)
+        if (Keyring.GetPassword("com.ib", "pmusic", "authToken").Length > 0)
         {
             CurrentPage = Ioc.Default.GetRequiredService<MainViewModel>();
         }
@@ -50,6 +43,12 @@ public partial class Navigation : ObservableObject
             CurrentPage = Ioc.Default.GetRequiredService<LoginViewModel>();
         }
     }
+
+    // Singleton instance
+    public static Navigation Instance { get; } = new(
+        music: Ioc.Default.GetRequiredService<IMusic>(),
+        plex: Ioc.Default.GetRequiredService<Plex>()
+    );
 
     public void GoToView<T>(Action<T>? intializer) where T : ViewModelBase, new()
     {

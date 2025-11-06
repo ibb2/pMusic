@@ -45,7 +45,7 @@ public class Plex
         _plexClientIdentifier = GetOrCreateClientIdentifier();
         try
         {
-            _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+            _plexToken = Keyring.GetPassword("com.ib", "pmusic", "authToken");
         }
         catch (Exception ex)
         {
@@ -55,7 +55,7 @@ public class Plex
 
         try
         {
-            _plexSessionIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+            _plexSessionIdentifier = Keyring.GetPassword("com.ib", "pmusic", "cIdentifier");
         }
         catch (KeyringException ex)
         {
@@ -75,7 +75,7 @@ public class Plex
         var clientIdentifier = "";
         try
         {
-            clientIdentifier = Keyring.GetPassword("com.ib.pmusic", "pMusic", "cIdentifier");
+            clientIdentifier = Keyring.GetPassword("com.ib", "pmusic", "cIdentifier");
         }
         catch (KeyringException ex)
         {
@@ -87,7 +87,7 @@ public class Plex
         // Initial Setup create the Client Identifier and store for later use
         var guid = Guid.NewGuid().ToString();
         clientIdentifier = guid;
-        Keyring.SetPassword("com.ib.pmusic", "pMusic", "cIdentifier", guid);
+        Keyring.SetPassword("com.ib", "pmusic", "cIdentifier", guid);
 
         return clientIdentifier;
     }
@@ -115,8 +115,8 @@ public class Plex
             id = incomingXml.Attribute("id").ToString().Split('"')[1];
             code = incomingXml.Attribute("code").ToString().Split('"')[1];
 
-            Keyring.SetPassword("com.ib.pmusic", "pMusic", "id", id);
-            Keyring.SetPassword("com.ib.pmusic", "pMusic", "code", code);
+            Keyring.SetPassword("com.ib", "pmusic", "id", id);
+            Keyring.SetPassword("com.ib", "pmusic", "code", code);
 
             Console.WriteLine("Successfully generated pin");
         }
@@ -175,7 +175,7 @@ public class Plex
             if (parsedToken.Length != 0 || !string.IsNullOrEmpty(parsedToken))
             {
                 authToken = parsedToken;
-                Keyring.SetPassword("com.ib.pmusic", "pMusic", "authToken", authToken);
+                Keyring.SetPassword("com.ib", "pmusic", "authToken", authToken);
                 isPinPolling = false;
                 Console.WriteLine("Successfully Authenticated");
             }
@@ -186,7 +186,7 @@ public class Plex
         } while (isPinPolling && authToken == null);
 
         _plexToken = authToken;
-        _plexApi = new PlexAPI(Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken"));
+        _plexApi = new PlexAPI(Keyring.GetPassword("com.ib", "pmusic", "authToken"));
         Console.WriteLine($"Redirecting");
     }
 
@@ -194,8 +194,8 @@ public class Plex
     {
         try
         {
-            _plexToken = Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
-            _plexId = Keyring.GetPassword("com.ib.pmusic", "pMusic", "id");
+            _plexToken = Keyring.GetPassword("com.ib", "pmusic", "authToken");
+            _plexId = Keyring.GetPassword("com.ib", "pmusic", "id");
         }
         catch (KeyringException ex)
         {
@@ -251,7 +251,6 @@ public class Plex
 
             if (artistXElement.DescendantsAndSelf("Directory").Count() == artistsFromDb.Count)
             {
-                Console.WriteLine($"Returning all artists from db");
                 return artistsFromDb.ToImmutableList();
             }
 
@@ -287,7 +286,6 @@ public class Plex
 
             if (albumXElement.DescendantsAndSelf("Directory").Count() == albumsInDbCount)
             {
-                Console.WriteLine($"Returning {artist}'s albums from db");
                 return _musicDbContext.Albums.Where(a => (a.ArtistId == artist.Id) & (a.UserId == _plexId))
                     .ToImmutableList();
             }
@@ -311,7 +309,6 @@ public class Plex
             Console.WriteLine($"Error retrieving albums: {ex.Message}");
             if (albumsInDbCount > 0)
             {
-                Console.WriteLine($"{ex.Message} -> Returning {artist}'s albums from db");
                 return _musicDbContext.Albums.Where(a => (a.Artist == artist) & (a.UserId == _plexId))
                     .ToImmutableList();
             }
@@ -322,7 +319,7 @@ public class Plex
         return ImmutableList<Album>.Empty;
     }
 
-    public async ValueTask<IImmutableList<Track>> GetTrackList(string uri, string albumGuid)
+    public async ValueTask<IImmutableList<Track>> GetTrackList(string uri, string albumGuid, bool isPlaylist = false)
     {
         // Check if a track exists in db. If they do, return them.
         var trackExists = _musicDbContext.Tracks.Any(t => t.UserId == _plexId && t.ParentGuid == albumGuid);
@@ -353,6 +350,7 @@ public class Plex
         var album = _musicDbContext.Albums.FirstOrDefault(a => a.Guid == albumGuid);
 
         var trackUri = uri + "/library/metadata/" + album.RatingKey + "/children";
+
         var trackXml = await httpClient.GetStringAsync(trackUri);
 
         var tracks = await ParseTracks(XElement.Parse(trackXml), uri, album);
@@ -363,6 +361,53 @@ public class Plex
         Console.WriteLine($"Tracks {tracks.Count}");
         return tracks.ToImmutableList();
     }
+
+    public async ValueTask<IImmutableList<Track>> GetPlaylistTrackList(string uri, string guid,
+        bool isPlaylist = true)
+    {
+        // Check if a track exists in db. If they do, return them.
+        var trackExists = _musicDbContext.Tracks.Any(t => t.UserId == _plexId && t.ParentGuid == guid);
+
+        if (trackExists)
+        {
+            // _logger.LogInformation("Tracks found in DB for Album GUID {AlbumGuid}, retrieving with related data.", albumGuid); // Added logging for clarity
+
+            // Use Include() to load Media, and ThenInclude() to load Part from Media
+            var tracksFromDb = _musicDbContext.Tracks
+                .Include(t => t.Media) // Tell EF Core to load the Media navigation property
+                .ThenInclude(m => m.Part) // For each Media loaded, also load its Part navigation property
+                .Where(t => t.UserId == _plexId && t.ParentGuid == guid) // Filter by UserId AND AlbumGuid
+                .ToImmutableList();
+
+            // _logger.LogInformation("Retrieved {TrackCount} tracks from DB.", tracksFromDb.Count);
+            // Optional: Check if Media/Part are loaded for the first track (for debugging)
+            // if (tracksFromDb.Any() && tracksFromDb.First().Media == null) {
+            //     _logger.LogWarning("First track from DB still has null Media. Check Include/ThenInclude logic and DB data.");
+            // } else if (tracksFromDb.Any() && tracksFromDb.First().Media?.Part == null) {
+            //     _logger.LogWarning("First track from DB has Media but null Part. Check ThenInclude logic and DB data.");
+            // }
+
+            return tracksFromDb;
+        }
+
+        // If not, get them from plex and save them to the db.
+        Playlist? obj = null;
+        Album? album = null;
+        if (isPlaylist) obj = _musicDbContext.Playlists.FirstOrDefault(a => a.Guid == guid);
+
+        var trackUri = uri + "/playlists/" + obj.RatingKey + "/items";
+
+        var trackXml = await httpClient.GetStringAsync(trackUri);
+
+        var tracks = await ParsePlaylistTracks(XElement.Parse(trackXml), uri, obj);
+
+        // _musicDbContext.Tracks.AddRange(tracks);
+        // await _musicDbContext.SaveChangesAsync();
+
+        Console.WriteLine($"Tracks {tracks.Count}");
+        return tracks.ToImmutableList();
+    }
+
 
     public async ValueTask MarkTrackAsPlayed(double ratingKey)
     {
@@ -405,7 +450,6 @@ public class Plex
             if (playlistXElement.DescendantsAndSelf("Playlist")
                     .Count(p => p.Attribute("playlistType").Value == "audio") == pCount)
             {
-                Console.WriteLine($"Returning all Playlists from db");
                 return _musicDbContext.Playlists.Where(p => p.UserId == _plexId).ToImmutableList();
             }
 
@@ -424,11 +468,9 @@ public class Plex
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"Error retrieving playlists: {ex.Message}, Returning Playlists from database");
             return _musicDbContext.Playlists.Where(p => p.UserId == _plexId).ToImmutableList();
         }
 
-        Console.WriteLine($"No Playlists found, Returning empty list");
         return ImmutableList<Playlist>.Empty;
     }
 
@@ -534,6 +576,58 @@ public class Plex
 
         return items.ToList();
     }
+
+    public async Task<List<Track>> ParsePlaylistTracks(XElement mediaContainer, string uri, Playlist? playlist)
+    {
+        if (mediaContainer == null) return new List<Track>();
+
+        var items = mediaContainer.Elements("Track").Select(track =>
+        {
+            var album = _musicDbContext.Albums
+                .FirstOrDefault(a => a.Guid == track.Attribute("parentGuid")!.Value);
+
+            var nTrack = new Track
+            {
+                RatingKey = track.Attribute("ratingKey")?.Value ?? "",
+                Key = track.Attribute("key")?.Value ?? "",
+                ParentRatingKey = track.Attribute("parentRatingKey")?.Value ?? "",
+                GrandparentRatingKey = track.Attribute("grandparentRatingKey")?.Value ?? "",
+                Guid = track.Attribute("guid")?.Value ?? "",
+                ParentGuid = track.Attribute("parentGuid")?.Value ?? "",
+                GrandparentGuid = track.Attribute("grandparentGuid")?.Value ?? "",
+                ParentStudio = track.Attribute("parentStudio")?.Value ?? "",
+                Type = track.Attribute("type")?.Value ?? "",
+                Title = track.Attribute("title")?.Value ?? "",
+                GrandparentKey = track.Attribute("grandparentKey")?.Value ?? "",
+                ParentKey = track.Attribute("parentKey")?.Value ?? "",
+                GrandparentTitle = track.Attribute("grandparentTitle")?.Value ?? "",
+                ParentTitle = track.Attribute("parentTitle")?.Value ?? "",
+                Summary = track.Attribute("summary")?.Value ?? "",
+                Index = int.Parse(track.Attribute("index")?.Value ?? "0"),
+                ParentIndex = int.Parse(track.Attribute("parentIndex")?.Value ?? "0"),
+                RatingCount = int.Parse(track.Attribute("ratingCount")?.Value ?? "0"),
+                ParentYear = int.Parse(track.Attribute("parentYear")?.Value ?? "0"),
+                Thumb = uri + track.Attribute("thumb")?.Value ?? "",
+                Art = track.Attribute("art")?.Value ?? "",
+                ParentThumb = track.Attribute("parentThumb")?.Value ?? "",
+                GrandparentThumb = track.Attribute("grandparentThumb")?.Value ?? "",
+                GrandparentArt = track.Attribute("grandparentArt")?.Value ?? "",
+                Duration = TimeSpan.FromMilliseconds(int.Parse(track.Attribute("duration")?.Value ?? "0")),
+                AddedAt = int.Parse(track.Attribute("addedAt")?.Value ?? "0"),
+                UpdatedAt = int.Parse(track.Attribute("updatedAt")?.Value ?? "0"),
+                MusicAnalysisVersion = int.Parse(track.Attribute("musicAnalysisVersion")?.Value ?? "0"),
+                UserId = _plexId,
+                AlbumId = album!.Id,
+                Album = album
+            };
+
+            nTrack.Media = ParseMedia(track.Element("Media"), nTrack);
+            return nTrack;
+        }).ToList();
+
+        return items.ToList();
+    }
+
 
     private Media ParseMedia(XElement mediaElement, Track track)
     {

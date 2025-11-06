@@ -25,12 +25,15 @@ public partial class AlbumViewModel : ViewModelBase
     [ObservableProperty] public string _albumTitle = "MUSIC";
     [ObservableProperty] public string _albumTrackLength = "30";
     [ObservableProperty] public Bitmap? _Image = null;
+
+    private bool _isLoadingTracks;
     private IMusic _music;
     private MusicDbContext _musicDbContext;
     private MusicPlayer _musicPlayer;
     private Plex _plex;
     private Sidebar _sidebar;
     [ObservableProperty] public string _title = "Album";
+
 
     public AlbumViewModel(IMusic music, Plex plex,
         MusicDbContext musicDbContext, Sidebar sidebar, AudioPlayerFactory audioPlayerFactory, MusicPlayer musicPlayer)
@@ -54,12 +57,25 @@ public partial class AlbumViewModel : ViewModelBase
 
     public async ValueTask GetTracks()
     {
-        if (Album?.Guid == null) return;
+        if (Album?.Guid == null || _isLoadingTracks)
+            return;
 
-        var tracks =
-            await _music.GetTrackList(CancellationToken.None, _plex, Album.Guid);
+        _isLoadingTracks = true;
+        try
+        {
+            var tracks = await _music.GetTrackList(CancellationToken.None, _plex, Album.Guid);
+            TrackList.Clear();
 
-        foreach (var track in tracks) TrackList.Add(track);
+            foreach (var track in tracks)
+            {
+                if (!TrackList.Any(t => t?.Guid == track.Guid))
+                    TrackList.Add(track);
+            }
+        }
+        finally
+        {
+            _isLoadingTracks = false;
+        }
     }
 
     [RelayCommand]
@@ -80,16 +96,14 @@ public partial class AlbumViewModel : ViewModelBase
     public async Task Play(Track track)
     {
         var serverUri = await _music.GetServerUri(CancellationToken.None, _plex);
-        _musicPlayer.Album = Album;
-        _musicPlayer.Artist = Album.Artist;
+        _musicPlayer.ServerUrl = serverUri;
         _musicPlayer.Play(track);
-        // _ = _audioPlayerService.PlayAudio(uri: url, baseUri: serverUri, track: track);
     }
 
     [RelayCommand]
     public async Task AddToLibrary(Album currentAlbum)
     {
-        _sidebar.PinnedAlbum = new ObservableCollection<DisplayAlbumViewModel>();
+        _sidebar.Pinned.Clear();
 
         // No need to re-fetch or attach
         currentAlbum.IsPinned = !currentAlbum.IsPinned;
@@ -98,10 +112,13 @@ public partial class AlbumViewModel : ViewModelBase
         Console.WriteLine($"count: {count}");
         Console.WriteLine($"currentAlbum ref: {currentAlbum.GetHashCode()}");
 
+        var playlists = _musicDbContext.Playlists.Where(x => x.IsPinned).ToList();
+        var pViewModels = playlists.Select(a => new DisplayPlaylistViewModel(a, _plex)).ToList();
+        foreach (var p in pViewModels) _sidebar.Pinned.Add(p);
         var albums = _musicDbContext.Albums.Where(x => x.IsPinned).ToList();
         var viewModels = albums.Select(a => new DisplayAlbumViewModel(a, _plex)).ToList();
         await Task.WhenAll(viewModels.Select(vm => vm.LoadThumbAsync()));
-        foreach (var a in viewModels) _sidebar.PinnedAlbum.Add(a);
+        foreach (var a in viewModels) _sidebar.Pinned.Add(a);
     }
 
 
@@ -109,7 +126,7 @@ public partial class AlbumViewModel : ViewModelBase
     public async Task LoadAlbumThumbnail()
     {
         var url = Album.Thumb + "?X-Plex-Token=" +
-                  Keyring.GetPassword("com.ib.pmusic", "pMusic", "authToken");
+                  Keyring.GetPassword("com.ib", "pmusic", "authToken");
         Image = await _plex.GetBitmapImage(url);
     }
 }

@@ -16,10 +16,10 @@
         <converter:AuthenticateThumbnail x:Key="AuthenticateThumbnail" />
     </UserControl.Resources>
 
-    <ScrollViewer HorizontalAlignment="Stretch">
+    <ScrollViewer HorizontalAlignment="Stretch" Width="300" MaxWidth="400">
         <StackPanel Margin="20 16">
             <StackPanel Spacing="16">
-                <TextBlock Text="Now Playing"></TextBlock>
+                <TextBlock Text="Now Playing" FontSize="16" FontWeight="SemiBold"></TextBlock>
                 <Border Padding="8 0">
                     <StackPanel Spacing="16" VerticalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding !!MusicPlayer.Album}">
@@ -32,8 +32,7 @@
                             <StackPanel Spacing="8" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding MusicPlayer.Track.Title}" TextWrapping="NoWrap"
                                            TextTrimming="CharacterEllipsis"
-                                           HorizontalAlignment="Left"
-                                           MaxWidth="50">
+                                           HorizontalAlignment="Left">
                                 </TextBlock>
                                 <TextBlock Text="{Binding MusicPlayer.Artist.Title}"></TextBlock>
                             </StackPanel>
@@ -44,7 +43,7 @@
 
             <Border Height="20"></Border>
             <StackPanel Spacing="16" IsVisible="{Binding !!MusicPlayer.Album}">
-                <TextBlock Text="Up Next"></TextBlock>
+                <TextBlock Text="Up Next" FontSize="16" FontWeight="SemiBold"></TextBlock>
                 <ItemsControl ItemsSource="{Binding MusicPlayer.UpcomingTracksAndHighPriorityBacking}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -62,14 +61,10 @@
                                             Width="50" />
                                     </Border>
                                     <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Stretch">
-                                        <TextBlock Text="{Binding Title}" Foreground="{DynamicResource SukiText}"
-                                                   TextWrapping="NoWrap"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   HorizontalAlignment="Left"
-                                                   MaxWidth="50">
+                                        <TextBlock Text="{Binding Title}"
+                                                   HorizontalAlignment="Left">
                                         </TextBlock>
-                                        <TextBlock Text="{Binding Album.Artist.Title}"
-                                                   Foreground="{DynamicResource SukiText}">
+                                        <TextBlock Text="{Binding Album.Artist.Title}">
                                         </TextBlock>
                                     </StackPanel>
                                 </Grid>

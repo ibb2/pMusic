@@ -1,10 +1,10 @@
 using System;
 using System.Globalization;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml;
+using Avalonia.Interactivity;
+using pMusic.ViewModels;
 
 namespace pMusic.Views;
 
@@ -15,10 +15,27 @@ public partial class AlbumView : UserControl
         InitializeComponent();
     }
 
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        var vm = DataContext as AlbumViewModel;
+        if (vm == null) return;
+        _ = vm.GetTracks();
+    }
+
+
     private void InputElement_OnPointerEntered(object? sender, PointerEventArgs e)
     {
         Console.WriteLine("Entered");
         Console.WriteLine($"{e.GetCurrentPoint(this).Position}");
+    }
+
+    private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not TextBlock textBlock) return;
+
+        Console.WriteLine($"Textblock,{textBlock.Text}");
+        var vm = DataContext as AlbumViewModel;
+        vm?.GoToArtist(vm.Album!.Artist);
     }
 }
 

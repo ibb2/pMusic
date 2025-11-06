@@ -69,7 +69,7 @@ public class Playback
         if (bassState is ManagedBass.PlaybackState.Stopped)
         {
             await _timer.DisposeAsync();
-            if (playerPosition / _musicPlayer.Duration * 100 > 90)
+            if (playerPosition / (decimal)_musicPlayer.Duration * 100 > 90)
                 await TrackCompleted(_track.RatingKey);
 
             return;

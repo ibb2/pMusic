@@ -1,8 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using Avalonia.Controls;
-using Avalonia.Input;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using pMusic.Models;
+using Avalonia.Interactivity;
 using pMusic.ViewModels;
 
 namespace pMusic.Views;
@@ -12,40 +11,25 @@ public partial class HomeView : UserControl
     public HomeView()
     {
         InitializeComponent();
-        var dc = Ioc.Default.GetRequiredService<HomeViewModel>();
-        DataContext = dc;
-
-        this.Loaded += async (_, _) =>
-        {
-            var vm = (HomeViewModel)DataContext;
-            var isLoaded = vm.IsLoaded;
-            Console.WriteLine($"Is loaded: {isLoaded}");
-            await dc.LoadContent(isLoaded);
-        };
-        // this.DataContextChanged += async (_, _) =>
-        // {
-        //     if (DataContext is HomeViewModel vm)
-        //         await vm.LoadHomepageAlbumsAsync();
-        // };
+        // _ = LoadContentAsync();
     }
 
-    // // Parameterless constructor needed for XAML instantiation.
-    // public HomeView()
-    // {
-    // }
-
-    public void GoToAlbum(object? sender, PointerPressedEventArgs pointerPressedEvent)
+    public async Task LoadContentAsync()
     {
-        Console.WriteLine("Pressed event");
-        var album = ((StackPanel)sender).DataContext as DisplayAlbumViewModel;
-        Console.WriteLine($"Go to album: {album.Title}");
+        // Your data loading logic here
+        var vm = (HomeViewModel)DataContext!;
+        var isLoaded = vm.IsLoaded;
+        Console.WriteLine($"Is loaded: {isLoaded}");
+        if (!isLoaded) _ = vm.LoadContent();
+        Console.WriteLine($"check Is loaded: {isLoaded}");
+    }
 
-        if (pointerPressedEvent.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-        {
-            var vm = (HomeViewModel)DataContext;
-            vm.GoToAlbum(album.Album);
-        }
-
-        pointerPressedEvent.Handled = true;
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        var vm = (HomeViewModel)DataContext!;
+        var isLoaded = vm.IsLoaded;
+        Console.WriteLine($"Is loaded: {isLoaded}");
+        if (!isLoaded) _ = vm.LoadContent();
+        Console.WriteLine($"check Is loaded: {isLoaded}");
     }
 }
