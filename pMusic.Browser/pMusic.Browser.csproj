@@ -13,6 +13,7 @@
         <PackageReference Include="HeroIcons.Avalonia"/>
         <PackageReference Include="Huskui.Avalonia"/>
         <PackageReference Include="IconPacks.Avalonia"/>
+        <PackageReference Include="Lucide.Avalonia"/>
         <PackageReference Include="ManagedBass"/>
         <PackageReference Include="ManagedBass.Flac"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore"/>

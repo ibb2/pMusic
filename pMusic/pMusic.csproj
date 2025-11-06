@@ -31,6 +31,7 @@
         <PackageReference Include="Huskui.Avalonia"/>
         <PackageReference Include="IconPacks.Avalonia"/>
         <PackageReference Include="KeySharp"/>
+        <PackageReference Include="Lucide.Avalonia"/>
         <PackageReference Include="LukeHagar.PlexAPI.SDK"/>
         <PackageReference Include="ManagedBass"/>
         <PackageReference Include="ManagedBass.Flac"/>

@@ -8,6 +8,7 @@
         xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
         xmlns:converters="clr-namespace:ShadUI"
         xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
+        xmlns:converter="clr-namespace:pMusic.Converter"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="pMusic.Views.MainWindow"
         x:DataType="vm:MainViewModel"
@@ -18,8 +19,13 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainViewModel />
     </Design.DataContext>
+    <Window.Resources>
+        <converter:PlayingConverter x:Key="PlaybackStateToBooleanConverter" />
+        <converter:Seconds x:Key="SecondsToMinutesConverter" />
+    </Window.Resources>
+
     <Panel>
-        <Grid ColumnDefinitions="Auto *">
+        <Grid ColumnDefinitions="Auto *" RowDefinitions="* Auto">
             <shadui:Sidebar
                 Grid.Column="0"
                 Width="220"
@@ -84,7 +90,7 @@
                     <!-- </shadui:SidebarItem> -->
                 </StackPanel>
             </shadui:Sidebar>
-            <Grid Grid.Column="1">
+            <Grid Grid.Row="0" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -197,6 +203,114 @@
                     </UserControl>
                 </ScrollViewer>
             </Grid>
+            <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" BorderThickness="0 1 0 0" BorderBrush="WhiteSmoke">
+                <Grid ColumnDefinitions="*, *, *"
+                      VerticalAlignment="Bottom" Margin="8 0" MinHeight="90">
+                    <!-- Bottom Music Player -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
+                        <Border CornerRadius="8" ClipToBounds="True" VerticalAlignment="Center">
+                            <Image Source="{Binding MusicPlayer.Image}" Width="75" ClipToBounds="True"
+                                   VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding MusicPlayer.Track.Title}" FontWeight="Regular" FontSize="14"
+                                       VerticalAlignment="Center" Margin="8 4" />
+                            <TextBlock Text="{Binding MusicPlayer.Artist.Title}"
+                                       VerticalAlignment="Center" Margin="8 4" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Spacing="8" Margin="0 0 0 -10">
+                            <Button
+                                shadui:ElementAssist.Classes="Icon"
+                                Command="{Binding PrevTrack}"
+                                BorderThickness="0">
+                                <shadui:ButtonAssist.Icon>
+                                    <LucideIcon Kind="Rewind" Size="2"></LucideIcon>
+                                </shadui:ButtonAssist.Icon>
+                            </Button>
+                            <Grid HorizontalAlignment="Center">
+                                <Button
+                                    shadui:ElementAssist.Classes="Primary"
+                                    Command="{Binding PlayPause}"
+                                    CornerRadius="{DynamicResource FullCornerRadius}"
+                                    IsVisible="{Binding MusicPlayer.MPlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}, ConverterParameter=NotPlaying}"
+                                    Height="35"
+                                    Width="35"
+                                    Padding="6 7 7 7"
+                                    VerticalAlignment="Center">
+                                    <shadui:ButtonAssist.Icon>
+                                        <LucideIcon Kind="Play" Size="4" StrokeWidth="2">
+                                        </LucideIcon>
+                                    </shadui:ButtonAssist.Icon>
+                                </Button>
+                                <Button
+                                    shadui:ElementAssist.Classes="Primary"
+                                    Command="{Binding PlayPause}"
+                                    IsVisible="{Binding MusicPlayer.MPlaybackState, Converter={StaticResource PlaybackStateToBooleanConverter}}"
+                                    CornerRadius="{DynamicResource FullCornerRadius}"
+                                    Height="35"
+                                    Width="35"
+                                    Padding="6 7 7 7"
+                                    VerticalAlignment="Center">
+                                    <shadui:ButtonAssist.Icon>
+                                        <LucideIcon Kind="Pause" Size="4" StrokeWidth="2"></LucideIcon>
+                                    </shadui:ButtonAssist.Icon>
+                                </Button>
+                            </Grid>
+                            <Button
+                                shadui:ElementAssist.Classes="Icon"
+                                Command="{Binding NextTrack}"
+                                BorderThickness="0">
+                                <shadui:ButtonAssist.Icon>
+                                    <LucideIcon Kind="FastForward" Size="2"></LucideIcon>
+                                </shadui:ButtonAssist.Icon>
+                            </Button>
+                        </StackPanel>
+                        <Grid ColumnDefinitions="30, *, 30" HorizontalAlignment="Stretch" ColumnSpacing="16">
+                            <TextBlock
+                                Text="{Binding MusicPlayer.Position, Converter={StaticResource SecondsToMinutesConverter}}"
+                                VerticalAlignment="Center" />
+                            <Slider Grid.Column="1" Value="{Binding MusicPlayer.Position}"
+                                    IsEnabled="{Binding MusicPlayer.IsPlaying}"
+                                    Maximum="{Binding MusicPlayer.Duration}"
+                                    Width="350"
+                                    x:Name="MySlider" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding MusicPlayer.Track.Duration, Converter={StaticResource SecondsToMinutesConverter}}"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                        <Button shadui:ElementAssist.Classes="Icon" Command="{Binding ToggleSidecarCommand}"
+                                VerticalAlignment="Center">
+                            <shadui:ButtonAssist.Icon>
+                                <LucideIcon Kind="ListMusic"></LucideIcon>
+                            </shadui:ButtonAssist.Icon>
+                        </Button>
+                        <Button shadui:ElementAssist.Classes="Icon" Command="{Binding MuteCommand}"
+                                VerticalAlignment="Center"
+                                CommandParameter="{Binding MusicPlayer.Muted}"
+                                IsVisible="{Binding MusicPlayer.MutedOpposite}">
+                            <shadui:ButtonAssist.Icon>
+                                <LucideIcon Kind="Volume2"></LucideIcon>
+                            </shadui:ButtonAssist.Icon>
+                        </Button>
+                        <Button shadui:ElementAssist.Classes="Icon" Command="{Binding MuteCommand}"
+                                VerticalAlignment="Center"
+                                CommandParameter="{Binding MusicPlayer.Muted}"
+                                IsVisible="{Binding MusicPlayer.Muted}">
+                            <shadui:ButtonAssist.Icon>
+                                <LucideIcon Kind="VolumeX"></LucideIcon>
+                            </shadui:ButtonAssist.Icon>
+                        </Button>
+                        <Slider Minimum="0" Maximum="1" Value="{Binding MusicPlayer.Volume}" MinWidth="100"
+                                VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
     </Panel>
 </Window>
