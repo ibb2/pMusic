@@ -93,6 +93,8 @@ public partial class HomeViewModel : ViewModelBase
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
             RecentlyAddedAlbums.Clear();
+            TopEight.Clear();
+
             var count = 0;
 
             foreach (var vm in viewModels)
@@ -142,5 +144,10 @@ public partial class HomeViewModel : ViewModelBase
     public void GoToPlaylistPage(Playlist playlist)
     {
         GoToPlaylist(playlist);
+    }
+
+    [RelayCommand]
+    private void ShowToastWithTitle()
+    {
     }
 }

@@ -3,9 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
-             xmlns:heroIcons="clr-namespace:HeroIconsAvalonia.Controls;assembly=HeroIconsAvalonia"
              xmlns:views="clr-namespace:pMusic.Views"
              xmlns:converter="clr-namespace:pMusic.Converter"
+             xmlns:shadUi="clr-namespace:ShadUI;assembly=ShadUI"
+             xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="pMusic.Views.PlaylistView"
              x:DataType="vm:PlaylistViewModel">
@@ -27,151 +28,136 @@
             </Style>
         </Style>
     </UserControl.Styles>
-    <ScrollViewer ClipToBounds="True" CornerRadius="8" VerticalScrollBarVisibility="Hidden" Padding="8">
-
-        <Border Padding="16 8 16 32" Margin="0 4 8 2" CornerRadius="8" ClipToBounds="True">
-            <Grid RowDefinitions="Auto, Auto, Auto">
+    <Grid RowDefinitions="Auto, Auto, Auto">
+        <Grid>
+            <Grid ColumnDefinitions="Auto, *" VerticalAlignment="Top">
                 <Grid>
-                    <Grid ColumnDefinitions="Auto, *" VerticalAlignment="Top">
-                        <Grid>
-                            <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
-                                <Image Source="/Assets/Images/blank_playlist.png" Width="300" />
-                            </Border>
-                            <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
-                                <Rectangle RadiusX="4" RadiusY="4">
-                                    <Rectangle.Fill>
-                                        <ImageBrush Source="{Binding Image}"
-                                                    Stretch="UniformToFill" />
-                                    </Rectangle.Fill>
-                                </Rectangle>
-                            </Border>
-                        </Grid>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock>Playlist</TextBlock>
-                            <Viewbox Stretch="Fill" StretchDirection="Both" MaxWidth="500"
-                                     HorizontalAlignment="Left">
-                                <TextBlock Classes="h1" Text="{Binding Playlist.Title}"></TextBlock>
-                            </Viewbox>
-                            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                <!-- <Border CornerRadius="1000" Margin="0 0 12 0" ClipToBounds="True"> -->
-                                <!--     <Image Source="/Assets/Images/blank_playlist.png" Width="30" Height="30" /> -->
-                                <!-- </Border> -->
-                                <!-- <TextBlock Text="{Binding Playlist}" FontWeight="SemiBold" -->
-                                <!--            VerticalAlignment="Center"> -->
-                                <!-- </TextBlock> -->
-                                <!-- <TextBlock Text="{Binding Playlist.AddedAt}" -->
-                                <!--            VerticalAlignment="Center"> -->
-                                <!-- </TextBlock> -->
-                                <TextBlock
-                                    Text="{Binding Playlist.Duration, Converter={StaticResource TimeSpanToReadableConverter}}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
+                    <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
+                        <Image Source="/Assets/Images/blank_playlist.png" Width="300" />
+                    </Border>
+                    <Border CornerRadius="15" Margin="0 0 24 0" ClipToBounds="True">
+                        <Rectangle RadiusX="4" RadiusY="4">
+                            <Rectangle.Fill>
+                                <ImageBrush Source="{Binding Image}"
+                                            Stretch="UniformToFill" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Border>
                 </Grid>
-                <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
-                    <StackPanel Orientation="Horizontal" Spacing="20">
-                        <Button Classes="Flat Icon" HorizontalContentAlignment="Center"
-                                Command="{Binding QueuePlaylistCommand}">
-                            <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}"
-                                                Type="Play"
-                                                Kind="Solid" Min="True" Margin="4 0 0 0">
-                            </heroIcons:HeroIcon>
-                        </Button>
-                        <Button Classes="Basic Icon">
-                            <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ArrowsRightLeft"></heroIcons:HeroIcon>
-                        </Button>
-                        <Button Classes="Basic Icon"
-                                Command="{Binding AddToLibrary}" CommandParameter="{Binding Playlist}">
-                            <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="Plus"></heroIcons:HeroIcon>
-                        </Button>
-                        <Button Classes="Basic Icon">
-                            <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="CloudArrowDown"></heroIcons:HeroIcon>
-                        </Button>
+                <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
+                    <TextBlock FontSize="16">Playlist</TextBlock>
+                    <Viewbox Stretch="Fill" StretchDirection="Both" MaxWidth="500"
+                             HorizontalAlignment="Left">
+                        <TextBlock Classes="h1" Text="{Binding Playlist.Title}"></TextBlock>
+                    </Viewbox>
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock
+                            Text="{Binding Playlist.Duration, Converter={StaticResource TimeSpanToReadableConverter}}" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock VerticalAlignment="Center">
-                            List
-                        </TextBlock>
-                        <Button Classes="Basic Icon" VerticalAlignment="Center">
-                            <heroIcons:HeroIcon Foreground="{DynamicResource SukiText}" Type="ListBullet"></heroIcons:HeroIcon>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-                <DataGrid Grid.Row="2"
-                          Name="Tracklist"
-                          ItemsSource="{Binding TrackList}"
-                          IsReadOnly="True"
-                          CanUserResizeColumns="True"
-                          VerticalScrollBarVisibility="Disabled"
-                          HorizontalScrollBarVisibility="Disabled"
-                          RowHeight="30"
-                          ColumnHeaderHeight="30"
-                          HeadersVisibility="All">
-                    <DataGrid.Template>
-                        <ControlTemplate>
-                            <Border Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-
-                                    <DataGridColumnHeadersPresenter Name="PART_ColumnHeadersPresenter" Grid.Row="0" />
-                                    <DataGridRowsPresenter Name="PART_RowsPresenter" Grid.Row="1" />
-                                </Grid>
-                            </Border>
-                        </ControlTemplate>
-                    </DataGrid.Template>
-
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="Auto">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button
-                                        Classes="Basic Icon"
-                                        Command="{Binding ((vm:PlaylistViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        CommandParameter="{Binding}"
-                                        Width="{Binding $parent[DataGridCell].Bounds.Width}"
-                                        Height="{Binding $parent[DataGridCell].Bounds.Height}"
-                                        IsVisible="{Binding $parent[DataGridRow].IsPointerOver}">
-                                        <heroIcons:HeroIcon
-                                            Foreground="{DynamicResource SukiText}"
-                                            Type="Play"
-                                            Kind="Solid" />
-                                    </Button>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Width="*"
-                                            Binding="{Binding Title}">
-                            <DataGridTextColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="Title"
-                                               Padding="12,0,0,0"
-                                               VerticalAlignment="Center"
-                                               Foreground="{DynamicResource SukiText}" />
-                                </DataTemplate>
-                            </DataGridTextColumn.HeaderTemplate>
-                        </DataGridTextColumn>
-                        <!--The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"-->
-                        <!-- <DataGridTextColumn Header="Rating" Binding="{Binding RatingCount}"></DataGridTextColumn> -->
-                        <DataGridTextColumn
-                            Binding="{Binding Duration, Converter={StaticResource TimeSpanToMinSecConverter}, Mode=OneWay}"
-                            CellStyleClasses="right">
-                            <DataGridTextColumn.HeaderTemplate>
-                                <!-- Simply use a HeaderTemplate -->
-                                <DataTemplate>
-                                    <TextBlock Text="Length" HorizontalAlignment="Right"
-                                               Foreground="{DynamicResource SukiText}">
-                                    </TextBlock>
-                                </DataTemplate>
-                            </DataGridTextColumn.HeaderTemplate>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                </StackPanel>
             </Grid>
-        </Border>
-    </ScrollViewer>
+        </Grid>
+        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0 32">
+            <StackPanel Orientation="Horizontal" Spacing="20">
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <Button
+                        shadUi:ElementAssist.Classes="Primary"
+                        Command="{Binding QueuePlaylistCommand}"
+                        Content="Play">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Play"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
+                    </Button>
+                    <Button shadUi:ElementAssist.Classes="Icon">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Shuffle"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
+                    </Button>
+                    <Button shadUi:ElementAssist.Classes="Icon"
+                            Command="{Binding AddToLibraryCommand}" CommandParameter="{Binding Playlist}">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Plus"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
+                    </Button>
+                    <Button shadUi:ElementAssist.Classes="Icon">
+                        <shadUi:ButtonAssist.Icon>
+                            <iconPacks:PackIconLucide Kind="Download"></iconPacks:PackIconLucide>
+                        </shadUi:ButtonAssist.Icon>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+        <DataGrid Grid.Row="2"
+                  Name="Tracklist"
+                  ItemsSource="{Binding TrackList}"
+                  IsReadOnly="True"
+                  CanUserResizeColumns="True"
+                  VerticalScrollBarVisibility="Disabled"
+                  HorizontalScrollBarVisibility="Disabled"
+                  RowHeight="30"
+                  ColumnHeaderHeight="30"
+                  Margin="0 0 0 20"
+                  HeadersVisibility="All">
+            <DataGrid.Template>
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <DataGridColumnHeadersPresenter Name="PART_ColumnHeadersPresenter" Grid.Row="0" />
+                            <DataGridRowsPresenter Name="PART_RowsPresenter" Grid.Row="1" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </DataGrid.Template>
+
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="60">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="#" HorizontalAlignment="Center">
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Panel>
+                                <Button shadUi:ElementAssist.Classes="Icon"
+                                        IsVisible="{Binding $parent[DataGridCellsPresenter].IsPointerOver}"
+                                        Command="{Binding ((vm:PlaylistViewModel)DataContext).PlayCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding }"
+                                        Width="40"
+                                        Height="15">
+                                    <shadUi:ButtonAssist.Icon>
+                                        <iconPacks:PackIconLucide Kind="Play"></iconPacks:PackIconLucide>
+                                    </shadUi:ButtonAssist.Icon>
+                                </Button>
+                            </Panel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Width="*" Binding="{Binding Title}">
+                    <DataGridTextColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="Title"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTextColumn.HeaderTemplate>
+                </DataGridTextColumn>
+                <DataGridTextColumn
+                    Binding="{Binding Duration, Converter={StaticResource TimeSpanToMinSecConverter}, Mode=OneWay}"
+                    CellStyleClasses="right">
+                    <DataGridTextColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="Length" HorizontalAlignment="Right"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTextColumn.HeaderTemplate>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
 </UserControl>

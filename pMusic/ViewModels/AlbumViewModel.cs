@@ -25,6 +25,8 @@ public partial class AlbumViewModel : ViewModelBase
     [ObservableProperty] public string _albumTitle = "MUSIC";
     [ObservableProperty] public string _albumTrackLength = "30";
     [ObservableProperty] public Bitmap? _Image = null;
+
+    private bool _isLoadingTracks;
     private IMusic _music;
     private MusicDbContext _musicDbContext;
     private MusicPlayer _musicPlayer;
@@ -55,14 +57,25 @@ public partial class AlbumViewModel : ViewModelBase
 
     public async ValueTask GetTracks()
     {
-        TrackList.Clear();
+        if (Album?.Guid == null || _isLoadingTracks)
+            return;
 
-        if (Album?.Guid == null) return;
+        _isLoadingTracks = true;
+        try
+        {
+            var tracks = await _music.GetTrackList(CancellationToken.None, _plex, Album.Guid);
+            TrackList.Clear();
 
-        var tracks =
-            await _music.GetTrackList(CancellationToken.None, _plex, Album.Guid);
-
-        foreach (var track in tracks) TrackList.Add(track);
+            foreach (var track in tracks)
+            {
+                if (!TrackList.Any(t => t?.Guid == track.Guid))
+                    TrackList.Add(track);
+            }
+        }
+        finally
+        {
+            _isLoadingTracks = false;
+        }
     }
 
     [RelayCommand]

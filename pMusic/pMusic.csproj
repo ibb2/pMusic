@@ -25,13 +25,13 @@
         <PackageReference Include="Avalonia.Themes.Fluent"/>
         <PackageReference Include="Avalonia.Fonts.Inter"/>
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Include="Avalonia.Diagnostics">
-            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
-            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
-        </PackageReference>
+        <PackageReference Include="AvaloniaUI.DiagnosticsSupport"/>
         <PackageReference Include="CommunityToolkit.Mvvm"/>
         <PackageReference Include="HeroIcons.Avalonia"/>
+        <PackageReference Include="Huskui.Avalonia"/>
+        <PackageReference Include="IconPacks.Avalonia"/>
         <PackageReference Include="KeySharp"/>
+        <PackageReference Include="Lucide.Avalonia"/>
         <PackageReference Include="LukeHagar.PlexAPI.SDK"/>
         <PackageReference Include="ManagedBass"/>
         <PackageReference Include="ManagedBass.Flac"/>
@@ -48,8 +48,8 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
         <PackageReference Include="Microsoft.Extensions.Http"/>
         <PackageReference Include="Microsoft.Extensions.Http.Polly"/>
+        <PackageReference Include="ShadUI"/>
         <PackageReference Include="SoundFlow"/>
-        <PackageReference Include="SukiUI"/>
         <PackageReference Include="System.Net.Http"/>
     </ItemGroup>
 </Project>

@@ -1,8 +1,8 @@
-using SukiUI.Controls;
+using Avalonia.Controls;
 
 namespace pMusic.Views;
 
-public partial class MainWindow : SukiWindow
+public partial class MainWindow : Window
 {
     public MainWindow()
     {

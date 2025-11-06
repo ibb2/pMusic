@@ -5,6 +5,8 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:pMusic.ViewModels"
              xmlns:converter="clr-namespace:pMusic.Converter"
+             xmlns:behaviours="clr-namespace:pMusic.Behaviours"
+             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
              x:Class="pMusic.Views.HomeView"
              x:DataType="vm:HomeViewModel">
     <Design.DataContext>
@@ -19,260 +21,232 @@
         <Style>
             <Style Selector="TextBlock.h2">
                 <Setter Property="FontSize" Value="22"></Setter>
-                <Setter Property="FontWeight" Value="Bold"></Setter>
+                <Setter Property="FontWeight" Value="SemiBold"></Setter>
             </Style>
-            <Style Selector="ListBox /template/ ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-            </Style>
-            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                <Setter Property="CornerRadius" Value="8" />
-                <Setter Property="Background"
-                        Value="{DynamicResource SystemChromeHighColor}">
-                </Setter>
-            </Style>
-            <Style Selector="ListBoxItem:pointerover:focus /template/ ContentPresenter">
-                <Setter Property="CornerRadius" Value="8" />
-            </Style>
-            <!-- <Style Selector="ListBoxItem:selected /template/ ContentPresenter"> -->
-            <!--     <Setter Property="Background" Value="Transparent"></Setter> -->
-            <!-- </Style> -->
         </Style>
     </UserControl.Styles>
-    <ScrollViewer IsScrollChainingEnabled="True" VerticalScrollBarVisibility="Hidden" Padding="20">
-        <Grid Grid.RowDefinitions="*, *, *, *">
-            <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
-            <!-- Recently Played -->
-            <ItemsControl Classes="Top" Grid.Row="0" Margin="0 32" ItemsSource="{Binding TopEight}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch"></WrapPanel>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button
-                            Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
-                            CommandParameter="{Binding Album}"
-                            Width="250" Margin="8" CornerRadius="8"
-                            Background="{DynamicResource SukiPrimaryColor10}"
-                            BorderThickness="0"
-                            Padding="8"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch">
-                            <Grid ColumnDefinitions="Auto, 12, *" HorizontalAlignment="Stretch"
-                                  Width="{Binding $parent.Width}">
-                                <Border Width="50" Height="50" CornerRadius="4" ClipToBounds="True"
-                                        HorizontalAlignment="Left">
-                                    <Image Source="{Binding Image}" Stretch="UniformToFill" />
-                                </Border>
-                                <TextBlock Grid.Column="2" Text="{Binding Title}"
-                                           FontWeight="Bold"
-                                           TextWrapping="NoWrap"
-                                           TextTrimming="CharacterEllipsis"
-                                           VerticalAlignment="Center"
-                                           HorizontalAlignment="Left"
-                                           Foreground="{DynamicResource SukiText}" />
-                            </Grid>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto" HorizontalAlignment="Stretch">
+        <!-- Filters for library type (Music, Podcats, Audiobooks, etc) -->
+        <!-- Recently Played -->
+        <ItemsControl
+            Grid.Row="0"
+            Margin="0 32"
+            ItemsSource="{Binding TopEight}"
+            HorizontalAlignment="Stretch">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid
+                        behaviours:ResponsiveGridBehavior.IsEnabled="True"
+                        ColumnDefinitions="*,*,*,*"
+                        RowDefinitions="Auto, Auto">
+                    </Grid>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button
+                        Command="{Binding $parent[ItemsControl].((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
+                        CommandParameter="{Binding Album}"
+                        Margin="4"
+                        CornerRadius="8"
+                        BorderThickness="0"
+                        Padding="0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        MinWidth="150"
+                        Height="60"
+                        shadui:ElementAssist.Classes="Secondary">
+                        <Grid ColumnDefinitions="Auto, *" HorizontalAlignment="Stretch">
+                            <Border Width="60" Height="60"
+                                    CornerRadius="8,0,0,8"
+                                    ClipToBounds="True">
+                                <Image Source="{Binding Image}" Stretch="UniformToFill" />
+                            </Border>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Title}"
+                                       Margin="12,0,12,0"
+                                       FontWeight="Bold"
+                                       TextWrapping="NoWrap"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left" />
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <StackPanel Grid.Row="1" Margin="0 0 0 24" Spacing="4">
+            <TextBlock Classes="h2">Recently Played</TextBlock>
+            <!-- New Releases / Recently Added? -->
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden">
+                <ItemsControl ItemsSource="{Binding  Albums}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button
+                                shadui:ElementAssist.Classes="Ghost"
+                                Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
+                                CommandParameter="{Binding Album}"
+                                Height="225"
+                                Padding="4 2" VerticalAlignment="Center" VerticalContentAlignment="Center">
+                                <shadui:Card
+                                    HorizontalAlignment="Center"
+                                    HasShadow="True" Padding="16" Height="215" MaxWidth="175">
+                                    <StackPanel Spacing="12">
+                                        <StackPanel>
+                                            <Border Width="175" Height="125" CornerRadius="4" ClipToBounds="True"
+                                                    BorderThickness="1" HorizontalAlignment="Center">
+                                                <Rectangle RadiusX="4" RadiusY="4">
+                                                    <Rectangle.Fill>
+                                                        <ImageBrush Source="{Binding Image}" Stretch="UniformToFill" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{Binding Title}" TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis" FontWeight="SemiBold"
+                                                       FontSize="14" />
+                                            <TextBlock Text="{Binding Album.Artist.Title}"
+                                                       TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis" FontSize="12"
+                                                       FontWeight="Light" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </shadui:Card>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                        </Style>
+                    </ItemsControl.Styles>
+                </ItemsControl>
+            </ScrollViewer>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Margin="0 0 0 24" Spacing="4">
+            <TextBlock Classes="h2">Recently Added</TextBlock>
+            <!-- New Releases / Recently Added? -->
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden">
+                <ItemsControl ItemsSource="{Binding  RecentlyAddedAlbums}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button
+                                shadui:ElementAssist.Classes="Ghost"
+                                Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
+                                CommandParameter="{Binding Album}"
+                                Height="225"
+                                Padding="4 2" VerticalAlignment="Center" VerticalContentAlignment="Center">
+                                <shadui:Card
+                                    HorizontalAlignment="Center"
+                                    HasShadow="True" Padding="16" Height="215" MaxWidth="175">
+                                    <StackPanel Spacing="12">
+                                        <StackPanel>
+                                            <Border Width="175" Height="125" CornerRadius="4" ClipToBounds="True"
+                                                    BorderThickness="1" HorizontalAlignment="Center">
+                                                <Rectangle RadiusX="4" RadiusY="4">
+                                                    <Rectangle.Fill>
+                                                        <ImageBrush Source="{Binding Image}" Stretch="UniformToFill" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{Binding Title}" TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis" FontWeight="SemiBold"
+                                                       FontSize="14" />
+                                            <TextBlock Text="{Binding Album.Artist.Title}"
+                                                       TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis" FontSize="12"
+                                                       FontWeight="Light" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </shadui:Card>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                        </Style>
+                    </ItemsControl.Styles>
+                </ItemsControl>
+            </ScrollViewer>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Margin="0 0 0 24" Spacing="4">
+            <!-- Uniquely Yours -->
+            <TextBlock Classes="h2">Uniquely Yours</TextBlock>
+            <!-- Playlists (and other auto-generated information) -->
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden">
+                <ItemsControl ItemsSource="{Binding  Playlists}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button
+                                shadui:ElementAssist.Classes="Ghost"
+                                Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToPlaylistPageCommand}"
+                                CommandParameter="{Binding Playlist}"
+                                Height="225"
+                                Padding="4 2" VerticalAlignment="Center"
+                                VerticalContentAlignment="Center">
 
-                <ItemsControl.Styles>
-                    <Style>
-                        <Setter Property="ContentPresenter.Background" Value="Transparent" />
-                    </Style>
-                    <Style Selector="ListBoxItem">
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0" />
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ItemsControl.Styles>
-            </ItemsControl>
-            <StackPanel Grid.Row="1" Margin="0 0 0 60" Spacing="24">
-                <TextBlock Classes="h2">Recently Played</TextBlock>
-                <!-- New Releases / Recently Added? -->
-                <ScrollViewer HorizontalScrollBarVisibility="Hidden">
-                    <ItemsControl ItemsSource="{Binding  Albums}"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden" Background="Transparent">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button
-                                    Classes="Flat"
-                                    Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
-                                    CommandParameter="{Binding Album}"
-                                    Padding="8"
-                                    Background="Transparent">
-                                    <Button.Styles>
-                                        <Style Selector="Button">
-                                            <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
-                                        </Style>
-                                        <Style Selector="Button /template/ ContentPresenter">
-                                            <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
-                                            <Setter Property="Padding" Value="8"></Setter>
-                                        </Style>
-                                        <Style Selector="Button:pointerover /template/ ContentPresenter">
-                                            <Setter Property="Background" Value="{DynamicResource SukiAccentColor3}"></Setter>
-                                            <Setter Property="Padding" Value="8"></Setter>
-                                            <Setter Property="CornerRadius" Value=" 4"></Setter>
-                                        </Style>
-                                    </Button.Styles>
-                                    <StackPanel MaxWidth="150">
-                                        <Border Width="150" Height="150" CornerRadius="4" ClipToBounds="True"
-                                                BorderThickness="1" HorizontalAlignment="Center">
-                                            <Rectangle RadiusX="4" RadiusY="4">
-                                                <Rectangle.Fill>
-                                                    <ImageBrush Source="{Binding Image}" Stretch="UniformToFill" />
-                                                </Rectangle.Fill>
-                                            </Rectangle>
-                                        </Border>
-                                        <TextBlock Padding="5,0,0,8" Text="{Binding Title}" TextWrapping="NoWrap"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Foreground="{DynamicResource SukiText}" />
-                                        <TextBlock Padding="5,0,0,0" Text="{Binding Artist}" TextWrapping="NoWrap"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Foreground="{DynamicResource SukiText}" />
+                                <shadui:Card
+                                    HorizontalAlignment="Center"
+                                    HasShadow="True" Padding="16" Height="215" MaxWidth="175">
+                                    <StackPanel Spacing="12">
+                                        <StackPanel>
+                                            <Border Width="175" Height="125" CornerRadius="4" ClipToBounds="True"
+                                                    BorderThickness="1" HorizontalAlignment="Center">
+                                                <Rectangle RadiusX="4" RadiusY="4">
+                                                    <Rectangle.Fill>
+                                                        <ImageBrush Source="{Binding Composite}"
+                                                                    Stretch="UniformToFill" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{Binding Title}" TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis" FontWeight="SemiBold"
+                                                       FontSize="14" />
+                                            <TextBlock Text="{Binding Duration}"
+                                                       TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis" FontSize="12"
+                                                       FontWeight="Light" />
+                                        </StackPanel>
                                     </StackPanel>
-                                </Button>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                        <ItemsControl.Styles>
-                            <Style Selector="ListBoxItem">
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="Margin" Value="0" />
-                            </Style>
-                        </ItemsControl.Styles>
-                    </ItemsControl>
-                </ScrollViewer>
-                <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
-            </StackPanel>
-            <StackPanel Grid.Row="2" Margin="0 0 0 60" Spacing="24">
-                <TextBlock Classes="h2">Recently Added</TextBlock>
-                <!-- New Releases / Recently Added? -->
-                <ScrollViewer HorizontalScrollBarVisibility="Hidden">
-                    <ItemsControl ItemsSource="{Binding  RecentlyAddedAlbums}"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden" Background="Transparent">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button
-                                    Classes="Flat"
-                                    Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToAlbumPageCommand}"
-                                    CommandParameter="{Binding Album}"
-                                    Padding="8"
-                                    Background="Transparent">
-                                    <Button.Styles>
-                                        <Style Selector="Button">
-                                            <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
-                                        </Style>
-                                        <Style Selector="Button /template/ ContentPresenter">
-                                            <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
-                                            <Setter Property="Padding" Value="8"></Setter>
-                                        </Style>
-                                        <Style Selector="Button:pointerover /template/ ContentPresenter">
-                                            <Setter Property="Background" Value="{DynamicResource SukiAccentColor3}"></Setter>
-                                            <Setter Property="Padding" Value="8"></Setter>
-                                            <Setter Property="CornerRadius" Value=" 4"></Setter>
-                                        </Style>
-                                    </Button.Styles>
-                                    <StackPanel MaxWidth="150">
-                                        <Border Width="150" Height="150" CornerRadius="4" ClipToBounds="True"
-                                                BorderThickness="1" HorizontalAlignment="Center">
-                                            <Rectangle RadiusX="4" RadiusY="4">
-                                                <Rectangle.Fill>
-                                                    <ImageBrush Source="{Binding Image}" Stretch="UniformToFill" />
-                                                </Rectangle.Fill>
-                                            </Rectangle>
-                                        </Border>
-                                        <TextBlock Padding="5,0,0,8" Text="{Binding Title}" TextWrapping="NoWrap"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Foreground="{DynamicResource SukiText}" />
-                                        <TextBlock Padding="5,0,0,0" Text="{Binding Artist}" TextWrapping="NoWrap"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Foreground="{DynamicResource SukiText}" />
-                                    </StackPanel>
-                                </Button>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                        <ItemsControl.Styles>
-                            <Style Selector="ListBoxItem">
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="Margin" Value="0" />
-                            </Style>
-                        </ItemsControl.Styles>
-                    </ItemsControl>
-                </ScrollViewer>
-                <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
-            </StackPanel>
-            <StackPanel Grid.Row="3" Margin="0 0 0 60" Spacing="24">
-                <!-- Uniquely Yours -->
-                <TextBlock Classes="h2">Uniquely Yours</TextBlock>
-                <!-- Playlists (and other auto-generated information) -->
-                <ScrollViewer HorizontalScrollBarVisibility="Hidden">
-                    <ItemsControl ItemsSource="{Binding  Playlists}"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden" Background="Transparent">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button
-                                    Classes="Flat"
-                                    Padding="8"
-                                    Background="Transparent"
-                                    Command="{Binding $parent.((vm:HomeViewModel)DataContext).GoToPlaylistPageCommand}"
-                                    CommandParameter="{Binding Playlist}">
-                                    <Button.Styles>
-                                        <Style Selector="Button">
-                                            <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
-                                        </Style>
-                                        <Style Selector="Button /template/ ContentPresenter">
-                                            <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
-                                            <Setter Property="Padding" Value="8"></Setter>
-                                        </Style>
-                                        <Style Selector="Button:pointerover /template/ ContentPresenter">
-                                            <Setter Property="Background" Value="{DynamicResource SukiAccentColor3}"></Setter>
-                                            <Setter Property="Padding" Value="8"></Setter>
-                                            <Setter Property="CornerRadius" Value=" 4"></Setter>
-                                        </Style>
-                                    </Button.Styles>
-                                    <StackPanel>
-                                        <Border Width="150" Height="150" CornerRadius="4" ClipToBounds="True"
-                                                BorderThickness="1" HorizontalAlignment="Center">
-                                            <Rectangle RadiusX="4" RadiusY="4">
-                                                <Rectangle.Fill>
-                                                    <ImageBrush Source="{Binding Composite}" Stretch="UniformToFill" />
-                                                </Rectangle.Fill>
-                                            </Rectangle>
-                                        </Border>
-                                        <TextBlock Padding="5,0,0,8" Text="{Binding Title}"
-                                                   Foreground="{DynamicResource SukiText}" />
-                                        <TextBlock Padding="5,0,0,0" Text="{Binding Duration}"
-                                                   Foreground="{DynamicResource SukiText}" />
-                                    </StackPanel>
-                                </Button>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                        <ItemsControl.Styles>
-                            <Style Selector="ListBoxItem">
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="Margin" Value="0" />
-                            </Style>
-                        </ItemsControl.Styles>
-                    </ItemsControl>
-                </ScrollViewer>
-                <!-- <Button Content="Go To Album" HorizontalAlignment="Stretch" Command="{Binding GoToAlbum}" Height="50"></Button> -->
-            </StackPanel>
-        </Grid>
-    </ScrollViewer>
+                                </shadui:Card>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                        </Style>
+                    </ItemsControl.Styles>
+                </ItemsControl>
+            </ScrollViewer>
+        </StackPanel>
+    </Grid>
 </UserControl>
