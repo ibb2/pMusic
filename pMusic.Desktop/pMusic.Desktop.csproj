@@ -1,67 +1,85 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>WinExe</OutputType>
-        <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
-        One for Windows with net9.0-windows TFM, one for MacOS with net9.0-macos and one with net9.0 TFM for Linux.-->
-        <TargetFramework>net9.0</TargetFramework>
-        <RuntimeIdentifiers>osx-arm64;osx-x64</RuntimeIdentifiers> <!-- ✅ ADD THIS -->
-        <Nullable>enable</Nullable>
-        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-        <!--        Publishing-->
-        <ApplicationTitle>pMusic</ApplicationTitle>
-        <Version>0.1.0</Version>
-    </PropertyGroup>
 
-    <!--        Settings for publishing with Avalonia-->
-    <PropertyGroup>
-        <PublishSingleFile>true</PublishSingleFile>
-        <SelfContained>true</SelfContained>
-        <PublishTrimmed>true</PublishTrimmed>
-        <PublishReadyToRun>true</PublishReadyToRun>
-        <UseAppHost>true</UseAppHost>
-    </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0</TargetFramework>
 
-    <PropertyGroup>
-        <ApplicationManifest>app.manifest</ApplicationManifest>
-    </PropertyGroup>
+		<!-- Add your supported runtime identifiers -->
+		<RuntimeIdentifiers>win-x64;osx-arm64;osx-x64</RuntimeIdentifiers>
 
-    <ItemGroup>
-        <None Include="Assets/AppIcon.icns" Pack="true"/>
-    </ItemGroup>
+		<Nullable>enable</Nullable>
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 
-    <ItemGroup>
-        <PackageReference Include="AsyncImageLoader.Avalonia"/>
-        <PackageReference Include="Avalonia.Desktop"/>
-        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Include="AvaloniaUI.DiagnosticsSupport"/>
-        <PackageReference Include="HeroIcons.Avalonia"/>
-        <PackageReference Include="Huskui.Avalonia"/>
-        <PackageReference Include="IconPacks.Avalonia"/>
-        <PackageReference Include="Lucide.Avalonia"/>
-        <PackageReference Include="ManagedBass"/>
-        <PackageReference Include="ManagedBass.Flac"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="ShadUI"/>
-    </ItemGroup>
+		<!-- Application metadata -->
+		<ApplicationTitle>pMusic</ApplicationTitle>
+		<Version>0.3.0</Version>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<PackageId>com.ib.pmusic</PackageId>
+		<ApplicationId>$(PackageId)</ApplicationId>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\pMusic\pMusic.csproj"/>
-    </ItemGroup>
+	<!-- Parcel / Publish settings -->
+	<PropertyGroup>
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<PublishTrimmed>true</PublishTrimmed>
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<UseAppHost>true</UseAppHost>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <Folder Include="Assets\"/>
-        <Folder Include="bin\Debug\net9.0\"/>
-    </ItemGroup>
+	<!-- Include app assets -->
+	<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+		<ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64' Or '$(RuntimeIdentifier)' == 'osx-arm64'">
+		<!-- macOS doesn’t use ApplicationIcon — just ensure the .icns is bundled -->
+	</PropertyGroup>
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64' Or '$(RuntimeIdentifier)' == 'osx-arm64'">
+		<None Include="Assets/AppIcon.icns" Pack="true" />
+	</ItemGroup>
 
-    <!--    Macos Specific-->
-    <!-- macOS-specific metadata -->
+
+	<!-- NuGet dependencies -->
+	<ItemGroup>
+		<PackageReference Include="AsyncImageLoader.Avalonia" />
+		<PackageReference Include="Avalonia.Desktop" />
+		<PackageReference Include="AvaloniaUI.DiagnosticsSupport" />
+		<PackageReference Include="HeroIcons.Avalonia" />
+		<PackageReference Include="Huskui.Avalonia" />
+		<PackageReference Include="IconPacks.Avalonia" />
+		<PackageReference Include="Lucide.Avalonia" />
+		<PackageReference Include="ManagedBass" />
+		<PackageReference Include="ManagedBass.Flac" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ShadUI" />
+	</ItemGroup>
+
+	<!-- Project reference -->
+	<ItemGroup>
+		<ProjectReference Include="..\pMusic\pMusic.csproj" />
+	</ItemGroup>
+
+	<!-- Copy BASS native libraries into output -->
+	<ItemGroup>
+		<None Include="bass.dll" CopyToOutputDirectory="Always" />
+		<None Include="bassflac.dll" CopyToOutputDirectory="Always" />
+		<None Include="bass.net.dll" CopyToOutputDirectory="Always" />
+	</ItemGroup>
+
+	<!-- Preserve native DLLs in single-file publish -->
+	<ItemGroup>
+		<NativeFile Include="bass.dll" />
+		<NativeFile Include="bassflac.dll" />
+		<NativeFile Include="bass.net.dll" />
+	</ItemGroup>
+
 </Project>

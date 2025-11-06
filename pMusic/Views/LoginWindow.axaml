@@ -7,7 +7,7 @@
                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                x:Class="pMusic.Views.LoginWindow"
                x:DataType="vm:LoginViewModel"
-               Icon="/Assets/avalonia-logo.ico"
+               Icon="/Assets/AppIcon.ico"
                Title="pMusic">
     <Design.DataContext>
         <vm:LoginViewModel />
