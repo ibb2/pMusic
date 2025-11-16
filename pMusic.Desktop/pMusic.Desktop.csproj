@@ -26,23 +26,31 @@
         <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     </PropertyGroup>
 
-	<!-- Copy runtime native libraries to output root (for ManagedBass, etc.) -->
-	<Target Name="CopyNativeBassLibraries" AfterTargets="AfterBuild">
-		<ItemGroup>
-			<!-- Copy only the DLLs for the current platform -->
-			<BassNativeLibs Include="$(ProjectDir)runtimes\win-x64\native\*.dll" Condition="$([MSBuild]::IsOSPlatform('Windows'))"/>
-			<BassNativeLibs Include="$(ProjectDir)runtimes\osx-arm64\native\*.*" Condition="$([MSBuild]::IsOSPlatform('OSX'))"/>
-			<BassNativeLibs Include="$(ProjectDir)runtimes\osx-x64\native\*.*" Condition="$([MSBuild]::IsOSPlatform('OSX'))"/>
-			<!-- Fallback: also check output directory in case NuGet puts them there -->
-			<BassNativeLibs Include="$(OutputPath)runtimes\**\native\*.dll"/>
-		</ItemGroup>
-		<Copy SourceFiles="@(BassNativeLibs)"
-			  DestinationFolder="$(OutputPath)"
-			  SkipUnchangedFiles="true"
-			  Condition="'@(BassNativeLibs)' != ''"/>
-		<Message Text="Copied BASS native libraries to $(OutputPath)" Importance="high"/>
-	</Target>
-	
+    <!-- Copy runtime native libraries to output root (for ManagedBass, etc.) -->
+    <Target Name="CopyNativeBassLibraries" AfterTargets="AfterBuild;AfterPublish">
+        <!-- Determine the correct output directory (build or publish) -->
+        <PropertyGroup>
+            <TargetDir Condition="'$(PublishDir)' != ''">$(PublishDir)</TargetDir>
+            <TargetDir Condition="'$(PublishDir)' == ''">$(OutputPath)</TargetDir>
+        </PropertyGroup>
+
+        <ItemGroup>
+            <!-- Copy only the DLLs for the current platform -->
+            <BassNativeLibs Include="$(ProjectDir)runtimes\win-x64\native\*.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64'"/>
+            <BassNativeLibs Include="$(ProjectDir)runtimes\osx-arm64\native\*.*" Condition="'$(RuntimeIdentifier)' == 'osx-arm64'"/>
+            <BassNativeLibs Include="$(ProjectDir)runtimes\osx-x64\native\*.*" Condition="'$(RuntimeIdentifier)' == 'osx-x64'"/>
+            <!-- Fallback: also check output directory in case NuGet puts them there -->
+            <BassNativeLibs Include="$(TargetDir)runtimes\**\native\*.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64'"/>
+            <BassNativeLibs Include="$(TargetDir)runtimes\**\native\*.dylib" Condition="'$(RuntimeIdentifier)' == 'osx-arm64' Or '$(RuntimeIdentifier)' == 'osx-x64'"/>
+        </ItemGroup>
+
+        <Copy SourceFiles="@(BassNativeLibs)"
+              DestinationFolder="$(TargetDir)"
+              SkipUnchangedFiles="true"
+              Condition="'@(BassNativeLibs)' != ''"/>
+        <Message Text="Copied BASS native libraries to $(TargetDir)" Importance="high"/>
+    </Target>
+
     <!-- Publishing Settings -->
     <PropertyGroup>
         <!-- SelfContained: Include .NET runtime with the app (true = no .NET install required) -->
