@@ -1,9 +1,17 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import {
+  app,
+  shell,
+  BrowserWindow,
+  ipcMain,
+  Menu,
+  type MenuItemConstructorOptions
+} from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { DatabaseManager } from './database'
 import { PlexServer } from './types'
+import type Authentication from './plex/authentication'
 
 const API_PORT = process.env.API_PORT || 34567
 
@@ -28,13 +36,23 @@ if (!gotTheLock) {
 // Actually, standard pattern is to quit immediately if no lock.
 // Moving the rest of the logic inside the lock check or just above.
 
+function loadRendererRoute(mainWindow: BrowserWindow, route = '/'): Promise<void> {
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    return mainWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}#${route}`)
+  }
+
+  return mainWindow.loadFile(join(__dirname, '../renderer/index.html'), {
+    hash: route
+  })
+}
+
 function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -56,13 +74,62 @@ function createWindow(): BrowserWindow {
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
+  loadRendererRoute(mainWindow)
 
   return mainWindow
+}
+
+function createApplicationMenu(auth: Authentication, mainWindow: BrowserWindow): void {
+  const signOut = async (): Promise<void> => {
+    const logoutSuccessful = await auth.logout()
+
+    if (!logoutSuccessful || mainWindow.isDestroyed()) {
+      return
+    }
+
+    await loadRendererRoute(mainWindow, '/auth')
+  }
+
+  const isMac = process.platform === 'darwin'
+  const template: MenuItemConstructorOptions[] = [
+    ...(isMac
+      ? [
+          {
+            label: app.name,
+            submenu: [
+              { role: 'about' },
+              { type: 'separator' },
+              { role: 'services' },
+              { type: 'separator' },
+              { role: 'hide' },
+              { role: 'hideOthers' },
+              { role: 'unhide' },
+              { type: 'separator' },
+              { role: 'quit' }
+            ]
+          } satisfies MenuItemConstructorOptions
+        ]
+      : []),
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Sign Out',
+          accelerator: 'CommandOrControl+Shift+L',
+          click: () => {
+            void signOut()
+          }
+        },
+        { type: 'separator' },
+        isMac ? { role: 'close' } : { role: 'quit' }
+      ]
+    },
+    { role: 'editMenu' },
+    { role: 'viewMenu' },
+    { role: 'windowMenu' }
+  ]
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 // This method will be called when Electron has finished
@@ -139,12 +206,16 @@ app.whenReady().then(async () => {
   })
 
   // Wait for API to be ready before creating window
-  const mainWindow = createWindow()
+  let mainWindow = createWindow()
+  createApplicationMenu(auth, mainWindow)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) {
+      mainWindow = createWindow()
+      createApplicationMenu(auth, mainWindow)
+    }
   })
 
   // Protocol handler for Windows/Linux

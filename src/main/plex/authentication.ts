@@ -204,11 +204,16 @@ class Authentication {
   public async logout(): Promise<boolean> {
     try {
       this.store.delete('plexUserAccessToken')
+      this.store.delete('plexId')
       this.store.delete('plexCode')
-      this.store.delete("selectedServer")
+      this.store.delete('selectedServer')
+      this.store.delete('selectedLibraries')
       this.plexUserAccessToken = ''
+      this.plexId = ''
       this.plexCode = ''
       this.selectedServer = null
+      this.selectedLibraries = null
+      await this.closeLoopbackServer()
       return true
     } catch {
       return false
