@@ -3,9 +3,25 @@ import { PlayerFooter } from "@/components/layout/PlayerFooter";
 import { SiteHeader } from "@/components/site-header";
 import { StartupLoading } from "@/components/StartupLoading";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app")({
+  beforeLoad: async () => {
+    const isUserLoggedIn = await window.api.auth.isUserSignedIn();
+    const server = await window.api.auth.getUserSelectedServer();
+
+    if (!isUserLoggedIn) {
+      throw redirect({
+        to: "/auth",
+      });
+    }
+
+    if (!server) {
+      throw redirect({
+        to: "/setup",
+      });
+    }
+  },
   component: AppLayoutComponent,
 });
 
