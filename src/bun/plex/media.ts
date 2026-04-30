@@ -10,9 +10,12 @@ type PlexMetadata = Record<string, any>
 type PlexResponse = {
   MediaContainer?: {
     Metadata?: PlexMetadata[]
+    Directory?: PlexMetadata[]
     totalSize?: number
   }
 }
+
+const PLEX_REQUEST_TIMEOUT_MS = 8_000
 
 export class MediaService {
   private activeBaseUrl: string | null = null
@@ -126,7 +129,7 @@ export class MediaService {
   async getAlbum(ratingKey: string): Promise<unknown> {
     const album = await this.fetchMetadataItem(ratingKey)
     const tracks = await this.fetchMetadataChildren(ratingKey)
-    const artistKey = this.extractRatingKey(album.parentKey)
+    const artistKey = album.parentRatingKey || this.extractRatingKey(album.parentKey)
 
     return {
       id: album.key,
@@ -161,26 +164,37 @@ export class MediaService {
   }
 
   async getArtistAlbums(ratingKey: string): Promise<unknown[]> {
-    const albums = await this.fetchMetadataChildren(ratingKey, { type: '9' })
+    let albums = await this.fetchMetadataChildren(ratingKey, { type: '9' })
+    if (albums.length === 0) {
+      albums = await this.fetchMetadataChildren(ratingKey)
+    }
+    if (albums.length === 0) {
+      albums = await this.getArtistAlbumsFromSections(ratingKey)
+    }
+
     return albums.map((album) => ({
       ...this.mapAlbum(album),
-      artistKey: album.parentKey,
+      artistKey: album.parentRatingKey || this.extractRatingKey(album.parentKey),
       leafCount: album.leafCount
     }))
   }
 
   async getArtistPopularTracks(ratingKey: string): Promise<unknown> {
-    const data = await this.fetchPlex(`/library/metadata/${ratingKey}/popularTracks`)
+    try {
+      const data = await this.fetchPlex(`/library/metadata/${ratingKey}/popularTracks`)
 
-    return {
-      tracks: (data.MediaContainer?.Metadata || []).map((track) => ({
-        id: track.ratingKey,
-        number: track.trackNumber,
-        title: track.title,
-        duration: track.duration,
-        ratingCount: track.ratingCount,
-        ratingKey: track.ratingKey
-      }))
+      return {
+        tracks: (data.MediaContainer?.Metadata || []).map((track) => ({
+          id: track.ratingKey,
+          number: track.trackNumber,
+          title: track.title,
+          duration: track.duration,
+          ratingCount: track.ratingCount,
+          ratingKey: track.ratingKey
+        }))
+      }
+    } catch {
+      return { tracks: [] }
     }
   }
 
@@ -221,9 +235,9 @@ export class MediaService {
         duration: track.duration,
         albumThumb: this.plexUrl(track.parentThumb),
         albumTitle: track.parentTitle,
-        albumRatingKey: track.parentRatingKey,
+        albumRatingKey: track.parentRatingKey || this.extractRatingKey(track.parentKey),
         artistTitle: track.grandparentTitle,
-        artistRatingKey: track.grandparentRatingKey,
+        artistRatingKey: track.grandparentRatingKey || this.extractRatingKey(track.grandparentKey),
         ratingKey: track.ratingKey
       }))
     }
@@ -280,6 +294,22 @@ export class MediaService {
     return results.flat().slice(0, limit)
   }
 
+  private async getArtistAlbumsFromSections(ratingKey: string): Promise<PlexMetadata[]> {
+    const sections = await this.getSelectedMusicSections()
+    const results = await Promise.all(
+      sections.map(async (section) => {
+        const data = await this.fetchPlex(`/library/sections/${section.key}/all`, {
+          type: '9',
+          'artist.id': ratingKey,
+          'X-Plex-Container-Size': '100'
+        })
+        return data.MediaContainer?.Metadata || data.MediaContainer?.Directory || []
+      })
+    )
+
+    return results.flat()
+  }
+
   private async getSelectedMusicSections(): Promise<PlexLibrary[]> {
     const libraries = await this.auth.getLibraries()
     const selectedLibraries = (await this.auth.getUserSelectedLibraries()) || []
@@ -311,7 +341,7 @@ export class MediaService {
     params: Record<string, string> = {}
   ): Promise<PlexMetadata[]> {
     const data = await this.fetchPlex(`/library/metadata/${ratingKey}/children`, params)
-    return data.MediaContainer?.Metadata || []
+    return data.MediaContainer?.Metadata || data.MediaContainer?.Directory || []
   }
 
   private async fetchPlaylistItems(ratingKey: string): Promise<PlexMetadata[]> {
@@ -384,6 +414,7 @@ export class MediaService {
         url.searchParams.set('X-Plex-Token', token)
 
         const response = await fetch(url, {
+          signal: AbortSignal.timeout(PLEX_REQUEST_TIMEOUT_MS),
           headers: {
             Accept: 'application/json',
             'X-Plex-Product': this.auth.plexProduct,
