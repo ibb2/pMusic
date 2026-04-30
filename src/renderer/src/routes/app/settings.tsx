@@ -122,7 +122,7 @@ export function SettingsPage() {
   if (error) return "An error has occurred: " + error.message;
 
   return (
-    <div className="flex flex-col gap-2 p-6 pb-10">
+    <div className="flex min-h-full flex-col gap-2 p-6 pb-10">
       <div className="flex-1">
         <div className="max-w-4xl mx-auto space-y-8">
           <div>

@@ -15,7 +15,6 @@ import {
   VolumeX
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Progress } from '../ui/progress'
 
 export function PlayerFooter() {
   const { data: status, refetch } = useQuery({
@@ -25,6 +24,7 @@ export function PlayerFooter() {
   })
 
   const [position, setPosition] = useState(0)
+  const [isSeeking, setIsSeeking] = useState(false)
   const [mute, toggleMute] = useState(false)
 
   useEffect(() => {
@@ -33,14 +33,10 @@ export function PlayerFooter() {
   }, [status?.current_track?.ratingKey])
 
   useEffect(() => {
-    if (status?.position !== undefined && status.is_playing) {
-      // Only sync with backend position if it's "fresh" (i.e. we have a duration)
-      // This prevents jumping back to old position if the backend hasn't updated its status object yet
-      if (status.duration > 0) {
-        setPosition(status.position)
-      }
+    if (status?.position !== undefined && status.duration > 0 && !isSeeking) {
+      setPosition(status.position)
     }
-  }, [status?.position, status?.duration])
+  }, [status?.position, status?.duration, isSeeking])
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined
@@ -48,7 +44,7 @@ export function PlayerFooter() {
     // This avoids progressing before the track is actually loaded and ready
     if (status?.is_playing && status?.duration && status.duration > 0) {
       interval = setInterval(() => {
-        setPosition((prev) => prev + 0.1)
+        setPosition((prev) => Math.min(prev + 0.1, status.duration))
       }, 100)
     }
     return () => {
@@ -76,8 +72,11 @@ export function PlayerFooter() {
   }
 
   const handleSeek = async (pos: number) => {
-    await window.api.player.seek(pos)
-    setPosition(pos)
+    const duration = status?.duration || 0
+    const nextPosition = duration > 0 ? Math.max(0, Math.min(pos, duration)) : Math.max(0, pos)
+    await window.api.player.seek(nextPosition)
+    setPosition(nextPosition)
+    setIsSeeking(false)
     refetch()
   }
 
@@ -157,26 +156,20 @@ export function PlayerFooter() {
         </div>
         <div className="w-full max-w-md flex items-center gap-2 text-xs text-muted-foreground">
           <span className="w-8">{dayjs.duration(position * 1000).format('m:ss')}</span>
-          <div className="group relative w-full flex items-center h-6 cursor-pointer">
-            {/* Progress bar - visible by default, hidden on hover */}
-            <div className="w-full group-hover:hidden">
-              <Progress
-                value={(position / (status?.duration || 1)) * 100}
-                className="w-full h-1.5"
-              />
-            </div>
-
-            {/* Slider - hidden by default, visible on hover */}
-            <div className="w-full hidden group-hover:block">
-              <Slider
-                value={[position]}
-                onValueChange={(pos) => setPosition(pos[0])}
-                max={status?.duration || 100}
-                step={0.1}
-                onValueCommit={(pos) => handleSeek(Math.round(pos[0]))}
-                className="w-full"
-              />
-            </div>
+          <div className="relative w-full flex items-center h-6">
+            <Slider
+              value={[position]}
+              min={0}
+              max={status?.duration || 100}
+              step={0.1}
+              disabled={!currentTrack || !status?.duration}
+              onValueChange={(pos) => {
+                setIsSeeking(true)
+                setPosition(pos[0])
+              }}
+              onValueCommit={(pos) => handleSeek(pos[0])}
+              className="w-full"
+            />
           </div>
           <span className="w-8">
             {status?.duration ? dayjs.duration(status.duration * 1000).format('m:ss') : '0:00'}

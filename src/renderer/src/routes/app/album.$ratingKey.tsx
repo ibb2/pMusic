@@ -29,7 +29,7 @@ export function AlbumPage() {
   const album = queryAlbum.data
 
   return (
-    <div className="flex flex-col p-6 pb-10">
+    <div className="flex min-h-full flex-col p-6 pb-10">
       {/* Album Header */}
       <div className="flex gap-6 mb-6">
         <img src={album.thumb} alt={album.title} className="w-48 h-48 rounded-lg shadow-xl" />

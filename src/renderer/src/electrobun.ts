@@ -55,6 +55,8 @@ window.api = {
   player: {
     getStatus: () => rpc.request.playerGetStatus(),
     playAlbum: (ratingKey: string) => rpc.request.playerPlayAlbum({ ratingKey }),
+    playPlaylist: (ratingKey: string) => rpc.request.playerPlayPlaylist({ ratingKey }),
+    playArtist: (ratingKey: string) => rpc.request.playerPlayArtist({ ratingKey }),
     playTrack: (ratingKey: string) => rpc.request.playerPlayTrack({ ratingKey }),
     play: () => rpc.request.playerPlay(),
     pause: () => rpc.request.playerPause(),

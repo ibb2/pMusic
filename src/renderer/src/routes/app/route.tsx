@@ -37,7 +37,10 @@ function AppLayoutComponent() {
             <AppSidebar collapsible="icon" />
             <SidebarInset className="h-full min-h-0 overflow-hidden">
               <SiteHeader />
-              <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+              <div
+                data-app-scroll-container
+                className="h-full min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
+              >
                 <Outlet />
               </div>
             </SidebarInset>

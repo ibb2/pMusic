@@ -50,6 +50,8 @@ declare global {
       player: {
         getStatus: () => Promise<PlayerStatus>
         playAlbum: (ratingKey: string) => Promise<unknown>
+        playPlaylist: (ratingKey: string) => Promise<unknown>
+        playArtist: (ratingKey: string) => Promise<unknown>
         playTrack: (ratingKey: string) => Promise<unknown>
         play: () => Promise<unknown>
         pause: () => Promise<unknown>

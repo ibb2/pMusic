@@ -99,7 +99,7 @@ export default function Home() {
     );
 
   return (
-    <div className="flex flex-col p-6 pb-10">
+    <div className="flex min-h-full flex-col p-6 pb-10">
       {/* Quick Access Grid */}
       {topEight.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 mb-8 w-full">
@@ -143,7 +143,7 @@ export default function Home() {
             {/* Scrollable container */}
             <div
               ref={recentRef}
-              className="flex flex-row overflow-x-auto overflow-y-hidden -ml-2 scrollbar-hidden scroll-smooth gap-1 px-2"
+              className="flex min-h-48 flex-row overflow-x-auto overflow-y-hidden -ml-2 scrollbar-hidden scroll-smooth gap-1 px-2"
             >
               {recentlyPlayed.length > 0 ? (
                 recentlyPlayed.map((album) => (
@@ -170,7 +170,7 @@ export default function Home() {
           <div className="relative group">
             <div
               ref={addedRef}
-              className="flex flex-row overflow-x-auto overflow-y-hidden -ml-2 scrollbar-hidden scroll-smooth gap-1 px-2"
+              className="flex min-h-48 flex-row overflow-x-auto overflow-y-hidden -ml-2 scrollbar-hidden scroll-smooth gap-1 px-2"
             >
               {recentlyAdded.length > 0 ? (
                 recentlyAdded.map((album) => (
@@ -196,7 +196,7 @@ export default function Home() {
           <div className="relative group">
             <div
               ref={recommendedRef}
-              className="flex flex-row overflow-x-auto overflow-y-hidden -ml-2 scrollbar-hidden scroll-smooth gap-1 px-2"
+              className="flex min-h-48 flex-row overflow-x-auto overflow-y-hidden -ml-2 scrollbar-hidden scroll-smooth gap-1 px-2"
             >
               {playlists.length > 0 ? (
                 playlists.map((playlist) => (

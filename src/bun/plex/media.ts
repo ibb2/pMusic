@@ -80,10 +80,14 @@ export class MediaService {
   async getRecentlyPlayedAlbums(): Promise<unknown[]> {
     const albums = await this.getAlbumsFromSections({
       sort: 'lastViewedAt:desc',
-      limit: 50
+      limit: 5
     })
 
-    return albums.filter((album) => album.lastViewedAt).map((album) => this.mapAlbum(album))
+    return albums
+      .filter((album) => album.lastViewedAt)
+      .sort((a, b) => Number(b.lastViewedAt || 0) - Number(a.lastViewedAt || 0))
+      .slice(0, 50)
+      .map((album) => this.mapAlbum(album))
   }
 
   async getRecentlyAddedAlbums(): Promise<unknown[]> {
@@ -92,16 +96,31 @@ export class MediaService {
       limit: 50
     })
 
-    return albums.map((album) => this.mapAlbum(album))
+    return albums
+      .sort((a, b) => Number(b.addedAt || 0) - Number(a.addedAt || 0))
+      .slice(0, 50)
+      .map((album) => this.mapAlbum(album))
   }
 
   async getTopEight(): Promise<unknown[]> {
     const albums = (await this.getRecentlyPlayedAlbums()).slice(0, 8) as Array<Record<string, any>>
     const playlists = (await this.getPlaylists()).slice(0, 8) as Array<Record<string, any>>
     return [
-      ...albums.map((album) => ({ ...album, type: 'album' })),
-      ...playlists.map((playlist) => ({ ...playlist, type: 'playlist', thumb: playlist.composite }))
-    ].slice(0, 8)
+      ...albums.map((album) => ({
+        ...album,
+        type: 'album',
+        sortAt: Number(album.lastViewedAt || album.addedAt || 0)
+      })),
+      ...playlists.map((playlist) => ({
+        ...playlist,
+        type: 'playlist',
+        thumb: playlist.composite,
+        sortAt: Number(playlist.lastViewedAt || playlist.addedAt || 0)
+      }))
+    ]
+      .sort((a, b) => b.sortAt - a.sortAt)
+      .slice(0, 8)
+      .map(({ sortAt: _sortAt, ...item }) => item)
   }
 
   async getAlbum(ratingKey: string): Promise<unknown> {
@@ -212,6 +231,21 @@ export class MediaService {
 
   async playAlbum(ratingKey: string): Promise<unknown> {
     const tracks = await this.fetchMetadataChildren(ratingKey)
+    const playableTracks = await Promise.all(tracks.map((track) => this.toPlayableTrack(track)))
+    this.bass.playTracks(playableTracks)
+    return { status: 'playing', count: playableTracks.length }
+  }
+
+  async playPlaylist(ratingKey: string): Promise<unknown> {
+    const tracks = await this.fetchPlaylistItems(ratingKey)
+    const playableTracks = await Promise.all(tracks.map((track) => this.toPlayableTrack(track)))
+    this.bass.playTracks(playableTracks)
+    return { status: 'playing', count: playableTracks.length }
+  }
+
+  async playArtist(ratingKey: string): Promise<unknown> {
+    const data = await this.fetchPlex(`/library/metadata/${ratingKey}/popularTracks`)
+    const tracks = data.MediaContainer?.Metadata || []
     const playableTracks = await Promise.all(tracks.map((track) => this.toPlayableTrack(track)))
     this.bass.playTracks(playableTracks)
     return { status: 'playing', count: playableTracks.length }
@@ -409,6 +443,8 @@ export class MediaService {
       artist: album.parentTitle,
       ratingKey: album.ratingKey,
       parentRatingKey: album.parentRatingKey || this.extractRatingKey(album.parentKey),
+      addedAt: album.addedAt,
+      lastViewedAt: album.lastViewedAt,
       thumb: this.plexUrl(album.thumb)
     }
   }

@@ -3,9 +3,9 @@ import { existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { BassStatus, PlayerStatus, PlayerTrack } from '../shared/rpc'
 
-const BASS_STREAM_BLOCK = 0x100000
 const BASS_POS_BYTE = 0
 const BASS_ATTRIB_VOL = 2
+const BASS_ACTIVE_STOPPED = 0
 const BASS_ACTIVE_PLAYING = 1
 const BASS_ACTIVE_STALLED = 2
 const BASS_ACTIVE_PAUSED = 3
@@ -57,6 +57,8 @@ export class BassManager {
   private queue: Array<{ track: PlayerTrack; streamUrl: string }> = []
   private volume = 1
   private volumeBeforeMute = 1
+  private monitor: Timer | null = null
+  private manuallyStopping = false
   private readonly libraryPath: string | null
 
   constructor() {
@@ -109,12 +111,15 @@ export class BassManager {
 
   stop(): void {
     if (!this.library) return
+    this.manuallyStopping = true
+    this.stopMonitor()
     if (this.streamHandle) {
       this.library.symbols.BASS_ChannelStop(this.streamHandle)
       this.library.symbols.BASS_StreamFree(this.streamHandle)
     }
     this.streamHandle = 0
     this.currentTrack = null
+    this.manuallyStopping = false
   }
 
   playNext(): void {
@@ -132,8 +137,14 @@ export class BassManager {
 
   seek(position: number): void {
     if (!this.library || !this.streamHandle) return
-    const bytes = this.library.symbols.BASS_ChannelSeconds2Bytes(this.streamHandle, position)
-    this.library.symbols.BASS_ChannelSetPosition(this.streamHandle, bytes, BASS_POS_BYTE)
+    const duration = this.getDuration()
+    const safePosition = Math.max(0, duration > 0 ? Math.min(position, duration) : position)
+    const bytes = this.library.symbols.BASS_ChannelSeconds2Bytes(this.streamHandle, safePosition)
+    const seeked = this.library.symbols.BASS_ChannelSetPosition(this.streamHandle, bytes, BASS_POS_BYTE)
+
+    if (!seeked) {
+      this.loadError = `BASS_ChannelSetPosition failed with error ${this.library.symbols.BASS_ErrorGetCode()}`
+    }
   }
 
   setVolume(volume: number): void {
@@ -292,15 +303,18 @@ export class BassManager {
   private playStream(track: PlayerTrack, streamUrl: string): void {
     if (!this.library || !this.initialized) return
 
+    this.manuallyStopping = true
+    this.stopMonitor()
     if (this.streamHandle) {
       this.library.symbols.BASS_ChannelStop(this.streamHandle)
       this.library.symbols.BASS_StreamFree(this.streamHandle)
     }
+    this.manuallyStopping = false
 
     this.streamHandle = this.library.symbols.BASS_StreamCreateURL(
       this.toCString(streamUrl),
       0,
-      BASS_STREAM_BLOCK,
+      0,
       null,
       null
     )
@@ -319,6 +333,37 @@ export class BassManager {
       this.library.symbols.BASS_StreamFree(this.streamHandle)
       this.streamHandle = 0
       this.currentTrack = null
+      this.playNext()
+      return
+    }
+
+    this.startMonitor()
+  }
+
+  private startMonitor(): void {
+    this.stopMonitor()
+    this.monitor = setInterval(() => this.checkPlayback(), 250)
+  }
+
+  private stopMonitor(): void {
+    if (!this.monitor) return
+    clearInterval(this.monitor)
+    this.monitor = null
+  }
+
+  private checkPlayback(): void {
+    if (!this.library || !this.streamHandle || !this.currentTrack || this.manuallyStopping) return
+
+    const active = this.library.symbols.BASS_ChannelIsActive(this.streamHandle)
+    if (active !== BASS_ACTIVE_STOPPED) return
+
+    const position = this.getPosition()
+    const duration = this.getDuration()
+    const reachedEnd = duration <= 0 || position >= Math.max(0, duration - 0.75)
+
+    if (reachedEnd) {
+      this.stopMonitor()
+      this.playNext()
     }
   }
 

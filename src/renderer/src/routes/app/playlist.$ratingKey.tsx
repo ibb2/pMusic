@@ -31,7 +31,7 @@ function PlaylistPage() {
   const playlist = queryPlaylist.data
 
   return (
-    <div className="flex flex-col p-6 pb-10">
+    <div className="flex min-h-full flex-col p-6 pb-10">
       {/* playlist Header */}
       <div className="flex gap-6 mb-6">
         <img
@@ -57,7 +57,12 @@ function PlaylistPage() {
 
       {/* Controls */}
       <div className="flex items-center gap-3 mb-6">
-        <Button className="px-8">
+        <Button
+          className="px-8"
+          onClick={() => {
+            window.api.player.playPlaylist(ratingKey)
+          }}
+        >
           <Play size={18} className="mr-2" fill={'white'} />
           Play
         </Button>
@@ -91,7 +96,12 @@ function PlaylistPage() {
             className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors cursor-pointer"
           >
             <div className="text-center w-8 group-hover:hidden self-center">{index + 1}</div>
-            <button className="hidden group-hover:block">
+            <button
+              className="hidden group-hover:block"
+              onClick={() => {
+                window.api.player.playTrack(String(track.ratingKey))
+              }}
+            >
               <Play size={16} className="text-shadow-black w-8" fill="black" />
             </button>
             <img src={track.albumThumb} alt={track.albumTitle} className="w-12 rounded-lg" />

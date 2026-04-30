@@ -81,9 +81,9 @@ function RouteComponent() {
   ) : (
     <div
       ref={containerRef}
-      className="flex flex-col gap-4 px-6 pb-10"
+      className="flex min-h-full flex-col gap-4 px-6 pb-10"
     >
-      <div className="absolute z-50 bg-background w-full pb-2">
+      <div className="sticky top-0 z-10 bg-background w-full py-2">
         {/* Header */}
         <p className="text-2xl font-semibold">Albums</p>
         {/* <p>count {37}</p> */}

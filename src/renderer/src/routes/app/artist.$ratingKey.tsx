@@ -36,7 +36,7 @@ export function ArtistPage() {
     )
 
   return (
-    <div className="flex flex-col p-6 pb-10">
+    <div className="flex min-h-full flex-col p-6 pb-10">
       {/* Artist Header */}
       <div className="flex gap-6 mb-6">
         <img
@@ -59,7 +59,12 @@ export function ArtistPage() {
 
       {/* Controls */}
       <div className="flex items-center gap-3 mb-6">
-        <Button className="px-8">
+        <Button
+          className="px-8"
+          onClick={() => {
+            window.api.player.playArtist(ratingKey)
+          }}
+        >
           <Play size={18} className="mr-2" fill="black" />
           Play
         </Button>
@@ -117,7 +122,7 @@ export function ArtistPage() {
       {/* Albums */}
       <div>
         <h2 className="text-2xl mb-4">Albums</h2>
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-row gap-4 overflow-x-auto pb-2 scrollbar-hidden">
           {(queryArtistAlbums.data ?? []).map((album: any) => (
             <Link
               key={album.id}

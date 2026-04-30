@@ -169,6 +169,14 @@ export type RaynaRPC = {
         params: { ratingKey: string }
         response: unknown
       }
+      playerPlayPlaylist: {
+        params: { ratingKey: string }
+        response: unknown
+      }
+      playerPlayArtist: {
+        params: { ratingKey: string }
+        response: unknown
+      }
       playerPlayTrack: {
         params: { ratingKey: string }
         response: unknown

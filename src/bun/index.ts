@@ -3,6 +3,7 @@ import { BassManager } from './bass'
 import { DatabaseManager } from './database'
 import Authentication from './plex/authentication'
 import { MediaService } from './plex/media'
+import type { ApplicationMenuItemConfig } from 'electrobun'
 import type { RaynaRPC } from '../shared/rpc'
 import type { PlexServer } from '../shared/types'
 
@@ -53,6 +54,8 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       mediaGetPlaylist: ({ ratingKey }) => media.getPlaylist(ratingKey),
       playerGetStatus: () => bass.getPlaybackStatus(),
       playerPlayAlbum: ({ ratingKey }) => media.playAlbum(ratingKey),
+      playerPlayPlaylist: ({ ratingKey }) => media.playPlaylist(ratingKey),
+      playerPlayArtist: ({ ratingKey }) => media.playArtist(ratingKey),
       playerPlayTrack: ({ ratingKey }) => media.playTrack(ratingKey),
       playerPlay: () => bass.resume(),
       playerPause: () => bass.pause(),
@@ -65,8 +68,6 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
   }
 })
 
-createApplicationMenu()
-
 const mainWindow = new BrowserWindow({
   title: 'Rayna',
   frame: {
@@ -75,9 +76,11 @@ const mainWindow = new BrowserWindow({
     width: 900,
     height: 670
   },
-  url: process.env.RAYNA_RENDERER_URL || 'views://main/index.html',
+  url: rendererRoute(),
   rpc
 })
+
+createApplicationMenu(mainWindow)
 
 mainWindow.webview.on('new-window-open' as never, (event: unknown) => {
   const url = extractUrl(event)
@@ -89,14 +92,38 @@ mainWindow.webview.on('new-window-open' as never, (event: unknown) => {
 process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 
-function createApplicationMenu(): void {
-  ApplicationMenu.setApplicationMenu([
+function rendererRoute(route = ''): string {
+  const normalizedRoute = route.startsWith('/') ? route : `/${route}`
+  const hash = normalizedRoute === '/' ? '' : `#${normalizedRoute}`
+  return `${process.env.RAYNA_RENDERER_URL || 'views://main/index.html'}${hash}`
+}
+
+function createApplicationMenu(window: BrowserWindow): void {
+  const isMac = process.platform === 'darwin'
+  const menu: ApplicationMenuItemConfig[] = []
+
+  if (isMac) {
+    menu.push({
+      label: 'Rayna',
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'showAll' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    })
+  }
+
+  menu.push(
     {
       label: 'File',
       submenu: [
         { label: 'Sign Out', action: 'sign-out', accelerator: 'CommandOrControl+Shift+L' },
         { type: 'separator' },
-        { role: process.platform === 'darwin' ? 'close' : 'quit' }
+        { role: isMac ? 'close' : 'quit' }
       ]
     },
     {
@@ -111,16 +138,40 @@ function createApplicationMenu(): void {
         { role: 'selectAll' }
       ]
     },
-    { role: 'viewMenu' },
-    { role: 'windowMenu' }
-  ])
+    {
+      label: 'View',
+      submenu: [{ role: 'toggleFullScreen' }]
+    },
+    {
+      label: 'Window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        { type: 'separator' },
+        { role: 'bringAllToFront' }
+      ]
+    }
+  )
+
+  ApplicationMenu.setApplicationMenu(menu)
 
   ApplicationMenu.on('application-menu-clicked', (event: unknown) => {
-    if (JSON.stringify(event).includes('sign-out')) {
-      void auth.logout()
-      mainWindow.webview.loadURL('views://main/index.html#/auth')
+    if (getApplicationMenuAction(event) === 'sign-out') {
+      void signOut(window)
     }
   })
+}
+
+async function signOut(window: BrowserWindow): Promise<void> {
+  const logoutSuccessful = await auth.logout()
+  if (!logoutSuccessful) return
+  bass.stop()
+  window.webview.loadURL(rendererRoute('/auth'))
+}
+
+function getApplicationMenuAction(event: unknown): string | null {
+  const action = (event as { data?: { action?: unknown } })?.data?.action
+  return typeof action === 'string' ? action : null
 }
 
 function extractUrl(event: unknown): string | null {
