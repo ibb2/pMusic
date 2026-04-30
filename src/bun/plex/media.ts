@@ -15,6 +15,13 @@ type PlexResponse = {
   }
 }
 
+type HomeData = {
+  topEight: Array<Record<string, any>>
+  recentlyPlayed: Array<Record<string, any>>
+  recentlyAdded: Array<Record<string, any>>
+  playlists: Array<Record<string, any>>
+}
+
 const PLEX_REQUEST_TIMEOUT_MS = 8_000
 
 export class MediaService {
@@ -105,16 +112,40 @@ export class MediaService {
       .map((album) => this.mapAlbum(album))
   }
 
+  async getHomeData(): Promise<HomeData> {
+    const [recentlyPlayed, recentlyAdded, playlists] = await Promise.all([
+      this.getRecentlyPlayedAlbums() as Promise<Array<Record<string, any>>>,
+      this.getRecentlyAddedAlbums() as Promise<Array<Record<string, any>>>,
+      this.getPlaylists() as Promise<Array<Record<string, any>>>
+    ])
+
+    return {
+      topEight: this.buildTopEight(recentlyPlayed, playlists),
+      recentlyPlayed,
+      recentlyAdded,
+      playlists
+    }
+  }
+
   async getTopEight(): Promise<unknown[]> {
-    const albums = (await this.getRecentlyPlayedAlbums()).slice(0, 8) as Array<Record<string, any>>
-    const playlists = (await this.getPlaylists()).slice(0, 8) as Array<Record<string, any>>
+    const [albums, playlists] = await Promise.all([
+      this.getRecentlyPlayedAlbums() as Promise<Array<Record<string, any>>>,
+      this.getPlaylists() as Promise<Array<Record<string, any>>>
+    ])
+    return this.buildTopEight(albums, playlists)
+  }
+
+  private buildTopEight(
+    albums: Array<Record<string, any>>,
+    playlists: Array<Record<string, any>>
+  ): Array<Record<string, any>> {
     return [
-      ...albums.map((album) => ({
+      ...albums.slice(0, 8).map((album) => ({
         ...album,
         type: 'album',
         sortAt: Number(album.lastViewedAt || album.addedAt || 0)
       })),
-      ...playlists.map((playlist) => ({
+      ...playlists.slice(0, 8).map((playlist) => ({
         ...playlist,
         type: 'playlist',
         thumb: playlist.composite,
@@ -400,7 +431,15 @@ export class MediaService {
     const connections = server.connections.filter((connection) => connection.uri)
     const orderedConnections = [
       ...connections.filter((connection) => connection.uri === this.activeBaseUrl),
-      ...connections.filter((connection) => connection.uri !== this.activeBaseUrl)
+      ...connections.filter(
+        (connection) =>
+          connection.uri !== this.activeBaseUrl && connection.local && !connection.relay
+      ),
+      ...connections.filter(
+        (connection) =>
+          connection.uri !== this.activeBaseUrl && !connection.local && !connection.relay
+      ),
+      ...connections.filter((connection) => connection.uri !== this.activeBaseUrl && connection.relay)
     ]
     let lastError: unknown = null
 

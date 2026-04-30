@@ -27,7 +27,7 @@ export function ArtistPage() {
     queryFn: () => window.api.media.getArtistPopularTracks(ratingKey)
   })
 
-  if (queryArtistAlbums.isLoading || queryArtistPopularTracks.isLoading || queryArtist.isLoading) {
+  if (queryArtist.isLoading) {
     return (
       <div className="flex items-center justify-center w-full h-full">
         <Spinner className="size-8" />
@@ -35,9 +35,8 @@ export function ArtistPage() {
     )
   }
 
-  if (queryArtist.isError || queryArtistAlbums.isError) {
-    const message =
-      queryArtist.error?.message || queryArtistAlbums.error?.message || 'Unknown artist error'
+  if (queryArtist.isError) {
+    const message = queryArtist.error?.message || 'Unknown artist error'
     return `Error loading artist: ${message}`
   }
 
@@ -94,7 +93,11 @@ export function ArtistPage() {
       <div className="mb-8">
         <h2 className="text-2xl mb-4">Popular Tracks</h2>
         <div className="bg-slate-300/10 rounded-lg">
-          {popularTracks.length > 0 ? (
+          {queryArtistPopularTracks.isLoading ? (
+            <div className="flex h-24 items-center justify-center">
+              <Spinner className="size-5" />
+            </div>
+          ) : popularTracks.length > 0 ? (
             popularTracks.map((track: any, index: number) => (
               <div
                 key={track.id}
@@ -129,7 +132,11 @@ export function ArtistPage() {
           ) : (
             <div className="flex h-24 items-center gap-3 px-4 text-sm text-muted-foreground">
               <Music className="size-5" />
-              <div>No popular tracks found</div>
+              <div>
+                {queryArtistPopularTracks.isError
+                  ? 'Popular tracks are unavailable'
+                  : 'No popular tracks found'}
+              </div>
             </div>
           )}
         </div>
@@ -138,7 +145,11 @@ export function ArtistPage() {
       {/* Albums */}
       <div>
         <h2 className="text-2xl mb-4">Albums</h2>
-        {albums.length > 0 ? (
+        {queryArtistAlbums.isLoading ? (
+          <div className="flex h-48 items-center justify-center rounded-md border border-dashed">
+            <Spinner className="size-5" />
+          </div>
+        ) : albums.length > 0 ? (
           <div className="flex flex-row gap-4 overflow-x-auto pb-2 scrollbar-hidden">
             {albums.map((album: any) => (
               <Link
@@ -165,7 +176,7 @@ export function ArtistPage() {
         ) : (
           <div className="flex h-24 items-center gap-3 rounded-md border border-dashed px-4 text-sm text-muted-foreground">
             <Disc3 className="size-5" />
-            <div>No albums found</div>
+            <div>{queryArtistAlbums.isError ? 'Albums are unavailable' : 'No albums found'}</div>
           </div>
         )}
       </div>

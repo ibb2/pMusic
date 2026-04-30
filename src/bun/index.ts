@@ -42,6 +42,7 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       authGetUserSelectedLibraries: () => auth.getUserSelectedLibraries(),
       authCloseLoopbackServer: () => auth.closeLoopbackServer(),
       bassGetStatus: () => bass.getStatus(),
+      mediaGetHomeData: () => media.getHomeData(),
       mediaGetTopEight: () => media.getTopEight(),
       mediaGetRecentlyPlayedAlbums: () => media.getRecentlyPlayedAlbums(),
       mediaGetRecentlyAddedAlbums: () => media.getRecentlyAddedAlbums(),

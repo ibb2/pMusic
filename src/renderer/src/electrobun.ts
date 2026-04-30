@@ -39,6 +39,7 @@ window.api = {
     getStatus: () => rpc.request.bassGetStatus()
   },
   media: {
+    getHomeData: () => rpc.request.mediaGetHomeData(),
     getTopEight: () => rpc.request.mediaGetTopEight(),
     getRecentlyPlayedAlbums: () => rpc.request.mediaGetRecentlyPlayedAlbums(),
     getRecentlyAddedAlbums: () => rpc.request.mediaGetRecentlyAddedAlbums(),

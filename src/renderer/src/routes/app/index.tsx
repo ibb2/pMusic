@@ -47,56 +47,25 @@ export default function Home() {
     });
   };
 
-  // queries
-  const queryTopEight = useQuery({
-    queryKey: ["top-eight"],
-    queryFn: () => window.api.media.getTopEight(),
-    retry: true,
+  const queryHome = useQuery({
+    queryKey: ["home"],
+    queryFn: () => window.api.media.getHomeData(),
+    staleTime: 60_000,
   });
 
-  const queryRecentlyPlayedAlbums = useQuery({
-    queryKey: ["albums"],
-    queryFn: () => window.api.media.getRecentlyPlayedAlbums(),
-  });
+  const topEight = queryHome.data?.topEight ?? [];
+  const recentlyPlayed = queryHome.data?.recentlyPlayed ?? [];
+  const recentlyAdded = queryHome.data?.recentlyAdded ?? [];
+  const playlists = queryHome.data?.playlists ?? [];
 
-  const queryRecentlyAddedAlbums = useQuery({
-    queryKey: ["album"],
-    queryFn: () => window.api.media.getRecentlyAddedAlbums(),
-  });
-
-  const queryAllPlaylists = useQuery({
-    queryKey: ["playlist"],
-    queryFn: () => window.api.media.getPlaylists(),
-  });
-
-  const topEight = queryTopEight.data ?? [];
-  const recentlyPlayed = queryRecentlyPlayedAlbums.data ?? [];
-  const recentlyAdded = queryRecentlyAddedAlbums.data ?? [];
-  const playlists = queryAllPlaylists.data ?? [];
-
-  if (
-    queryRecentlyAddedAlbums.isLoading ||
-    queryRecentlyPlayedAlbums.isLoading ||
-    queryAllPlaylists.isLoading ||
-    queryTopEight.isLoading
-  )
+  if (queryHome.isLoading)
     return (
       <div className="flex items-center justify-center w-full h-full">
         <Spinner className="size-8" />
       </div>
     );
-  if (
-    queryRecentlyAddedAlbums.isError ||
-    queryRecentlyPlayedAlbums.isError ||
-    queryAllPlaylists.isError ||
-    queryTopEight.isError
-  )
-    return (
-      "An error has occurred: " + queryRecentlyAddedAlbums.error?.message ||
-      queryRecentlyPlayedAlbums.error?.message ||
-      queryAllPlaylists.error?.message ||
-      queryTopEight.error?.message
-    );
+  if (queryHome.isError)
+    return `An error has occurred: ${queryHome.error?.message ?? "Unknown home error"}`;
 
   return (
     <div className="flex min-h-full flex-col p-6 pb-10">

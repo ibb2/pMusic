@@ -125,6 +125,15 @@ export type RaynaRPC = {
         params: void
         response: unknown[]
       }
+      mediaGetHomeData: {
+        params: void
+        response: {
+          topEight: unknown[]
+          recentlyPlayed: unknown[]
+          recentlyAdded: unknown[]
+          playlists: unknown[]
+        }
+      }
       mediaGetRecentlyPlayedAlbums: {
         params: void
         response: unknown[]

@@ -36,6 +36,12 @@ declare global {
         getStatus: () => Promise<BassStatus>
       }
       media: {
+        getHomeData: () => Promise<{
+          topEight: any[]
+          recentlyPlayed: any[]
+          recentlyAdded: any[]
+          playlists: any[]
+        }>
         getTopEight: () => Promise<any[]>
         getRecentlyPlayedAlbums: () => Promise<any[]>
         getRecentlyAddedAlbums: () => Promise<any[]>
