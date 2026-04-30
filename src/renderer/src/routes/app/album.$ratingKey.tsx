@@ -15,11 +15,7 @@ export function AlbumPage() {
   // queries
   const queryAlbum = useQuery({
     queryKey: ['album', ratingKey],
-    queryFn: () =>
-      fetch(`http://127.0.0.1:34567/music/album/${Number(ratingKey)}`).then((res) => {
-        if (!res.ok) throw new Error('Network response was not ok')
-        return res.json()
-      })
+    queryFn: () => window.api.media.getAlbum(ratingKey)
   })
 
   if (queryAlbum.isLoading)
@@ -33,7 +29,7 @@ export function AlbumPage() {
   const album = queryAlbum.data
 
   return (
-    <div className="flex flex-col overflow-y-scroll scrollbar-hidden p-6 mb-20">
+    <div className="flex flex-col p-6 pb-10">
       {/* Album Header */}
       <div className="flex gap-6 mb-6">
         <img src={album.thumb} alt={album.title} className="w-48 h-48 rounded-lg shadow-xl" />
@@ -62,7 +58,7 @@ export function AlbumPage() {
         <Button
           className="px-8"
           onClick={() => {
-            fetch(`http://127.0.0.1:34567/music/play/album/${ratingKey}`)
+            window.api.player.playAlbum(ratingKey)
           }}
         >
           <Play size={18} className="mr-2" fill={'white'} />
@@ -100,7 +96,7 @@ export function AlbumPage() {
             <button
               className="hidden group-hover:block"
               onClick={() => {
-                fetch(`http://127.0.0.1:34567/music/play/track/${track.ratingKey}`)
+                window.api.player.playTrack(String(track.ratingKey))
               }}
             >
               <Play size={16} className="text-shadow-black w-8" fill="black" />

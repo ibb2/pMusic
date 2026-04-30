@@ -17,11 +17,7 @@ function PlaylistPage() {
   // queries
   const queryPlaylist = useQuery({
     queryKey: ['playlist', ratingKey],
-    queryFn: () =>
-      fetch(`http://127.0.0.1:34567/music/playlist/${Number(ratingKey)}`).then((res) => {
-        if (!res.ok) throw new Error('Network response was not ok')
-        return res.json()
-      })
+    queryFn: () => window.api.media.getPlaylist(ratingKey)
   })
 
   if (queryPlaylist.isLoading)
@@ -35,7 +31,7 @@ function PlaylistPage() {
   const playlist = queryPlaylist.data
 
   return (
-    <div className="flex flex-col overflow-y-scroll scrollbar-hidden p-6 mb-20">
+    <div className="flex flex-col p-6 pb-10">
       {/* playlist Header */}
       <div className="flex gap-6 mb-6">
         <img

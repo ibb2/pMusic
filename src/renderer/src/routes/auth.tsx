@@ -20,11 +20,7 @@ function Auth() {
       await window.api.auth.generateKeyPair();
       await window.api.auth.generatePin();
       const { authUrl, plexId } = await window.api.auth.checkPin();
-
-      // Open the authentication URL in the default browser
-      if (authUrl) {
-        window.open(authUrl, "_blank");
-      }
+      void authUrl;
 
       // Poll for the token
       const pollInterval = setInterval(async () => {

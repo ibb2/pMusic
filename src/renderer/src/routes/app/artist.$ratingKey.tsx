@@ -15,29 +15,15 @@ export function ArtistPage() {
   // queries
   const queryArtist = useQuery({
     queryKey: ['artist', ratingKey],
-    queryFn: () =>
-      fetch(`http://127.0.0.1:34567/music/artist/${Number(ratingKey)}`).then((res) => {
-        if (!res.ok) throw new Error('Network response was not ok')
-        return res.json()
-      })
+    queryFn: () => window.api.media.getArtist(ratingKey)
   })
   const queryArtistAlbums = useQuery({
     queryKey: ['artistAlbum', ratingKey],
-    queryFn: () =>
-      fetch(`http://127.0.0.1:34567/music/artist/${Number(ratingKey)}/albums`).then((res) => {
-        if (!res.ok) throw new Error('Network response was not ok')
-        return res.json()
-      })
+    queryFn: () => window.api.media.getArtistAlbums(ratingKey)
   })
   const queryArtistPopularTracks = useQuery({
     queryKey: ['artistPopularTrack', ratingKey],
-    queryFn: () =>
-      fetch(`http://127.0.0.1:34567/music/artist/${Number(ratingKey)}/popular-tracks`).then(
-        (res) => {
-          if (!res.ok) throw new Error('Network response was not ok')
-          return res.json()
-        }
-      )
+    queryFn: () => window.api.media.getArtistPopularTracks(ratingKey)
   })
 
   if (queryArtistAlbums.isLoading || queryArtistPopularTracks.isLoading || queryArtist.isLoading)
@@ -50,7 +36,7 @@ export function ArtistPage() {
     )
 
   return (
-    <div className="flex flex-col overflow-y-scroll scrollbar-hidden h-full p-6 mb-20">
+    <div className="flex flex-col p-6 pb-10">
       {/* Artist Header */}
       <div className="flex gap-6 mb-6">
         <img
@@ -103,7 +89,7 @@ export function ArtistPage() {
               <button
                 className="hidden group-hover:block"
                 onClick={() => {
-                  fetch(`http://127.0.0.1:34567/music/play/track/${track.ratingKey}`)
+                  window.api.player.playTrack(String(track.ratingKey))
                 }}
               >
                 <Play size={16} className="text-shadow-black w-8" fill="black" />
@@ -132,7 +118,7 @@ export function ArtistPage() {
       <div>
         <h2 className="text-2xl mb-4">Albums</h2>
         <div className="flex flex-row gap-4">
-          {queryArtistAlbums.data.map((album: any) => (
+          {(queryArtistAlbums.data ?? []).map((album: any) => (
             <Link
               key={album.id}
               to={`/app/album/$ratingKey`}

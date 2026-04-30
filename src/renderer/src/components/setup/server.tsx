@@ -28,21 +28,6 @@ export default function SelectServer({ progress, servers, selectServer }) {
               onClick={async () => {
                 selectServer(server);
                 await window.api.auth.selectServer(server);
-
-                const accessToken = await window.api.auth.getUserAccessToken();
-
-                const response = await fetch(`http://127.0.0.1:34567/init`, {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    serverUrl: server.connections[0].uri,
-                  }),
-                });
-                await response.json();
-
                 progress();
               }}
               className="w-full h-full"

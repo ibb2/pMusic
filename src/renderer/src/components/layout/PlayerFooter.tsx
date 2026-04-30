@@ -20,11 +20,7 @@ import { Progress } from '../ui/progress'
 export function PlayerFooter() {
   const { data: status, refetch } = useQuery({
     queryKey: ['playerStatus'],
-    queryFn: () =>
-      fetch('http://127.0.0.1:34567/player/status').then((res) => {
-        if (!res.ok) throw new Error('Network response was not ok')
-        return res.json()
-      }),
+    queryFn: () => window.api.player.getStatus(),
     refetchInterval: 1000
   })
 
@@ -47,7 +43,7 @@ export function PlayerFooter() {
   }, [status?.position, status?.duration])
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    let interval: ReturnType<typeof setInterval> | undefined
     // Only run optimistic timer if we are playing AND we have a valid duration
     // This avoids progressing before the track is actually loaded and ready
     if (status?.is_playing && status?.duration && status.duration > 0) {
@@ -55,46 +51,49 @@ export function PlayerFooter() {
         setPosition((prev) => prev + 0.1)
       }, 100)
     }
-    return () => clearInterval(interval)
+    return () => {
+      if (interval) clearInterval(interval)
+    }
   }, [status?.is_playing, status?.duration])
 
   const handlePlayPause = async () => {
     if (status?.is_playing) {
-      await fetch('http://127.0.0.1:34567/player/pause', { method: 'POST' })
+      await window.api.player.pause()
     } else {
-      await fetch('http://127.0.0.1:34567/player/play', { method: 'POST' })
+      await window.api.player.play()
     }
     refetch()
   }
 
   const handleNext = async () => {
-    await fetch('http://127.0.0.1:34567/player/next', { method: 'POST' })
+    await window.api.player.next()
     refetch()
   }
 
   const handlePrev = async () => {
-    await fetch('http://127.0.0.1:34567/player/prev', { method: 'POST' })
+    await window.api.player.prev()
     refetch()
   }
 
   const handleSeek = async (pos: number) => {
-    await fetch(`http://127.0.0.1:34567/player/seek/${pos}`)
+    await window.api.player.seek(pos)
     setPosition(pos)
     refetch()
   }
 
   const handleVolume = async (newVolume: number) => {
-    await fetch(`http://127.0.0.1:34567/player/volume/${newVolume}`)
+    await window.api.player.setVolume(newVolume)
     refetch()
   }
 
   const handleMute = async () => {
-    await fetch(`http://127.0.0.1:34567/player/volume/mute/${!mute}`)
+    await window.api.player.setMuted(!mute)
     toggleMute(!mute)
     refetch()
   }
 
   const currentTrack = status?.current_track
+  const volume = status?.volume ?? 1
 
   return (
     <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] h-20 bg-card border-t border-border w-full">
@@ -198,15 +197,15 @@ export function PlayerFooter() {
         </Button>*/}
         <div className="flex items-center gap-x-1 w-32">
           <div>
-            {status?.volume === 0 ? (
+            {volume === 0 ? (
               <Button variant={'ghost'} size={'icon-sm'} onClick={handleMute}>
                 <VolumeX className="h-4 w-4 text-muted-foreground" />
               </Button>
             ) : (
               <Button variant={'ghost'} size={'icon-sm'} onClick={handleMute}>
-                {status?.volume < 0.3 ? (
+                {volume < 0.3 ? (
                   <Volume className="h-4 w-4 text-muted-foreground" />
-                ) : status?.volume < 0.7 ? (
+                ) : volume < 0.7 ? (
                   <Volume1 className="h-4 w-4 text-muted-foreground" />
                 ) : (
                   <Volume2 className="h-4 w-4 text-muted-foreground" />
@@ -217,7 +216,7 @@ export function PlayerFooter() {
           <>
             <Slider
               defaultValue={[1]}
-              value={[status?.volume]}
+              value={[volume]}
               onValueChange={(value) => handleVolume(value[0])}
               max={1}
               step={1 / 100}

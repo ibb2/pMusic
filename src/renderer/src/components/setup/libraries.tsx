@@ -13,19 +13,19 @@ import { Check, Music } from "lucide-react";
 
 export default function Libraries({
   complete,
+  selectedServer,
   selectedLibraries,
   selectLibrary,
 }) {
   const { isPending, error, data } = useQuery({
-    queryKey: ["libraries"],
-    queryFn: async () => {
-      const res = await fetch("http://127.0.0.1:34567/library/sections/all");
-      if (!res.ok) throw new Error("Failed to fetch libraries");
-      return res.json();
-    },
+    queryKey: ["libraries", selectedServer?.clientIdentifier],
+    queryFn: () => window.api.auth.getLibraries(),
+    enabled: Boolean(selectedServer),
     staleTime: 30 * 60 * 1000,
     retry: true,
   });
+
+  if (!selectedServer) return null;
 
   if (isPending)
     return (
@@ -42,7 +42,7 @@ export default function Libraries({
         Libraries
       </h1>
       <div className="flex flex-col gap-2">
-        {data.map((library) => (
+        {(data ?? []).map((library) => (
           <div key={library.uuid}>
             {library.type === "artist" ? (
               <Item

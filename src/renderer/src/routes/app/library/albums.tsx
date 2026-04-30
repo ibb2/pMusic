@@ -12,10 +12,7 @@ function RouteComponent() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchAlbums = async ({ pageParam }) => {
-    const res = await fetch(
-      `http://127.0.0.1:34567/music/albums/all?cursor=${pageParam || ""}&page_size=20`,
-    );
-    return res.json();
+    return window.api.media.getAlbumsPage(pageParam || "", 20);
   };
 
   const {
@@ -84,7 +81,7 @@ function RouteComponent() {
   ) : (
     <div
       ref={containerRef}
-      className="flex flex-col gap-4 h-full overflow-y-scroll mb-20 px-6 "
+      className="flex flex-col gap-4 px-6 pb-10"
     >
       <div className="absolute z-50 bg-background w-full pb-2">
         {/* Header */}

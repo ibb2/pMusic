@@ -3,7 +3,7 @@
 Rayna is a 3rd party music player client for Plex focusing on the desktop experience - Inspired by Spotify.
 
 > [!IMPORTANT]
-> This is currently completely online only and a major work in progress, I recently migrated from Avalonia to Electron, but local. No support yet for offline usage or any advanced caching.
+> This is currently completely online only and a major work in progress, now running on Electrobun with a React frontend and BASS-backed playback. No separate backend is required. No support yet for offline usage or any advanced caching.
 
 <img width="1012" height="782" alt="Screenshot 2026-01-07 at 12 36 52 PM" src="https://github.com/user-attachments/assets/29cb7279-5c22-4c53-8b5a-9989f1abff26" />
 
