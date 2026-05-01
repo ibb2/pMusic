@@ -3,7 +3,15 @@ import qs from 'qs'
 import { v4 as uuidv4 } from 'uuid'
 import { LoopbackAuthServer } from './loopback'
 import { JsonStore } from '../store'
+import type { UserProfile } from '../../shared/rpc'
 import type { PlexLibrary, PlexServer } from '../../shared/types'
+
+const USER_PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000
+
+type CachedUserProfile = {
+  profile: UserProfile
+  fetchedAt: number
+}
 
 class Authentication {
   plexProduct = 'Rayna'
@@ -16,6 +24,7 @@ class Authentication {
   publicKey: string | null = null
   selectedServer: PlexServer | null = null
   selectedLibraries: unknown[] | null = null
+  private userProfileRefresh: Promise<UserProfile | null> | null = null
   store = new JsonStore('auth.json')
 
   constructor() {
@@ -83,7 +92,8 @@ class Authentication {
     const headers = {
       Accept: 'application/json',
       'X-Plex-Product': this.plexProduct,
-      'X-Plex-Client-Identifier': this.plexClientId || this.generateClientIdentifier()
+      'X-Plex-Client-Identifier':
+        this.plexClientId || this.generateClientIdentifier()
     }
 
     const response = await fetch(url, { headers, method: 'POST' })
@@ -96,7 +106,11 @@ class Authentication {
     return data
   }
 
-  async checkPin(): Promise<{ authUrl: string; plexId: string; plexCode: string }> {
+  async checkPin(): Promise<{
+    authUrl: string
+    plexId: string
+    plexCode: string
+  }> {
     this.loopbackServer = new LoopbackAuthServer()
     this.loopbackServer.onRedirect = () => {
       void this.checkPinStatus(this.plexId)
@@ -134,16 +148,22 @@ class Authentication {
     const headers = {
       Accept: 'application/json',
       'X-Plex-Product': this.plexProduct,
-      'X-Plex-Client-Identifier': this.plexClientId || this.generateClientIdentifier()
+      'X-Plex-Client-Identifier':
+        this.plexClientId || this.generateClientIdentifier()
     }
 
     const response = await fetch(url, { headers })
-    const data = (await response.json()) as { authToken?: string; auth_token?: string }
+    const data = (await response.json()) as {
+      authToken?: string
+      auth_token?: string
+    }
     const token = data.authToken || data.auth_token
 
     if (token) {
       this.plexUserAccessToken = token
       this.store.set('plexUserAccessToken', this.plexUserAccessToken)
+      this.store.delete('userProfile')
+      void this.getUserProfile()
       await this.closeLoopbackServer()
     }
 
@@ -161,6 +181,7 @@ class Authentication {
       this.store.delete('plexCode')
       this.store.delete('selectedServer')
       this.store.delete('selectedLibraries')
+      this.store.delete('userProfile')
       this.plexUserAccessToken = ''
       this.plexId = ''
       this.plexCode = ''
@@ -179,7 +200,8 @@ class Authentication {
     const headers = {
       Accept: 'application/json',
       'X-Plex-Product': this.plexProduct,
-      'X-Plex-Client-Identifier': this.plexClientId || this.generateClientIdentifier(),
+      'X-Plex-Client-Identifier':
+        this.plexClientId || this.generateClientIdentifier(),
       'X-Plex-Token': this.plexUserAccessToken
     }
 
@@ -190,10 +212,15 @@ class Authentication {
   }
 
   async getLibraries(): Promise<PlexLibrary[]> {
-    const selectedServer = this.selectedServer || this.store.get<PlexServer>('selectedServer')
+    const selectedServer =
+      this.selectedServer || this.store.get<PlexServer>('selectedServer')
     const token =
-      selectedServer?.accessToken || this.plexUserAccessToken || this.store.get<string>('plexUserAccessToken') || ''
-    const connections = selectedServer?.connections?.filter((connection) => connection.uri) || []
+      selectedServer?.accessToken ||
+      this.plexUserAccessToken ||
+      this.store.get<string>('plexUserAccessToken') ||
+      ''
+    const connections =
+      selectedServer?.connections?.filter((connection) => connection.uri) || []
 
     if (connections.length === 0 || !token) {
       return []
@@ -210,13 +237,16 @@ class Authentication {
           headers: {
             Accept: 'application/json',
             'X-Plex-Product': this.plexProduct,
-            'X-Plex-Client-Identifier': this.plexClientId || this.generateClientIdentifier(),
+            'X-Plex-Client-Identifier':
+              this.plexClientId || this.generateClientIdentifier(),
             'X-Plex-Token': token
           }
         })
 
         if (!response.ok) {
-          lastError = new Error(`Plex library request failed at ${connection.uri}: ${response.status}`)
+          lastError = new Error(
+            `Plex library request failed at ${connection.uri}: ${response.status}`
+          )
           continue
         }
 
@@ -267,6 +297,89 @@ class Authentication {
     return this.plexUserAccessToken
   }
 
+  async getUserProfile(): Promise<UserProfile | null> {
+    const cached = this.store.get<CachedUserProfile>('userProfile')
+    const isFresh = cached
+      ? Date.now() - cached.fetchedAt < USER_PROFILE_CACHE_TTL_MS
+      : false
+
+    if (cached?.profile && isFresh) {
+      return cached.profile
+    }
+
+    if (cached?.profile) {
+      void this.refreshUserProfile()
+      return cached.profile
+    }
+
+    return this.refreshUserProfile()
+  }
+
+  private async refreshUserProfile(): Promise<UserProfile | null> {
+    if (this.userProfileRefresh) {
+      return this.userProfileRefresh
+    }
+
+    this.userProfileRefresh = this.fetchUserProfile()
+      .catch((error) => {
+        const cached = this.store.get<CachedUserProfile>('userProfile')
+        if (cached?.profile) return cached.profile
+        throw error
+      })
+      .finally(() => {
+        this.userProfileRefresh = null
+      })
+
+    return this.userProfileRefresh
+  }
+
+  private async fetchUserProfile(): Promise<UserProfile | null> {
+    const token =
+      this.plexUserAccessToken ||
+      this.store.get<string>('plexUserAccessToken') ||
+      ''
+
+    if (!token) {
+      return null
+    }
+
+    const response = await fetch('https://plex.tv/api/v2/user', {
+      headers: {
+        Accept: 'application/json',
+        'X-Plex-Product': this.plexProduct,
+        'X-Plex-Client-Identifier':
+          this.plexClientId || this.generateClientIdentifier(),
+        'X-Plex-Token': token
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Plex user profile request failed: ${response.status}`)
+    }
+
+    const data = (await response.json()) as Record<string, unknown>
+    const profile = this.normalizeUserProfile(data)
+    this.store.set('userProfile', {
+      profile,
+      fetchedAt: Date.now()
+    } satisfies CachedUserProfile)
+    return profile
+  }
+
+  private normalizeUserProfile(data: Record<string, unknown>): UserProfile {
+    const username = String(
+      data.username || data.title || data.email || 'Rayna User'
+    )
+
+    return {
+      id: String(data.id || data.uuid || ''),
+      username,
+      title: String(data.title || username),
+      email: String(data.email || ''),
+      thumb: String(data.thumb || '')
+    }
+  }
+
   private normalizeLibrary(
     library: Record<string, unknown>,
     baseUrl: string,
@@ -295,27 +408,37 @@ class Authentication {
       type: String(library.type || ''),
       uuid: String(library.uuid || library.key || ''),
       agent: typeof library.agent === 'string' ? library.agent : undefined,
-      allowSync: typeof library.allowSync === 'boolean' ? library.allowSync : undefined,
+      allowSync:
+        typeof library.allowSync === 'boolean' ? library.allowSync : undefined,
       art: withToken(library.art),
       composite: withToken(library.composite),
-      createdAt: typeof library.createdAt === 'number' ? library.createdAt : undefined,
-      language: typeof library.language === 'string' ? library.language : undefined,
+      createdAt:
+        typeof library.createdAt === 'number' ? library.createdAt : undefined,
+      language:
+        typeof library.language === 'string' ? library.language : undefined,
       locations,
-      refreshing: typeof library.refreshing === 'boolean' ? library.refreshing : undefined,
-      scanner: typeof library.scanner === 'string' ? library.scanner : undefined,
+      refreshing:
+        typeof library.refreshing === 'boolean'
+          ? library.refreshing
+          : undefined,
+      scanner:
+        typeof library.scanner === 'string' ? library.scanner : undefined,
       thumb: withToken(library.thumb),
-      updatedAt: typeof library.updatedAt === 'number' ? library.updatedAt : undefined
+      updatedAt:
+        typeof library.updatedAt === 'number' ? library.updatedAt : undefined
     }
   }
 
   private setUserInformation(): void {
     this.plexClientId = this.generateClientIdentifier()
-    this.plexUserAccessToken = this.store.get<string>('plexUserAccessToken') || ''
+    this.plexUserAccessToken =
+      this.store.get<string>('plexUserAccessToken') || ''
     this.plexId = this.store.get<string>('plexId') || ''
     this.privateKey = this.store.get<string>('privateKey') || null
     this.publicKey = this.store.get<string>('publicKey') || null
     this.selectedServer = this.store.get<PlexServer>('selectedServer') || null
-    this.selectedLibraries = this.store.get<unknown[]>('selectedLibraries') || null
+    this.selectedLibraries =
+      this.store.get<unknown[]>('selectedLibraries') || null
   }
 }
 

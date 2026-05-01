@@ -1,15 +1,29 @@
 import type { PlexLibrary, PlexServer } from './types'
 
-type RPCSchema<I extends { requests?: Record<string, unknown>; messages?: Record<string, unknown> } = object> = {
-  requests: I extends { requests: infer Requests } ? Requests : Record<never, never>
-  messages: I extends { messages: infer Messages } ? Messages : Record<never, never>
+type RPCSchema<
+  I extends {
+    requests?: Record<string, unknown>
+    messages?: Record<string, unknown>
+  } = object
+> = {
+  requests: I extends { requests: infer Requests }
+    ? Requests
+    : Record<never, never>
+  messages: I extends { messages: infer Messages }
+    ? Messages
+    : Record<never, never>
 }
 
 export type BassStatus = {
   available: boolean
   version: string | null
   libraryPath: string | null
-  plugins: Array<{ name: string; path: string; loaded: boolean; error: string | null }>
+  plugins: Array<{
+    name: string
+    path: string
+    loaded: boolean
+    error: string | null
+  }>
   error: string | null
 }
 
@@ -32,6 +46,14 @@ export type PlayerStatus = {
 
 export type PlaybackSettings = {
   useOriginalFileUrl: boolean
+}
+
+export type UserProfile = {
+  id: string
+  username: string
+  title: string
+  email: string
+  thumb: string
 }
 
 export type RaynaRPC = {
@@ -108,6 +130,10 @@ export type RaynaRPC = {
       authGetUserAccessToken: {
         params: void
         response: string
+      }
+      authGetUserProfile: {
+        params: void
+        response: UserProfile | null
       }
       authGetUserSelectedLibraries: {
         params: void

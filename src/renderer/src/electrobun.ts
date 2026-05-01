@@ -15,7 +15,8 @@ window.api = {
   },
   settings: {
     getPlayback: () => rpc.request.settingsGetPlayback(),
-    setPlayback: (settings: PlaybackSettings) => rpc.request.settingsSetPlayback({ settings })
+    setPlayback: (settings: PlaybackSettings) =>
+      rpc.request.settingsSetPlayback({ settings })
   },
   auth: {
     generateClientIdentifier: () => rpc.request.authGenerateClientIdentifier(),
@@ -27,11 +28,14 @@ window.api = {
     logout: () => rpc.request.authLogout(),
     getServers: () => rpc.request.authGetServers(),
     getLibraries: () => rpc.request.authGetLibraries(),
-    selectServer: (server: PlexServer) => rpc.request.authSelectServer({ server }),
-    selectLibraries: (libraries: unknown[]) => rpc.request.authSelectLibraries({ libraries }),
+    selectServer: (server: PlexServer) =>
+      rpc.request.authSelectServer({ server }),
+    selectLibraries: (libraries: unknown[]) =>
+      rpc.request.authSelectLibraries({ libraries }),
     isServerSelected: () => rpc.request.authIsServerSelected(),
     getUserSelectedServer: () => rpc.request.authGetUserSelectedServer(),
     getUserAccessToken: () => rpc.request.authGetUserAccessToken(),
+    getUserProfile: () => rpc.request.authGetUserProfile(),
     getUserSelectedLibraries: () => rpc.request.authGetUserSelectedLibraries(),
     closeLoopbackServer: () => rpc.request.authCloseLoopbackServer()
   },
@@ -48,17 +52,23 @@ window.api = {
       rpc.request.mediaGetAlbumsPage({ cursor, pageSize }),
     getAlbum: (ratingKey: string) => rpc.request.mediaGetAlbum({ ratingKey }),
     getArtist: (ratingKey: string) => rpc.request.mediaGetArtist({ ratingKey }),
-    getArtistAlbums: (ratingKey: string) => rpc.request.mediaGetArtistAlbums({ ratingKey }),
+    getArtistAlbums: (ratingKey: string) =>
+      rpc.request.mediaGetArtistAlbums({ ratingKey }),
     getArtistPopularTracks: (ratingKey: string) =>
       rpc.request.mediaGetArtistPopularTracks({ ratingKey }),
-    getPlaylist: (ratingKey: string) => rpc.request.mediaGetPlaylist({ ratingKey })
+    getPlaylist: (ratingKey: string) =>
+      rpc.request.mediaGetPlaylist({ ratingKey })
   },
   player: {
     getStatus: () => rpc.request.playerGetStatus(),
-    playAlbum: (ratingKey: string) => rpc.request.playerPlayAlbum({ ratingKey }),
-    playPlaylist: (ratingKey: string) => rpc.request.playerPlayPlaylist({ ratingKey }),
-    playArtist: (ratingKey: string) => rpc.request.playerPlayArtist({ ratingKey }),
-    playTrack: (ratingKey: string) => rpc.request.playerPlayTrack({ ratingKey }),
+    playAlbum: (ratingKey: string) =>
+      rpc.request.playerPlayAlbum({ ratingKey }),
+    playPlaylist: (ratingKey: string) =>
+      rpc.request.playerPlayPlaylist({ ratingKey }),
+    playArtist: (ratingKey: string) =>
+      rpc.request.playerPlayArtist({ ratingKey }),
+    playTrack: (ratingKey: string) =>
+      rpc.request.playerPlayTrack({ ratingKey }),
     play: () => rpc.request.playerPlay(),
     pause: () => rpc.request.playerPause(),
     next: () => rpc.request.playerNext(),

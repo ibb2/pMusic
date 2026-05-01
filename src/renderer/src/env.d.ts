@@ -1,6 +1,11 @@
 /// <reference types="vite/client" />
 
-import type { BassStatus, PlaybackSettings, PlayerStatus } from '../../shared/rpc'
+import type {
+  BassStatus,
+  PlaybackSettings,
+  PlayerStatus,
+  UserProfile
+} from '../../shared/rpc'
 import type { PlexLibrary, PlexServer } from '../../shared/types'
 
 declare global {
@@ -20,7 +25,11 @@ declare global {
         generateClientIdentifier: () => Promise<string>
         generateKeyPair: () => Promise<[string, string]>
         generatePin: () => Promise<unknown>
-        checkPin: () => Promise<{ authUrl: string; plexId: string; plexCode: string }>
+        checkPin: () => Promise<{
+          authUrl: string
+          plexId: string
+          plexCode: string
+        }>
         checkPinStatus: (id: string) => Promise<any>
         getServers: () => Promise<PlexServer[]>
         getLibraries: () => Promise<PlexLibrary[]>
@@ -30,6 +39,7 @@ declare global {
         getUserSelectedServer: () => Promise<PlexServer | null>
         getUserSelectedLibraries: () => Promise<unknown[] | null>
         getUserAccessToken: () => Promise<string>
+        getUserProfile: () => Promise<UserProfile | null>
         closeLoopbackServer: () => Promise<void>
       }
       bass: {
