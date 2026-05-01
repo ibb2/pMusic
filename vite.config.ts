@@ -10,6 +10,15 @@ const __dirname = dirname(__filename)
 
 export default defineConfig({
   root: resolve(__dirname, 'src/renderer'),
+  server: {
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
+    hmr: {
+      host: '127.0.0.1',
+      protocol: 'ws'
+    }
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/renderer/src')
