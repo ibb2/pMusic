@@ -27,27 +27,24 @@ export const Route = createFileRoute("/app")({
 
 function AppLayoutComponent() {
   return (
-    <StartupLoading>
-      <div className="flex flex-col h-screen w-screen">
-        <div className="flex-1 min-h-0 overflow-hidden relative">
-          <SidebarProvider
-            defaultOpen={false}
-            className="h-full! min-h-0! [&_div[data-slot='sidebar-container']]:absolute! [&_div[data-slot='sidebar-container']]:h-full! [&_div[data-slot='sidebar-container']]:top-0! [&_div[data-slot='sidebar-container']]:bottom-0!"
-          >
-            <AppSidebar collapsible="icon" />
-            <SidebarInset className="h-full min-h-0 overflow-hidden">
-              <SiteHeader />
-              <div
-                data-app-scroll-container
-                className="h-full min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
-              >
-                <Outlet />
-              </div>
-            </SidebarInset>
-          </SidebarProvider>
-        </div>
-        <PlayerFooter />
+    // <StartupLoading>
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden relative">
+        <SidebarProvider className="h-full! min-h-0! w-full! min-w-0! [&_div[data-slot='sidebar-container']]:absolute! [&_div[data-slot='sidebar-container']]:h-full! [&_div[data-slot='sidebar-container']]:top-0! [&_div[data-slot='sidebar-container']]:bottom-0!">
+          <AppSidebar variant="inset" />
+          <SidebarInset className="min-h-0 min-w-0 overflow-hidden">
+            <SiteHeader />
+            <div
+              data-app-scroll-container
+              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
+            >
+              <Outlet />
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
       </div>
-    </StartupLoading>
+      <PlayerFooter />
+    </div>
+    // </StartupLoading>
   );
 }

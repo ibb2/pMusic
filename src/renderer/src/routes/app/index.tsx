@@ -68,7 +68,7 @@ export default function Home() {
     return `An error has occurred: ${queryHome.error?.message ?? "Unknown home error"}`;
 
   return (
-    <div className="flex min-h-full flex-col p-6 pb-10">
+    <div className="flex min-h-full min-w-0 flex-col p-6 pb-10">
       {/* Quick Access Grid */}
       {topEight.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 mb-8 w-full">
@@ -102,17 +102,17 @@ export default function Home() {
         </div>
       )}
 
-      <div className="flex flex-col gap-12">
+      <div className="flex min-w-0 flex-col gap-12">
         {/* Recently Played */}
-        <div>
+        <div className="min-w-0">
           <h2 className="text-2xl mb-4 font-semibold">Recently Played</h2>
 
           {/* Wrapper - relative positioning context */}
-          <div className="relative group">
+          <div className="relative group min-w-0 overflow-hidden">
             {/* Scrollable container */}
             <div
               ref={recentRef}
-              className="flex min-h-48 flex-row overflow-x-auto overflow-y-hidden -ml-2 scrollbar-hidden scroll-smooth gap-1 px-2"
+              className="flex min-h-48 min-w-0 flex-row overflow-x-auto overflow-y-hidden scrollbar-hidden scroll-smooth gap-1 px-2"
             >
               {recentlyPlayed.length > 0 ? (
                 recentlyPlayed.map((album) => (
@@ -134,12 +134,12 @@ export default function Home() {
         </div>
 
         {/* Recently Added - Same Pattern */}
-        <div>
+        <div className="min-w-0">
           <h2 className="text-2xl font-semibold mb-4">Recently Added</h2>
-          <div className="relative group">
+          <div className="relative group min-w-0 overflow-hidden">
             <div
               ref={addedRef}
-              className="flex min-h-48 flex-row overflow-x-auto overflow-y-hidden -ml-2 scrollbar-hidden scroll-smooth gap-1 px-2"
+              className="flex min-h-48 min-w-0 flex-row overflow-x-auto overflow-y-hidden scrollbar-hidden scroll-smooth gap-1 px-2"
             >
               {recentlyAdded.length > 0 ? (
                 recentlyAdded.map((album) => (
@@ -160,12 +160,12 @@ export default function Home() {
         </div>
 
         {/* Recommended - Same Pattern */}
-        <div>
+        <div className="min-w-0">
           <h2 className="text-2xl font-semibold mb-4">Recommended for You</h2>
-          <div className="relative group">
+          <div className="relative group min-w-0 overflow-hidden">
             <div
               ref={recommendedRef}
-              className="flex min-h-48 flex-row overflow-x-auto overflow-y-hidden -ml-2 scrollbar-hidden scroll-smooth gap-1 px-2"
+              className="flex min-h-48 min-w-0 flex-row overflow-x-auto overflow-y-hidden scrollbar-hidden scroll-smooth gap-1 px-2"
             >
               {playlists.length > 0 ? (
                 playlists.map((playlist) => (
