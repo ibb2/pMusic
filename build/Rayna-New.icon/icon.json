@@ -9,7 +9,11 @@
       "hidden" : false,
       "layers" : [
         {
+          "blend-mode" : "overlay",
           "fill-specializations" : [
+            {
+              "value" : "none"
+            },
             {
               "appearance" : "dark",
               "value" : {
@@ -24,7 +28,7 @@
             }
           ],
           "glass" : true,
-          "hidden" : false,
+          "hidden" : true,
           "image-name" : "2 – Layer.svg",
           "name" : "Rayna Highlight"
         }
@@ -59,7 +63,20 @@
           "fill-specializations" : [
             {
               "value" : {
-                "automatic-gradient" : "extended-gray:0.00000,1.00000"
+                "linear-gradient" : [
+                  "display-p3:0.20000,0.20000,0.20000,1.00000",
+                  "extended-gray:0.00000,1.00000"
+                ],
+                "orientation" : {
+                  "start" : {
+                    "x" : 0.5,
+                    "y" : 0
+                  },
+                  "stop" : {
+                    "x" : 0.4999999999999998,
+                    "y" : 0.5000000000000001
+                  }
+                }
               }
             },
             {

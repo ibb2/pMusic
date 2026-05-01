@@ -9,7 +9,14 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import { NavMain } from "./nav-main";
-import { AudioLines, DiscAlbum, Heart, Home, Music } from "lucide-react";
+import { Home } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  AudioWave01FreeIcons,
+  Home02Icon,
+  Vynil03Icon,
+} from "@hugeicons/core-free-icons";
+import { NavLibrary } from "./nav-library";
 
 const data = {
   user: {
@@ -21,9 +28,8 @@ const data = {
     {
       title: "Home",
       url: "/app",
-      icon: Home,
+      icon: Home02Icon,
     },
-    { title: "Albums", url: "/app/library/albums", icon: DiscAlbum },
     // {
     //   title: "Artists",
     //   url: "/app/library/artists",
@@ -95,17 +101,20 @@ const data = {
   //     icon: IconSearch
   //   }
   // ],
-  documents: [
-    {
-      name: "Liked Songs",
-      url: "#",
-      icon: Heart,
-    },
-    {
-      name: "All Music",
-      url: "#",
-      icon: Music,
-    },
+  library: [
+    // {
+    //   name: "Liked Songs",
+    //   url: "#",
+    //   icon: Heart,
+    // },
+    { name: "Albums", url: "/app/library/albums", icon: Vynil03Icon },
+    // { name: "Artits", url: "/app/library/artists", icon: DiscAlbum },
+    // { name: "Playlists", url: "/app/library/playlists", icon: DiscAlbum },
+    // {
+    //   name: "All Music",
+    //   url: "#",
+    //   icon: Music,
+    // },
   ],
 };
 
@@ -118,22 +127,42 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
+            <SidebarMenuButton
+              asChild
+              className="flex items-center data-[slot=sidebar-menu-button]:p-2 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0!"
+            >
+              <a
+                href="#"
+                className="flex w-full flex-row items-center justify-start gap-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
+              >
+                <HugeiconsIcon
+                  icon={AudioWave01FreeIcons}
+                  className="size-6! shrink-0"
+                />
+                <span className="truncate text-xl font-normal group-data-[collapsible=icon]:hidden">
+                  Rayna
+                </span>
+              </a>
+            </SidebarMenuButton>
+            {/*<SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:p-1.5!"
+            >
               <div className="flex flex-row">
                 <div className="bg-[#ffb150] dark:bg-[#ffb050e1] dark:text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <AudioLines className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Rayna</span>
-                  {/* <span className="truncate text-xs">Enterprise</span> */}
                 </div>
               </div>
-            </SidebarMenuButton>
+            </SidebarMenuButton>*/}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavLibrary items={data.library} />
         {/*<NavDocuments items={data.documents} />*/}
         {/*<NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>

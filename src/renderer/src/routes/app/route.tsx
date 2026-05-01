@@ -28,10 +28,10 @@ export const Route = createFileRoute("/app")({
 function AppLayoutComponent() {
   return (
     // <StartupLoading>
-    <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 w-full min-w-0 bg-(--color-sidebar) flex-col overflow-hidden">
       <div className="flex-1 min-h-0 overflow-hidden relative">
-        <SidebarProvider className="h-full! min-h-0! w-full! min-w-0! [&_div[data-slot='sidebar-container']]:absolute! [&_div[data-slot='sidebar-container']]:h-full! [&_div[data-slot='sidebar-container']]:top-0! [&_div[data-slot='sidebar-container']]:bottom-0!">
-          <AppSidebar variant="inset" />
+        <SidebarProvider className="h-full! min-h-0!  [&_div[data-slot='sidebar-container']]:absolute!">
+          <AppSidebar variant="inset" collapsible="icon" />
           <SidebarInset className="min-h-0 min-w-0 overflow-hidden">
             <SiteHeader />
             <div

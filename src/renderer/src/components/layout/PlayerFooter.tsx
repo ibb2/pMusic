@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button'
-import { Slider } from '@/components/ui/slider'
-import { useQuery } from '@tanstack/react-query'
-import dayjs from 'dayjs'
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import {
   Play,
   Pause,
@@ -12,103 +12,108 @@ import {
   Volume2,
   Volume1,
   Volume,
-  VolumeX
-} from 'lucide-react'
-import { useState, useEffect } from 'react'
+  VolumeX,
+} from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function PlayerFooter() {
   const { data: status, refetch } = useQuery({
-    queryKey: ['playerStatus'],
+    queryKey: ["playerStatus"],
     queryFn: () => window.api.player.getStatus(),
-    refetchInterval: 1000
-  })
+    refetchInterval: 1000,
+  });
 
-  const [position, setPosition] = useState(0)
-  const [isSeeking, setIsSeeking] = useState(false)
-  const [mute, toggleMute] = useState(false)
+  const [position, setPosition] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [mute, toggleMute] = useState(false);
 
   useEffect(() => {
     // Reset position immediately when the track changes to avoid showing old progress
-    setPosition(0)
-  }, [status?.current_track?.ratingKey])
+    setPosition(0);
+  }, [status?.current_track?.ratingKey]);
 
   useEffect(() => {
     if (status?.position !== undefined && status.duration > 0 && !isSeeking) {
-      setPosition(status.position)
+      setPosition(status.position);
     }
-  }, [status?.position, status?.duration, isSeeking])
+  }, [status?.position, status?.duration, isSeeking]);
 
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined
+    let interval: ReturnType<typeof setInterval> | undefined;
     // Only run optimistic timer if we are playing AND we have a valid duration
     // This avoids progressing before the track is actually loaded and ready
     if (status?.is_playing && status?.duration && status.duration > 0) {
       interval = setInterval(() => {
-        setPosition((prev) => Math.min(prev + 0.1, status.duration))
-      }, 100)
+        setPosition((prev) => Math.min(prev + 0.1, status.duration));
+      }, 100);
     }
     return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [status?.is_playing, status?.duration])
+      if (interval) clearInterval(interval);
+    };
+  }, [status?.is_playing, status?.duration]);
 
   const handlePlayPause = async () => {
     if (status?.is_playing) {
-      await window.api.player.pause()
+      await window.api.player.pause();
     } else {
-      await window.api.player.play()
+      await window.api.player.play();
     }
-    refetch()
-  }
+    refetch();
+  };
 
   const handleNext = async () => {
-    await window.api.player.next()
-    refetch()
-  }
+    await window.api.player.next();
+    refetch();
+  };
 
   const handlePrev = async () => {
-    await window.api.player.prev()
-    refetch()
-  }
+    await window.api.player.prev();
+    refetch();
+  };
 
   const handleSeek = async (pos: number) => {
-    const duration = status?.duration || 0
-    const nextPosition = duration > 0 ? Math.max(0, Math.min(pos, duration)) : Math.max(0, pos)
-    await window.api.player.seek(nextPosition)
-    setPosition(nextPosition)
-    setIsSeeking(false)
-    refetch()
-  }
+    const duration = status?.duration || 0;
+    const nextPosition =
+      duration > 0 ? Math.max(0, Math.min(pos, duration)) : Math.max(0, pos);
+    await window.api.player.seek(nextPosition);
+    setPosition(nextPosition);
+    setIsSeeking(false);
+    refetch();
+  };
 
   const handleVolume = async (newVolume: number) => {
-    await window.api.player.setVolume(newVolume)
-    refetch()
-  }
+    await window.api.player.setVolume(newVolume);
+    refetch();
+  };
 
   const handleMute = async () => {
-    await window.api.player.setMuted(!mute)
-    toggleMute(!mute)
-    refetch()
-  }
+    await window.api.player.setMuted(!mute);
+    toggleMute(!mute);
+    refetch();
+  };
 
-  const currentTrack = status?.current_track
-  const volume = status?.volume ?? 1
+  const currentTrack = status?.current_track;
+  const volume = status?.volume ?? 1;
 
   return (
-    <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] h-20 bg-card border-t border-border w-full">
+    <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] h-20 bg-card rounded-xl drop-shadow-sm m-2">
       {/* Now Playing Info */}
       <div className="flex flex-row items-center gap-2 pl-2">
         <div className="h-14 w-14 bg-muted rounded-md flex items-center justify-center overflow-hidden">
           {currentTrack?.thumb && (
-            <img src={currentTrack.thumb} alt="Cover" className="w-full h-full object-cover" />
+            <img
+              src={currentTrack.thumb}
+              alt="Cover"
+              className="w-full h-full object-cover"
+            />
           )}
         </div>
         <div className="flex flex-col ">
           <span className="text-sm font-semibold hover:underline cursor-pointer truncate max-w-[200px]">
-            {currentTrack?.title || ''}
+            {currentTrack?.title || ""}
           </span>
           <span className="text-xs text-muted-foreground hover:underline cursor-pointer truncate max-w-[200px]">
-            {currentTrack?.artist || ''}
+            {currentTrack?.artist || ""}
           </span>
         </div>
       </div>
@@ -131,7 +136,11 @@ export function PlayerFooter() {
           >
             <SkipBack className="h-5 w-5 fill-current" />
           </Button>
-          <Button size="icon" className="rounded-full h-8 w-8" onClick={handlePlayPause}>
+          <Button
+            size="icon"
+            className="rounded-full h-8 w-8"
+            onClick={handlePlayPause}
+          >
             {status?.is_playing ? (
               <Pause className="h-4 w-4 fill-current" />
             ) : (
@@ -155,7 +164,9 @@ export function PlayerFooter() {
           </Button>
         </div>
         <div className="w-full max-w-md flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="w-8">{dayjs.duration(position * 1000).format('m:ss')}</span>
+          <span className="w-8">
+            {dayjs.duration(position * 1000).format("m:ss")}
+          </span>
           <div className="relative w-full flex items-center h-6">
             <Slider
               value={[position]}
@@ -164,15 +175,17 @@ export function PlayerFooter() {
               step={0.1}
               disabled={!currentTrack || !status?.duration}
               onValueChange={(pos) => {
-                setIsSeeking(true)
-                setPosition(pos[0])
+                setIsSeeking(true);
+                setPosition(pos[0]);
               }}
               onValueCommit={(pos) => handleSeek(pos[0])}
               className="w-full"
             />
           </div>
           <span className="w-8">
-            {status?.duration ? dayjs.duration(status.duration * 1000).format('m:ss') : '0:00'}
+            {status?.duration
+              ? dayjs.duration(status.duration * 1000).format("m:ss")
+              : "0:00"}
           </span>
         </div>
       </div>
@@ -191,11 +204,11 @@ export function PlayerFooter() {
         <div className="flex items-center gap-x-1 w-32">
           <div>
             {volume === 0 ? (
-              <Button variant={'ghost'} size={'icon-sm'} onClick={handleMute}>
+              <Button variant={"ghost"} size={"icon-sm"} onClick={handleMute}>
                 <VolumeX className="h-4 w-4 text-muted-foreground" />
               </Button>
             ) : (
-              <Button variant={'ghost'} size={'icon-sm'} onClick={handleMute}>
+              <Button variant={"ghost"} size={"icon-sm"} onClick={handleMute}>
                 {volume < 0.3 ? (
                   <Volume className="h-4 w-4 text-muted-foreground" />
                 ) : volume < 0.7 ? (
@@ -219,5 +232,5 @@ export function PlayerFooter() {
         </div>
       </div>
     </div>
-  )
+  );
 }
