@@ -1,41 +1,42 @@
-import type { ElectrobunConfig } from 'electrobun'
+import type { ElectrobunConfig } from "electrobun";
 
 const config: ElectrobunConfig = {
   app: {
-    name: 'Rayna',
-    identifier: 'com.ib.rayna',
-    version: '0.4.0',
-    description: 'Rayna',
-    urlSchemes: ['rayna']
+    name: "Rayna",
+    identifier: "com.ib.rayna",
+    version: "0.4.0",
+    description: "Rayna",
+    urlSchemes: ["rayna"],
   },
   build: {
-    buildFolder: 'build/electrobun',
-    artifactFolder: 'dist/electrobun',
+    buildFolder: "build/electrobun",
+    artifactFolder: "dist/electrobun",
     bun: {
-      entrypoint: 'src/bun/index.ts'
+      entrypoint: "src/bun/index.ts",
     },
     copy: {
-      'out/renderer': 'views/main',
-      'vendor/bass': 'vendor/bass'
+      "out/renderer": "views/main",
+      "vendor/bass": "vendor/bass",
     },
-    watch: ['src/bun', 'src/shared', 'src/renderer', 'vendor/bass'],
+    watch: ["src/bun", "src/shared", "src/renderer", "vendor/bass"],
     mac: {
       codesign: false,
       createDmg: true,
       notarize: false,
-      icons: ''
+      icons: "",
+      bundleCEF: true,
     },
     win: {
-      icon: 'resources/icon.png'
+      icon: "resources/icon.png",
     },
     linux: {
-      icon: 'resources/icon.png'
-    }
+      icon: "resources/icon.png",
+    },
   },
   release: {
-    baseUrl: '',
-    generatePatch: false
-  }
-}
+    baseUrl: "",
+    generatePatch: false,
+  },
+};
 
-export default config
+export default config;

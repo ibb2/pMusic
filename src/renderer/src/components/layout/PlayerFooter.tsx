@@ -15,6 +15,8 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Progress } from "../ui/progress";
+import { Link } from "@tanstack/react-router";
 
 export function PlayerFooter() {
   const { data: status, refetch } = useQuery({
@@ -96,7 +98,7 @@ export function PlayerFooter() {
   const volume = status?.volume ?? 1;
 
   return (
-    <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] h-20 bg-card rounded-xl drop-shadow-sm m-2">
+    <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] bg-card rounded-xl drop-shadow-sm p-2">
       {/* Now Playing Info */}
       <div className="flex flex-row items-center gap-2 pl-2">
         <div className="h-14 w-14 bg-muted rounded-md flex items-center justify-center overflow-hidden">
@@ -109,12 +111,24 @@ export function PlayerFooter() {
           )}
         </div>
         <div className="flex flex-col ">
-          <span className="text-sm font-semibold hover:underline cursor-pointer truncate max-w-[200px]">
-            {currentTrack?.title || ""}
-          </span>
-          <span className="text-xs text-muted-foreground hover:underline cursor-pointer truncate max-w-[200px]">
-            {currentTrack?.artist || ""}
-          </span>
+          {currentTrack?.albumRatingKey && (
+            <Link
+              to={`/app/album/$ratingKey`}
+              params={{ ratingKey: currentTrack.albumRatingKey }}
+              className="text-sm font-semibold hover:underline cursor-pointer truncate max-w-32"
+            >
+              <span>{currentTrack?.title || ""}</span>
+            </Link>
+          )}
+          {currentTrack?.artistRatingKey && (
+            <Link
+              to={`/app/artist/$ratingKey`}
+              params={{ ratingKey: currentTrack.artistRatingKey }}
+              className="text-xs text-muted-foreground hover:underline cursor-pointer truncate max-w-32"
+            >
+              <span>{currentTrack?.artist || ""}</span>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -167,20 +181,32 @@ export function PlayerFooter() {
           <span className="w-8">
             {dayjs.duration(position * 1000).format("m:ss")}
           </span>
-          <div className="relative w-full flex items-center h-6">
-            <Slider
-              value={[position]}
-              min={0}
+          <div className="group relative w-full h-6 flex items-center">
+            {/* Progress (default visible) */}
+            <Progress
+              value={position}
               max={status?.duration || 100}
-              step={0.1}
-              disabled={!currentTrack || !status?.duration}
-              onValueChange={(pos) => {
-                setIsSeeking(true);
-                setPosition(pos[0]);
-              }}
-              onValueCommit={(pos) => handleSeek(pos[0])}
-              className="w-full"
+              className="w-full transition-opacity duration-150 group-hover:opacity-0"
             />
+
+            {/* Slider (visible on hover) */}
+            <div className="absolute inset-0 flex items-center opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100 group-hover:pointer-events-auto">
+              <Slider
+                value={position}
+                min={0}
+                max={status?.duration || 100}
+                step={0.1}
+                disabled={!currentTrack || !status?.duration}
+                onValueChange={(pos) => {
+                  setIsSeeking(true);
+                  setPosition(pos as number);
+                }}
+                onValueCommitted={(pos) => {
+                  handleSeek(pos as number);
+                }}
+                className="w-full"
+              />
+            </div>
           </div>
           <span className="w-8">
             {status?.duration
@@ -221,12 +247,13 @@ export function PlayerFooter() {
           </div>
           <>
             <Slider
-              defaultValue={[1]}
-              value={[volume]}
-              onValueChange={(value) => handleVolume(value[0])}
+              defaultValue={[volume]}
               max={1}
               step={1 / 100}
-              className="w-20"
+              onValueCommitted={(value) => {
+                handleVolume(value as number);
+              }}
+              className="mx-auto w-full max-w-xs"
             />
           </>
         </div>
