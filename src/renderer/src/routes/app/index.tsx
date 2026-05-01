@@ -102,17 +102,17 @@ export default function Home() {
         </div>
       )}
 
-      <div className="flex min-w-0 flex-col gap-12">
+      <div className="flex min-w-0 flex-col gap-4">
         {/* Recently Played */}
         <div className="min-w-0">
-          <h2 className="text-2xl mb-4 font-semibold">Recently Played</h2>
+          <h2 className="text-xl mb-2 font-semibold">Recently Played</h2>
 
           {/* Wrapper - relative positioning context */}
           <div className="relative group min-w-0 overflow-hidden">
             {/* Scrollable container */}
             <div
               ref={recentRef}
-              className="flex min-h-48 min-w-0 flex-row overflow-x-auto overflow-y-hidden scrollbar-hidden scroll-smooth gap-1 px-2"
+              className="flex min-h-40 min-w-0 flex-row overflow-x-auto overflow-y-hidden scrollbar-hidden scroll-smooth gap-0 px-2"
             >
               {recentlyPlayed.length > 0 ? (
                 recentlyPlayed.map((album) => (
@@ -135,11 +135,11 @@ export default function Home() {
 
         {/* Recently Added - Same Pattern */}
         <div className="min-w-0">
-          <h2 className="text-2xl font-semibold mb-4">Recently Added</h2>
+          <h2 className="text-xl font-semibold mb-2">Recently Added</h2>
           <div className="relative group min-w-0 overflow-hidden">
             <div
               ref={addedRef}
-              className="flex min-h-48 min-w-0 flex-row overflow-x-auto overflow-y-hidden scrollbar-hidden scroll-smooth gap-1 px-2"
+              className="flex min-h-40 min-w-0 flex-row overflow-x-auto overflow-y-hidden scrollbar-hidden scroll-smooth gap-0 px-2"
             >
               {recentlyAdded.length > 0 ? (
                 recentlyAdded.map((album) => (
@@ -161,11 +161,11 @@ export default function Home() {
 
         {/* Recommended - Same Pattern */}
         <div className="min-w-0">
-          <h2 className="text-2xl font-semibold mb-4">Recommended for You</h2>
+          <h2 className="text-xl font-semibold mb-2">Recommended for You</h2>
           <div className="relative group min-w-0 overflow-hidden">
             <div
               ref={recommendedRef}
-              className="flex min-h-48 min-w-0 flex-row overflow-x-auto overflow-y-hidden scrollbar-hidden scroll-smooth gap-1 px-2"
+              className="flex min-h-40 min-w-0 flex-row overflow-x-auto overflow-y-hidden scrollbar-hidden scroll-smooth gap-0 px-2"
             >
               {playlists.length > 0 ? (
                 playlists.map((playlist) => (
@@ -195,18 +195,19 @@ function AlbumCard({ album }: { album: any }) {
       key={album.id}
       to={`/app/album/$ratingKey`}
       params={{ ratingKey: album.ratingKey }}
+      className="h-fit"
     >
-      <Card className="flex justify-center w-40 shrink-0 border-0 shadow-none hover:bg-zinc-100 dark:hover:bg-zinc-800/30 dark:bg-transparent p-2 rounded-md">
-        <CardHeader className="p-0">
+      <Card className="flex w-40 shrink-0 justify-center border-0 p-3  shadow-none ring-0 hover:rounded-lg hover:bg-zinc-100 dark:bg-transparent dark:hover:bg-zinc-800/30">
+        <CardHeader className="p-0 gap-0">
           <img
             src={album.thumb ?? BlankImage}
             alt={album.title}
-            className="w-full object-cover rounded-lg aspect-square"
+            className="mb-1.5 aspect-square w-full rounded-lg object-cover"
           />
-          <CardTitle className="overflow-hidden text-ellipsis text-nowrap text-sm">
+          <CardTitle className="mb-0.5 overflow-hidden text-ellipsis text-nowrap text-sm leading-tight">
             {album.title}
           </CardTitle>
-          <CardDescription className="text-xs truncate">
+          <CardDescription className="truncate text-xs leading-tight">
             {album.artist}
           </CardDescription>
         </CardHeader>
@@ -225,7 +226,9 @@ function PlaylistCard({ playlist }: { playlist: any }) {
       <Card className="flex justify-center w-40 shrink-0 border-0 shadow-none hover:bg-zinc-100 dark:hover:bg-zinc-800/30 dark:bg-transparent p-2 rounded-md">
         <CardHeader className="p-0">
           <img
-            src={playlist.composite?.length > 0 ? playlist.composite : BlankImage}
+            src={
+              playlist.composite?.length > 0 ? playlist.composite : BlankImage
+            }
             alt={playlist.title}
             className="w-full object-cover rounded-lg aspect-square"
           />
@@ -245,7 +248,7 @@ function PlaylistCard({ playlist }: { playlist: any }) {
 
 function EmptyRow({ title }: { title: string }) {
   return (
-    <div className="flex h-40 min-w-full items-center rounded-md border border-dashed border-zinc-300 bg-zinc-50/60 px-6 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400">
+    <div className="flex min-w-full items-center rounded-md border border-dashed border-zinc-300 bg-zinc-50/60 px-6 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400">
       <div className="flex items-center gap-3">
         <Library className="size-5" />
         <span className="text-sm">{title}</span>
