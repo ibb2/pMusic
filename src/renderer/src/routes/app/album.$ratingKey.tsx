@@ -1,6 +1,8 @@
 import { usePageUltraBlur } from "@/components/layout/UltraBlurProvider";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { PlayIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
@@ -39,20 +41,27 @@ export function AlbumPage() {
   const album = queryAlbum.data;
 
   return (
-    <div className="flex min-h-full flex-col p-6 pb-10">
+    <div className="flex min-h-full flex-col p-6">
       {/* Album Header */}
-      <div className="flex gap-6 mb-6">
+      <div className="flex gap-6 mb-6 items-stretch">
         <img
           src={album.thumb}
           alt={album.title}
-          className="w-48 h-48 rounded-lg shadow-xl"
+          className="w-48 h-48 rounded-lg shadow-xl self-start"
         />
-        <div className="flex flex-col justify-between py-2">
-          <div>
-            <div className="text-slate-600 dark:text-slate-100 text-sm mb-2">
+        <div className="flex flex-col justify-between py-2 flex-1 min-w-0 h-48">
+          <div className="flex-1 flex flex-col justify-center min-h-0">
+            <div className="text-zinc-800/90 dark:text-slate-100 text-md mb-2">
               ALBUM
             </div>
-            <h1 className="text-5xl font-bold mb-3">{album.title}</h1>
+            <h1
+              className="font-bold leading-tight break-words line-clamp-3"
+              style={{ fontSize: "clamp(1.5rem, 3.5vw, 3rem)" }}
+            >
+              {album.title}
+            </h1>
+          </div>
+          <div className="shrink-0">
             <Link
               to={`/app/artist/$ratingKey`}
               params={{ ratingKey: album.artistKey }}
@@ -60,11 +69,11 @@ export function AlbumPage() {
             >
               {album.artist}
             </Link>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <span>{album.year}</span>
-            <span>•</span>
-            <span>{album.leafCount} tracks</span>
+            <div className="flex items-center gap-2 text-sm mt-1">
+              <span>{album.year}</span>
+              <span>•</span>
+              <span>{album.leafCount} tracks</span>
+            </div>
           </div>
         </div>
       </div>
@@ -72,17 +81,16 @@ export function AlbumPage() {
       {/* Controls */}
       <div className="flex items-center gap-3 mb-6">
         <Button
-          className="px-8"
+          className="rounded-full h-14 w-14"
           onClick={() => {
             window.api.player.playAlbum(ratingKey);
           }}
         >
-          <Play size={18} className="mr-2" fill={"white"} />
-          Play
+          <Play size={24} fill={"white"} />
+          {/*<HugeiconsIcon fill="white" icon={PlayIcon} />*/}
         </Button>
-        <Button variant="outline" className="">
-          <Heart size={18} className="mr-2" />
-          Like
+        <Button variant={"secondary"} size="icon-lg" className="rounded-full">
+          <Heart size={18} />
         </Button>
         <Button variant="ghost" size="icon">
           <Plus size={20} />
