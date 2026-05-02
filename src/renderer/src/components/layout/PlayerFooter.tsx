@@ -98,10 +98,10 @@ export function PlayerFooter() {
   const volume = status?.volume ?? 1;
 
   return (
-    <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] bg-card rounded-xl drop-shadow-sm p-2">
+    <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] p-2">
       {/* Now Playing Info */}
-      <div className="flex flex-row items-center gap-2 pl-2">
-        <div className="h-14 w-14 bg-muted rounded-md flex items-center justify-center overflow-hidden">
+      <div className="flex flex-row items-center gap-2">
+        <div className="h-14 w-14 rounded-md flex items-center justify-center overflow-hidden">
           {currentTrack?.thumb && (
             <img
               src={currentTrack.thumb}
