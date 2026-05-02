@@ -1,4 +1,5 @@
 import { AlbumCard } from "@/components/music/albumcard";
+import { useUltraBlur } from "@/components/layout/UltraBlurProvider";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,7 +20,7 @@ import {
   Music,
   Play,
 } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 export const Route = createFileRoute("/app/artist/$ratingKey")({
   component: ArtistPage,
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/app/artist/$ratingKey")({
 
 export function ArtistPage() {
   const { ratingKey } = Route.useParams();
+  const { setUltraBlurUrl } = useUltraBlur();
 
   const albumRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +54,15 @@ export function ArtistPage() {
     queryKey: ["artist", ratingKey],
     queryFn: () => window.api.media.getArtist(ratingKey),
   });
+
+  useEffect(() => {
+    if (queryArtist.data?.ultraBlur) {
+      setUltraBlurUrl(queryArtist.data.ultraBlur);
+    }
+    return () => {
+      setUltraBlurUrl(null);
+    };
+  }, [queryArtist.data?.ultraBlur, setUltraBlurUrl]);
   const queryArtistAlbums = useQuery({
     queryKey: ["artistAlbum", ratingKey],
     queryFn: () => window.api.media.getArtistAlbums(ratingKey),

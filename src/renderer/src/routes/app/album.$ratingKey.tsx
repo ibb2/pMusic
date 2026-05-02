@@ -1,9 +1,11 @@
+import { useUltraBlur } from '@/components/layout/UltraBlurProvider'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { Play, Heart, Plus, MoreVertical, Clock } from 'lucide-react'
+import { useEffect } from 'react'
 
 export const Route = createFileRoute('/app/album/$ratingKey')({
   component: AlbumPage
@@ -11,12 +13,22 @@ export const Route = createFileRoute('/app/album/$ratingKey')({
 
 export function AlbumPage() {
   const { ratingKey } = Route.useParams()
+  const { setUltraBlurUrl } = useUltraBlur()
 
   // queries
   const queryAlbum = useQuery({
     queryKey: ['album', ratingKey],
     queryFn: () => window.api.media.getAlbum(ratingKey)
   })
+
+  useEffect(() => {
+    if (queryAlbum.data?.ultraBlur) {
+      setUltraBlurUrl(queryAlbum.data.ultraBlur)
+    }
+    return () => {
+      setUltraBlurUrl(null)
+    }
+  }, [queryAlbum.data?.ultraBlur, setUltraBlurUrl])
 
   if (queryAlbum.isLoading)
     return (

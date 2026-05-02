@@ -12,6 +12,12 @@ type PlexResponse = {
     Metadata?: PlexMetadata[];
     Directory?: PlexMetadata[];
     totalSize?: number;
+    UltraBlurColors?: Array<{
+      topLeft: string;
+      topRight: string;
+      bottomLeft: string;
+      bottomRight: string;
+    }>;
   };
 };
 
@@ -169,10 +175,13 @@ export class MediaService {
   }
 
   async getAlbum(ratingKey: string): Promise<unknown> {
-    const album = await this.fetchMetadataItem(ratingKey);
-    const tracks = await this.fetchMetadataChildren(ratingKey);
+    const album = await this.fetchMetadataItem(ratingKey)
+    const [tracks, ultraBlur] = await Promise.all([
+      this.fetchMetadataChildren(ratingKey),
+      this.getUltraBlur(album.art || album.thumb),
+    ])
     const artistKey =
-      album.parentRatingKey || this.extractRatingKey(album.parentKey);
+      album.parentRatingKey || this.extractRatingKey(album.parentKey)
 
     return {
       id: album.key,
@@ -183,6 +192,8 @@ export class MediaService {
       ratingKey: album.ratingKey,
       leafCount: album.leafCount,
       thumb: this.plexUrl(album.thumb),
+      art: this.plexUrl(album.art),
+      ultraBlur,
       tracks: tracks.map((track) => ({
         id: track.ratingKey,
         number: track.trackNumber,
@@ -190,11 +201,12 @@ export class MediaService {
         duration: track.duration,
         ratingKey: track.ratingKey,
       })),
-    };
+    }
   }
 
   async getArtist(ratingKey: string): Promise<unknown> {
-    const artist = await this.fetchMetadataItem(ratingKey);
+    const artist = await this.fetchMetadataItem(ratingKey)
+    const ultraBlur = await this.getUltraBlur(artist.art || artist.thumb)
 
     return {
       id: artist.key,
@@ -202,8 +214,32 @@ export class MediaService {
       ratingKey: artist.ratingKey,
       summary: artist.summary,
       thumb: this.plexUrl(artist.thumb),
+      art: this.plexUrl(artist.art),
+      ultraBlur,
       viewCount: artist.viewCount,
-    };
+    }
+  }
+
+  async getUltraBlur(imagePath: string | null): Promise<string | null> {
+    if (!imagePath) return null
+
+    try {
+      const colors = await this.fetchPlex('/services/ultrablur/colors', {
+        url: imagePath,
+      })
+      const blurColors = colors.MediaContainer?.UltraBlurColors?.[0]
+      if (!blurColors) return null
+
+      const ultraBlurImagePath = `/services/ultrablur/image?topLeft=${blurColors.topLeft}&topRight=${blurColors.topRight}&bottomLeft=${blurColors.bottomLeft}&bottomRight=${blurColors.bottomRight}&width=1920&height=1080&noise=1`
+
+      return this.plexUrl('/photo/:/transcode', {
+        url: ultraBlurImagePath,
+        width: '1920',
+        height: '1080',
+      })
+    } catch {
+      return null
+    }
   }
 
   async getArtistAlbums(ratingKey: string): Promise<unknown[]> {
