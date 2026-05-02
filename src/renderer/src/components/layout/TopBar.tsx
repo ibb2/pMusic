@@ -1,3 +1,4 @@
+import { useUltraBlur } from "@/components/layout/UltraBlurProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/components/theme-provider";
@@ -26,6 +27,8 @@ export function TopBar() {
   const canGoBack = useCanGoBack();
   const routerState = useRouterState();
   const { theme, setTheme } = useTheme();
+  const { ultraBlurUrl, enabled } = useUltraBlur();
+  const hasUltraBlur = !!ultraBlurUrl && enabled;
 
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile"],
@@ -53,7 +56,14 @@ export function TopBar() {
   };
 
   return (
-    <div className="flex items-center justify-between bg-background/95 backdrop-blur sticky top-0 z-10 w-full">
+    <div
+      className={cn(
+        "flex items-center justify-between sticky top-0 z-10 w-full transition-colors duration-300",
+        hasUltraBlur
+          ? "bg-transparent"
+          : "bg-background/95 backdrop-blur"
+      )}
+    >
       <div className="flex items-center gap-2">
         <Button
           disabled={!canGoBack}

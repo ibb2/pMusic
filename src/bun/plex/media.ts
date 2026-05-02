@@ -43,6 +43,7 @@ export class MediaService {
     return (
       (this.db.get("playback") as PlaybackSettings | null) ?? {
         useOriginalFileUrl: true,
+        enableUltraBlur: true,
       }
     );
   }

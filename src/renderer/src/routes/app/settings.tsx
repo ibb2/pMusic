@@ -1,3 +1,4 @@
+import { useUltraBlur } from "@/components/layout/UltraBlurProvider";
 import {
   Item,
   ItemActions,
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/app/settings")({
 });
 
 export function SettingsPage() {
+  const { setEnabled } = useUltraBlur();
   const [selectedLibraries, setSelectedLibraries] = useState<any[] | null>(
     null,
   );
@@ -70,9 +72,19 @@ export function SettingsPage() {
   const setUseOriginalFileUrl = async (useOriginalFileUrl: boolean) => {
     const next = { ...playbackSettings, useOriginalFileUrl };
     setPlaybackSettings(next);
-    await window.api.settings
-      .setPlayback(next)
-      .catch((e) => console.error(e));
+    await window.api.settings.setPlayback(next).catch((e) => console.error(e));
+    setPlaybackUpdated(true);
+
+    setTimeout(() => {
+      setPlaybackUpdated(false);
+    }, 1500);
+  };
+
+  const setEnableUltraBlur = async (enableUltraBlur: boolean) => {
+    const next = { ...playbackSettings, enableUltraBlur };
+    setPlaybackSettings(next);
+    setEnabled(enableUltraBlur);
+    await window.api.settings.setPlayback(next).catch((e) => console.error(e));
     setPlaybackUpdated(true);
 
     setTimeout(() => {
@@ -182,6 +194,26 @@ export function SettingsPage() {
                   />
                 </div>
               </div>
+              <div className="flex items-center justify-between gap-6">
+                <div>
+                  <Label className="mb-2 block">UltraBlur Background</Label>
+                  <Label className="mb-2 block text-sm text-muted-foreground">
+                    Show colorful artist and album backgrounds.
+                  </Label>
+                </div>
+                <div className="flex items-center gap-4">
+                  {playbackUpdated && (
+                    <p className="text-green-700 dark:text-green-300">
+                      Updated
+                    </p>
+                  )}
+                  <Switch
+                    checked={playbackSettings.enableUltraBlur !== false}
+                    onCheckedChange={setEnableUltraBlur}
+                    aria-label="UltraBlur Background"
+                  />
+                </div>
+              </div>
             </div>
           </section>
 
@@ -234,7 +266,7 @@ export function SettingsPage() {
                                 : "",
                             )}
                           >
-                            <div className="w-full h-full">
+                            <div className="flex flex-row gap-4 w-full h-full">
                               <ItemMedia>
                                 <Music className="size-5" />
                               </ItemMedia>

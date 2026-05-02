@@ -7,6 +7,7 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import { StartupLoading } from "@/components/StartupLoading";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app")({
@@ -57,13 +58,21 @@ function AppLayoutComponent() {
 }
 
 function UltraBlurBackground() {
-  const { ultraBlurUrl } = useUltraBlur();
-  if (!ultraBlurUrl) return null;
+  const { ultraBlurUrl, enabled } = useUltraBlur();
+  if (!ultraBlurUrl || !enabled) return null;
 
   return (
-    <div
-      className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700"
-      style={{ backgroundImage: `url(${ultraBlurUrl})` }}
-    />
+    <>
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700"
+        style={{ backgroundImage: `url(${ultraBlurUrl})` }}
+      />
+      <div
+        className={cn(
+          "absolute inset-0 z-[1] pointer-events-none transition-opacity duration-700",
+          "bg-white/50 dark:bg-black/20"
+        )}
+      />
+    </>
   );
 }

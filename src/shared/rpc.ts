@@ -48,6 +48,7 @@ export type PlayerStatus = {
 
 export type PlaybackSettings = {
   useOriginalFileUrl: boolean;
+  enableUltraBlur?: boolean;
 };
 
 export type UserProfile = {

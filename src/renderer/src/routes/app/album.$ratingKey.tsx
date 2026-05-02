@@ -22,13 +22,15 @@ export function AlbumPage() {
   })
 
   useEffect(() => {
+    // Always clear first when ratingKey changes to avoid showing stale blur
+    setUltraBlurUrl(null)
     if (queryAlbum.data?.ultraBlur) {
       setUltraBlurUrl(queryAlbum.data.ultraBlur)
     }
     return () => {
       setUltraBlurUrl(null)
     }
-  }, [queryAlbum.data?.ultraBlur, setUltraBlurUrl])
+  }, [queryAlbum.data?.ultraBlur, setUltraBlurUrl, ratingKey])
 
   if (queryAlbum.isLoading)
     return (
@@ -89,7 +91,7 @@ export function AlbumPage() {
       </div>
 
       {/* Track List */}
-      <div className="bg-slate-300/10 rounded-lg">
+      <div className="bg-white/60 dark:bg-slate-300/10 rounded-lg">
         <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-2 text-sm border-b">
           <div className="w-8 text-center">#</div>
           <div>Title</div>
@@ -102,7 +104,7 @@ export function AlbumPage() {
         {album.tracks.map((track: any, index: number) => (
           <div
             key={track.id}
-            className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors cursor-pointer"
+            className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors cursor-pointer"
           >
             <div className="text-center w-8 group-hover:hidden">{index + 1}</div>
             <button

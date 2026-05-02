@@ -56,13 +56,15 @@ export function ArtistPage() {
   });
 
   useEffect(() => {
+    // Always clear first when ratingKey changes to avoid showing stale blur
+    setUltraBlurUrl(null);
     if (queryArtist.data?.ultraBlur) {
       setUltraBlurUrl(queryArtist.data.ultraBlur);
     }
     return () => {
       setUltraBlurUrl(null);
     };
-  }, [queryArtist.data?.ultraBlur, setUltraBlurUrl]);
+  }, [queryArtist.data?.ultraBlur, setUltraBlurUrl, ratingKey]);
   const queryArtistAlbums = useQuery({
     queryKey: ["artistAlbum", ratingKey],
     queryFn: () => window.api.media.getArtistAlbums(ratingKey),
@@ -141,7 +143,7 @@ export function ArtistPage() {
       {/* Popular Tracks */}
       <div className="mb-8">
         <h2 className="text-2xl mb-4">Popular Tracks</h2>
-        <div className="bg-slate-300/10 rounded-lg">
+        <div className="bg-white/60 dark:bg-slate-300/10 rounded-lg">
           {queryArtistPopularTracks.isLoading ? (
             <div className="flex h-24 items-center justify-center">
               <Spinner className="size-5" />
@@ -150,7 +152,7 @@ export function ArtistPage() {
             popularTracks.map((track: any, index: number) => (
               <div
                 key={track.id}
-                className="flex items-center gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors cursor-pointer"
+                className="flex items-center gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors cursor-pointer"
               >
                 <div className="text-center w-8 group-hover:hidden">
                   {index + 1}
