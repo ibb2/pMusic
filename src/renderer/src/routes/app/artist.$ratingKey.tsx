@@ -195,7 +195,7 @@ export function ArtistPage() {
       </div>
 
       {/* Albums */}
-      <div className="px-6 pb-6">
+      <div className="pb-6">
         <h2 className="text-2xl mb-4">Albums</h2>
         {queryArtistAlbums.isLoading ? (
           <div className="flex h-48 items-center justify-center rounded-md border border-dashed">

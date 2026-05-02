@@ -1,5 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import BlankImage from "@/assets/512px-Black_colour.jpg";
 
 export function AlbumCard({ album }: { album: any }) {
@@ -10,7 +16,7 @@ export function AlbumCard({ album }: { album: any }) {
       params={{ ratingKey: album.ratingKey }}
       className="h-fit"
     >
-      <Card className="flex w-40 shrink-0 justify-center border-0 p-3  shadow-none ring-0 hover:rounded-lg hover:bg-zinc-100 dark:bg-transparent dark:hover:bg-zinc-800/30">
+      <Card className="flex w-40 shrink-0 justify-center border-0 p-3 shadow-none ring-0 hover:rounded-lg hover:bg-zinc-300/60 bg-transparent dark:hover:bg-zinc-800/60">
         <CardHeader className="p-0 gap-0">
           <img
             src={album.thumb ?? BlankImage}
@@ -20,7 +26,7 @@ export function AlbumCard({ album }: { album: any }) {
           <CardTitle className="mb-0.5 overflow-hidden text-ellipsis text-nowrap text-sm leading-tight">
             {album.title}
           </CardTitle>
-          <CardDescription className="truncate text-xs leading-tight">
+          <CardDescription className="truncate text-xs leading-tight text-black/80 dark:text-muted-foreground">
             {album.artist}
           </CardDescription>
         </CardHeader>
