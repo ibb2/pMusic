@@ -177,7 +177,7 @@ export function PlayerFooter() {
             <Repeat className="h-4 w-4" />
           </Button>
         </div>
-        <div className="w-full max-w-md flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="w-full max-w-sm flex items-center gap-2 text-xs text-muted-foreground">
           <span className="w-8">
             {dayjs.duration(position * 1000).format("m:ss")}
           </span>
