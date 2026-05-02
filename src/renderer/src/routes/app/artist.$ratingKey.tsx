@@ -87,7 +87,7 @@ export function ArtistPage() {
   const popularTracks = queryArtistPopularTracks.data?.tracks ?? [];
 
   return (
-    <div className="flex min-h-full flex-col p-6 pb-10">
+    <div className="flex min-h-full flex-col p-6">
       {/* Artist Header */}
       <div className="flex gap-6 mb-6">
         <img
@@ -95,18 +95,21 @@ export function ArtistPage() {
           alt={artist.title}
           className="w-48 h-48 rounded-full object-cover shadow-xl"
         />
-        <div className="flex flex-col justify-between py-2">
+        <div className="flex flex-col justify-end py-2">
           <div>
             {queryArtist.data.verified && (
               <div className="text-blue-400 text-sm mb-2">
                 ✓ VERIFIED ARTIST
               </div>
             )}
-            <h1 className="text-5xl font-bold mb-2">{artist.title}</h1>
+            <h1
+              className="text-5xl font-extrabold mb-2"
+              style={{ fontSize: "clamp(2rem, 10vw, 6rem)" }}
+            >
+              {artist.title}
+            </h1>
             {/*<div className="text-zinc-400">{queryArtist.data.followers} monthly listeners</div>*/}
-            <div className="text-muted-foreground">
-              {artist.viewCount ?? 0} plays
-            </div>
+            <div className="pl-2">{artist.viewCount ?? 0} plays</div>
           </div>
         </div>
       </div>
@@ -114,30 +117,25 @@ export function ArtistPage() {
       {/* Controls */}
       <div className="flex items-center gap-3 mb-6">
         <Button
-          className="px-8"
+          className="rounded-full h-14 w-14"
           onClick={() => {
             window.api.player.playArtist(ratingKey);
           }}
         >
-          <Play size={18} className="mr-2" fill="black" />
-          Play
+          <Play size={24} fill="white" />
         </Button>
-        <Button variant="outline">
+        <Button variant="secondary">
           <Heart size={18} className="mr-2" />
           Follow
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-zinc-400 hover:text-white hover:bg-zinc-800"
-        >
+        <Button variant="ghost" size="icon">
           <MoreVertical size={20} />
         </Button>
       </div>
 
       {/* Popular Tracks */}
       <div className="mb-8">
-        <h2 className="text-2xl mb-4">Popular Tracks</h2>
+        <h2 className="text-xl font-semibold mb-2">Popular Tracks</h2>
         <div className="bg-white/60 dark:bg-slate-300/10 rounded-lg">
           {queryArtistPopularTracks.isLoading ? (
             <div className="flex h-24 items-center justify-center">
@@ -195,8 +193,8 @@ export function ArtistPage() {
       </div>
 
       {/* Albums */}
-      <div className="pb-6">
-        <h2 className="text-2xl mb-4">Albums</h2>
+      <div>
+        <h2 className="text-xl font-semibold mb-2">Albums</h2>
         {queryArtistAlbums.isLoading ? (
           <div className="flex h-48 items-center justify-center rounded-md border border-dashed">
             <Spinner className="size-5" />
