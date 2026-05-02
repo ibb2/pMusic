@@ -1,4 +1,4 @@
-import { useUltraBlur } from '@/components/layout/UltraBlurProvider'
+import { usePageUltraBlur } from '@/components/layout/UltraBlurProvider'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { useQuery } from '@tanstack/react-query'
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/app/album/$ratingKey')({
 
 export function AlbumPage() {
   const { ratingKey } = Route.useParams()
-  const { setUltraBlurUrl } = useUltraBlur()
+  const { setBlur } = usePageUltraBlur(`album-${ratingKey}`)
 
   // queries
   const queryAlbum = useQuery({
@@ -22,15 +22,10 @@ export function AlbumPage() {
   })
 
   useEffect(() => {
-    // Always clear first when ratingKey changes to avoid showing stale blur
-    setUltraBlurUrl(null)
     if (queryAlbum.data?.ultraBlur) {
-      setUltraBlurUrl(queryAlbum.data.ultraBlur)
+      setBlur(queryAlbum.data.ultraBlur)
     }
-    return () => {
-      setUltraBlurUrl(null)
-    }
-  }, [queryAlbum.data?.ultraBlur, setUltraBlurUrl, ratingKey])
+  }, [queryAlbum.data?.ultraBlur, setBlur])
 
   if (queryAlbum.isLoading)
     return (

@@ -1,5 +1,5 @@
 import { AlbumCard } from "@/components/music/albumcard";
-import { useUltraBlur } from "@/components/layout/UltraBlurProvider";
+import { usePageUltraBlur } from "@/components/layout/UltraBlurProvider";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/app/artist/$ratingKey")({
 
 export function ArtistPage() {
   const { ratingKey } = Route.useParams();
-  const { setUltraBlurUrl } = useUltraBlur();
+  const { setBlur } = usePageUltraBlur(`artist-${ratingKey}`);
 
   const albumRef = useRef<HTMLDivElement>(null);
 
@@ -56,15 +56,10 @@ export function ArtistPage() {
   });
 
   useEffect(() => {
-    // Always clear first when ratingKey changes to avoid showing stale blur
-    setUltraBlurUrl(null);
     if (queryArtist.data?.ultraBlur) {
-      setUltraBlurUrl(queryArtist.data.ultraBlur);
+      setBlur(queryArtist.data.ultraBlur);
     }
-    return () => {
-      setUltraBlurUrl(null);
-    };
-  }, [queryArtist.data?.ultraBlur, setUltraBlurUrl, ratingKey]);
+  }, [queryArtist.data?.ultraBlur, setBlur]);
   const queryArtistAlbums = useQuery({
     queryKey: ["artistAlbum", ratingKey],
     queryFn: () => window.api.media.getArtistAlbums(ratingKey),

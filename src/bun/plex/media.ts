@@ -179,7 +179,7 @@ export class MediaService {
     const album = await this.fetchMetadataItem(ratingKey)
     const [tracks, ultraBlur] = await Promise.all([
       this.fetchMetadataChildren(ratingKey),
-      this.getUltraBlur(album.art || album.thumb),
+      this.getUltraBlur(album.art || album.thumb, `album-${ratingKey}`),
     ])
     const artistKey =
       album.parentRatingKey || this.extractRatingKey(album.parentKey)
@@ -205,9 +205,9 @@ export class MediaService {
     }
   }
 
-  async getArtist(ratingKey: string): Promise<unknown> {
+async getArtist(ratingKey: string): Promise<unknown> {
     const artist = await this.fetchMetadataItem(ratingKey)
-    const ultraBlur = await this.getUltraBlur(artist.art || artist.thumb)
+    const ultraBlur = await this.getUltraBlur(artist.thumb, `artist-${ratingKey}`)
 
     return {
       id: artist.key,
@@ -221,7 +221,7 @@ export class MediaService {
     }
   }
 
-  async getUltraBlur(imagePath: string | null): Promise<string | null> {
+  async getUltraBlur(imagePath: string | null, cacheBuster?: string): Promise<string | null> {
     if (!imagePath) return null
 
     try {
@@ -237,6 +237,7 @@ export class MediaService {
         url: ultraBlurImagePath,
         width: '1920',
         height: '1080',
+        ...(cacheBuster ? { v: cacheBuster } : {}),
       })
     } catch {
       return null

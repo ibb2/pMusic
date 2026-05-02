@@ -64,6 +64,7 @@ function UltraBlurBackground() {
   return (
     <>
       <div
+        key={ultraBlurUrl}
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700"
         style={{ backgroundImage: `url(${ultraBlurUrl})` }}
       />

@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 type UltraBlurContextType = {
   ultraBlurUrl: string | null
-  setUltraBlurUrl: (url: string | null) => void
+  setUltraBlurUrl: (url: string | null, sourceId: string) => void
   enabled: boolean
   setEnabled: (enabled: boolean) => void
 }
@@ -15,8 +15,21 @@ const UltraBlurContext = createContext<UltraBlurContextType>({
 })
 
 export function UltraBlurProvider({ children }: { children: React.ReactNode }) {
-  const [ultraBlurUrl, setUltraBlurUrl] = useState<string | null>(null)
+  const [ultraBlurUrl, setUltraBlurUrlRaw] = useState<string | null>(null)
   const [enabled, setEnabled] = useState(true)
+  const currentSourceRef = useRef<string | null>(null)
+
+  const setUltraBlurUrl = useCallback((url: string | null, sourceId: string) => {
+    if (url === null) {
+      if (currentSourceRef.current === sourceId) {
+        setUltraBlurUrlRaw(null)
+        currentSourceRef.current = null
+      }
+      return
+    }
+    currentSourceRef.current = sourceId
+    setUltraBlurUrlRaw(url)
+  }, [])
 
   useEffect(() => {
     window.api.settings
@@ -40,4 +53,20 @@ export function UltraBlurProvider({ children }: { children: React.ReactNode }) {
 
 export function useUltraBlur() {
   return useContext(UltraBlurContext)
+}
+
+export function usePageUltraBlur(sourceId: string) {
+  const { setUltraBlurUrl, enabled, ultraBlurUrl } = useUltraBlur()
+
+  const setBlur = useCallback((url: string | null) => {
+    setUltraBlurUrl(url, sourceId)
+  }, [setUltraBlurUrl, sourceId])
+
+  useEffect(() => {
+    return () => {
+      setBlur(null)
+    }
+  }, [sourceId, setBlur])
+
+  return { setBlur, enabled, ultraBlurUrl }
 }
