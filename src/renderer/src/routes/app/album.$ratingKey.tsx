@@ -1,55 +1,62 @@
-import { usePageUltraBlur } from '@/components/layout/UltraBlurProvider'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import dayjs from 'dayjs'
-import { Play, Heart, Plus, MoreVertical, Clock } from 'lucide-react'
-import { useEffect } from 'react'
+import { usePageUltraBlur } from "@/components/layout/UltraBlurProvider";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import dayjs from "dayjs";
+import { Play, Heart, Plus, MoreVertical, Clock } from "lucide-react";
+import { useEffect } from "react";
 
-export const Route = createFileRoute('/app/album/$ratingKey')({
-  component: AlbumPage
-})
+export const Route = createFileRoute("/app/album/$ratingKey")({
+  component: AlbumPage,
+});
 
 export function AlbumPage() {
-  const { ratingKey } = Route.useParams()
-  const { setBlur } = usePageUltraBlur(`album-${ratingKey}`)
+  const { ratingKey } = Route.useParams();
+  const { setBlur } = usePageUltraBlur(`album-${ratingKey}`);
 
   // queries
   const queryAlbum = useQuery({
-    queryKey: ['album', ratingKey],
-    queryFn: () => window.api.media.getAlbum(ratingKey)
-  })
+    queryKey: ["album", ratingKey],
+    queryFn: () => window.api.media.getAlbum(ratingKey),
+  });
 
   useEffect(() => {
     if (queryAlbum.data?.ultraBlur) {
-      setBlur(queryAlbum.data.ultraBlur)
+      setBlur(queryAlbum.data.ultraBlur);
     }
-  }, [queryAlbum.data?.ultraBlur, setBlur])
+  }, [queryAlbum.data?.ultraBlur, setBlur]);
 
   if (queryAlbum.isLoading)
     return (
       <div className="flex items-center justify-center w-full h-full">
         <Spinner className="size-8" />
       </div>
-    )
-  if (queryAlbum.isError) return 'Error loading album' + queryAlbum.error.message
+    );
+  if (queryAlbum.isError)
+    return "Error loading album" + queryAlbum.error.message;
 
-  const album = queryAlbum.data
+  const album = queryAlbum.data;
 
   return (
     <div className="flex min-h-full flex-col p-6 pb-10">
       {/* Album Header */}
       <div className="flex gap-6 mb-6">
-        <img src={album.thumb} alt={album.title} className="w-48 h-48 rounded-lg shadow-xl" />
+        <img
+          src={album.thumb}
+          alt={album.title}
+          className="w-48 h-48 rounded-lg shadow-xl"
+        />
         <div className="flex flex-col justify-between py-2">
           <div>
-            <div className="text-slate-600 dark:text-slate-100 text-sm mb-2">ALBUM</div>
+            <div className="text-slate-600 dark:text-slate-100 text-sm mb-2">
+              ALBUM
+            </div>
             <h1 className="text-5xl font-bold mb-3">{album.title}</h1>
             <Link
               to={`/app/artist/$ratingKey`}
               params={{ ratingKey: album.artistKey }}
-              className="hover:text-slate-700/50 hover:underline text-lg"
+              className="hover:underline text-lg"
             >
               {album.artist}
             </Link>
@@ -67,10 +74,10 @@ export function AlbumPage() {
         <Button
           className="px-8"
           onClick={() => {
-            window.api.player.playAlbum(ratingKey)
+            window.api.player.playAlbum(ratingKey);
           }}
         >
-          <Play size={18} className="mr-2" fill={'white'} />
+          <Play size={18} className="mr-2" fill={"white"} />
           Play
         </Button>
         <Button variant="outline" className="">
@@ -101,11 +108,13 @@ export function AlbumPage() {
             key={track.id}
             className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors cursor-pointer"
           >
-            <div className="text-center w-8 group-hover:hidden">{index + 1}</div>
+            <div className="text-center w-8 group-hover:hidden">
+              {index + 1}
+            </div>
             <button
               className="hidden group-hover:block"
               onClick={() => {
-                window.api.player.playTrack(String(track.ratingKey))
+                window.api.player.playTrack(String(track.ratingKey));
               }}
             >
               <Play size={16} className="text-shadow-black w-8" fill="black" />
@@ -115,11 +124,11 @@ export function AlbumPage() {
               <Heart size={16} className="hover:text-red-400" />
             </button>
             <div className="text-sm w-16 text-right">
-              {dayjs.duration(track.duration).format('m:ss')}
+              {dayjs.duration(track.duration).format("m:ss")}
             </div>
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
