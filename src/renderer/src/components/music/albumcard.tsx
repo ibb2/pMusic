@@ -24,10 +24,24 @@ export function AlbumCard({ album }: { album: any }) {
             className="mb-1.5 aspect-square w-full rounded-lg object-cover"
           />
           <CardTitle className="mb-0.5 overflow-hidden text-ellipsis text-nowrap text-sm leading-tight">
-            {album.title}
+            <Link
+              to={`/app/album/$ratingKey`}
+              params={{ ratingKey: album.ratingKey }}
+            >
+              <p className="truncate hover:underline max-w-sm text-sm">
+                {album.title}
+              </p>
+            </Link>
           </CardTitle>
           <CardDescription className="truncate text-xs leading-tight text-black/80 dark:text-muted-foreground">
-            {album.artist}
+            <Link
+              to={`/app/artist/$ratingKey`}
+              params={{ ratingKey: album.parentRatingKey }}
+            >
+              <p className="hover:underline font-semibold text-xs text-muted-foreground">
+                {album.artist}
+              </p>
+            </Link>
           </CardDescription>
         </CardHeader>
       </Card>

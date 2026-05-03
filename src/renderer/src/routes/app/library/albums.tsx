@@ -3,6 +3,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import BlankImage from "@/assets/512px-Black_colour.jpg";
 import React, { useEffect, useRef } from "react";
+import { AlbumCard } from "@/components/music/albumcard";
 
 export const Route = createFileRoute("/app/library/albums")({
   component: RouteComponent,
@@ -79,13 +80,10 @@ function RouteComponent() {
   ) : status === "error" ? (
     <p>Error: {error.message}</p>
   ) : (
-    <div
-      ref={containerRef}
-      className="flex min-h-full flex-col gap-4 px-6 pb-10"
-    >
+    <div ref={containerRef} className="flex min-h-full flex-col px-6">
       <div className="sticky top-0 z-10 bg-background w-full py-2">
         {/* Header */}
-        <p className="text-2xl font-semibold">Albums</p>
+        <p className="text-2xl font-bold">Albums</p>
         {/* <p>count {37}</p> */}
       </div>
       <div>
@@ -97,35 +95,11 @@ function RouteComponent() {
           <Spinner className="size-4" />
         ) : null}
       </div> */}
-      <div className="flex flex-wrap gap-8 w-full pb-4 pt-8">
+      <div className="flex flex-wrap w-full">
         {data.pages.map((group, i) => (
           <React.Fragment key={i}>
             {group.items.map((album) => (
-              <div className="flex flex-col gap-4 max-w-sm">
-                <img
-                  src={album.thumb ?? BlankImage}
-                  alt={album.title}
-                  className="relative z-20 aspect-video rounded-lg size-36 object-cover"
-                />
-                <div className="w-36">
-                  <Link
-                    to={`/app/album/$ratingKey`}
-                    params={{ ratingKey: album.ratingKey }}
-                  >
-                    <p className="truncate hover:underline max-w-sm text-sm">
-                      {album.title}
-                    </p>
-                  </Link>
-                  <Link
-                    to={`/app/artist/$ratingKey`}
-                    params={{ ratingKey: album.parentRatingKey }}
-                  >
-                    <p className="hover:underline font-semibold text-xs text-muted-foreground">
-                      {album.artist}
-                    </p>
-                  </Link>
-                </div>
-              </div>
+              <AlbumCard album={album} />
             ))}
           </React.Fragment>
         ))}
