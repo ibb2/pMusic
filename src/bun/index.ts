@@ -1,16 +1,16 @@
-import { ApplicationMenu, BrowserView, BrowserWindow, Utils } from 'electrobun'
-import { BassManager } from './bass'
-import { DatabaseManager } from './database'
-import Authentication from './plex/authentication'
-import { MediaService } from './plex/media'
-import type { ApplicationMenuItemConfig } from 'electrobun'
-import type { RaynaRPC } from '../shared/rpc'
-import type { PlexServer } from '../shared/types'
+import { ApplicationMenu, BrowserView, BrowserWindow, Utils } from "electrobun";
+import { BassManager } from "./bass";
+import { DatabaseManager } from "./database";
+import Authentication from "./plex/authentication";
+import { MediaService } from "./plex/media";
+import type { ApplicationMenuItemConfig } from "electrobun";
+import type { RaynaRPC } from "../shared/rpc";
+import type { PlexServer } from "../shared/types";
 
-const db = new DatabaseManager()
-const auth = new Authentication()
-const bass = new BassManager()
-const media = new MediaService(auth, bass, db)
+const db = new DatabaseManager();
+const auth = new Authentication();
+const bass = new BassManager();
+const media = new MediaService(auth, bass, db);
 
 const rpc = BrowserView.defineRPC<RaynaRPC>({
   maxRequestTime: 30_000,
@@ -25,9 +25,9 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       authGenerateKeyPair: () => auth.generateKeyPair(),
       authGeneratePin: () => auth.generatePin(),
       authCheckPin: async () => {
-        const result = await auth.checkPin()
-        Utils.openExternal(result.authUrl)
-        return result
+        const result = await auth.checkPin();
+        Utils.openExternal(result.authUrl);
+        return result;
       },
       authCheckPinStatus: ({ id }) => auth.checkPinStatus(id),
       authIsUserSignedIn: () => auth.isUserSignedIn(),
@@ -69,138 +69,139 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       playerPrev: () => bass.playPrev(),
       playerSeek: ({ position }) => bass.seek(position),
       playerSetVolume: ({ volume }) => bass.setVolume(volume),
-      playerSetMuted: ({ muted }) => bass.setMuted(muted)
-    }
-  }
-})
+      playerSetMuted: ({ muted }) => bass.setMuted(muted),
+    },
+  },
+});
 
 const mainWindow = new BrowserWindow({
-  title: 'Rayna',
+  title: "Rayna",
   frame: {
     x: 120,
     y: 120,
     width: 900,
-    height: 670
+    height: 670,
   },
   url: rendererRoute(),
-  titleBarStyle: 'hiddenInset',
-  rpc
-})
+  titleBarStyle: "hidden",
+  ...(process.platform !== "darwin" ? { titleBarOverlay: true } : {}),
+  rpc,
+});
 
-createApplicationMenu(mainWindow)
+createApplicationMenu(mainWindow);
 
-mainWindow.webview.on('new-window-open' as never, (event: unknown) => {
-  const url = extractUrl(event)
+mainWindow.webview.on("new-window-open" as never, (event: unknown) => {
+  const url = extractUrl(event);
   if (url) {
-    Utils.openExternal(url)
+    Utils.openExternal(url);
   }
-})
+});
 
-process.on('SIGINT', shutdown)
-process.on('SIGTERM', shutdown)
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
 
-function rendererRoute(route = ''): string {
-  const normalizedRoute = route.startsWith('/') ? route : `/${route}`
-  const hash = normalizedRoute === '/' ? '' : `#${normalizedRoute}`
-  return `${process.env.RAYNA_RENDERER_URL || 'views://main/index.html'}${hash}`
+function rendererRoute(route = ""): string {
+  const normalizedRoute = route.startsWith("/") ? route : `/${route}`;
+  const hash = normalizedRoute === "/" ? "" : `#${normalizedRoute}`;
+  return `${process.env.RAYNA_RENDERER_URL || "views://main/index.html"}${hash}`;
 }
 
 function createApplicationMenu(window: BrowserWindow): void {
-  const isMac = process.platform === 'darwin'
-  const menu: ApplicationMenuItemConfig[] = []
+  const isMac = process.platform === "darwin";
+  const menu: ApplicationMenuItemConfig[] = [];
 
   if (isMac) {
     menu.push({
-      label: 'Rayna',
+      label: "Rayna",
       submenu: [
-        { role: 'about' },
-        { type: 'separator' },
-        { role: 'hide' },
-        { role: 'hideOthers' },
-        { role: 'showAll' },
-        { type: 'separator' },
-        { role: 'quit' }
-      ]
-    })
+        { role: "about" },
+        { type: "separator" },
+        { role: "hide" },
+        { role: "hideOthers" },
+        { role: "showAll" },
+        { type: "separator" },
+        { role: "quit" },
+      ],
+    });
   }
 
   menu.push(
     {
-      label: 'File',
+      label: "File",
       submenu: [
         {
-          label: 'Sign Out',
-          action: 'sign-out',
-          accelerator: 'CommandOrControl+Shift+L'
+          label: "Sign Out",
+          action: "sign-out",
+          accelerator: "CommandOrControl+Shift+L",
         },
-        { type: 'separator' },
-        { role: isMac ? 'close' : 'quit' }
-      ]
+        { type: "separator" },
+        { role: isMac ? "close" : "quit" },
+      ],
     },
     {
-      label: 'Edit',
+      label: "Edit",
       submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' }
-      ]
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { role: "selectAll" },
+      ],
     },
     {
-      label: 'View',
-      submenu: [{ role: 'toggleFullScreen' }]
+      label: "View",
+      submenu: [{ role: "toggleFullScreen" }],
     },
     {
-      label: 'Window',
+      label: "Window",
       submenu: [
-        { role: 'minimize' },
-        { role: 'zoom' },
-        { type: 'separator' },
-        { role: 'bringAllToFront' }
-      ]
-    }
-  )
+        { role: "minimize" },
+        { role: "zoom" },
+        { type: "separator" },
+        { role: "bringAllToFront" },
+      ],
+    },
+  );
 
-  ApplicationMenu.setApplicationMenu(menu)
+  ApplicationMenu.setApplicationMenu(menu);
 
-  ApplicationMenu.on('application-menu-clicked', (event: unknown) => {
-    if (getApplicationMenuAction(event) === 'sign-out') {
-      void signOut(window)
+  ApplicationMenu.on("application-menu-clicked", (event: unknown) => {
+    if (getApplicationMenuAction(event) === "sign-out") {
+      void signOut(window);
     }
-  })
+  });
 }
 
 async function signOut(window: BrowserWindow): Promise<void> {
-  const logoutSuccessful = await auth.logout()
-  if (!logoutSuccessful) return
-  bass.stop()
-  window.webview.loadURL(rendererRoute('/auth'))
+  const logoutSuccessful = await auth.logout();
+  if (!logoutSuccessful) return;
+  bass.stop();
+  window.webview.loadURL(rendererRoute("/auth"));
 }
 
 function getApplicationMenuAction(event: unknown): string | null {
-  const action = (event as { data?: { action?: unknown } })?.data?.action
-  return typeof action === 'string' ? action : null
+  const action = (event as { data?: { action?: unknown } })?.data?.action;
+  return typeof action === "string" ? action : null;
 }
 
 function extractUrl(event: unknown): string | null {
-  const detail = (event as { data?: { detail?: unknown } }).data?.detail
+  const detail = (event as { data?: { detail?: unknown } }).data?.detail;
 
-  if (typeof detail === 'string') {
-    return detail
+  if (typeof detail === "string") {
+    return detail;
   }
 
-  if (detail && typeof detail === 'object' && 'url' in detail) {
-    const url = (detail as { url?: unknown }).url
-    return typeof url === 'string' ? url : null
+  if (detail && typeof detail === "object" && "url" in detail) {
+    const url = (detail as { url?: unknown }).url;
+    return typeof url === "string" ? url : null;
   }
 
-  return null
+  return null;
 }
 
 function shutdown(): void {
-  bass.free()
-  Utils.quit()
+  bass.free();
+  Utils.quit();
 }
