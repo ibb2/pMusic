@@ -8,8 +8,9 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Spinner } from "@/components/ui/spinner";
+import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Music } from "lucide-react";
 
 export default function Libraries({
   complete,
@@ -57,7 +58,7 @@ export default function Libraries({
               >
                 <div className="w-full h-full">
                   <ItemMedia>
-                    <Music className="size-5" />
+                    <HugeiconsIcon icon={MusicNote03Icon} />
                   </ItemMedia>
                   <ItemContent>
                     <ItemTitle>{library.title}</ItemTitle>
@@ -65,7 +66,7 @@ export default function Libraries({
                   </ItemContent>
                   <ItemActions>
                     {selectedLibraries.some((l) => l.uuid === library.uuid) && (
-                      <Check className="size-4" />
+                      <HugeiconsIcon icon={Tick01Icon} />
                     )}
                   </ItemActions>
                 </div>

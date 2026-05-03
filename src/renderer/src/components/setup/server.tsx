@@ -8,7 +8,8 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { PlexServer } from "@/types";
-import { Server } from "lucide-react";
+import { ServerStack02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 export default function SelectServer({ progress, servers, selectServer }) {
   return (
@@ -34,7 +35,7 @@ export default function SelectServer({ progress, servers, selectServer }) {
               variant={"ghost"}
             >
               <ItemMedia className="self-center!">
-                <Server className="size-8" />
+                <HugeiconsIcon icon={ServerStack02Icon} className="size-8" />
               </ItemMedia>
               <ItemContent className="flex flex-col items-start">
                 <ItemTitle>{server.name}</ItemTitle>

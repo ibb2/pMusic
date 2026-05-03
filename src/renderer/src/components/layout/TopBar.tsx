@@ -17,13 +17,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Icon } from "../ui/Icon";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
+  Logout01Icon,
+  MonitorDotIcon,
+  Moon02Icon,
+  PaintBoardIcon,
   Search01Icon,
+  Settings01Icon,
+  Sun03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
@@ -99,7 +104,7 @@ export function TopBar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center">
         {/* <Link to={'/app/settings'}> */}
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -151,14 +156,11 @@ export function TopBar() {
               <DropdownMenuItem
                 onClick={() => router.navigate({ to: "/app/settings" })}
               >
-                <Icon name="Cog" />
+                <HugeiconsIcon icon={Settings01Icon} />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className="gap-2 py-1.5"
-                onSelect={(event) => event.preventDefault()}
-              >
-                <Icon name="Palette" className="size-4" />
+              <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                <HugeiconsIcon icon={PaintBoardIcon} />
                 <span className="flex-1">Theme</span>
 
                 <div className="relative grid grid-cols-3 rounded-lg bg-muted p-0.5">
@@ -184,20 +186,15 @@ export function TopBar() {
                           <span className="absolute inset-0 -z-10 rounded-md bg-background shadow-sm transition-all duration-200 ease-out" />
                         )}
 
-                        <Icon
-                          name={
+                        <HugeiconsIcon
+                          icon={
                             value === "light"
-                              ? "Sun"
+                              ? Sun03Icon
                               : value === "dark"
-                                ? "Moon"
-                                : "Monitor"
+                                ? Moon02Icon
+                                : MonitorDotIcon
                           }
-                          className={cn(
-                            "size-3.5 transition-transform duration-200",
-                            isSelected && "scale-110",
-                          )}
                         />
-
                         <span className="sr-only">{value}</span>
                       </button>
                     );
@@ -207,7 +204,7 @@ export function TopBar() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()} variant="destructive">
-              <Icon name="LogOut" />
+              <HugeiconsIcon icon={Logout01Icon} />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

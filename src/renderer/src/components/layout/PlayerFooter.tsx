@@ -2,18 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Shuffle,
-  Repeat,
-  Volume2,
-  Volume1,
-  Volume,
-  VolumeX,
-} from "lucide-react";
 import { useState, useEffect } from "react";
 import { Progress } from "../ui/progress";
 import { Link } from "@tanstack/react-router";

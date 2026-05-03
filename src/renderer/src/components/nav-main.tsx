@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/sidebar";
 import { HugeiconsIcon, IconSvgElement } from "@hugeicons/react";
 import { useNavigate } from "@tanstack/react-router";
-import { LucideIcon } from "lucide-react";
 
 export function NavMain({
   items,

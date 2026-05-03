@@ -1,26 +1,19 @@
 import { AlbumCard } from "@/components/music/albumcard";
 import { usePageUltraBlur } from "@/components/layout/UltraBlurProvider";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import dayjs from "dayjs";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  Disc3,
-  Heart,
-  MoreVertical,
-  Music,
-  Play,
-} from "lucide-react";
 import { useEffect, useRef } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  DiscIcon,
+  FavouriteIcon,
+  MoreVerticalIcon,
+  MusicNote03Icon,
+  PlayIcon,
+} from "@hugeicons/core-free-icons";
 
 export const Route = createFileRoute("/app/artist/$ratingKey")({
   component: ArtistPage,
@@ -122,14 +115,14 @@ export function ArtistPage() {
             window.api.player.playArtist(ratingKey);
           }}
         >
-          <Play size={24} fill="white" />
+          <HugeiconsIcon icon={PlayIcon} className="fill-current" />
         </Button>
         <Button variant="secondary">
-          <Heart size={18} className="mr-2" />
+          <HugeiconsIcon icon={FavouriteIcon} />
           Follow
         </Button>
         <Button variant="ghost" size="icon">
-          <MoreVertical size={20} />
+          <HugeiconsIcon icon={MoreVerticalIcon} />
         </Button>
       </div>
 
@@ -150,18 +143,14 @@ export function ArtistPage() {
                 <div className="text-center w-8 group-hover:hidden">
                   {index + 1}
                 </div>
-                <button
+                <Button
                   className="hidden group-hover:block"
                   onClick={() => {
                     window.api.player.playTrack(String(track.ratingKey));
                   }}
                 >
-                  <Play
-                    size={16}
-                    className="text-shadow-black w-8"
-                    fill="black"
-                  />
-                </button>
+                  <HugeiconsIcon icon={PlayIcon} className="fill-current" />
+                </Button>
                 <div className="flex-1">
                   <div className="">{track.title}</div>
                   <div className="text-zinc-400 text-sm">
@@ -174,14 +163,14 @@ export function ArtistPage() {
                 <div className="text-zinc-400 text-sm">
                   {dayjs.duration(track.duration).format("m:ss")}
                 </div>
-                <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Heart size={16} className="text-zinc-400 hover:text-white" />
-                </button>
+                <Button className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <HugeiconsIcon icon={FavouriteIcon} />
+                </Button>
               </div>
             ))
           ) : (
             <div className="flex h-24 items-center gap-3 px-4 text-sm text-muted-foreground">
-              <Music className="size-5" />
+              <HugeiconsIcon icon={MusicNote03Icon} />
               <div>
                 {queryArtistPopularTracks.isError
                   ? "Popular tracks are unavailable"
@@ -218,7 +207,7 @@ export function ArtistPage() {
           </div>
         ) : (
           <div className="flex h-24 items-center gap-3 rounded-md border border-dashed px-4 text-sm text-muted-foreground">
-            <Disc3 className="size-5" />
+            <HugeiconsIcon icon={DiscIcon} />
             <div>
               {queryArtistAlbums.isError
                 ? "Albums are unavailable"

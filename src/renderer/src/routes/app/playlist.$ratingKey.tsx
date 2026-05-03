@@ -1,34 +1,42 @@
-import { Button } from '@/components/ui/button'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Clock, Heart, MoreVertical, Play, Plus } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
-import noPlaylistCover from '../../assets/no-playlist-cover.png'
-import { Spinner } from '@/components/ui/spinner'
-import { useQuery } from '@tanstack/react-query'
-import dayjs from 'dayjs'
+import noPlaylistCover from "../../assets/no-playlist-cover.png";
+import { Spinner } from "@/components/ui/spinner";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Clock01Icon,
+  FavouriteIcon,
+  MoreVerticalIcon,
+  PlayIcon,
+  PlusSignIcon,
+} from "@hugeicons/core-free-icons";
 
-export const Route = createFileRoute('/app/playlist/$ratingKey')({
-  component: PlaylistPage
-})
+export const Route = createFileRoute("/app/playlist/$ratingKey")({
+  component: PlaylistPage,
+});
 
 function PlaylistPage() {
-  const { ratingKey } = Route.useParams()
+  const { ratingKey } = Route.useParams();
 
   // queries
   const queryPlaylist = useQuery({
-    queryKey: ['playlist', ratingKey],
-    queryFn: () => window.api.media.getPlaylist(ratingKey)
-  })
+    queryKey: ["playlist", ratingKey],
+    queryFn: () => window.api.media.getPlaylist(ratingKey),
+  });
 
   if (queryPlaylist.isLoading)
     return (
       <div className="flex items-center justify-center w-full h-full">
         <Spinner className="size-8" />
       </div>
-    )
-  if (queryPlaylist.isError) return 'Error loading playlist' + queryPlaylist.error.message
+    );
+  if (queryPlaylist.isError)
+    return "Error loading playlist" + queryPlaylist.error.message;
 
-  const playlist = queryPlaylist.data
+  const playlist = queryPlaylist.data;
 
   return (
     <div className="flex min-h-full flex-col p-6 pb-10">
@@ -48,7 +56,7 @@ function PlaylistPage() {
             <div>{playlist.summary}</div>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <span>{dayjs(playlist.addedAt).format('YYYY')}</span>
+            <span>{dayjs(playlist.addedAt).format("YYYY")}</span>
             <span>•</span>
             <span>{playlist.leafCount} tracks</span>
           </div>
@@ -58,23 +66,21 @@ function PlaylistPage() {
       {/* Controls */}
       <div className="flex items-center gap-3 mb-6">
         <Button
-          className="px-8"
+          className="rounded-full h-14 w-14"
           onClick={() => {
-            window.api.player.playPlaylist(ratingKey)
+            window.api.player.playPlaylist(ratingKey);
           }}
         >
-          <Play size={18} className="mr-2" fill={'white'} />
-          Play
+          <HugeiconsIcon icon={PlayIcon} className="fill-current" />
         </Button>
-        <Button variant="outline" className="">
-          <Heart size={18} className="mr-2" />
-          Like
+        <Button variant={"secondary"} size="icon-lg" className="rounded-full">
+          <HugeiconsIcon icon={FavouriteIcon} />
         </Button>
         <Button variant="ghost" size="icon">
-          <Plus size={20} />
+          <HugeiconsIcon icon={PlusSignIcon} />
         </Button>
         <Button variant="ghost" size="icon">
-          <MoreVertical size={20} />
+          <HugeiconsIcon icon={MoreVerticalIcon} />
         </Button>
       </div>
 
@@ -86,7 +92,7 @@ function PlaylistPage() {
           <div>Title</div>
           <div></div>
           <div className="w-16 text-right">
-            <Clock size={14} className="inline" />
+            <HugeiconsIcon size={16} icon={Clock01Icon} className="inline" />
           </div>
         </div>
 
@@ -95,26 +101,38 @@ function PlaylistPage() {
             key={track.id}
             className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors cursor-pointer"
           >
-            <div className="text-center w-8 group-hover:hidden self-center">{index + 1}</div>
+            <div className="text-center w-8 group-hover:hidden self-center">
+              {index + 1}
+            </div>
             <button
               className="hidden group-hover:block"
               onClick={() => {
-                window.api.player.playTrack(String(track.ratingKey))
+                window.api.player.playTrack(String(track.ratingKey));
               }}
             >
-              <Play size={16} className="text-shadow-black w-8" fill="black" />
+              <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
             </button>
-            <img src={track.albumThumb} alt={track.albumTitle} className="w-12 rounded-lg" />
+            <img
+              src={track.albumThumb}
+              alt={track.albumTitle}
+              className="w-12 rounded-lg"
+            />
             <div>
               <div>{track.title}</div>
               <div className="flex flex-row items-center gap-2">
-                <Link to={'/app/artist/$ratingKey'} params={{ ratingKey: track.artistRatingKey }}>
+                <Link
+                  to={"/app/artist/$ratingKey"}
+                  params={{ ratingKey: track.artistRatingKey }}
+                >
                   <div className="text-slate-400 text-sm hover:text-slate-700/50 hover:underline">
                     {track.artistTitle}
                   </div>
                 </Link>
-                <div className="pb-1 text-slate-400 ">{'  -  '}</div>
-                <Link to={'/app/album/$ratingKey'} params={{ ratingKey: track.albumRatingKey }}>
+                <div className="pb-1 text-slate-400 ">{"  -  "}</div>
+                <Link
+                  to={"/app/album/$ratingKey"}
+                  params={{ ratingKey: track.albumRatingKey }}
+                >
                   <div className="text-slate-400 text-sm hover:text-slate-700/50 hover:underline">
                     {track.albumTitle}
                   </div>
@@ -122,14 +140,14 @@ function PlaylistPage() {
               </div>
             </div>
             <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <Heart size={16} className="hover:text-red-400" />
+              <HugeiconsIcon icon={FavouriteIcon} />
             </button>
             <div className="text-zinc-400 text-sm text-right self-center">
-              {dayjs.duration(track.duration).format('m:ss')}
+              {dayjs.duration(track.duration).format("m:ss")}
             </div>
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }

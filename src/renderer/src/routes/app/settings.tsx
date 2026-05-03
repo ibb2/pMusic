@@ -14,8 +14,9 @@ import type { PlaybackSettings } from "../../../../shared/rpc";
 import { PlexServer } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Music, Check } from "lucide-react";
 import { useEffect, useState } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
@@ -268,7 +269,7 @@ export function SettingsPage() {
                           >
                             <div className="flex flex-row gap-4 w-full h-full">
                               <ItemMedia>
-                                <Music className="size-5" />
+                                <HugeiconsIcon icon={MusicNote03Icon} />{" "}
                               </ItemMedia>
                               <ItemContent>
                                 <ItemTitle className="justify-self-start">
@@ -278,7 +279,7 @@ export function SettingsPage() {
                               <ItemActions>
                                 {selectedLibraries?.some(
                                   (l) => l.uuid === library.uuid,
-                                ) && <Check className="size-4" />}
+                                ) && <HugeiconsIcon icon={Tick01Icon} />}
                               </ItemActions>
                             </div>
                           </Item>

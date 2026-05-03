@@ -1,12 +1,17 @@
 import { usePageUltraBlur } from "@/components/layout/UltraBlurProvider";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { PlayIcon } from "@hugeicons/core-free-icons";
+import {
+  Clock01Icon,
+  FavouriteIcon,
+  MoreVerticalIcon,
+  PlayIcon,
+  PlusSignIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
-import { Play, Heart, Plus, MoreVertical, Clock } from "lucide-react";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/app/album/$ratingKey")({
@@ -86,17 +91,16 @@ export function AlbumPage() {
             window.api.player.playAlbum(ratingKey);
           }}
         >
-          <Play size={24} fill={"white"} />
-          {/*<HugeiconsIcon fill="white" icon={PlayIcon} />*/}
+          <HugeiconsIcon icon={PlayIcon} className="fill-current" />
         </Button>
         <Button variant={"secondary"} size="icon-lg" className="rounded-full">
-          <Heart size={18} />
+          <HugeiconsIcon icon={FavouriteIcon} />
         </Button>
         <Button variant="ghost" size="icon">
-          <Plus size={20} />
+          <HugeiconsIcon icon={PlusSignIcon} />
         </Button>
         <Button variant="ghost" size="icon">
-          <MoreVertical size={20} />
+          <HugeiconsIcon icon={MoreVerticalIcon} />
         </Button>
       </div>
 
@@ -107,7 +111,7 @@ export function AlbumPage() {
           <div>Title</div>
           <div></div>
           <div className="w-16 text-right">
-            <Clock size={14} className="inline" />
+            <HugeiconsIcon size={16} icon={Clock01Icon} className="inline" />
           </div>
         </div>
 
@@ -120,16 +124,16 @@ export function AlbumPage() {
               {index + 1}
             </div>
             <button
-              className="hidden group-hover:block"
+              className="hidden group-hover:block w-8"
               onClick={() => {
                 window.api.player.playTrack(String(track.ratingKey));
               }}
             >
-              <Play size={16} className="text-shadow-black w-8" fill="black" />
+              <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
             </button>
             <div>{track.title}</div>
             <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <Heart size={16} className="hover:text-red-400" />
+              <HugeiconsIcon icon={FavouriteIcon} />
             </button>
             <div className="text-sm w-16 text-right">
               {dayjs.duration(track.duration).format("m:ss")}

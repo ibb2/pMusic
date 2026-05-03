@@ -15,8 +15,14 @@ import { Item, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item";
 import BlankImage from "@/assets/512px-Black_colour.jpg";
 import { Spinner } from "@/components/ui/spinner";
 import { useRef } from "react";
-import { ChevronLeftIcon, ChevronRightIcon, Library } from "lucide-react";
 import { AlbumCard } from "@/components/music/albumcard";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  LibraryIcon,
+} from "@hugeicons/core-free-icons";
+import { Button } from "@/components/ui/button";
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
@@ -224,7 +230,7 @@ function EmptyRow({ title }: { title: string }) {
   return (
     <div className="flex min-w-full items-center rounded-md border border-dashed border-zinc-300 bg-zinc-50/60 px-6 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400">
       <div className="flex items-center gap-3">
-        <Library className="size-5" />
+        <HugeiconsIcon icon={LibraryIcon} />
         <span className="text-sm">{title}</span>
       </div>
     </div>
@@ -240,20 +246,22 @@ function RowControls({
 }) {
   return (
     <>
-      <button
-        className="absolute left-2 top-2/5 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/50 dark:bg-neutral-800/90 hover:bg-black/70 dark:hover:bg-neutral-900/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+      <Button
+        size="icon-sm"
+        className="absolute left-2 top-2/5 -translate-y-1/2 bg-black/50 dark:bg-neutral-800/90 hover:bg-black/70 dark:hover:bg-neutral-900/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
         onClick={onLeft}
         aria-label="Scroll left"
       >
-        <ChevronLeftIcon className="w-4 h-4" />
-      </button>
-      <button
-        className="absolute right-2 top-2/5 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/50 dark:bg-neutral-800/90 hover:bg-black/70 dark:hover:bg-neutral-900/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+        <HugeiconsIcon icon={ArrowLeft01Icon} />
+      </Button>
+      <Button
+        size={"icon-sm"}
+        className="absolute right-2 top-2/5 -translate-y-1/2 bg-black/50 dark:bg-neutral-800/90 hover:bg-black/70 dark:hover:bg-neutral-900/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
         onClick={onRight}
         aria-label="Scroll right"
       >
-        <ChevronRightIcon className="w-4 h-4" />
-      </button>
+        <HugeiconsIcon icon={ArrowRight01Icon} />
+      </Button>
     </>
   );
 }
