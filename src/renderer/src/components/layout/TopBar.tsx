@@ -7,7 +7,6 @@ import {
   useRouter,
   useRouterState,
 } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   DropdownMenu,
@@ -21,6 +20,12 @@ import {
 import { Icon } from "../ui/Icon";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Search01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 export function TopBar() {
   const router = useRouter();
@@ -59,33 +64,34 @@ export function TopBar() {
     <div
       className={cn(
         "flex items-center justify-between sticky top-0 z-10 w-full transition-colors duration-300",
-        hasUltraBlur
-          ? "bg-transparent"
-          : "bg-background/95 backdrop-blur"
+        hasUltraBlur ? "bg-transparent" : "bg-background/95 backdrop-blur",
       )}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center">
         <Button
           disabled={!canGoBack}
           variant="ghost"
-          size="icon-sm"
+          size="icon"
           onClick={() => router.history.back()}
         >
-          <ChevronLeft className="h-5 w-5" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} />
         </Button>
         <Button
           disabled={!canGoForward}
           variant="ghost"
-          size="icon-sm"
+          size="icon"
           onClick={() => router.history.forward()}
         >
-          <ChevronRight className="h-5 w-5" />
+          <HugeiconsIcon icon={ArrowRight01Icon} />
         </Button>
       </div>
 
       <div className="flex flex-1 max-w-md mx-4">
         <div className="relative w-full">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon
+            icon={Search01Icon}
+            className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"
+          />
           <Input
             placeholder="What do you want to play?"
             className="pl-8 rounded-full bg-secondary border-0 w-full"
