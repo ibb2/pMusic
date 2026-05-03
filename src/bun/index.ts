@@ -12,6 +12,8 @@ const auth = new Authentication();
 const bass = new BassManager();
 const media = new MediaService(auth, bass, db);
 
+const isMac = process.platform === "darwin";
+
 const rpc = BrowserView.defineRPC<RaynaRPC>({
   maxRequestTime: 30_000,
   handlers: {
@@ -83,8 +85,7 @@ const mainWindow = new BrowserWindow({
     height: 670,
   },
   url: rendererRoute(),
-  titleBarStyle: "hidden",
-  ...(process.platform !== "darwin" ? { titleBarOverlay: true } : {}),
+  titleBarStyle: isMac ? "hiddenInset" : "default",
   rpc,
 });
 
