@@ -9,7 +9,6 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import { NavMain } from "./nav-main";
-import { Home } from "lucide-react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   AudioWave01FreeIcons,

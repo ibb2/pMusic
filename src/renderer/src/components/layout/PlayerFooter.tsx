@@ -17,6 +17,20 @@ import {
 import { useState, useEffect } from "react";
 import { Progress } from "../ui/progress";
 import { Link } from "@tanstack/react-router";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  NextIcon,
+  PauseIcon,
+  PlayIcon,
+  PreviousIcon,
+  Repeat1,
+  RepeatIcon,
+  ShuffleIcon,
+  VolumeHighIcon,
+  VolumeLowIcon,
+  VolumeMute01Icon,
+  VolumeMute02Icon,
+} from "@hugeicons/core-free-icons";
 
 export function PlayerFooter() {
   const { data: status, refetch } = useQuery({
@@ -140,7 +154,7 @@ export function PlayerFooter() {
             size="icon"
             className="text-muted-foreground hover:text-foreground"
           >
-            <Shuffle className="h-4 w-4" />
+            <HugeiconsIcon icon={ShuffleIcon} />
           </Button>
           <Button
             variant="ghost"
@@ -148,17 +162,17 @@ export function PlayerFooter() {
             className="text-muted-foreground hover:text-foreground"
             onClick={handlePrev}
           >
-            <SkipBack className="h-5 w-5 fill-current" />
+            <HugeiconsIcon icon={PreviousIcon} className="fill-current" />
           </Button>
           <Button
-            size="icon"
-            className="rounded-full h-8 w-8"
+            size="icon-lg"
+            className="rounded-full"
             onClick={handlePlayPause}
           >
             {status?.is_playing ? (
-              <Pause className="h-4 w-4 fill-current" />
+              <HugeiconsIcon icon={PauseIcon} className="fill-current" />
             ) : (
-              <Play className="h-4 w-4 fill-current pl-0.5" />
+              <HugeiconsIcon icon={PlayIcon} className="fill-current" />
             )}
           </Button>
           <Button
@@ -167,14 +181,14 @@ export function PlayerFooter() {
             className="text-muted-foreground hover:text-foreground"
             onClick={handleNext}
           >
-            <SkipForward className="h-5 w-5 fill-current" />
+            <HugeiconsIcon icon={NextIcon} className="fill-current" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:text-foreground"
           >
-            <Repeat className="h-4 w-4" />
+            <HugeiconsIcon icon={RepeatIcon} />
           </Button>
         </div>
         <div className="w-full max-w-sm flex items-center gap-2 text-xs text-muted-foreground">
@@ -230,17 +244,29 @@ export function PlayerFooter() {
         <div className="flex items-center gap-x-1 w-32">
           <div>
             {volume === 0 ? (
-              <Button variant={"ghost"} size={"icon-sm"} onClick={handleMute}>
-                <VolumeX className="h-4 w-4 text-muted-foreground" />
+              <Button variant={"ghost"} size={"icon"} onClick={handleMute}>
+                <HugeiconsIcon
+                  icon={VolumeMute02Icon}
+                  className="text-muted-foreground"
+                />
               </Button>
             ) : (
-              <Button variant={"ghost"} size={"icon-sm"} onClick={handleMute}>
+              <Button variant={"ghost"} size={"icon"} onClick={handleMute}>
                 {volume < 0.3 ? (
-                  <Volume className="h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon
+                    icon={VolumeMute01Icon}
+                    className="text-muted-foreground"
+                  />
                 ) : volume < 0.7 ? (
-                  <Volume1 className="h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon
+                    icon={VolumeLowIcon}
+                    className="text-muted-foreground"
+                  />
                 ) : (
-                  <Volume2 className="h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon
+                    icon={VolumeHighIcon}
+                    className="text-muted-foreground"
+                  />
                 )}
               </Button>
             )}
