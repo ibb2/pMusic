@@ -91,9 +91,9 @@ export default function Home() {
             >
               <Item
                 variant={"muted"}
-                className="flex flex-row hover:bg-slate-300/40 overflow-hidden p-0"
+                className="flex flex-row hover:bg-slate-300/40 overflow-hidden p-0 rounded-lg"
               >
-                <ItemMedia className="rounded-l-md rounded-r-none">
+                <ItemMedia className="">
                   <img
                     src={x.thumb ?? BlankImage}
                     alt={x.title}
@@ -246,22 +246,20 @@ function RowControls({
 }) {
   return (
     <>
-      <Button
-        size="icon-sm"
+      <button
         className="absolute left-2 top-2/5 -translate-y-1/2 bg-black/50 dark:bg-neutral-800/90 hover:bg-black/70 dark:hover:bg-neutral-900/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
         onClick={onLeft}
         aria-label="Scroll left"
       >
         <HugeiconsIcon icon={ArrowLeft01Icon} />
-      </Button>
-      <Button
-        size={"icon-sm"}
+      </button>
+      <button
         className="absolute right-2 top-2/5 -translate-y-1/2 bg-black/50 dark:bg-neutral-800/90 hover:bg-black/70 dark:hover:bg-neutral-900/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
         onClick={onRight}
         aria-label="Scroll right"
       >
         <HugeiconsIcon icon={ArrowRight01Icon} />
-      </Button>
+      </button>
     </>
   );
 }
