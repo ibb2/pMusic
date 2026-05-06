@@ -8,24 +8,25 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Spinner } from "@/components/ui/spinner";
+import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Music } from "lucide-react";
 
 export default function Libraries({
   complete,
+  selectedServer,
   selectedLibraries,
   selectLibrary,
 }) {
   const { isPending, error, data } = useQuery({
-    queryKey: ["libraries"],
-    queryFn: async () => {
-      const res = await fetch("http://127.0.0.1:34567/library/sections/all");
-      if (!res.ok) throw new Error("Failed to fetch libraries");
-      return res.json();
-    },
+    queryKey: ["libraries", selectedServer?.clientIdentifier],
+    queryFn: () => window.api.auth.getLibraries(),
+    enabled: Boolean(selectedServer),
     staleTime: 30 * 60 * 1000,
     retry: true,
   });
+
+  if (!selectedServer) return null;
 
   if (isPending)
     return (
@@ -42,7 +43,7 @@ export default function Libraries({
         Libraries
       </h1>
       <div className="flex flex-col gap-2">
-        {data.map((library) => (
+        {(data ?? []).map((library) => (
           <div key={library.uuid}>
             {library.type === "artist" ? (
               <Item
@@ -52,23 +53,21 @@ export default function Libraries({
                     : "outline"
                 }
                 size="sm"
-                asChild
                 onClick={() => selectLibrary(library)}
+                className="flex justify-center hover:bg-accent"
               >
-                <div className="w-full h-full">
-                  <ItemMedia>
-                    <Music className="size-5" />
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>{library.title}</ItemTitle>
-                    <ItemDescription>{library.type}</ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                    {selectedLibraries.some((l) => l.uuid === library.uuid) && (
-                      <Check className="size-4" />
-                    )}
-                  </ItemActions>
-                </div>
+                <ItemMedia className="self-center!">
+                  <HugeiconsIcon icon={MusicNote03Icon} />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{library.title}</ItemTitle>
+                  <ItemDescription>{library.type}</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  {selectedLibraries.some((l) => l.uuid === library.uuid) && (
+                    <HugeiconsIcon icon={Tick01Icon} />
+                  )}
+                </ItemActions>
               </Item>
             ) : (
               <div></div>

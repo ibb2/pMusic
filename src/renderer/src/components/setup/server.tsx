@@ -8,7 +8,8 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { PlexServer } from "@/types";
-import { Server } from "lucide-react";
+import { ServerStack02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 export default function SelectServer({ progress, servers, selectServer }) {
   return (
@@ -22,43 +23,23 @@ export default function SelectServer({ progress, servers, selectServer }) {
             key={server.name + server.createdAt}
             size="sm"
             variant={"outline"}
-            asChild
+            onClick={async () => {
+              selectServer(server);
+              await window.api.auth.selectServer(server);
+              progress();
+            }}
+            className="hover:bg-accent"
           >
-            <Button
-              onClick={async () => {
-                selectServer(server);
-                await window.api.auth.selectServer(server);
-
-                const accessToken = await window.api.auth.getUserAccessToken();
-
-                const response = await fetch(`http://127.0.0.1:34567/init`, {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    serverUrl: server.connections[0].uri,
-                  }),
-                });
-                await response.json();
-
-                progress();
-              }}
-              className="w-full h-full"
-              variant={"ghost"}
-            >
-              <ItemMedia className="self-center!">
-                <Server className="size-8" />
-              </ItemMedia>
-              <ItemContent className="flex flex-col items-start">
-                <ItemTitle>{server.name}</ItemTitle>
-                <ItemDescription>
-                  {server.presence ? "Online" : "Offline"}
-                </ItemDescription>
-              </ItemContent>
-              <ItemActions />
-            </Button>
+            <ItemMedia className="self-center!">
+              <HugeiconsIcon icon={ServerStack02Icon} className="size-8" />
+            </ItemMedia>
+            <ItemContent className="flex flex-col items-start">
+              <ItemTitle>{server.name}</ItemTitle>
+              <ItemDescription>
+                {server.presence ? "Online" : "Offline"}
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions />
           </Item>
         ))}
       </div>

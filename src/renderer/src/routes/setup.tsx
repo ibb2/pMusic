@@ -50,31 +50,14 @@ function RouteComponent() {
   };
 
   const progressForwards = () => {
-    if (selectedServer !== null || selectedServer !== undefined) {
-      setProgression(progression + 1);
-      api?.scrollNext();
-    }
+    setProgression(progression + 1);
+    api?.scrollNext();
   };
 
   const complete = async () => {
-    if (selectedLibraries.length > 0) {
+    if (selectedServer && selectedLibraries.length > 0) {
       await window.api.auth.selectServer(selectedServer);
       await window.api.auth.selectLibraries(selectedLibraries);
-
-      const accessToken = await window.api.auth.getUserAccessToken();
-
-      const response = await fetch(`http://127.0.0.1:34567/init`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          serverUrl: selectedServer?.connections[0].uri,
-          libraries: selectedLibraries,
-        }),
-      });
-      await response.json();
       router.navigate({ to: "/app" });
     }
   };
@@ -120,6 +103,7 @@ function RouteComponent() {
           <CarouselItem>
             <Libraries
               complete={complete}
+              selectedServer={selectedServer}
               selectedLibraries={selectedLibraries}
               selectLibrary={selectLibrary}
             />

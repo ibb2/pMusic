@@ -1,12 +1,12 @@
 {
   "fill" : {
-    "automatic-gradient" : "srgb:1.00000,0.57637,0.00000,1.00000"
+    "automatic-gradient" : "srgb:1.00000,0.49700,0.00000,1.00000"
   },
   "groups" : [
     {
       "blend-mode" : "normal",
       "blur-material" : 0.5,
-      "hidden" : true,
+      "hidden" : false,
       "layers" : [
         {
           "fill-specializations" : [
@@ -26,7 +26,7 @@
           "glass" : true,
           "hidden" : false,
           "image-name" : "2 – Layer.svg",
-          "name" : "2 – Layer"
+          "name" : "Rayna Highlight"
         }
       ],
       "shadow" : {
@@ -77,7 +77,7 @@
           ],
           "hidden" : false,
           "image-name" : "1 – Layer.svg",
-          "name" : "1 – Layer"
+          "name" : "Rayna Waveform"
         }
       ],
       "lighting" : "individual",

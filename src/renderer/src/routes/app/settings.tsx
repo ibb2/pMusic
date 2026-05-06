@@ -1,3 +1,4 @@
+import { useUltraBlur } from "@/components/layout/UltraBlurProvider";
 import {
   Item,
   ItemActions,
@@ -7,33 +8,37 @@ import {
 } from "@/components/ui/item";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import type { PlaybackSettings } from "../../../../shared/rpc";
 import { PlexServer } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Music, Check } from "lucide-react";
 import { useEffect, useState } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
 });
 
 export function SettingsPage() {
+  const { setEnabled } = useUltraBlur();
   const [selectedLibraries, setSelectedLibraries] = useState<any[] | null>(
     null,
   );
   const [selectedServer, setSelectedServer] = useState<PlexServer | null>(null);
+  const [playbackSettings, setPlaybackSettings] = useState<PlaybackSettings>({
+    useOriginalFileUrl: true,
+  });
   const [loading, setLoading] = useState(true);
   const [updated, setUpdated] = useState(false);
+  const [playbackUpdated, setPlaybackUpdated] = useState(false);
 
   // queries
   const { isPending, error, data } = useQuery({
     queryKey: ["libraries"],
-    queryFn: () =>
-      fetch("http://127.0.0.1:34567/library/sections/all").then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      }),
+    queryFn: () => window.api.auth.getLibraries(),
     staleTime: 30 * 60 * 1000,
     retry: true,
   });
@@ -58,30 +63,33 @@ export function SettingsPage() {
     await window.api.auth
       .selectLibraries(updated)
       .catch((e) => console.error(e));
-
-    // Update backend immediately
-    (async () => {
-      try {
-        const token = await window.api.auth.getUserAccessToken();
-        await fetch(`http://127.0.0.1:34567/init`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            serverUrl: selectedServer?.connections[0].uri,
-            libraries: updated,
-          }),
-        });
-        setUpdated(true);
-      } catch (err) {
-        console.error("Failed to update selected libraries:", err);
-      }
-    })();
+    setUpdated(true);
 
     setTimeout(() => {
       setUpdated(false);
+    }, 1500);
+  };
+
+  const setUseOriginalFileUrl = async (useOriginalFileUrl: boolean) => {
+    const next = { ...playbackSettings, useOriginalFileUrl };
+    setPlaybackSettings(next);
+    await window.api.settings.setPlayback(next).catch((e) => console.error(e));
+    setPlaybackUpdated(true);
+
+    setTimeout(() => {
+      setPlaybackUpdated(false);
+    }, 1500);
+  };
+
+  const setEnableUltraBlur = async (enableUltraBlur: boolean) => {
+    const next = { ...playbackSettings, enableUltraBlur };
+    setPlaybackSettings(next);
+    setEnabled(enableUltraBlur);
+    await window.api.settings.setPlayback(next).catch((e) => console.error(e));
+    setPlaybackUpdated(true);
+
+    setTimeout(() => {
+      setPlaybackUpdated(false);
     }, 1500);
   };
 
@@ -104,8 +112,17 @@ export function SettingsPage() {
         setLoading(false);
       }
     };
+    const fetchPlaybackSettings = async () => {
+      try {
+        const settings = await window.api.settings.getPlayback();
+        setPlaybackSettings(settings);
+      } catch (error) {
+        console.error("Failed to fetch playback settings:", error);
+      }
+    };
     fetchSelectedServer();
     fetchSelectedLibraries();
+    fetchPlaybackSettings();
   }, []);
 
   if (isPending)
@@ -118,8 +135,8 @@ export function SettingsPage() {
   if (error) return "An error has occurred: " + error.message;
 
   return (
-    <div className="flex flex-col overflow-y-auto gap-2 p-6 mb-20">
-      <div className="flex-1 overflow-y-auto scrollbar-hidden">
+    <div className="flex min-h-full flex-col gap-2 p-6 pb-10">
+      <div className="flex-1">
         <div className="max-w-4xl mx-auto space-y-8">
           <div>
             <h1 className="text-3xl mb-2">Settings</h1>
@@ -155,12 +172,51 @@ export function SettingsPage() {
           </section> */}
 
           {/* Playback Section */}
-          {/* <section className="space-y-4">
+          <section className="space-y-4">
             <h2 className=" text-xl">Playback</h2>
-            <div className=" rounded-lg p-6">
-              <p className=" text-sm">Playback settings coming soon</p>
+            <div className="border border-zinc-300 dark:border-zinc-700 rounded-lg p-6 space-y-6">
+              <div className="flex items-center justify-between gap-6">
+                <div>
+                  <Label className="mb-2 block">Use original Plex file</Label>
+                  <Label className="mb-2 block text-sm text-muted-foreground">
+                    Play the Plex media URL directly.
+                  </Label>
+                </div>
+                <div className="flex items-center gap-4">
+                  {playbackUpdated && (
+                    <p className="text-green-700 dark:text-green-300">
+                      Updated
+                    </p>
+                  )}
+                  <Switch
+                    checked={playbackSettings.useOriginalFileUrl}
+                    onCheckedChange={setUseOriginalFileUrl}
+                    aria-label="Use original Plex file"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-6">
+                <div>
+                  <Label className="mb-2 block">UltraBlur Background</Label>
+                  <Label className="mb-2 block text-sm text-muted-foreground">
+                    Show colorful artist and album backgrounds.
+                  </Label>
+                </div>
+                <div className="flex items-center gap-4">
+                  {playbackUpdated && (
+                    <p className="text-green-700 dark:text-green-300">
+                      Updated
+                    </p>
+                  )}
+                  <Switch
+                    checked={playbackSettings.enableUltraBlur !== false}
+                    onCheckedChange={setEnableUltraBlur}
+                    aria-label="UltraBlur Background"
+                  />
+                </div>
+              </div>
             </div>
-          </section> */}
+          </section>
 
           {/* Display Section */}
           {/* <section className="space-y-4">
@@ -211,9 +267,9 @@ export function SettingsPage() {
                                 : "",
                             )}
                           >
-                            <div className="w-full h-full">
+                            <div className="flex flex-row gap-4 w-full h-full">
                               <ItemMedia>
-                                <Music className="size-5" />
+                                <HugeiconsIcon icon={MusicNote03Icon} />{" "}
                               </ItemMedia>
                               <ItemContent>
                                 <ItemTitle className="justify-self-start">
@@ -223,7 +279,7 @@ export function SettingsPage() {
                               <ItemActions>
                                 {selectedLibraries?.some(
                                   (l) => l.uuid === library.uuid,
-                                ) && <Check className="size-4" />}
+                                ) && <HugeiconsIcon icon={Tick01Icon} />}
                               </ItemActions>
                             </div>
                           </Item>

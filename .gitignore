@@ -464,3 +464,8 @@ resources/api
 
 # Python
 python-backend/build/api
+
+# Vendored native runtime libraries
+!vendor/
+!vendor/bass/
+!vendor/bass/**
