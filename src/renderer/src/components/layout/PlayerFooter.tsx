@@ -262,6 +262,7 @@ export function PlayerFooter() {
           <>
             <Slider
               defaultValue={[volume]}
+              value={volume}
               max={1}
               step={1 / 100}
               onValueCommitted={(value) => {
