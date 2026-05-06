@@ -53,23 +53,21 @@ export default function Libraries({
                     : "outline"
                 }
                 size="sm"
-                asChild
                 onClick={() => selectLibrary(library)}
+                className="flex justify-center hover:bg-accent"
               >
-                <div className="w-full h-full">
-                  <ItemMedia>
-                    <HugeiconsIcon icon={MusicNote03Icon} />
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>{library.title}</ItemTitle>
-                    <ItemDescription>{library.type}</ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                    {selectedLibraries.some((l) => l.uuid === library.uuid) && (
-                      <HugeiconsIcon icon={Tick01Icon} />
-                    )}
-                  </ItemActions>
-                </div>
+                <ItemMedia className="self-center!">
+                  <HugeiconsIcon icon={MusicNote03Icon} />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{library.title}</ItemTitle>
+                  <ItemDescription>{library.type}</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  {selectedLibraries.some((l) => l.uuid === library.uuid) && (
+                    <HugeiconsIcon icon={Tick01Icon} />
+                  )}
+                </ItemActions>
               </Item>
             ) : (
               <div></div>

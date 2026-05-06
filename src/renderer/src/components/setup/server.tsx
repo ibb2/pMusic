@@ -23,28 +23,23 @@ export default function SelectServer({ progress, servers, selectServer }) {
             key={server.name + server.createdAt}
             size="sm"
             variant={"outline"}
-            asChild
+            onClick={async () => {
+              selectServer(server);
+              await window.api.auth.selectServer(server);
+              progress();
+            }}
+            className="hover:bg-accent"
           >
-            <Button
-              onClick={async () => {
-                selectServer(server);
-                await window.api.auth.selectServer(server);
-                progress();
-              }}
-              className="w-full h-full"
-              variant={"ghost"}
-            >
-              <ItemMedia className="self-center!">
-                <HugeiconsIcon icon={ServerStack02Icon} className="size-8" />
-              </ItemMedia>
-              <ItemContent className="flex flex-col items-start">
-                <ItemTitle>{server.name}</ItemTitle>
-                <ItemDescription>
-                  {server.presence ? "Online" : "Offline"}
-                </ItemDescription>
-              </ItemContent>
-              <ItemActions />
-            </Button>
+            <ItemMedia className="self-center!">
+              <HugeiconsIcon icon={ServerStack02Icon} className="size-8" />
+            </ItemMedia>
+            <ItemContent className="flex flex-col items-start">
+              <ItemTitle>{server.name}</ItemTitle>
+              <ItemDescription>
+                {server.presence ? "Online" : "Offline"}
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions />
           </Item>
         ))}
       </div>
