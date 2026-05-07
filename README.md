@@ -50,7 +50,7 @@ On install login to you Plex account and select your server[^1], that is all.
 - [x] Add Screenshots
 - [x] Artist page
   - [x] Play popular tracks
-  - [ ] Artist library page
+  - [x] Artist library page
 - [x] Playlist page
   - [ ] Play entire playlist
   - [ ] Play individual track for playlist
