@@ -179,6 +179,10 @@ export type RaynaRPC = {
         params: { cursor?: string; pageSize: number };
         response: unknown;
       };
+      mediaGetArtistsPage: {
+        params: { cursor?: string; pageSize: number };
+        response: unknown;
+      };
       mediaGetAlbum: {
         params: { ratingKey: string };
         response: unknown;

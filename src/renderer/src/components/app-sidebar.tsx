@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import * as React from "react";
 import {
   Sidebar,
@@ -13,6 +12,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   AudioWave01FreeIcons,
   Home02Icon,
+  MusicNote03Icon,
   Vynil03Icon,
 } from "@hugeicons/core-free-icons";
 import { NavLibrary } from "./nav-library";
@@ -107,7 +107,7 @@ const data = {
     //   icon: Heart,
     // },
     { name: "Albums", url: "/app/library/albums", icon: Vynil03Icon },
-    // { name: "Artits", url: "/app/library/artists", icon: DiscAlbum },
+    { name: "Artists", url: "/app/library/artists", icon: MusicNote03Icon },
     // { name: "Playlists", url: "/app/library/playlists", icon: DiscAlbum },
     // {
     //   name: "All Music",

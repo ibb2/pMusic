@@ -1,22 +1,22 @@
-import { createRPC, Electroview } from 'electrobun/view'
-import type { PlaybackSettings, RaynaRPC } from '../../shared/rpc'
-import type { PlexServer } from '../../shared/types'
+import { createRPC, Electroview } from "electrobun/view";
+import type { PlaybackSettings, RaynaRPC } from "../../shared/rpc";
+import type { PlexServer } from "../../shared/types";
 
-const rpc = createRPC<RaynaRPC['webview'], RaynaRPC['bun']>({
-  maxRequestTime: 30_000
-})
+const rpc = createRPC<RaynaRPC["webview"], RaynaRPC["bun"]>({
+  maxRequestTime: 30_000,
+});
 
-new Electroview({ rpc })
+new Electroview({ rpc });
 
 window.api = {
   db: {
     get: (key: string) => rpc.request.dbGet({ key }),
-    set: (key: string, value: unknown) => rpc.request.dbSet({ key, value })
+    set: (key: string, value: unknown) => rpc.request.dbSet({ key, value }),
   },
   settings: {
     getPlayback: () => rpc.request.settingsGetPlayback(),
     setPlayback: (settings: PlaybackSettings) =>
-      rpc.request.settingsSetPlayback({ settings })
+      rpc.request.settingsSetPlayback({ settings }),
   },
   auth: {
     generateClientIdentifier: () => rpc.request.authGenerateClientIdentifier(),
@@ -37,10 +37,10 @@ window.api = {
     getUserAccessToken: () => rpc.request.authGetUserAccessToken(),
     getUserProfile: () => rpc.request.authGetUserProfile(),
     getUserSelectedLibraries: () => rpc.request.authGetUserSelectedLibraries(),
-    closeLoopbackServer: () => rpc.request.authCloseLoopbackServer()
+    closeLoopbackServer: () => rpc.request.authCloseLoopbackServer(),
   },
   bass: {
-    getStatus: () => rpc.request.bassGetStatus()
+    getStatus: () => rpc.request.bassGetStatus(),
   },
   media: {
     getHomeData: () => rpc.request.mediaGetHomeData(),
@@ -50,6 +50,8 @@ window.api = {
     getPlaylists: () => rpc.request.mediaGetPlaylists(),
     getAlbumsPage: (cursor: string, pageSize: number) =>
       rpc.request.mediaGetAlbumsPage({ cursor, pageSize }),
+    getArtistsPage: (cursor: string, pageSize: number) =>
+      rpc.request.mediaGetArtistsPage({ cursor, pageSize }),
     getAlbum: (ratingKey: string) => rpc.request.mediaGetAlbum({ ratingKey }),
     getArtist: (ratingKey: string) => rpc.request.mediaGetArtist({ ratingKey }),
     getArtistAlbums: (ratingKey: string) =>
@@ -57,7 +59,7 @@ window.api = {
     getArtistPopularTracks: (ratingKey: string) =>
       rpc.request.mediaGetArtistPopularTracks({ ratingKey }),
     getPlaylist: (ratingKey: string) =>
-      rpc.request.mediaGetPlaylist({ ratingKey })
+      rpc.request.mediaGetPlaylist({ ratingKey }),
   },
   player: {
     getStatus: () => rpc.request.playerGetStatus(),
@@ -75,6 +77,6 @@ window.api = {
     prev: () => rpc.request.playerPrev(),
     seek: (position: number) => rpc.request.playerSeek({ position }),
     setVolume: (volume: number) => rpc.request.playerSetVolume({ volume }),
-    setMuted: (muted: boolean) => rpc.request.playerSetMuted({ muted })
-  }
-}
+    setMuted: (muted: boolean) => rpc.request.playerSetMuted({ muted }),
+  },
+};
