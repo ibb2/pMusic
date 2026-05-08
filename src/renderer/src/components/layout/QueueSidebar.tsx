@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Cancel01Icon, MusicNote03Icon } from "@hugeicons/core-free-icons";
+import { MusicNote03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -38,6 +38,7 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
     enabled: open,
   });
 
+  const previousTrack = queue?.previous_track ?? null;
   const currentTrack = queue?.current_track ?? null;
   const queuedTracks = queue?.tracks ?? [];
 
@@ -135,11 +136,20 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
             disabled={queuedTracks.length === 0}
             aria-label="Clear queue"
           >
-            <HugeiconsIcon icon={Cancel01Icon} />
+            Clear
           </Button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-2">
+          {previousTrack ? (
+            <section className="mb-7">
+              <h3 className="mb-3 px-2 text-xs font-medium uppercase text-muted-foreground">
+                Previous
+              </h3>
+              <QueueTrackRow track={previousTrack} muted />
+            </section>
+          ) : null}
+
           {currentTrack ? (
             <section className="mb-7">
               <h3 className="mb-3 px-2 text-xs font-medium uppercase text-muted-foreground">
@@ -178,15 +188,18 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
 function QueueTrackRow({
   track,
   active = false,
+  muted = false,
 }: {
   track: PlayerTrack;
   active?: boolean;
+  muted?: boolean;
 }) {
   return (
     <div
       className={cn(
         "flex gap-3 rounded-md px-2 py-2 transition-colors",
         active ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/70",
+        muted && "opacity-70",
       )}
     >
       <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">

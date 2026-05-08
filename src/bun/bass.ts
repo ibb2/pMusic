@@ -70,6 +70,7 @@ export class BassManager {
     loaded: boolean;
     error: string | null;
   }> = [];
+  private previousTrack: PlayerTrack | null = null;
   private currentTrack: PlayerTrack | null = null;
   private queue: Array<{ track: PlayerTrack; streamUrl: string }> = [];
   private volume = 1;
@@ -108,18 +109,21 @@ export class BassManager {
 
   getQueue(): PlayerQueue {
     return {
+      previous_track: this.previousTrack,
       current_track: this.currentTrack,
       tracks: this.queue.map((item) => item.track),
     };
   }
 
   playTrack(track: PlayerTrack, streamUrl: string): void {
+    this.rememberCurrentTrack();
     this.stop();
     this.queue = [];
     this.playStream(track, streamUrl);
   }
 
   playTracks(tracks: Array<{ track: PlayerTrack; streamUrl: string }>): void {
+    this.rememberCurrentTrack();
     this.stop();
     this.queue = tracks;
     this.playNext();
@@ -141,6 +145,12 @@ export class BassManager {
 
   clearQueue(): void {
     this.queue = [];
+  }
+
+  private rememberCurrentTrack(): void {
+    if (!this.currentTrack) return;
+    if (this.previousTrack?.ratingKey === this.currentTrack.ratingKey) return;
+    this.previousTrack = this.currentTrack;
   }
 
   resume(): void {
@@ -383,6 +393,7 @@ export class BassManager {
   private playStream(track: PlayerTrack, streamUrl: string): void {
     if (!this.library || !this.initialized) return;
 
+    this.rememberCurrentTrack();
     this.manuallyStopping = true;
     this.stopMonitor();
     if (this.streamHandle) {

@@ -39,6 +39,7 @@ export type PlayerTrack = {
 };
 
 export type PlayerQueue = {
+  previous_track: PlayerTrack | null;
   current_track: PlayerTrack | null;
   tracks: PlayerTrack[];
 };
