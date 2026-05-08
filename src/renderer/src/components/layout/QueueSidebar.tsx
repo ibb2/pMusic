@@ -5,16 +5,19 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { PlayerTrack } from "../../../../shared/rpc";
 
-const DEFAULT_QUEUE_WIDTH = "17.5rem";
-const MIN_QUEUE_WIDTH = "12.5rem";
-const MAX_QUEUE_WIDTH = "32.5rem";
+const DEFAULT_QUEUE_WIDTH = "18rem";
+const MIN_QUEUE_WIDTH = "16rem";
+const MAX_QUEUE_WIDTH = "24rem";
 
 function remToPixels(rem: string) {
-  return Number.parseFloat(rem) * 16;
+  const rootFontSize = Number.parseFloat(
+    window.getComputedStyle(document.documentElement).fontSize,
+  );
+  return Number.parseFloat(rem) * rootFontSize;
 }
 
 type QueueSidebarProps = {
@@ -24,6 +27,10 @@ type QueueSidebarProps = {
 export function QueueSidebar({ open }: QueueSidebarProps) {
   const queryClient = useQueryClient();
   const [width, setWidth] = useState(remToPixels(DEFAULT_QUEUE_WIDTH));
+  const [isResizing, setIsResizing] = useState(false);
+  const asideRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<number | null>(null);
   const { data: queue } = useQuery({
     queryKey: ["playerQueue"],
     queryFn: () => window.api.player.getQueue(),
@@ -43,20 +50,45 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
   const handleResizeStart = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       event.preventDefault();
+      setIsResizing(true);
       const startX = event.clientX;
       const startWidth = width;
+      const previousCursor = document.body.style.cursor;
+      const previousUserSelect = document.body.style.userSelect;
+      let nextWidth = startWidth;
+
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+
+      const applyWidth = () => {
+        asideRef.current?.style.setProperty("width", `${nextWidth}px`);
+        contentRef.current?.style.setProperty("width", `${nextWidth}px`);
+        frameRef.current = null;
+      };
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
-        const nextWidth = startWidth + startX - moveEvent.clientX;
-        setWidth(
-          Math.max(
-            remToPixels(MIN_QUEUE_WIDTH),
-            Math.min(remToPixels(MAX_QUEUE_WIDTH), nextWidth),
+        nextWidth = Math.max(
+          remToPixels(MIN_QUEUE_WIDTH),
+          Math.min(
+            remToPixels(MAX_QUEUE_WIDTH),
+            startWidth + startX - moveEvent.clientX,
           ),
         );
+        if (frameRef.current === null) {
+          frameRef.current = window.requestAnimationFrame(applyWidth);
+        }
       };
 
       const handlePointerUp = () => {
+        if (frameRef.current !== null) {
+          window.cancelAnimationFrame(frameRef.current);
+          frameRef.current = null;
+        }
+        applyWidth();
+        setWidth(nextWidth);
+        setIsResizing(false);
+        document.body.style.cursor = previousCursor;
+        document.body.style.userSelect = previousUserSelect;
         window.removeEventListener("pointermove", handlePointerMove);
         window.removeEventListener("pointerup", handlePointerUp);
       };
@@ -69,8 +101,10 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
 
   return (
     <aside
+      ref={asideRef}
       className={cn(
-        "relative z-10 h-full min-h-0 shrink-0 overflow-hidden bg-sidebar text-sidebar-foreground transition-[width,opacity] duration-200",
+        "relative z-10 h-full min-h-0 shrink-0 overflow-hidden bg-sidebar text-sidebar-foreground",
+        !isResizing && "transition-[width,opacity] duration-200",
         open ? "opacity-100" : "w-0 opacity-0",
       )}
       style={{ width: open ? width : 0 }}
@@ -82,7 +116,11 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
         aria-label="Resize queue"
         role="separator"
       />
-      <div className="flex h-full min-h-0 flex-col" style={{ width }}>
+      <div
+        ref={contentRef}
+        className="flex h-full min-h-0 flex-col"
+        style={{ width }}
+      >
         <div className="flex items-start justify-between gap-3 px-5 pb-3 pt-5">
           <div className="min-w-0">
             <h2 className="truncate text-base font-semibold">Queue</h2>
