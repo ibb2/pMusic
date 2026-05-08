@@ -82,6 +82,7 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
   const handlePrev = async () => {
     await window.api.player.prev();
     refetch();
+    queryClient.invalidateQueries({ queryKey: ["playerQueue"] });
   };
 
   const handleSeek = async (pos: number) => {

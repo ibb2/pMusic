@@ -14,6 +14,12 @@ const BASS_ACTIVE_STOPPED = 0;
 const BASS_ACTIVE_PLAYING = 1;
 const BASS_ACTIVE_STALLED = 2;
 const BASS_ACTIVE_PAUSED = 3;
+const PREVIOUS_TRACK_THRESHOLD_SECONDS = 3;
+
+type PlayableTrack = {
+  track: PlayerTrack;
+  streamUrl: string;
+};
 
 type BassLibrary = {
   symbols: {
@@ -70,9 +76,10 @@ export class BassManager {
     loaded: boolean;
     error: string | null;
   }> = [];
-  private previousTrack: PlayerTrack | null = null;
+  private previousPlayable: PlayableTrack | null = null;
+  private currentPlayable: PlayableTrack | null = null;
   private currentTrack: PlayerTrack | null = null;
-  private queue: Array<{ track: PlayerTrack; streamUrl: string }> = [];
+  private queue: PlayableTrack[] = [];
   private volume = 1;
   private volumeBeforeMute = 1;
   private monitor: Timer | null = null;
@@ -109,7 +116,7 @@ export class BassManager {
 
   getQueue(): PlayerQueue {
     return {
-      previous_track: this.previousTrack,
+      previous_track: this.previousPlayable?.track ?? null,
       current_track: this.currentTrack,
       tracks: this.queue.map((item) => item.track),
     };
@@ -122,7 +129,7 @@ export class BassManager {
     this.playStream(track, streamUrl);
   }
 
-  playTracks(tracks: Array<{ track: PlayerTrack; streamUrl: string }>): void {
+  playTracks(tracks: PlayableTrack[]): void {
     this.rememberCurrentTrack();
     this.stop();
     this.queue = tracks;
@@ -139,7 +146,7 @@ export class BassManager {
     this.queue.unshift(item);
   }
 
-  replaceQueue(tracks: Array<{ track: PlayerTrack; streamUrl: string }>): void {
+  replaceQueue(tracks: PlayableTrack[]): void {
     this.playTracks(tracks);
   }
 
@@ -148,9 +155,13 @@ export class BassManager {
   }
 
   private rememberCurrentTrack(): void {
-    if (!this.currentTrack) return;
-    if (this.previousTrack?.ratingKey === this.currentTrack.ratingKey) return;
-    this.previousTrack = this.currentTrack;
+    if (!this.currentPlayable) return;
+    if (
+      this.previousPlayable?.track.ratingKey ===
+      this.currentPlayable.track.ratingKey
+    )
+      return;
+    this.previousPlayable = this.currentPlayable;
   }
 
   resume(): void {
@@ -172,6 +183,7 @@ export class BassManager {
       this.library.symbols.BASS_StreamFree(this.streamHandle);
     }
     this.streamHandle = 0;
+    this.currentPlayable = null;
     this.currentTrack = null;
     this.manuallyStopping = false;
   }
@@ -186,7 +198,22 @@ export class BassManager {
   }
 
   playPrev(): void {
-    this.seek(0);
+    if (this.getPosition() > PREVIOUS_TRACK_THRESHOLD_SECONDS) {
+      this.seek(0);
+      return;
+    }
+
+    if (!this.previousPlayable) {
+      this.seek(0);
+      return;
+    }
+
+    if (this.currentPlayable) {
+      this.queue.unshift(this.currentPlayable);
+    }
+    const previous = this.previousPlayable;
+    this.previousPlayable = null;
+    this.playStream(previous.track, previous.streamUrl, false);
   }
 
   seek(position: number): void {
@@ -390,10 +417,16 @@ export class BassManager {
     });
   }
 
-  private playStream(track: PlayerTrack, streamUrl: string): void {
+  private playStream(
+    track: PlayerTrack,
+    streamUrl: string,
+    rememberCurrent = true,
+  ): void {
     if (!this.library || !this.initialized) return;
 
-    this.rememberCurrentTrack();
+    if (rememberCurrent) {
+      this.rememberCurrentTrack();
+    }
     this.manuallyStopping = true;
     this.stopMonitor();
     if (this.streamHandle) {
@@ -412,10 +445,12 @@ export class BassManager {
 
     if (!this.streamHandle) {
       this.loadError = `BASS_StreamCreateURL failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
+      this.currentPlayable = null;
       this.currentTrack = null;
       return;
     }
 
+    this.currentPlayable = { track, streamUrl };
     this.currentTrack = track;
     this.setVolume(this.volume);
     const started = this.library.symbols.BASS_ChannelPlay(
@@ -426,6 +461,7 @@ export class BassManager {
       this.loadError = `BASS_ChannelPlay failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
       this.library.symbols.BASS_StreamFree(this.streamHandle);
       this.streamHandle = 0;
+      this.currentPlayable = null;
       this.currentTrack = null;
       this.playNext();
       return;
