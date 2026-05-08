@@ -9,9 +9,13 @@ import { useCallback, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { PlayerTrack } from "../../../../shared/rpc";
 
-const DEFAULT_QUEUE_WIDTH = 320;
-const MIN_QUEUE_WIDTH = 280;
-const MAX_QUEUE_WIDTH = 520;
+const DEFAULT_QUEUE_WIDTH = "17.5rem";
+const MIN_QUEUE_WIDTH = "12.5rem";
+const MAX_QUEUE_WIDTH = "32.5rem";
+
+function remToPixels(rem: string) {
+  return Number.parseFloat(rem) * 16;
+}
 
 type QueueSidebarProps = {
   open: boolean;
@@ -19,7 +23,7 @@ type QueueSidebarProps = {
 
 export function QueueSidebar({ open }: QueueSidebarProps) {
   const queryClient = useQueryClient();
-  const [width, setWidth] = useState(DEFAULT_QUEUE_WIDTH);
+  const [width, setWidth] = useState(remToPixels(DEFAULT_QUEUE_WIDTH));
   const { data: queue } = useQuery({
     queryKey: ["playerQueue"],
     queryFn: () => window.api.player.getQueue(),
@@ -45,7 +49,10 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
       const handlePointerMove = (moveEvent: PointerEvent) => {
         const nextWidth = startWidth + startX - moveEvent.clientX;
         setWidth(
-          Math.max(MIN_QUEUE_WIDTH, Math.min(MAX_QUEUE_WIDTH, nextWidth)),
+          Math.max(
+            remToPixels(MIN_QUEUE_WIDTH),
+            Math.min(remToPixels(MAX_QUEUE_WIDTH), nextWidth),
+          ),
         );
       };
 
