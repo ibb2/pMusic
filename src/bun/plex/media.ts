@@ -2,7 +2,11 @@ import { Buffer } from "node:buffer";
 import type { BassManager } from "../bass";
 import type { DatabaseManager } from "../database";
 import type Authentication from "./authentication";
-import type { PlaybackSettings, PlayerTrack } from "../../shared/rpc";
+import type {
+  PlaybackSettings,
+  PlayerQueue,
+  PlayerTrack,
+} from "../../shared/rpc";
 import type { PlexLibrary, PlexServer } from "../../shared/types";
 
 type PlexMetadata = Record<string, any>;
@@ -437,7 +441,7 @@ export class MediaService {
     return { status: "playing", track: playableTrack.track.title };
   }
 
-  getQueue(): unknown {
+  getQueue(): PlayerQueue {
     return this.bass.getQueue();
   }
 

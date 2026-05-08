@@ -12,8 +12,10 @@ import {
   FavouriteIcon,
   MoreVerticalIcon,
   MusicNote03Icon,
+  NextIcon,
   PlayIcon,
   PlusSignIcon,
+  PreviousIcon,
 } from "@hugeicons/core-free-icons";
 
 export const Route = createFileRoute("/app/artist/$ratingKey")({
@@ -256,14 +258,14 @@ function RowControls({
         onClick={onLeft}
         aria-label="Scroll left"
       >
-        <ChevronLeftIcon className="w-4 h-4" />
+        <HugeiconsIcon icon={PreviousIcon} className="w-4 h-4" />
       </button>
       <button
         className="absolute right-2 top-2/5 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/50 dark:bg-neutral-800/90 hover:bg-black/70 dark:hover:bg-neutral-900/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
         onClick={onRight}
         aria-label="Scroll right"
       >
-        <ChevronRightIcon className="w-4 h-4" />
+        <HugeiconsIcon icon={NextIcon} className="w-4 h-4" />
       </button>
     </>
   );
