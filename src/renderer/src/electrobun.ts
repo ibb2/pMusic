@@ -63,6 +63,7 @@ window.api = {
   },
   player: {
     getStatus: () => rpc.request.playerGetStatus(),
+    getQueue: () => rpc.request.playerGetQueue(),
     playAlbum: (ratingKey: string) =>
       rpc.request.playerPlayAlbum({ ratingKey }),
     playPlaylist: (ratingKey: string) =>
@@ -71,6 +72,13 @@ window.api = {
       rpc.request.playerPlayArtist({ ratingKey }),
     playTrack: (ratingKey: string) =>
       rpc.request.playerPlayTrack({ ratingKey }),
+    queueAlbum: (ratingKey: string) =>
+      rpc.request.playerQueueAlbum({ ratingKey }),
+    queuePlaylist: (ratingKey: string) =>
+      rpc.request.playerQueuePlaylist({ ratingKey }),
+    queueTrack: (ratingKey: string) =>
+      rpc.request.playerQueueTrack({ ratingKey }),
+    clearQueue: () => rpc.request.playerClearQueue(),
     play: () => rpc.request.playerPlay(),
     pause: () => rpc.request.playerPause(),
     next: () => rpc.request.playerNext(),

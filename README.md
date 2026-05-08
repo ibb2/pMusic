@@ -52,9 +52,9 @@ On install login to you Plex account and select your server[^1], that is all.
   - [x] Play popular tracks
   - [x] Artist library page
 - [x] Playlist page
-  - [ ] Play entire playlist
-  - [ ] Play individual track for playlist
-  - [ ] Playlist library page
+  - [x] Play entire playlist
+  - [x] Play individual track for playlist
+  - [x] Playlist library page
 - [ ] Albums page
   - [x] Albums library page
   - [x] Albums detail page
@@ -63,10 +63,10 @@ On install login to you Plex account and select your server[^1], that is all.
   - [ ] Tracks library page
   - [ ] Filtering options
 - [ ] Search
-- [ ] Queue's
-  - [ ] Queue Albums
-  - [ ] Queue individual tracks
-  - [ ] Display Queue
+- [x] Queue's
+  - [x] Queue Albums
+  - [x] Queue individual tracks
+  - [x] Display Queue
 - [ ] Offline support
 - [x] Multi-library support
 - [ ] Caching

@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { PlayerFooter } from "@/components/layout/PlayerFooter";
+import { QueueSidebar } from "@/components/layout/QueueSidebar";
 import {
   UltraBlurProvider,
   useUltraBlur,
@@ -9,6 +10,7 @@ import { StartupLoading } from "@/components/StartupLoading";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { useState } from "react";
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async () => {
@@ -31,6 +33,8 @@ export const Route = createFileRoute("/app")({
 });
 
 function AppLayoutComponent() {
+  const [queueOpen, setQueueOpen] = useState(false);
+
   return (
     // <StartupLoading>
     <UltraBlurProvider>
@@ -48,9 +52,13 @@ function AppLayoutComponent() {
                 <Outlet />
               </div>
             </SidebarInset>
+            <QueueSidebar open={queueOpen} />
           </SidebarProvider>
         </div>
-        <PlayerFooter />
+        <PlayerFooter
+          queueOpen={queueOpen}
+          onToggleQueue={() => setQueueOpen((open) => !open)}
+        />
       </div>
     </UltraBlurProvider>
     // </StartupLoading>

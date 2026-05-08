@@ -9,7 +9,7 @@ import {
   PlusSignIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useEffect } from "react";
@@ -21,6 +21,12 @@ export const Route = createFileRoute("/app/album/$ratingKey")({
 export function AlbumPage() {
   const { ratingKey } = Route.useParams();
   const { setBlur } = usePageUltraBlur(`album-${ratingKey}`);
+  const queryClient = useQueryClient();
+
+  const invalidatePlayerQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ["playerStatus"] });
+    queryClient.invalidateQueries({ queryKey: ["playerQueue"] });
+  };
 
   // queries
   const queryAlbum = useQuery({
@@ -87,8 +93,9 @@ export function AlbumPage() {
       <div className="flex items-center gap-3 mb-6">
         <Button
           className="rounded-full h-14 w-14"
-          onClick={() => {
-            window.api.player.playAlbum(ratingKey);
+          onClick={async () => {
+            await window.api.player.playAlbum(ratingKey);
+            invalidatePlayerQueries();
           }}
         >
           <HugeiconsIcon icon={PlayIcon} className="fill-current" />
@@ -96,7 +103,15 @@ export function AlbumPage() {
         <Button variant={"secondary"} size="icon-lg" className="rounded-full">
           <HugeiconsIcon icon={FavouriteIcon} />
         </Button>
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={async () => {
+            await window.api.player.queueAlbum(ratingKey);
+            invalidatePlayerQueries();
+          }}
+          aria-label="Queue album"
+        >
           <HugeiconsIcon icon={PlusSignIcon} />
         </Button>
         <Button variant="ghost" size="icon">
@@ -106,9 +121,10 @@ export function AlbumPage() {
 
       {/* Track List */}
       <div className="bg-white/60 dark:bg-slate-300/10 rounded-lg">
-        <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-2 text-sm border-b">
+        <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 px-4 py-2 text-sm border-b">
           <div className="w-8 text-center">#</div>
           <div>Title</div>
+          <div></div>
           <div></div>
           <div className="w-16 text-right">
             <HugeiconsIcon size={16} icon={Clock01Icon} className="inline" />
@@ -118,20 +134,32 @@ export function AlbumPage() {
         {album.tracks.map((track: any, index: number) => (
           <div
             key={track.id}
-            className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors cursor-pointer"
+            className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors cursor-pointer"
           >
             <div className="text-center w-8 group-hover:hidden">
               {index + 1}
             </div>
             <button
               className="hidden group-hover:block w-8"
-              onClick={() => {
-                window.api.player.playTrack(String(track.ratingKey));
+              onClick={async () => {
+                await window.api.player.playTrack(String(track.ratingKey));
+                invalidatePlayerQueries();
               }}
+              aria-label={`Play ${track.title}`}
             >
               <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
             </button>
             <div>{track.title}</div>
+            <button
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={async () => {
+                await window.api.player.queueTrack(String(track.ratingKey));
+                invalidatePlayerQueries();
+              }}
+              aria-label={`Queue ${track.title}`}
+            >
+              <HugeiconsIcon icon={PlusSignIcon} />
+            </button>
             <button className="opacity-0 group-hover:opacity-100 transition-opacity">
               <HugeiconsIcon icon={FavouriteIcon} />
             </button>

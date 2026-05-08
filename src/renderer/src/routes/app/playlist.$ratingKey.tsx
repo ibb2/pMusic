@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 import noPlaylistCover from "../../assets/no-playlist-cover.png";
 import { Spinner } from "@/components/ui/spinner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -20,6 +20,12 @@ export const Route = createFileRoute("/app/playlist/$ratingKey")({
 
 function PlaylistPage() {
   const { ratingKey } = Route.useParams();
+  const queryClient = useQueryClient();
+
+  const invalidatePlayerQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ["playerStatus"] });
+    queryClient.invalidateQueries({ queryKey: ["playerQueue"] });
+  };
 
   // queries
   const queryPlaylist = useQuery({
@@ -67,8 +73,9 @@ function PlaylistPage() {
       <div className="flex items-center gap-3 mb-6">
         <Button
           className="rounded-full h-14 w-14"
-          onClick={() => {
-            window.api.player.playPlaylist(ratingKey);
+          onClick={async () => {
+            await window.api.player.playPlaylist(ratingKey);
+            invalidatePlayerQueries();
           }}
         >
           <HugeiconsIcon icon={PlayIcon} className="fill-current" />
@@ -76,7 +83,15 @@ function PlaylistPage() {
         <Button variant={"secondary"} size="icon-lg" className="rounded-full">
           <HugeiconsIcon icon={FavouriteIcon} />
         </Button>
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={async () => {
+            await window.api.player.queuePlaylist(ratingKey);
+            invalidatePlayerQueries();
+          }}
+          aria-label="Queue playlist"
+        >
           <HugeiconsIcon icon={PlusSignIcon} />
         </Button>
         <Button variant="ghost" size="icon">
@@ -86,10 +101,11 @@ function PlaylistPage() {
 
       {/* Track List */}
       <div className="bg-slate-300/10 rounded-lg">
-        <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-4 px-4 py-2 text-sm border-b">
+        <div className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-4 px-4 py-2 text-sm border-b">
           <div className="w-8 text-center">#</div>
           <div></div>
           <div>Title</div>
+          <div></div>
           <div></div>
           <div className="w-16 text-right">
             <HugeiconsIcon size={16} icon={Clock01Icon} className="inline" />
@@ -99,16 +115,18 @@ function PlaylistPage() {
         {playlist.tracks.map((track: any, index: number) => (
           <div
             key={track.id}
-            className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors cursor-pointer"
+            className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors cursor-pointer"
           >
             <div className="text-center w-8 group-hover:hidden self-center">
               {index + 1}
             </div>
             <button
               className="hidden group-hover:block"
-              onClick={() => {
-                window.api.player.playTrack(String(track.ratingKey));
+              onClick={async () => {
+                await window.api.player.playTrack(String(track.ratingKey));
+                invalidatePlayerQueries();
               }}
+              aria-label={`Play ${track.title}`}
             >
               <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
             </button>
@@ -139,6 +157,16 @@ function PlaylistPage() {
                 </Link>
               </div>
             </div>
+            <button
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={async () => {
+                await window.api.player.queueTrack(String(track.ratingKey));
+                invalidatePlayerQueries();
+              }}
+              aria-label={`Queue ${track.title}`}
+            >
+              <HugeiconsIcon icon={PlusSignIcon} />
+            </button>
             <button className="opacity-0 group-hover:opacity-100 transition-opacity">
               <HugeiconsIcon icon={FavouriteIcon} />
             </button>

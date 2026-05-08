@@ -2,7 +2,7 @@ import { AlbumCard } from "@/components/music/albumcard";
 import { usePageUltraBlur } from "@/components/layout/UltraBlurProvider";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useEffect, useRef } from "react";
@@ -12,7 +12,10 @@ import {
   FavouriteIcon,
   MoreVerticalIcon,
   MusicNote03Icon,
+  NextIcon,
   PlayIcon,
+  PlusSignIcon,
+  PreviousIcon,
 } from "@hugeicons/core-free-icons";
 
 export const Route = createFileRoute("/app/artist/$ratingKey")({
@@ -22,8 +25,14 @@ export const Route = createFileRoute("/app/artist/$ratingKey")({
 export function ArtistPage() {
   const { ratingKey } = Route.useParams();
   const { setBlur } = usePageUltraBlur(`artist-${ratingKey}`);
+  const queryClient = useQueryClient();
 
   const albumRef = useRef<HTMLDivElement>(null);
+
+  const invalidatePlayerQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ["playerStatus"] });
+    queryClient.invalidateQueries({ queryKey: ["playerQueue"] });
+  };
 
   const scroll = (
     ref: React.RefObject<HTMLDivElement | null>,
@@ -111,8 +120,9 @@ export function ArtistPage() {
       <div className="flex items-center gap-3 mb-6">
         <Button
           className="rounded-full h-14 w-14"
-          onClick={() => {
-            window.api.player.playArtist(ratingKey);
+          onClick={async () => {
+            await window.api.player.playArtist(ratingKey);
+            invalidatePlayerQueries();
           }}
         >
           <HugeiconsIcon icon={PlayIcon} className="fill-current" />
@@ -145,9 +155,11 @@ export function ArtistPage() {
                 </div>
                 <Button
                   className="hidden group-hover:block"
-                  onClick={() => {
-                    window.api.player.playTrack(String(track.ratingKey));
+                  onClick={async () => {
+                    await window.api.player.playTrack(String(track.ratingKey));
+                    invalidatePlayerQueries();
                   }}
+                  aria-label={`Play ${track.title}`}
                 >
                   <HugeiconsIcon icon={PlayIcon} className="fill-current" />
                 </Button>
@@ -163,6 +175,18 @@ export function ArtistPage() {
                 <div className="text-zinc-400 text-sm">
                   {dayjs.duration(track.duration).format("m:ss")}
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={async () => {
+                    await window.api.player.queueTrack(String(track.ratingKey));
+                    invalidatePlayerQueries();
+                  }}
+                  aria-label={`Queue ${track.title}`}
+                >
+                  <HugeiconsIcon icon={PlusSignIcon} />
+                </Button>
                 <Button className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <HugeiconsIcon icon={FavouriteIcon} />
                 </Button>
@@ -234,14 +258,14 @@ function RowControls({
         onClick={onLeft}
         aria-label="Scroll left"
       >
-        <ChevronLeftIcon className="w-4 h-4" />
+        <HugeiconsIcon icon={PreviousIcon} className="w-4 h-4" />
       </button>
       <button
         className="absolute right-2 top-2/5 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/50 dark:bg-neutral-800/90 hover:bg-black/70 dark:hover:bg-neutral-900/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
         onClick={onRight}
         aria-label="Scroll right"
       >
-        <ChevronRightIcon className="w-4 h-4" />
+        <HugeiconsIcon icon={NextIcon} className="w-4 h-4" />
       </button>
     </>
   );
