@@ -12,6 +12,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   AudioWave01FreeIcons,
   Home02Icon,
+  LibraryIcon,
   MusicNote03Icon,
   Vynil03Icon,
 } from "@hugeicons/core-free-icons";
@@ -108,7 +109,7 @@ const data = {
     // },
     { name: "Albums", url: "/app/library/albums", icon: Vynil03Icon },
     { name: "Artists", url: "/app/library/artists", icon: MusicNote03Icon },
-    // { name: "Playlists", url: "/app/library/playlists", icon: DiscAlbum },
+    { name: "Playlists", url: "/app/library/playlists", icon: LibraryIcon },
     // {
     //   name: "All Music",
     //   url: "#",
