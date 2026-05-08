@@ -5,7 +5,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
+import { useCallback, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import type { PlayerTrack } from "../../../../shared/rpc";
+
+const DEFAULT_QUEUE_WIDTH = 320;
+const MIN_QUEUE_WIDTH = 280;
+const MAX_QUEUE_WIDTH = 520;
 
 type QueueSidebarProps = {
   open: boolean;
@@ -13,6 +19,7 @@ type QueueSidebarProps = {
 
 export function QueueSidebar({ open }: QueueSidebarProps) {
   const queryClient = useQueryClient();
+  const [width, setWidth] = useState(DEFAULT_QUEUE_WIDTH);
   const { data: queue } = useQuery({
     queryKey: ["playerQueue"],
     queryFn: () => window.api.player.getQueue(),
@@ -29,19 +36,50 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
     queryClient.invalidateQueries({ queryKey: ["playerStatus"] });
   };
 
+  const handleResizeStart = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const startX = event.clientX;
+      const startWidth = width;
+
+      const handlePointerMove = (moveEvent: PointerEvent) => {
+        const nextWidth = startWidth + startX - moveEvent.clientX;
+        setWidth(
+          Math.max(MIN_QUEUE_WIDTH, Math.min(MAX_QUEUE_WIDTH, nextWidth)),
+        );
+      };
+
+      const handlePointerUp = () => {
+        window.removeEventListener("pointermove", handlePointerMove);
+        window.removeEventListener("pointerup", handlePointerUp);
+      };
+
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+    },
+    [width],
+  );
+
   return (
     <aside
       className={cn(
-        "relative z-10 h-full min-h-0 shrink-0 overflow-hidden border-l bg-sidebar text-sidebar-foreground transition-[width,opacity] duration-200",
-        open ? "w-80 opacity-100" : "w-0 opacity-0",
+        "relative z-10 h-full min-h-0 shrink-0 overflow-hidden bg-sidebar text-sidebar-foreground transition-[width,opacity] duration-200",
+        open ? "opacity-100" : "w-0 opacity-0",
       )}
+      style={{ width: open ? width : 0 }}
       aria-hidden={!open}
     >
-      <div className="flex h-full min-h-0 w-80 flex-col">
-        <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
+      <div
+        className="absolute inset-y-3 left-0 z-10 w-2 cursor-col-resize rounded-full bg-transparent transition-colors hover:bg-sidebar-accent"
+        onPointerDown={handleResizeStart}
+        aria-label="Resize queue"
+        role="separator"
+      />
+      <div className="flex h-full min-h-0 flex-col" style={{ width }}>
+        <div className="flex items-start justify-between gap-3 px-5 pb-3 pt-5">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold">Queue</h2>
-            <p className="text-xs text-muted-foreground">
+            <h2 className="truncate text-base font-semibold">Queue</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
               {queuedTracks.length} up next
             </p>
           </div>
@@ -56,10 +94,10 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
           </Button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-2">
           {currentTrack ? (
-            <section className="mb-5">
-              <h3 className="mb-2 px-1 text-xs font-medium uppercase text-muted-foreground">
+            <section className="mb-7">
+              <h3 className="mb-3 px-2 text-xs font-medium uppercase text-muted-foreground">
                 Now Playing
               </h3>
               <QueueTrackRow track={currentTrack} active />
@@ -67,7 +105,7 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
           ) : null}
 
           <section>
-            <h3 className="mb-2 px-1 text-xs font-medium uppercase text-muted-foreground">
+            <h3 className="mb-3 px-2 text-xs font-medium uppercase text-muted-foreground">
               Up Next
             </h3>
             {queuedTracks.length > 0 ? (
@@ -80,8 +118,8 @@ export function QueueSidebar({ open }: QueueSidebarProps) {
                 ))}
               </div>
             ) : (
-              <div className="flex min-h-36 flex-col items-center justify-center rounded-md border border-dashed px-4 text-center text-sm text-muted-foreground">
-                <HugeiconsIcon icon={MusicNote03Icon} className="mb-2" />
+              <div className="flex min-h-16 items-center gap-2 px-2 text-sm text-muted-foreground">
+                <HugeiconsIcon icon={MusicNote03Icon} className="shrink-0" />
                 <span>No tracks queued</span>
               </div>
             )}
