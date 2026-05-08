@@ -3,6 +3,7 @@
 import type {
   BassStatus,
   PlaybackSettings,
+  PlayerQueue,
   PlayerStatus,
   UserProfile,
 } from "../../shared/rpc";
@@ -66,10 +67,15 @@ declare global {
       };
       player: {
         getStatus: () => Promise<PlayerStatus>;
+        getQueue: () => Promise<PlayerQueue>;
         playAlbum: (ratingKey: string) => Promise<unknown>;
         playPlaylist: (ratingKey: string) => Promise<unknown>;
         playArtist: (ratingKey: string) => Promise<unknown>;
         playTrack: (ratingKey: string) => Promise<unknown>;
+        queueAlbum: (ratingKey: string) => Promise<unknown>;
+        queuePlaylist: (ratingKey: string) => Promise<unknown>;
+        queueTrack: (ratingKey: string) => Promise<unknown>;
+        clearQueue: () => Promise<unknown>;
         play: () => Promise<unknown>;
         pause: () => Promise<unknown>;
         next: () => Promise<unknown>;

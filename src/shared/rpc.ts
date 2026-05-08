@@ -31,10 +31,16 @@ export type PlayerTrack = {
   title: string;
   artist: string;
   artistRatingKey: string;
+  album: string;
   albumRatingKey: string;
   ratingKey: string;
   duration?: number;
   thumb?: string | null;
+};
+
+export type PlayerQueue = {
+  current_track: PlayerTrack | null;
+  tracks: PlayerTrack[];
 };
 
 export type PlayerStatus = {
@@ -207,6 +213,10 @@ export type RaynaRPC = {
         params: void;
         response: PlayerStatus;
       };
+      playerGetQueue: {
+        params: void;
+        response: PlayerQueue;
+      };
       playerPlayAlbum: {
         params: { ratingKey: string };
         response: unknown;
@@ -221,6 +231,22 @@ export type RaynaRPC = {
       };
       playerPlayTrack: {
         params: { ratingKey: string };
+        response: unknown;
+      };
+      playerQueueAlbum: {
+        params: { ratingKey: string };
+        response: unknown;
+      };
+      playerQueuePlaylist: {
+        params: { ratingKey: string };
+        response: unknown;
+      };
+      playerQueueTrack: {
+        params: { ratingKey: string };
+        response: unknown;
+      };
+      playerClearQueue: {
+        params: void;
         response: unknown;
       };
       playerPlay: {

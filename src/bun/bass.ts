@@ -1,7 +1,12 @@
 import { dlopen, FFIType } from "bun:ffi";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { BassStatus, PlayerStatus, PlayerTrack } from "../shared/rpc";
+import type {
+  BassStatus,
+  PlayerQueue,
+  PlayerStatus,
+  PlayerTrack,
+} from "../shared/rpc";
 
 const BASS_POS_BYTE = 0;
 const BASS_ATTRIB_VOL = 2;
@@ -101,6 +106,13 @@ export class BassManager {
     };
   }
 
+  getQueue(): PlayerQueue {
+    return {
+      current_track: this.currentTrack,
+      tracks: this.queue.map((item) => item.track),
+    };
+  }
+
   playTrack(track: PlayerTrack, streamUrl: string): void {
     this.stop();
     this.queue = [];
@@ -111,6 +123,24 @@ export class BassManager {
     this.stop();
     this.queue = tracks;
     this.playNext();
+  }
+
+  queueTrack(track: PlayerTrack, streamUrl: string): void {
+    const item = { track, streamUrl };
+    if (!this.currentTrack && !this.streamHandle) {
+      this.playTracks([item]);
+      return;
+    }
+
+    this.queue.unshift(item);
+  }
+
+  replaceQueue(tracks: Array<{ track: PlayerTrack; streamUrl: string }>): void {
+    this.playTracks(tracks);
+  }
+
+  clearQueue(): void {
+    this.queue = [];
   }
 
   resume(): void {

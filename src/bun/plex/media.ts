@@ -253,6 +253,17 @@ export class MediaService {
         number: track.trackNumber,
         title: track.title,
         duration: track.duration,
+        albumThumb: this.plexUrl(track.thumb || album.thumb),
+        albumTitle: track.parentTitle || album.title,
+        albumRatingKey:
+          track.parentRatingKey ||
+          this.extractRatingKey(track.parentKey) ||
+          album.ratingKey,
+        artistTitle: track.grandparentTitle || album.parentTitle,
+        artistRatingKey:
+          track.grandparentRatingKey ||
+          this.extractRatingKey(track.grandparentKey) ||
+          artistKey,
         ratingKey: track.ratingKey,
       })),
     };
@@ -426,6 +437,40 @@ export class MediaService {
     return { status: "playing", track: playableTrack.track.title };
   }
 
+  getQueue(): unknown {
+    return this.bass.getQueue();
+  }
+
+  async queueAlbum(ratingKey: string): Promise<unknown> {
+    const tracks = await this.fetchMetadataChildren(ratingKey);
+    const playableTracks = await Promise.all(
+      tracks.map((track) => this.toPlayableTrack(track)),
+    );
+    this.bass.replaceQueue(playableTracks);
+    return { status: "queued", count: playableTracks.length };
+  }
+
+  async queuePlaylist(ratingKey: string): Promise<unknown> {
+    const tracks = await this.fetchPlaylistItems(ratingKey);
+    const playableTracks = await Promise.all(
+      tracks.map((track) => this.toPlayableTrack(track)),
+    );
+    this.bass.replaceQueue(playableTracks);
+    return { status: "queued", count: playableTracks.length };
+  }
+
+  async queueTrack(ratingKey: string): Promise<unknown> {
+    const track = await this.fetchMetadataItem(ratingKey);
+    const playableTrack = await this.toPlayableTrack(track);
+    this.bass.queueTrack(playableTrack.track, playableTrack.streamUrl);
+    return { status: "queued", track: playableTrack.track.title };
+  }
+
+  clearQueue(): unknown {
+    this.bass.clearQueue();
+    return { status: "cleared" };
+  }
+
   private async getAlbumsFromSections({
     sort,
     limit,
@@ -538,10 +583,9 @@ export class MediaService {
       track: {
         title: track.title || "",
         artist: track.originalTitle || track.grandparentTitle || "",
-        // albumTitle: track.parentTitle,
+        album: track.parentTitle || "",
         albumRatingKey:
           track.parentRatingKey || this.extractRatingKey(track.parentKey),
-        // artistTitle: track.grandparentTitle,
         artistRatingKey:
           track.grandparentRatingKey ||
           this.extractRatingKey(track.grandparentKey),
