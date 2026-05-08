@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useState, useEffect } from "react";
 import { Progress } from "../ui/progress";
@@ -14,13 +14,20 @@ import {
   Repeat1,
   RepeatIcon,
   ShuffleIcon,
+  MusicNote03Icon,
   VolumeHighIcon,
   VolumeLowIcon,
   VolumeMute01Icon,
   VolumeMute02Icon,
 } from "@hugeicons/core-free-icons";
 
-export function PlayerFooter() {
+type PlayerFooterProps = {
+  queueOpen: boolean;
+  onToggleQueue: () => void;
+};
+
+export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
+  const queryClient = useQueryClient();
   const { data: status, refetch } = useQuery({
     queryKey: ["playerStatus"],
     queryFn: () => window.api.player.getStatus(),
@@ -68,6 +75,7 @@ export function PlayerFooter() {
   const handleNext = async () => {
     await window.api.player.next();
     refetch();
+    queryClient.invalidateQueries({ queryKey: ["playerQueue"] });
   };
 
   const handlePrev = async () => {
@@ -229,6 +237,15 @@ export function PlayerFooter() {
         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
           <Laptop2 className="h-4 w-4" />
         </Button>*/}
+        <Button
+          variant={queueOpen ? "secondary" : "ghost"}
+          size="icon"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={onToggleQueue}
+          aria-label={queueOpen ? "Close queue" : "Open queue"}
+        >
+          <HugeiconsIcon icon={MusicNote03Icon} />
+        </Button>
         <div className="flex items-center gap-x-1 w-32">
           <div>
             {volume === 0 ? (
