@@ -18,6 +18,7 @@ import { Route as AppSettingsRouteImport } from './routes/app/settings'
 import { Route as AppLibraryRouteRouteImport } from './routes/app/library/route'
 import { Route as AppPlaylistRatingKeyRouteImport } from './routes/app/playlist.$ratingKey'
 import { Route as AppLibraryTracksRouteImport } from './routes/app/library/tracks'
+import { Route as AppLibraryPlaylistsRouteImport } from './routes/app/library/playlists'
 import { Route as AppLibraryArtistsRouteImport } from './routes/app/library/artists'
 import { Route as AppLibraryAlbumsRouteImport } from './routes/app/library/albums'
 import { Route as AppArtistRatingKeyRouteImport } from './routes/app/artist.$ratingKey'
@@ -68,6 +69,11 @@ const AppLibraryTracksRoute = AppLibraryTracksRouteImport.update({
   path: '/tracks',
   getParentRoute: () => AppLibraryRouteRoute,
 } as any)
+const AppLibraryPlaylistsRoute = AppLibraryPlaylistsRouteImport.update({
+  id: '/playlists',
+  path: '/playlists',
+  getParentRoute: () => AppLibraryRouteRoute,
+} as any)
 const AppLibraryArtistsRoute = AppLibraryArtistsRouteImport.update({
   id: '/artists',
   path: '/artists',
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/app/artist/$ratingKey': typeof AppArtistRatingKeyRoute
   '/app/library/albums': typeof AppLibraryAlbumsRoute
   '/app/library/artists': typeof AppLibraryArtistsRoute
+  '/app/library/playlists': typeof AppLibraryPlaylistsRoute
   '/app/library/tracks': typeof AppLibraryTracksRoute
   '/app/playlist/$ratingKey': typeof AppPlaylistRatingKeyRoute
 }
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/app/artist/$ratingKey': typeof AppArtistRatingKeyRoute
   '/app/library/albums': typeof AppLibraryAlbumsRoute
   '/app/library/artists': typeof AppLibraryArtistsRoute
+  '/app/library/playlists': typeof AppLibraryPlaylistsRoute
   '/app/library/tracks': typeof AppLibraryTracksRoute
   '/app/playlist/$ratingKey': typeof AppPlaylistRatingKeyRoute
 }
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/app/artist/$ratingKey': typeof AppArtistRatingKeyRoute
   '/app/library/albums': typeof AppLibraryAlbumsRoute
   '/app/library/artists': typeof AppLibraryArtistsRoute
+  '/app/library/playlists': typeof AppLibraryPlaylistsRoute
   '/app/library/tracks': typeof AppLibraryTracksRoute
   '/app/playlist/$ratingKey': typeof AppPlaylistRatingKeyRoute
 }
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/app/artist/$ratingKey'
     | '/app/library/albums'
     | '/app/library/artists'
+    | '/app/library/playlists'
     | '/app/library/tracks'
     | '/app/playlist/$ratingKey'
   fileRoutesByTo: FileRoutesByTo
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/app/artist/$ratingKey'
     | '/app/library/albums'
     | '/app/library/artists'
+    | '/app/library/playlists'
     | '/app/library/tracks'
     | '/app/playlist/$ratingKey'
   id:
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/app/artist/$ratingKey'
     | '/app/library/albums'
     | '/app/library/artists'
+    | '/app/library/playlists'
     | '/app/library/tracks'
     | '/app/playlist/$ratingKey'
   fileRoutesById: FileRoutesById
@@ -253,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLibraryTracksRouteImport
       parentRoute: typeof AppLibraryRouteRoute
     }
+    '/app/library/playlists': {
+      id: '/app/library/playlists'
+      path: '/playlists'
+      fullPath: '/app/library/playlists'
+      preLoaderRoute: typeof AppLibraryPlaylistsRouteImport
+      parentRoute: typeof AppLibraryRouteRoute
+    }
     '/app/library/artists': {
       id: '/app/library/artists'
       path: '/artists'
@@ -287,12 +306,14 @@ declare module '@tanstack/react-router' {
 interface AppLibraryRouteRouteChildren {
   AppLibraryAlbumsRoute: typeof AppLibraryAlbumsRoute
   AppLibraryArtistsRoute: typeof AppLibraryArtistsRoute
+  AppLibraryPlaylistsRoute: typeof AppLibraryPlaylistsRoute
   AppLibraryTracksRoute: typeof AppLibraryTracksRoute
 }
 
 const AppLibraryRouteRouteChildren: AppLibraryRouteRouteChildren = {
   AppLibraryAlbumsRoute: AppLibraryAlbumsRoute,
   AppLibraryArtistsRoute: AppLibraryArtistsRoute,
+  AppLibraryPlaylistsRoute: AppLibraryPlaylistsRoute,
   AppLibraryTracksRoute: AppLibraryTracksRoute,
 }
 
