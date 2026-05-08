@@ -76,7 +76,7 @@ export class BassManager {
     loaded: boolean;
     error: string | null;
   }> = [];
-  private previousPlayable: PlayableTrack | null = null;
+  private previousPlayables: PlayableTrack[] = [];
   private currentPlayable: PlayableTrack | null = null;
   private currentTrack: PlayerTrack | null = null;
   private queue: PlayableTrack[] = [];
@@ -116,7 +116,7 @@ export class BassManager {
 
   getQueue(): PlayerQueue {
     return {
-      previous_track: this.previousPlayable?.track ?? null,
+      previous_track: this.previousPlayables.at(-1)?.track ?? null,
       current_track: this.currentTrack,
       tracks: this.queue.map((item) => item.track),
     };
@@ -156,12 +156,13 @@ export class BassManager {
 
   private rememberCurrentTrack(): void {
     if (!this.currentPlayable) return;
+    const previousPlayable = this.previousPlayables.at(-1);
     if (
-      this.previousPlayable?.track.ratingKey ===
+      previousPlayable?.track.ratingKey ===
       this.currentPlayable.track.ratingKey
     )
       return;
-    this.previousPlayable = this.currentPlayable;
+    this.previousPlayables.push(this.currentPlayable);
   }
 
   resume(): void {
@@ -203,7 +204,8 @@ export class BassManager {
       return;
     }
 
-    if (!this.previousPlayable) {
+    const previous = this.previousPlayables.pop();
+    if (!previous) {
       this.seek(0);
       return;
     }
@@ -211,8 +213,6 @@ export class BassManager {
     if (this.currentPlayable) {
       this.queue.unshift(this.currentPlayable);
     }
-    const previous = this.previousPlayable;
-    this.previousPlayable = null;
     this.playStream(previous.track, previous.streamUrl, false);
   }
 
