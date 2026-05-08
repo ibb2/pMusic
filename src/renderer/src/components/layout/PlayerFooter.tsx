@@ -19,6 +19,7 @@ import {
   VolumeLowIcon,
   VolumeMute01Icon,
   VolumeMute02Icon,
+  Queue02Icon,
 } from "@hugeicons/core-free-icons";
 
 type PlayerFooterProps = {
@@ -244,7 +245,7 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
           onClick={onToggleQueue}
           aria-label={queueOpen ? "Close queue" : "Open queue"}
         >
-          <HugeiconsIcon icon={MusicNote03Icon} />
+          <HugeiconsIcon icon={Queue02Icon} />
         </Button>
         <div className="flex items-center gap-x-1 w-32">
           <div>
