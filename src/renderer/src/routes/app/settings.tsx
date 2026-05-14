@@ -30,6 +30,8 @@ export function SettingsPage() {
   const [selectedServer, setSelectedServer] = useState<PlexServer | null>(null);
   const [playbackSettings, setPlaybackSettings] = useState<PlaybackSettings>({
     useOriginalFileUrl: true,
+    enableUltraBlur: true,
+    enableTimelineReporting: true,
   });
   const [loading, setLoading] = useState(true);
   const [updated, setUpdated] = useState(false);
@@ -85,6 +87,19 @@ export function SettingsPage() {
     const next = { ...playbackSettings, enableUltraBlur };
     setPlaybackSettings(next);
     setEnabled(enableUltraBlur);
+    await window.api.settings.setPlayback(next).catch((e) => console.error(e));
+    setPlaybackUpdated(true);
+
+    setTimeout(() => {
+      setPlaybackUpdated(false);
+    }, 1500);
+  };
+
+  const setEnableTimelineReporting = async (
+    enableTimelineReporting: boolean,
+  ) => {
+    const next = { ...playbackSettings, enableTimelineReporting };
+    setPlaybackSettings(next);
     await window.api.settings.setPlayback(next).catch((e) => console.error(e));
     setPlaybackUpdated(true);
 
@@ -212,6 +227,26 @@ export function SettingsPage() {
                     checked={playbackSettings.enableUltraBlur !== false}
                     onCheckedChange={setEnableUltraBlur}
                     aria-label="UltraBlur Background"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-6">
+                <div>
+                  <Label className="mb-2 block">Report playback to Plex</Label>
+                  <Label className="mb-2 block text-sm text-muted-foreground">
+                    Show Rayna in Plex and Tautulli active sessions.
+                  </Label>
+                </div>
+                <div className="flex items-center gap-4">
+                  {playbackUpdated && (
+                    <p className="text-green-700 dark:text-green-300">
+                      Updated
+                    </p>
+                  )}
+                  <Switch
+                    checked={playbackSettings.enableTimelineReporting !== false}
+                    onCheckedChange={setEnableTimelineReporting}
+                    aria-label="Report playback to Plex"
                   />
                 </div>
               </div>

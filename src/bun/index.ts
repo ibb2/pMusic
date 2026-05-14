@@ -3,6 +3,7 @@ import { BassManager } from "./bass";
 import { DatabaseManager } from "./database";
 import Authentication from "./plex/authentication";
 import { MediaService } from "./plex/media";
+import { PlexTimelineReporter } from "./plex/timeline";
 import type { ApplicationMenuItemConfig } from "electrobun";
 import type { RaynaRPC } from "../shared/rpc";
 import type { PlexServer } from "../shared/types";
@@ -11,6 +12,10 @@ const db = new DatabaseManager();
 const auth = new Authentication();
 const bass = new BassManager();
 const media = new MediaService(auth, bass, db);
+const timeline = new PlexTimelineReporter(auth, bass, () =>
+  media.getPlaybackSettings(),
+);
+timeline.start();
 
 const isMac = process.platform === "darwin";
 
@@ -211,5 +216,6 @@ function extractUrl(event: unknown): string | null {
 
 function shutdown(): void {
   bass.free();
+  timeline.dispose();
   Utils.quit();
 }

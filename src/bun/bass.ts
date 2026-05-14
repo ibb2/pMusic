@@ -21,6 +21,39 @@ type PlayableTrack = {
   streamUrl: string;
 };
 
+export type BassStopReason = "manual" | "replaced" | "ended" | "remote";
+
+export type BassPlaybackEvent =
+  | {
+      type: "track-started";
+      track: PlayerTrack;
+      position: number;
+      duration: number;
+    }
+  | {
+      type: "state-changed";
+      state: "playing" | "paused";
+      track: PlayerTrack;
+      position: number;
+      duration: number;
+    }
+  | {
+      type: "seeked";
+      track: PlayerTrack;
+      position: number;
+      duration: number;
+      isPlaying: boolean;
+    }
+  | {
+      type: "track-stopped";
+      reason: BassStopReason;
+      track: PlayerTrack;
+      position: number;
+      duration: number;
+    };
+
+export type BassPlaybackListener = (event: BassPlaybackEvent) => void;
+
 type BassLibrary = {
   symbols: {
     BASS_GetVersion: () => number;
@@ -84,6 +117,7 @@ export class BassManager {
   private volumeBeforeMute = 1;
   private monitor: Timer | null = null;
   private manuallyStopping = false;
+  private listeners = new Set<BassPlaybackListener>();
   private readonly libraryPath: string | null;
 
   constructor() {
@@ -122,16 +156,21 @@ export class BassManager {
     };
   }
 
+  onPlaybackEvent(listener: BassPlaybackListener): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
   playTrack(track: PlayerTrack, streamUrl: string): void {
     this.rememberCurrentTrack();
-    this.stop();
+    this.stopCurrent("replaced");
     this.queue = [];
     this.playStream(track, streamUrl);
   }
 
   playTracks(tracks: PlayableTrack[]): void {
     this.rememberCurrentTrack();
-    this.stop();
+    this.stopCurrent("replaced");
     this.queue = tracks;
     this.playNext();
   }
@@ -167,26 +206,44 @@ export class BassManager {
 
   resume(): void {
     if (!this.library || !this.streamHandle) return;
-    this.library.symbols.BASS_ChannelPlay(this.streamHandle, false);
+    const resumed = this.library.symbols.BASS_ChannelPlay(
+      this.streamHandle,
+      false,
+    );
+    if (resumed && this.currentTrack) {
+      this.emitPlaybackEvent({
+        type: "state-changed",
+        state: "playing",
+        track: this.currentTrack,
+        position: this.getPosition(),
+        duration: this.getDuration(),
+      });
+    }
   }
 
   pause(): void {
     if (!this.library || !this.streamHandle) return;
-    this.library.symbols.BASS_ChannelPause(this.streamHandle);
+    const position = this.getPosition();
+    const duration = this.getDuration();
+    const paused = this.library.symbols.BASS_ChannelPause(this.streamHandle);
+    if (paused && this.currentTrack) {
+      this.emitPlaybackEvent({
+        type: "state-changed",
+        state: "paused",
+        track: this.currentTrack,
+        position,
+        duration,
+      });
+    }
   }
 
   stop(): void {
-    if (!this.library) return;
-    this.manuallyStopping = true;
-    this.stopMonitor();
-    if (this.streamHandle) {
-      this.library.symbols.BASS_ChannelStop(this.streamHandle);
-      this.library.symbols.BASS_StreamFree(this.streamHandle);
-    }
-    this.streamHandle = 0;
-    this.currentPlayable = null;
-    this.currentTrack = null;
-    this.manuallyStopping = false;
+    this.stopCurrent("manual");
+  }
+
+  stopFromRemote(): void {
+    this.queue = [];
+    this.stopCurrent("remote");
   }
 
   playNext(): void {
@@ -235,6 +292,17 @@ export class BassManager {
 
     if (!seeked) {
       this.loadError = `BASS_ChannelSetPosition failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
+      return;
+    }
+
+    if (this.currentTrack) {
+      this.emitPlaybackEvent({
+        type: "seeked",
+        track: this.currentTrack,
+        position: safePosition,
+        duration: this.getDuration(),
+        isPlaying: this.isPlaying(),
+      });
     }
   }
 
@@ -427,13 +495,7 @@ export class BassManager {
     if (rememberCurrent) {
       this.rememberCurrentTrack();
     }
-    this.manuallyStopping = true;
-    this.stopMonitor();
-    if (this.streamHandle) {
-      this.library.symbols.BASS_ChannelStop(this.streamHandle);
-      this.library.symbols.BASS_StreamFree(this.streamHandle);
-    }
-    this.manuallyStopping = false;
+    this.stopCurrent("replaced");
 
     this.streamHandle = this.library.symbols.BASS_StreamCreateURL(
       this.toCString(streamUrl),
@@ -468,6 +530,12 @@ export class BassManager {
     }
 
     this.startMonitor();
+    this.emitPlaybackEvent({
+      type: "track-started",
+      track,
+      position: this.getPosition(),
+      duration: this.getDuration(),
+    });
   }
 
   private startMonitor(): void {
@@ -499,9 +567,49 @@ export class BassManager {
       duration <= 0 || position >= Math.max(0, duration - 0.75);
 
     if (reachedEnd) {
-      this.stopMonitor();
+      this.stopCurrent("ended");
       this.playNext();
     }
+  }
+
+  private stopCurrent(reason: BassStopReason): void {
+    if (!this.library) return;
+
+    const stoppedTrack = this.currentTrack;
+    const stoppedPosition = stoppedTrack ? this.getPosition() : 0;
+    const stoppedDuration = stoppedTrack ? this.getDuration() : 0;
+
+    this.manuallyStopping = true;
+    this.stopMonitor();
+    if (this.streamHandle) {
+      this.library.symbols.BASS_ChannelStop(this.streamHandle);
+      this.library.symbols.BASS_StreamFree(this.streamHandle);
+    }
+    this.streamHandle = 0;
+    this.currentPlayable = null;
+    this.currentTrack = null;
+    this.manuallyStopping = false;
+
+    if (stoppedTrack) {
+      this.emitPlaybackEvent({
+        type: "track-stopped",
+        reason,
+        track: stoppedTrack,
+        position: stoppedPosition,
+        duration: stoppedDuration,
+      });
+    }
+  }
+
+  private emitPlaybackEvent(event: BassPlaybackEvent): void {
+    this.listeners.forEach((listener) => {
+      try {
+        listener(event);
+      } catch (error) {
+        this.loadError =
+          error instanceof Error ? error.message : String(error);
+      }
+    });
   }
 
   private isPlaying(): boolean {
