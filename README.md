@@ -76,8 +76,8 @@ On install login to you Plex account and select your server[^1], that is all.
 - [x] Server select
   - [ ] Change selected server
   - [x] Select libraries
-- [ ] Sessions support
-- [ ] Timeline support
+- [x] Sessions support
+- [x] Timeline support
 - [ ] Transcoding
 - [ ] Sync
 - [ ] TV Support (Probably never happening)
