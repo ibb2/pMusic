@@ -218,7 +218,7 @@ export class PlexTimelineReporter {
       );
 
       if (this.isTerminationResponse(response)) {
-        this.handleRemoteTermination();
+        await this.handleRemoteTermination(track, sessionId);
       }
     } catch {
       // Timeline reporting must not interrupt local playback.
@@ -361,13 +361,28 @@ export class PlexTimelineReporter {
     );
   }
 
-  private handleRemoteTermination(): void {
+  private async handleRemoteTermination(
+    track: PlayerTrack,
+    sessionId: string,
+  ): Promise<void> {
     if (this.handlingTermination) return;
 
     this.handlingTermination = true;
     this.stopHeartbeat();
-    this.activeSession = null;
+    const status = this.bass.getPlaybackStatus();
     this.bass.stopFromRemote();
+    try {
+      await this.fetchTimeline(
+        track,
+        "stopped",
+        status.position,
+        status.duration || secondsFromMilliseconds(track.duration),
+        sessionId,
+      );
+    } catch {
+      // The server may already have terminated the session; local stop still wins.
+    }
+    this.activeSession = null;
     this.handlingTermination = false;
   }
 
