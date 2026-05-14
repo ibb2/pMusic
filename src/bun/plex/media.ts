@@ -44,17 +44,21 @@ export class MediaService {
   ) {}
 
   getPlaybackSettings(): PlaybackSettings {
-    return (
-      (this.db.get("playback") as PlaybackSettings | null) ?? {
-        useOriginalFileUrl: true,
-        enableUltraBlur: true,
-      }
-    );
+    return {
+      useOriginalFileUrl: true,
+      enableUltraBlur: true,
+      enableTimelineReporting: true,
+      ...((this.db.get("playback") as PlaybackSettings | null) ?? {}),
+    };
   }
 
   setPlaybackSettings(settings: PlaybackSettings): PlaybackSettings {
-    this.db.set("playback", settings);
-    return settings;
+    const next = {
+      ...this.getPlaybackSettings(),
+      ...settings,
+    };
+    this.db.set("playback", next);
+    return next;
   }
 
   async getAlbumsPage(cursor = "", pageSize = 20): Promise<unknown> {
