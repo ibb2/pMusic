@@ -1,72 +1,92 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+export type UltraBlurValue =
+  | string
+  | {
+      light: string;
+      dark: string;
+    };
 
 type UltraBlurContextType = {
-  ultraBlurUrl: string | null
-  setUltraBlurUrl: (url: string | null, sourceId: string) => void
-  enabled: boolean
-  setEnabled: (enabled: boolean) => void
-}
+  ultraBlur: UltraBlurValue | null;
+  setUltraBlur: (blur: UltraBlurValue | null, sourceId: string) => void;
+  enabled: boolean;
+  setEnabled: (enabled: boolean) => void;
+};
 
 const UltraBlurContext = createContext<UltraBlurContextType>({
-  ultraBlurUrl: null,
-  setUltraBlurUrl: () => {},
+  ultraBlur: null,
+  setUltraBlur: () => {},
   enabled: true,
   setEnabled: () => {},
-})
+});
 
 export function UltraBlurProvider({ children }: { children: React.ReactNode }) {
-  const [ultraBlurUrl, setUltraBlurUrlRaw] = useState<string | null>(null)
-  const [enabled, setEnabled] = useState(true)
-  const currentSourceRef = useRef<string | null>(null)
+  const [ultraBlur, setUltraBlurRaw] = useState<UltraBlurValue | null>(null);
+  const [enabled, setEnabled] = useState(true);
+  const currentSourceRef = useRef<string | null>(null);
 
-  const setUltraBlurUrl = useCallback((url: string | null, sourceId: string) => {
-    if (url === null) {
-      if (currentSourceRef.current === sourceId) {
-        setUltraBlurUrlRaw(null)
-        currentSourceRef.current = null
+  const setUltraBlur = useCallback(
+    (blur: UltraBlurValue | null, sourceId: string) => {
+      if (blur === null) {
+        if (currentSourceRef.current === sourceId) {
+          setUltraBlurRaw(null);
+          currentSourceRef.current = null;
+        }
+        return;
       }
-      return
-    }
-    currentSourceRef.current = sourceId
-    setUltraBlurUrlRaw(url)
-  }, [])
+      currentSourceRef.current = sourceId;
+      setUltraBlurRaw(blur);
+    },
+    [],
+  );
 
   useEffect(() => {
     window.api.settings
       .getPlayback()
       .then((settings) => {
-        setEnabled(settings.enableUltraBlur !== false)
+        setEnabled(settings.enableUltraBlur !== false);
       })
       .catch(() => {
-        setEnabled(true)
-      })
-  }, [])
+        setEnabled(true);
+      });
+  }, []);
 
   return (
     <UltraBlurContext.Provider
-      value={{ ultraBlurUrl, setUltraBlurUrl, enabled, setEnabled }}
+      value={{ ultraBlur, setUltraBlur, enabled, setEnabled }}
     >
       {children}
     </UltraBlurContext.Provider>
-  )
+  );
 }
 
 export function useUltraBlur() {
-  return useContext(UltraBlurContext)
+  return useContext(UltraBlurContext);
 }
 
 export function usePageUltraBlur(sourceId: string) {
-  const { setUltraBlurUrl, enabled, ultraBlurUrl } = useUltraBlur()
+  const { setUltraBlur, enabled, ultraBlur } = useUltraBlur();
 
-  const setBlur = useCallback((url: string | null) => {
-    setUltraBlurUrl(url, sourceId)
-  }, [setUltraBlurUrl, sourceId])
+  const setBlur = useCallback(
+    (blur: UltraBlurValue | null) => {
+      setUltraBlur(blur, sourceId);
+    },
+    [setUltraBlur, sourceId],
+  );
 
   useEffect(() => {
     return () => {
-      setBlur(null)
-    }
-  }, [sourceId, setBlur])
+      setBlur(null);
+    };
+  }, [sourceId, setBlur]);
 
-  return { setBlur, enabled, ultraBlurUrl }
+  return { setBlur, enabled, ultraBlur };
 }

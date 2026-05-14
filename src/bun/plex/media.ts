@@ -32,6 +32,23 @@ type HomeData = {
   playlists: Array<Record<string, any>>;
 };
 
+type UltraBlurVariantUrls = {
+  light: string;
+  dark: string;
+};
+
+type RgbColor = {
+  r: number;
+  g: number;
+  b: number;
+};
+
+type HslColor = {
+  h: number;
+  s: number;
+  l: number;
+};
+
 const PLEX_REQUEST_TIMEOUT_MS = 8_000;
 
 export class MediaService {
@@ -240,7 +257,7 @@ export class MediaService {
     const album = await this.fetchMetadataItem(ratingKey);
     const [tracks, ultraBlur] = await Promise.all([
       this.fetchMetadataChildren(ratingKey),
-      this.getUltraBlur(album.art || album.thumb, `album-${ratingKey}`),
+      this.getUltraBlur(album.thumb || album.art, `album-${ratingKey}`),
     ]);
     const artistKey =
       album.parentRatingKey || this.extractRatingKey(album.parentKey);
@@ -299,7 +316,7 @@ export class MediaService {
   async getUltraBlur(
     imagePath: string | null,
     cacheBuster?: string,
-  ): Promise<string | null> {
+  ): Promise<UltraBlurVariantUrls | null> {
     if (!imagePath) return null;
 
     try {
@@ -309,17 +326,221 @@ export class MediaService {
       const blurColors = colors.MediaContainer?.UltraBlurColors?.[0];
       if (!blurColors) return null;
 
-      const ultraBlurImagePath = `/services/ultrablur/image?topLeft=${blurColors.topLeft}&topRight=${blurColors.topRight}&bottomLeft=${blurColors.bottomLeft}&bottomRight=${blurColors.bottomRight}&width=1920&height=1080&noise=1`;
+      const variants = this.buildPlexampUltraBlurColors(blurColors);
+      const light = this.ultraBlurImageUrl(variants.light, cacheBuster);
+      const dark = this.ultraBlurImageUrl(variants.dark, cacheBuster);
+      if (!light || !dark) return null;
 
-      return this.plexUrl("/photo/:/transcode", {
-        url: ultraBlurImagePath,
-        width: "1920",
-        height: "1080",
-        ...(cacheBuster ? { v: cacheBuster } : {}),
-      });
+      return { light, dark };
     } catch {
       return null;
     }
+  }
+
+  private ultraBlurImageUrl(
+    colors: {
+      topLeft: string;
+      topRight: string;
+      bottomLeft: string;
+      bottomRight: string;
+    },
+    cacheBuster?: string,
+  ): string | null {
+    const params = new URLSearchParams({
+      topLeft: colors.topLeft,
+      topRight: colors.topRight,
+      bottomLeft: colors.bottomLeft,
+      bottomRight: colors.bottomRight,
+      width: "1920",
+      height: "1080",
+      noise: "1",
+    });
+
+    return this.plexUrl("/photo/:/transcode", {
+      url: `/services/ultrablur/image?${params.toString()}`,
+      width: "1920",
+      height: "1080",
+      ...(cacheBuster ? { v: cacheBuster } : {}),
+    });
+  }
+
+  private buildPlexampUltraBlurColors(colors: {
+    topLeft: string;
+    topRight: string;
+    bottomLeft: string;
+    bottomRight: string;
+  }): {
+    light: {
+      topLeft: string;
+      topRight: string;
+      bottomLeft: string;
+      bottomRight: string;
+    };
+    dark: {
+      topLeft: string;
+      topRight: string;
+      bottomLeft: string;
+      bottomRight: string;
+    };
+  } {
+    const corners = [
+      colors.topLeft,
+      colors.topRight,
+      colors.bottomLeft,
+      colors.bottomRight,
+    ]
+      .map((color) => this.parseHexColor(color))
+      .filter((color): color is RgbColor => color !== null);
+
+    if (corners.length === 0) {
+      return {
+        light: colors,
+        dark: colors,
+      };
+    }
+
+    const average = corners.reduce<RgbColor>(
+      (sum, color) => ({
+        r: sum.r + color.r / corners.length,
+        g: sum.g + color.g / corners.length,
+        b: sum.b + color.b / corners.length,
+      }),
+      { r: 0, g: 0, b: 0 },
+    );
+    const averageHsl = this.rgbToHsl(average);
+    const lightBase = this.hslToRgb({
+      h: averageHsl.h,
+      s: this.clamp(averageHsl.s * 0.68, 0.36, 0.5),
+      l: 0.9,
+    });
+    const darkBase = this.hslToRgb({
+      h: averageHsl.h,
+      s: this.clamp(averageHsl.s * 1.2, 0.38, 0.62),
+      l: 0.31,
+    });
+    const cornerNames = [
+      "topLeft",
+      "topRight",
+      "bottomLeft",
+      "bottomRight",
+    ] as const;
+
+    const themed = cornerNames.reduce(
+      (acc, name) => {
+        const original = this.parseHexColor(colors[name]) ?? average;
+        acc.light[name] = this.rgbToHex(this.mixRgb(lightBase, original, 0.08));
+        acc.dark[name] = this.rgbToHex(this.mixRgb(darkBase, original, 0.18));
+        return acc;
+      },
+      {
+        light: {
+          topLeft: "",
+          topRight: "",
+          bottomLeft: "",
+          bottomRight: "",
+        },
+        dark: {
+          topLeft: "",
+          topRight: "",
+          bottomLeft: "",
+          bottomRight: "",
+        },
+      },
+    );
+
+    return themed;
+  }
+
+  private parseHexColor(color: string): RgbColor | null {
+    const normalized = color.replace(/^#/, "").trim();
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return null;
+
+    return {
+      r: Number.parseInt(normalized.slice(0, 2), 16),
+      g: Number.parseInt(normalized.slice(2, 4), 16),
+      b: Number.parseInt(normalized.slice(4, 6), 16),
+    };
+  }
+
+  private rgbToHex(color: RgbColor): string {
+    return [color.r, color.g, color.b]
+      .map((component) =>
+        Math.round(this.clamp(component, 0, 255))
+          .toString(16)
+          .padStart(2, "0"),
+      )
+      .join("");
+  }
+
+  private mixRgb(
+    base: RgbColor,
+    accent: RgbColor,
+    accentAmount: number,
+  ): RgbColor {
+    const baseAmount = 1 - accentAmount;
+    return {
+      r: base.r * baseAmount + accent.r * accentAmount,
+      g: base.g * baseAmount + accent.g * accentAmount,
+      b: base.b * baseAmount + accent.b * accentAmount,
+    };
+  }
+
+  private rgbToHsl({ r, g, b }: RgbColor): HslColor {
+    const red = r / 255;
+    const green = g / 255;
+    const blue = b / 255;
+    const max = Math.max(red, green, blue);
+    const min = Math.min(red, green, blue);
+    const lightness = (max + min) / 2;
+
+    if (max === min) {
+      return { h: 0, s: 0, l: lightness };
+    }
+
+    const delta = max - min;
+    const saturation =
+      lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+    let hue = 0;
+
+    if (max === red) {
+      hue = (green - blue) / delta + (green < blue ? 6 : 0);
+    } else if (max === green) {
+      hue = (blue - red) / delta + 2;
+    } else {
+      hue = (red - green) / delta + 4;
+    }
+
+    return { h: hue / 6, s: saturation, l: lightness };
+  }
+
+  private hslToRgb({ h, s, l }: HslColor): RgbColor {
+    if (s === 0) {
+      const value = l * 255;
+      return { r: value, g: value, b: value };
+    }
+
+    const hueToRgb = (p: number, q: number, t: number) => {
+      let next = t;
+      if (next < 0) next += 1;
+      if (next > 1) next -= 1;
+      if (next < 1 / 6) return p + (q - p) * 6 * next;
+      if (next < 1 / 2) return q;
+      if (next < 2 / 3) return p + (q - p) * (2 / 3 - next) * 6;
+      return p;
+    };
+
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+
+    return {
+      r: hueToRgb(p, q, h + 1 / 3) * 255,
+      g: hueToRgb(p, q, h) * 255,
+      b: hueToRgb(p, q, h - 1 / 3) * 255,
+    };
+  }
+
+  private clamp(value: number, min: number, max: number): number {
+    return Math.min(Math.max(value, min), max);
   }
 
   async getArtistAlbums(ratingKey: string): Promise<unknown[]> {

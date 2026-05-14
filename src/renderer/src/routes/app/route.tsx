@@ -66,20 +66,28 @@ function AppLayoutComponent() {
 }
 
 function UltraBlurBackground() {
-  const { ultraBlurUrl, enabled } = useUltraBlur();
-  if (!ultraBlurUrl || !enabled) return null;
+  const { ultraBlur, enabled } = useUltraBlur();
+  if (!ultraBlur || !enabled) return null;
+
+  const lightUrl = typeof ultraBlur === "string" ? ultraBlur : ultraBlur.light;
+  const darkUrl = typeof ultraBlur === "string" ? ultraBlur : ultraBlur.dark;
 
   return (
     <>
       <div
-        key={ultraBlurUrl}
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700"
-        style={{ backgroundImage: `url(${ultraBlurUrl})` }}
+        key={`light-${lightUrl}`}
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-100 transition-opacity duration-700 dark:opacity-0"
+        style={{ backgroundImage: `url(${lightUrl})` }}
+      />
+      <div
+        key={`dark-${darkUrl}`}
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-700 dark:opacity-100"
+        style={{ backgroundImage: `url(${darkUrl})` }}
       />
       <div
         className={cn(
           "absolute inset-0 z-[1] pointer-events-none transition-opacity duration-700",
-          "bg-white/50 dark:bg-black/20"
+          "bg-white/5 dark:bg-black/10",
         )}
       />
     </>

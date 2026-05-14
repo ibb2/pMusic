@@ -37,8 +37,8 @@ export function TopBar() {
   const canGoBack = useCanGoBack();
   const routerState = useRouterState();
   const { theme, setTheme } = useTheme();
-  const { ultraBlurUrl, enabled } = useUltraBlur();
-  const hasUltraBlur = !!ultraBlurUrl && enabled;
+  const { ultraBlur, enabled } = useUltraBlur();
+  const hasUltraBlur = !!ultraBlur && enabled;
 
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile"],
