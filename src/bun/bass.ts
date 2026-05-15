@@ -14,6 +14,7 @@ const BASS_ACTIVE_STOPPED = 0;
 const BASS_ACTIVE_PLAYING = 1;
 const BASS_ACTIVE_STALLED = 2;
 const BASS_ACTIVE_PAUSED = 3;
+const BASS_QWORD_FAILED = 0xffffffffffffffffn;
 const PREVIOUS_TRACK_THRESHOLD_SECONDS = 3;
 
 type PlayableTrack = {
@@ -202,8 +203,7 @@ export class BassManager {
     if (!this.currentPlayable) return;
     const previousPlayable = this.previousPlayables.at(-1);
     if (
-      previousPlayable?.track.ratingKey ===
-      this.currentPlayable.track.ratingKey
+      previousPlayable?.track.ratingKey === this.currentPlayable.track.ratingKey
     )
       return;
     this.previousPlayables.push(this.currentPlayable);
@@ -613,8 +613,7 @@ export class BassManager {
       try {
         listener(event);
       } catch (error) {
-        this.loadError =
-          error instanceof Error ? error.message : String(error);
+        this.loadError = error instanceof Error ? error.message : String(error);
       }
     });
   }
@@ -631,11 +630,12 @@ export class BassManager {
       this.streamHandle,
       BASS_POS_BYTE,
     );
-    if (position < 0n) return 0;
-    return this.library.symbols.BASS_ChannelBytes2Seconds(
+    if (position === BASS_QWORD_FAILED) return 0;
+    const seconds = this.library.symbols.BASS_ChannelBytes2Seconds(
       this.streamHandle,
       position,
     );
+    return Number.isFinite(seconds) && seconds >= 0 ? seconds : 0;
   }
 
   private getDuration(): number {
@@ -648,11 +648,12 @@ export class BassManager {
       this.streamHandle,
       BASS_POS_BYTE,
     );
-    if (length < 0n) return trackDuration;
-    return this.library.symbols.BASS_ChannelBytes2Seconds(
+    if (length === BASS_QWORD_FAILED || length === 0n) return trackDuration;
+    const seconds = this.library.symbols.BASS_ChannelBytes2Seconds(
       this.streamHandle,
       length,
     );
+    return Number.isFinite(seconds) && seconds > 0 ? seconds : trackDuration;
   }
 
   private resolveLibraryPath(): string | null {

@@ -805,7 +805,10 @@ export class MediaService {
     const transcode = this.getPlaybackSettings().transcodeAudio
       ? this.transcodeUrl(track)
       : null;
-    const streamUrl = transcode?.url ?? this.originalFileUrl(track);
+
+    const streamUrl = transcode ?? this.originalFileUrl(track);
+
+    console.log("Url", streamUrl);
 
     if (!streamUrl)
       throw new Error(
@@ -836,33 +839,26 @@ export class MediaService {
     return this.plexUrl(part?.key);
   }
 
-  private transcodeUrl(
-    track: PlexMetadata,
-  ): { url: string; sessionId: string } | null {
-    const sessionId = randomUUID();
-
-    const url = this.plexUrl("/audio/:/transcode/universal/start", {
+  private transcodeUrl(track: PlexMetadata): string | null {
+    return this.plexUrl("/music/:/transcode/universal/start.m3u8", {
       path: `/library/metadata/${track.ratingKey}`,
-      protocol: "http",
+      protocol: "hls",
+      hasMDE: "1",
       directPlay: "0",
       directStream: "0",
-      directStreamAudio: "0",
+      directStreamAudio: "1", // allow direct stream if codec matches, transcode if not
       download: "0",
       musicBitrate: "320",
-      session: sessionId,
       "X-Plex-Product": this.auth.plexProduct,
       "X-Plex-Client-Identifier": this.auth.plexClientId,
       "X-Plex-Device": deviceName(),
       "X-Plex-Device-Name": deviceName(),
       "X-Plex-Platform": platformName(),
       "X-Plex-Platform-Version": release(),
-      "X-Plex-Session-Identifier": sessionId,
       "X-Plex-Client-Profile-Name": "generic",
       "X-Plex-Client-Profile-Extra":
-        "add-transcode-target(type=musicProfile&context=streaming&protocol=http&container=ogg&audioCodec=opus)",
+        "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=mpegts&audioCodec=aac,mp3)",
     });
-
-    return url ? { url, sessionId } : null;
   }
 
   private async fetchPlex(
