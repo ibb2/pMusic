@@ -72,8 +72,8 @@ export function SettingsPage() {
     }, 1500);
   };
 
-  const setUseOriginalFileUrl = async (useOriginalFileUrl: boolean) => {
-    const next = { ...playbackSettings, useOriginalFileUrl };
+  const setTranscodeAudio = async (transcodeAudio: boolean) => {
+    const next = { ...playbackSettings, transcodeAudio };
     setPlaybackSettings(next);
     await window.api.settings.setPlayback(next).catch((e) => console.error(e));
     setPlaybackUpdated(true);
@@ -192,9 +192,9 @@ export function SettingsPage() {
             <div className="border border-zinc-300 dark:border-zinc-700 rounded-lg p-6 space-y-6">
               <div className="flex items-center justify-between gap-6">
                 <div>
-                  <Label className="mb-2 block">Use original Plex file</Label>
+                  <Label className="mb-2 block">Transcode audio</Label>
                   <Label className="mb-2 block text-sm text-muted-foreground">
-                    Play the Plex media URL directly.
+                    Transcode audio to OPUS 320 Kbps.
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
@@ -204,8 +204,8 @@ export function SettingsPage() {
                     </p>
                   )}
                   <Switch
-                    checked={playbackSettings.useOriginalFileUrl}
-                    onCheckedChange={setUseOriginalFileUrl}
+                    checked={playbackSettings.transcodeAudio}
+                    onCheckedChange={setTranscodeAudio}
                     aria-label="Use original Plex file"
                   />
                 </div>

@@ -64,7 +64,7 @@ export class MediaService {
 
   getPlaybackSettings(): PlaybackSettings {
     return {
-      useOriginalFileUrl: true,
+      transcodeAudio: false,
       enableUltraBlur: true,
       enableTimelineReporting: true,
       ...((this.db.get("playback") as PlaybackSettings | null) ?? {}),
@@ -802,9 +802,9 @@ export class MediaService {
   private async toPlayableTrack(
     track: PlexMetadata,
   ): Promise<{ track: PlayerTrack; streamUrl: string }> {
-    const streamUrl = this.getPlaybackSettings().useOriginalFileUrl
-      ? this.originalFileUrl(track)
-      : this.transcodeUrl(track);
+    const streamUrl = this.getPlaybackSettings().transcodeAudio
+      ? this.transcodeUrl(track)
+      : this.originalFileUrl(track);
 
     console.log("URL ", streamUrl);
 
@@ -847,14 +847,12 @@ export class MediaService {
       directStreamAudio: "0",
       download: "0",
       musicBitrate: "320",
-      session: sessionId,
       "X-Plex-Product": this.auth.plexProduct,
       "X-Plex-Client-Identifier": this.auth.plexClientId,
       "X-Plex-Device": deviceName(),
       "X-Plex-Device-Name": deviceName(),
       "X-Plex-Platform": platformName(),
       "X-Plex-Platform-Version": release(),
-      "X-Plex-Session-Identifier": sessionId,
       "X-Plex-Client-Profile-Name": "generic",
       "X-Plex-Client-Profile-Extra":
         "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=ogg&audioCodec=opus)",

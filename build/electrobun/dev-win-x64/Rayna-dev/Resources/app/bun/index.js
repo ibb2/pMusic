@@ -235199,7 +235199,7 @@ class MediaService {
   }
   getPlaybackSettings() {
     return {
-      useOriginalFileUrl: true,
+      transcodeAudio: false,
       enableUltraBlur: true,
       enableTimelineReporting: true,
       ...this.db.get("playback") ?? {}
@@ -235723,7 +235723,7 @@ class MediaService {
     return data.MediaContainer?.Metadata || [];
   }
   async toPlayableTrack(track) {
-    const streamUrl = this.getPlaybackSettings().useOriginalFileUrl ? this.originalFileUrl(track) : this.transcodeUrl(track);
+    const streamUrl = this.getPlaybackSettings().transcodeAudio ? this.transcodeUrl(track) : this.originalFileUrl(track);
     console.log("URL ", streamUrl);
     if (!streamUrl)
       throw new Error(`Track ${track.ratingKey} does not have a playable stream`);
@@ -235755,7 +235755,6 @@ class MediaService {
       directStreamAudio: "0",
       download: "0",
       musicBitrate: "320",
-      session: sessionId,
       "X-Plex-Product": this.auth.plexProduct,
       "X-Plex-Client-Identifier": this.auth.plexClientId,
       "X-Plex-Device": deviceName(),
