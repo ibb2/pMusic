@@ -234536,11 +234536,13 @@ class BassManager {
       return;
     const position = this.getPosition();
     const duration = this.getDuration();
-    const reachedEnd = duration <= 0 || position >= Math.max(0, duration - 0.75);
+    const reachedEnd = duration > 0 && position >= Math.max(0, duration - 0.75);
     if (reachedEnd) {
       this.stopCurrent("ended");
       this.playNext();
+      return;
     }
+    this.stopCurrent("failed");
   }
   stopCurrent(reason) {
     if (!this.library)
@@ -234592,11 +234594,12 @@ class BassManager {
     return this.library.symbols.BASS_ChannelBytes2Seconds(this.streamHandle, position);
   }
   getDuration() {
+    const trackDuration = this.currentTrack?.duration ? this.currentTrack.duration / 1000 : 0;
     if (!this.library || !this.streamHandle)
-      return 0;
+      return trackDuration;
     const length = this.library.symbols.BASS_ChannelGetLength(this.streamHandle, BASS_POS_BYTE);
     if (length < 0n)
-      return 0;
+      return trackDuration;
     return this.library.symbols.BASS_ChannelBytes2Seconds(this.streamHandle, length);
   }
   resolveLibraryPath() {
@@ -235723,8 +235726,8 @@ class MediaService {
     return data.MediaContainer?.Metadata || [];
   }
   async toPlayableTrack(track) {
-    const streamUrl = this.getPlaybackSettings().transcodeAudio ? this.transcodeUrl(track) : this.originalFileUrl(track);
-    console.log("URL ", streamUrl);
+    const transcode = this.getPlaybackSettings().transcodeAudio ? this.transcodeUrl(track) : null;
+    const streamUrl = transcode?.url ?? this.originalFileUrl(track);
     if (!streamUrl)
       throw new Error(`Track ${track.ratingKey} does not have a playable stream`);
     return {
@@ -235735,6 +235738,7 @@ class MediaService {
         albumRatingKey: track.parentRatingKey || this.extractRatingKey(track.parentKey),
         artistRatingKey: track.grandparentRatingKey || this.extractRatingKey(track.grandparentKey),
         ratingKey: String(track.ratingKey || ""),
+        plexSessionId: transcode?.sessionId,
         duration: track.duration,
         thumb: this.plexUrl(track.thumb)
       },
@@ -235747,14 +235751,15 @@ class MediaService {
   }
   transcodeUrl(track) {
     const sessionId = randomUUID2();
-    return this.plexUrl("/audio/:/transcode/universal/start", {
+    const url = this.plexUrl("/audio/:/transcode/universal/start", {
       path: `/library/metadata/${track.ratingKey}`,
-      protocol: "hls",
+      protocol: "http",
       directPlay: "0",
       directStream: "0",
       directStreamAudio: "0",
       download: "0",
       musicBitrate: "320",
+      session: sessionId,
       "X-Plex-Product": this.auth.plexProduct,
       "X-Plex-Client-Identifier": this.auth.plexClientId,
       "X-Plex-Device": deviceName(),
@@ -235763,8 +235768,9 @@ class MediaService {
       "X-Plex-Platform-Version": release(),
       "X-Plex-Session-Identifier": sessionId,
       "X-Plex-Client-Profile-Name": "generic",
-      "X-Plex-Client-Profile-Extra": "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=ogg&audioCodec=opus)"
+      "X-Plex-Client-Profile-Extra": "add-transcode-target(type=musicProfile&context=streaming&protocol=http&container=ogg&audioCodec=opus)"
     });
+    return url ? { url, sessionId } : null;
   }
   async fetchPlex(path, params = {}) {
     const server = await this.getSelectedServer();
@@ -235953,7 +235959,7 @@ class PlexTimelineReporter {
   startSession(track, position, duration) {
     this.stopHeartbeat();
     this.activeSession = {
-      sessionId: this.generateSessionId(),
+      sessionId: track.plexSessionId || this.generateSessionId(),
       track,
       state: "playing",
       pausedTicks: 0
@@ -235983,7 +235989,7 @@ class PlexTimelineReporter {
       return this.activeSession;
     }
     this.activeSession = {
-      sessionId: this.generateSessionId(),
+      sessionId: track.plexSessionId || this.generateSessionId(),
       track,
       state: "playing",
       pausedTicks: 0
@@ -236007,6 +236013,12 @@ class PlexTimelineReporter {
         session.pausedTicks = 0;
       }
       const status = this.bass.getPlaybackStatus();
+      if (!status.current_track || status.current_track.ratingKey !== session.track.ratingKey) {
+        this.stopHeartbeat();
+        this.activeSession = null;
+        this.report("stopped", session.track, status.position, status.duration, session.sessionId);
+        return;
+      }
       this.report(session.state, session.track, status.position, status.duration);
     }, PLAYING_HEARTBEAT_MS);
   }

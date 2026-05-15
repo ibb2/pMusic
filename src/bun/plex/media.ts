@@ -802,11 +802,10 @@ export class MediaService {
   private async toPlayableTrack(
     track: PlexMetadata,
   ): Promise<{ track: PlayerTrack; streamUrl: string }> {
-    const streamUrl = this.getPlaybackSettings().transcodeAudio
+    const transcode = this.getPlaybackSettings().transcodeAudio
       ? this.transcodeUrl(track)
-      : this.originalFileUrl(track);
-
-    console.log("URL ", streamUrl);
+      : null;
+    const streamUrl = transcode?.url ?? this.originalFileUrl(track);
 
     if (!streamUrl)
       throw new Error(
@@ -824,6 +823,7 @@ export class MediaService {
           track.grandparentRatingKey ||
           this.extractRatingKey(track.grandparentKey),
         ratingKey: String(track.ratingKey || ""),
+        plexSessionId: transcode?.sessionId,
         duration: track.duration,
         thumb: this.plexUrl(track.thumb),
       },
@@ -836,27 +836,33 @@ export class MediaService {
     return this.plexUrl(part?.key);
   }
 
-  private transcodeUrl(track: PlexMetadata): string | null {
+  private transcodeUrl(
+    track: PlexMetadata,
+  ): { url: string; sessionId: string } | null {
     const sessionId = randomUUID();
 
-    return this.plexUrl("/audio/:/transcode/universal/start", {
+    const url = this.plexUrl("/audio/:/transcode/universal/start", {
       path: `/library/metadata/${track.ratingKey}`,
-      protocol: "hls",
+      protocol: "http",
       directPlay: "0",
       directStream: "0",
       directStreamAudio: "0",
       download: "0",
       musicBitrate: "320",
+      session: sessionId,
       "X-Plex-Product": this.auth.plexProduct,
       "X-Plex-Client-Identifier": this.auth.plexClientId,
       "X-Plex-Device": deviceName(),
       "X-Plex-Device-Name": deviceName(),
       "X-Plex-Platform": platformName(),
       "X-Plex-Platform-Version": release(),
+      "X-Plex-Session-Identifier": sessionId,
       "X-Plex-Client-Profile-Name": "generic",
       "X-Plex-Client-Profile-Extra":
-        "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=ogg&audioCodec=opus)",
+        "add-transcode-target(type=musicProfile&context=streaming&protocol=http&container=ogg&audioCodec=opus)",
     });
+
+    return url ? { url, sessionId } : null;
   }
 
   private async fetchPlex(

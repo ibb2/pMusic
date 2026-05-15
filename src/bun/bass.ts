@@ -21,7 +21,12 @@ type PlayableTrack = {
   streamUrl: string;
 };
 
-export type BassStopReason = "manual" | "replaced" | "ended" | "remote";
+export type BassStopReason =
+  | "manual"
+  | "replaced"
+  | "ended"
+  | "failed"
+  | "remote";
 
 export type BassPlaybackEvent =
   | {
@@ -563,13 +568,15 @@ export class BassManager {
 
     const position = this.getPosition();
     const duration = this.getDuration();
-    const reachedEnd =
-      duration <= 0 || position >= Math.max(0, duration - 0.75);
+    const reachedEnd = duration > 0 && position >= Math.max(0, duration - 0.75);
 
     if (reachedEnd) {
       this.stopCurrent("ended");
       this.playNext();
+      return;
     }
+
+    this.stopCurrent("failed");
   }
 
   private stopCurrent(reason: BassStopReason): void {
@@ -632,12 +639,16 @@ export class BassManager {
   }
 
   private getDuration(): number {
-    if (!this.library || !this.streamHandle) return 0;
+    const trackDuration = this.currentTrack?.duration
+      ? this.currentTrack.duration / 1000
+      : 0;
+    if (!this.library || !this.streamHandle) return trackDuration;
+
     const length = this.library.symbols.BASS_ChannelGetLength(
       this.streamHandle,
       BASS_POS_BYTE,
     );
-    if (length < 0n) return 0;
+    if (length < 0n) return trackDuration;
     return this.library.symbols.BASS_ChannelBytes2Seconds(
       this.streamHandle,
       length,

@@ -112,7 +112,7 @@ export class PlexTimelineReporter {
   ): void {
     this.stopHeartbeat();
     this.activeSession = {
-      sessionId: this.generateSessionId(),
+      sessionId: track.plexSessionId || this.generateSessionId(),
       track,
       state: "playing",
       pausedTicks: 0,
@@ -156,7 +156,7 @@ export class PlexTimelineReporter {
     }
 
     this.activeSession = {
-      sessionId: this.generateSessionId(),
+      sessionId: track.plexSessionId || this.generateSessionId(),
       track,
       state: "playing",
       pausedTicks: 0,
@@ -181,6 +181,22 @@ export class PlexTimelineReporter {
       }
 
       const status = this.bass.getPlaybackStatus();
+      if (
+        !status.current_track ||
+        status.current_track.ratingKey !== session.track.ratingKey
+      ) {
+        this.stopHeartbeat();
+        this.activeSession = null;
+        void this.report(
+          "stopped",
+          session.track,
+          status.position,
+          status.duration,
+          session.sessionId,
+        );
+        return;
+      }
+
       void this.report(
         session.state,
         session.track,
