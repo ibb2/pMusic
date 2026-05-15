@@ -17,6 +17,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { set } from "zod";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
@@ -29,13 +30,17 @@ export function SettingsPage() {
   );
   const [selectedServer, setSelectedServer] = useState<PlexServer | null>(null);
   const [playbackSettings, setPlaybackSettings] = useState<PlaybackSettings>({
-    useOriginalFileUrl: true,
+    transcodeAudio: true,
     enableUltraBlur: true,
     enableTimelineReporting: true,
   });
   const [loading, setLoading] = useState(true);
   const [updated, setUpdated] = useState(false);
   const [playbackUpdated, setPlaybackUpdated] = useState(false);
+  const [transcodeAudioUpdated, setTranscodeAudioUpdated] = useState(false);
+  const [UltraBlurUpdated, setUltraBlurUpdated] = useState(false);
+  const [timelineReportingUpdated, setTimelineReportingUpdated] =
+    useState(false);
 
   // queries
   const { isPending, error, data } = useQuery({
@@ -76,11 +81,11 @@ export function SettingsPage() {
     const next = { ...playbackSettings, transcodeAudio };
     setPlaybackSettings(next);
     await window.api.settings.setPlayback(next).catch((e) => console.error(e));
-    setPlaybackUpdated(true);
+    setTranscodeAudioUpdated(true);
 
     setTimeout(() => {
-      setPlaybackUpdated(false);
-    }, 1500);
+      setTranscodeAudioUpdated(false);
+    }, 1000);
   };
 
   const setEnableUltraBlur = async (enableUltraBlur: boolean) => {
@@ -88,11 +93,11 @@ export function SettingsPage() {
     setPlaybackSettings(next);
     setEnabled(enableUltraBlur);
     await window.api.settings.setPlayback(next).catch((e) => console.error(e));
-    setPlaybackUpdated(true);
+    setUltraBlurUpdated(true);
 
     setTimeout(() => {
-      setPlaybackUpdated(false);
-    }, 1500);
+      setUltraBlurUpdated(false);
+    }, 1000);
   };
 
   const setEnableTimelineReporting = async (
@@ -101,10 +106,10 @@ export function SettingsPage() {
     const next = { ...playbackSettings, enableTimelineReporting };
     setPlaybackSettings(next);
     await window.api.settings.setPlayback(next).catch((e) => console.error(e));
-    setPlaybackUpdated(true);
+    setTimelineReportingUpdated(true);
 
     setTimeout(() => {
-      setPlaybackUpdated(false);
+      setTimelineReportingUpdated(false);
     }, 1500);
   };
 
@@ -198,7 +203,7 @@ export function SettingsPage() {
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
-                  {playbackUpdated && (
+                  {transcodeAudioUpdated && (
                     <p className="text-green-700 dark:text-green-300">
                       Updated
                     </p>
@@ -218,7 +223,7 @@ export function SettingsPage() {
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
-                  {playbackUpdated && (
+                  {UltraBlurUpdated && (
                     <p className="text-green-700 dark:text-green-300">
                       Updated
                     </p>
@@ -238,7 +243,7 @@ export function SettingsPage() {
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
-                  {playbackUpdated && (
+                  {timelineReportingUpdated && (
                     <p className="text-green-700 dark:text-green-300">
                       Updated
                     </p>
