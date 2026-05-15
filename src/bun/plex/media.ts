@@ -1,4 +1,6 @@
 import { Buffer } from "node:buffer";
+import { randomUUID } from "node:crypto";
+import { hostname, release } from "node:os";
 import type { BassManager } from "../bass";
 import type { DatabaseManager } from "../database";
 import type Authentication from "./authentication";
@@ -803,6 +805,9 @@ export class MediaService {
     const streamUrl = this.getPlaybackSettings().useOriginalFileUrl
       ? this.originalFileUrl(track)
       : this.transcodeUrl(track);
+
+    console.log("URL ", streamUrl);
+
     if (!streamUrl)
       throw new Error(
         `Track ${track.ratingKey} does not have a playable stream`,
@@ -832,19 +837,27 @@ export class MediaService {
   }
 
   private transcodeUrl(track: PlexMetadata): string | null {
-    return this.plexUrl("/music/:/transcode/universal/start.m3u8", {
+    const sessionId = randomUUID();
+
+    return this.plexUrl("/audio/:/transcode/universal/start", {
       path: `/library/metadata/${track.ratingKey}`,
       protocol: "hls",
       directPlay: "0",
       directStream: "0",
       directStreamAudio: "0",
-      hasMDE: "1",
-      mediaIndex: "0",
-      partIndex: "0",
+      download: "0",
       musicBitrate: "320",
+      session: sessionId,
+      "X-Plex-Product": this.auth.plexProduct,
+      "X-Plex-Client-Identifier": this.auth.plexClientId,
+      "X-Plex-Device": deviceName(),
+      "X-Plex-Device-Name": deviceName(),
+      "X-Plex-Platform": platformName(),
+      "X-Plex-Platform-Version": release(),
+      "X-Plex-Session-Identifier": sessionId,
       "X-Plex-Client-Profile-Name": "generic",
       "X-Plex-Client-Profile-Extra":
-        "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=mpegts&audioCodec=aac,mp3)",
+        "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=ogg&audioCodec=opus)",
     });
   }
 
@@ -1008,4 +1021,16 @@ export class MediaService {
       return { sectionIndex: 0, offset: 0 };
     }
   }
+}
+
+function platformName(): string {
+  if (process.platform === "darwin") return "macOS";
+  if (process.platform === "win32") return "Windows";
+  if (process.platform === "linux") return "Linux";
+  return process.platform;
+}
+
+function deviceName(): string {
+  const name = hostname();
+  return name ? `Rayna on ${name}` : "Rayna";
 }

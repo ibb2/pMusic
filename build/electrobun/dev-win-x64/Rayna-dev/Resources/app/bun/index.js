@@ -234160,6 +234160,8 @@ var BASS_ATTRIB_VOL = 2;
 var BASS_ACTIVE_STOPPED = 0;
 var BASS_ACTIVE_PLAYING = 1;
 var BASS_ACTIVE_STALLED = 2;
+var PREVIOUS_TRACK_THRESHOLD_SECONDS = 3;
+
 class BassManager {
   library = null;
   loadError = null;
@@ -234167,12 +234169,15 @@ class BassManager {
   streamHandle = 0;
   pluginHandles = [];
   pluginStatuses = [];
+  previousPlayables = [];
+  currentPlayable = null;
   currentTrack = null;
   queue = [];
   volume = 1;
   volumeBeforeMute = 1;
   monitor = null;
   manuallyStopping = false;
+  listeners = new Set;
   libraryPath;
   constructor() {
     this.libraryPath = this.resolveLibraryPath();
@@ -234197,38 +234202,87 @@ class BassManager {
       volume: this.volume
     };
   }
+  getQueue() {
+    return {
+      previous_track: this.previousPlayables.at(-1)?.track ?? null,
+      current_track: this.currentTrack,
+      tracks: this.queue.map((item) => item.track)
+    };
+  }
+  onPlaybackEvent(listener) {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
   playTrack(track, streamUrl) {
-    this.stop();
+    this.rememberCurrentTrack();
+    this.stopCurrent("replaced");
     this.queue = [];
     this.playStream(track, streamUrl);
   }
   playTracks(tracks) {
-    this.stop();
+    this.rememberCurrentTrack();
+    this.stopCurrent("replaced");
     this.queue = tracks;
     this.playNext();
+  }
+  queueTrack(track, streamUrl) {
+    const item = { track, streamUrl };
+    if (!this.currentTrack && !this.streamHandle) {
+      this.playTracks([item]);
+      return;
+    }
+    this.queue.unshift(item);
+  }
+  replaceQueue(tracks) {
+    this.playTracks(tracks);
+  }
+  clearQueue() {
+    this.queue = [];
+  }
+  rememberCurrentTrack() {
+    if (!this.currentPlayable)
+      return;
+    const previousPlayable = this.previousPlayables.at(-1);
+    if (previousPlayable?.track.ratingKey === this.currentPlayable.track.ratingKey)
+      return;
+    this.previousPlayables.push(this.currentPlayable);
   }
   resume() {
     if (!this.library || !this.streamHandle)
       return;
-    this.library.symbols.BASS_ChannelPlay(this.streamHandle, false);
+    const resumed = this.library.symbols.BASS_ChannelPlay(this.streamHandle, false);
+    if (resumed && this.currentTrack) {
+      this.emitPlaybackEvent({
+        type: "state-changed",
+        state: "playing",
+        track: this.currentTrack,
+        position: this.getPosition(),
+        duration: this.getDuration()
+      });
+    }
   }
   pause() {
     if (!this.library || !this.streamHandle)
       return;
-    this.library.symbols.BASS_ChannelPause(this.streamHandle);
+    const position = this.getPosition();
+    const duration = this.getDuration();
+    const paused = this.library.symbols.BASS_ChannelPause(this.streamHandle);
+    if (paused && this.currentTrack) {
+      this.emitPlaybackEvent({
+        type: "state-changed",
+        state: "paused",
+        track: this.currentTrack,
+        position,
+        duration
+      });
+    }
   }
   stop() {
-    if (!this.library)
-      return;
-    this.manuallyStopping = true;
-    this.stopMonitor();
-    if (this.streamHandle) {
-      this.library.symbols.BASS_ChannelStop(this.streamHandle);
-      this.library.symbols.BASS_StreamFree(this.streamHandle);
-    }
-    this.streamHandle = 0;
-    this.currentTrack = null;
-    this.manuallyStopping = false;
+    this.stopCurrent("manual");
+  }
+  stopFromRemote() {
+    this.queue = [];
+    this.stopCurrent("remote");
   }
   playNext() {
     const next = this.queue.shift();
@@ -234239,7 +234293,19 @@ class BassManager {
     this.playStream(next.track, next.streamUrl);
   }
   playPrev() {
-    this.seek(0);
+    if (this.getPosition() > PREVIOUS_TRACK_THRESHOLD_SECONDS) {
+      this.seek(0);
+      return;
+    }
+    const previous = this.previousPlayables.pop();
+    if (!previous) {
+      this.seek(0);
+      return;
+    }
+    if (this.currentPlayable) {
+      this.queue.unshift(this.currentPlayable);
+    }
+    this.playStream(previous.track, previous.streamUrl, false);
   }
   seek(position) {
     if (!this.library || !this.streamHandle)
@@ -234250,6 +234316,16 @@ class BassManager {
     const seeked = this.library.symbols.BASS_ChannelSetPosition(this.streamHandle, bytes, BASS_POS_BYTE);
     if (!seeked) {
       this.loadError = `BASS_ChannelSetPosition failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
+      return;
+    }
+    if (this.currentTrack) {
+      this.emitPlaybackEvent({
+        type: "seeked",
+        track: this.currentTrack,
+        position: safePosition,
+        duration: this.getDuration(),
+        isPlaying: this.isPlaying()
+      });
     }
   }
   setVolume(volume) {
@@ -234407,22 +234483,21 @@ class BassManager {
       };
     });
   }
-  playStream(track, streamUrl) {
+  playStream(track, streamUrl, rememberCurrent = true) {
     if (!this.library || !this.initialized)
       return;
-    this.manuallyStopping = true;
-    this.stopMonitor();
-    if (this.streamHandle) {
-      this.library.symbols.BASS_ChannelStop(this.streamHandle);
-      this.library.symbols.BASS_StreamFree(this.streamHandle);
+    if (rememberCurrent) {
+      this.rememberCurrentTrack();
     }
-    this.manuallyStopping = false;
+    this.stopCurrent("replaced");
     this.streamHandle = this.library.symbols.BASS_StreamCreateURL(this.toCString(streamUrl), 0, 0, null, null);
     if (!this.streamHandle) {
       this.loadError = `BASS_StreamCreateURL failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
+      this.currentPlayable = null;
       this.currentTrack = null;
       return;
     }
+    this.currentPlayable = { track, streamUrl };
     this.currentTrack = track;
     this.setVolume(this.volume);
     const started = this.library.symbols.BASS_ChannelPlay(this.streamHandle, true);
@@ -234430,11 +234505,18 @@ class BassManager {
       this.loadError = `BASS_ChannelPlay failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
       this.library.symbols.BASS_StreamFree(this.streamHandle);
       this.streamHandle = 0;
+      this.currentPlayable = null;
       this.currentTrack = null;
       this.playNext();
       return;
     }
     this.startMonitor();
+    this.emitPlaybackEvent({
+      type: "track-started",
+      track,
+      position: this.getPosition(),
+      duration: this.getDuration()
+    });
   }
   startMonitor() {
     this.stopMonitor();
@@ -234456,9 +234538,44 @@ class BassManager {
     const duration = this.getDuration();
     const reachedEnd = duration <= 0 || position >= Math.max(0, duration - 0.75);
     if (reachedEnd) {
-      this.stopMonitor();
+      this.stopCurrent("ended");
       this.playNext();
     }
+  }
+  stopCurrent(reason) {
+    if (!this.library)
+      return;
+    const stoppedTrack = this.currentTrack;
+    const stoppedPosition = stoppedTrack ? this.getPosition() : 0;
+    const stoppedDuration = stoppedTrack ? this.getDuration() : 0;
+    this.manuallyStopping = true;
+    this.stopMonitor();
+    if (this.streamHandle) {
+      this.library.symbols.BASS_ChannelStop(this.streamHandle);
+      this.library.symbols.BASS_StreamFree(this.streamHandle);
+    }
+    this.streamHandle = 0;
+    this.currentPlayable = null;
+    this.currentTrack = null;
+    this.manuallyStopping = false;
+    if (stoppedTrack) {
+      this.emitPlaybackEvent({
+        type: "track-stopped",
+        reason,
+        track: stoppedTrack,
+        position: stoppedPosition,
+        duration: stoppedDuration
+      });
+    }
+  }
+  emitPlaybackEvent(event) {
+    this.listeners.forEach((listener) => {
+      try {
+        listener(event);
+      } catch (error2) {
+        this.loadError = error2 instanceof Error ? error2.message : String(error2);
+      }
+    });
   }
   isPlaying() {
     if (!this.library || !this.streamHandle)
@@ -234507,7 +234624,7 @@ class BassManager {
       resolve3(process.cwd(), "vendor", "bass"),
       resolve3(import.meta.dir, "..", "vendor", "bass")
     ];
-    const pluginNames = ["flac", "hls"];
+    const pluginNames = ["flac", "hls", "opus"];
     return pluginNames.map((name531) => {
       const candidates = roots.map((root) => {
         if (process.platform === "darwin")
@@ -235066,6 +235183,8 @@ var authentication_default = Authentication;
 
 // src/bun/plex/media.ts
 import { Buffer as Buffer3 } from "buffer";
+import { randomUUID as randomUUID2 } from "crypto";
+import { hostname, release } from "os";
 var PLEX_REQUEST_TIMEOUT_MS = 8000;
 
 class MediaService {
@@ -235079,14 +235198,20 @@ class MediaService {
     this.db = db;
   }
   getPlaybackSettings() {
-    return this.db.get("playback") ?? {
+    return {
       useOriginalFileUrl: true,
-      enableUltraBlur: true
+      enableUltraBlur: true,
+      enableTimelineReporting: true,
+      ...this.db.get("playback") ?? {}
     };
   }
   setPlaybackSettings(settings) {
-    this.db.set("playback", settings);
-    return settings;
+    const next = {
+      ...this.getPlaybackSettings(),
+      ...settings
+    };
+    this.db.set("playback", next);
+    return next;
   }
   async getAlbumsPage(cursor = "", pageSize = 20) {
     const sections = await this.getSelectedMusicSections();
@@ -235117,6 +235242,40 @@ class MediaService {
     }
     return {
       items: albums.map((album) => this.mapAlbum(album)),
+      nextCursor: sectionIndex < sections.length ? this.encodeCursor(sectionIndex, offset) : null,
+      prevCursor: initialOffset > 0 || initialSectionIndex > 0 ? this.encodeCursor(initialSectionIndex, Math.max(0, initialOffset - pageSize)) : null,
+      hasMore: sectionIndex < sections.length
+    };
+  }
+  async getArtistsPage(cursor = "", pageSize = 30) {
+    const sections = await this.getSelectedMusicSections();
+    let { sectionIndex, offset } = this.decodeCursor(cursor);
+    const initialSectionIndex = sectionIndex;
+    const initialOffset = offset;
+    const artists = [];
+    while (artists.length < pageSize && sectionIndex < sections.length) {
+      const section = sections[sectionIndex];
+      const data = await this.fetchPlex(`/library/sections/${section.key}/all`, {
+        type: "8",
+        "X-Plex-Container-Start": String(offset),
+        "X-Plex-Container-Size": String(pageSize - artists.length)
+      });
+      const artistData = data.MediaContainer?.Metadata || data.MediaContainer?.Directory || [];
+      if (artistData.length === 0) {
+        sectionIndex += 1;
+        offset = 0;
+        continue;
+      }
+      artists.push(...artistData);
+      offset += artistData.length;
+      const totalSize = data.MediaContainer?.totalSize || 0;
+      if (offset >= totalSize) {
+        sectionIndex += 1;
+        offset = 0;
+      }
+    }
+    return {
+      items: artists.map((artist) => this.mapArtist(artist)),
       nextCursor: sectionIndex < sections.length ? this.encodeCursor(sectionIndex, offset) : null,
       prevCursor: initialOffset > 0 || initialSectionIndex > 0 ? this.encodeCursor(initialSectionIndex, Math.max(0, initialOffset - pageSize)) : null,
       hasMore: sectionIndex < sections.length
@@ -235175,7 +235334,7 @@ class MediaService {
     const album = await this.fetchMetadataItem(ratingKey);
     const [tracks, ultraBlur] = await Promise.all([
       this.fetchMetadataChildren(ratingKey),
-      this.getUltraBlur(album.art || album.thumb, `album-${ratingKey}`)
+      this.getUltraBlur(album.thumb || album.art, `album-${ratingKey}`)
     ]);
     const artistKey = album.parentRatingKey || this.extractRatingKey(album.parentKey);
     return {
@@ -235194,6 +235353,11 @@ class MediaService {
         number: track.trackNumber,
         title: track.title,
         duration: track.duration,
+        albumThumb: this.plexUrl(track.thumb || album.thumb),
+        albumTitle: track.parentTitle || album.title,
+        albumRatingKey: track.parentRatingKey || this.extractRatingKey(track.parentKey) || album.ratingKey,
+        artistTitle: track.grandparentTitle || album.parentTitle,
+        artistRatingKey: track.grandparentRatingKey || this.extractRatingKey(track.grandparentKey) || artistKey,
         ratingKey: track.ratingKey
       }))
     };
@@ -235222,16 +235386,161 @@ class MediaService {
       const blurColors = colors.MediaContainer?.UltraBlurColors?.[0];
       if (!blurColors)
         return null;
-      const ultraBlurImagePath = `/services/ultrablur/image?topLeft=${blurColors.topLeft}&topRight=${blurColors.topRight}&bottomLeft=${blurColors.bottomLeft}&bottomRight=${blurColors.bottomRight}&width=1920&height=1080&noise=1`;
-      return this.plexUrl("/photo/:/transcode", {
-        url: ultraBlurImagePath,
-        width: "1920",
-        height: "1080",
-        ...cacheBuster ? { v: cacheBuster } : {}
-      });
+      const variants = this.buildPlexampUltraBlurColors(blurColors);
+      const light2 = this.ultraBlurImageUrl(variants.light, cacheBuster);
+      const dark = this.ultraBlurImageUrl(variants.dark, cacheBuster);
+      if (!light2 || !dark)
+        return null;
+      return { light: light2, dark };
     } catch {
       return null;
     }
+  }
+  ultraBlurImageUrl(colors, cacheBuster) {
+    const params = new URLSearchParams({
+      topLeft: colors.topLeft,
+      topRight: colors.topRight,
+      bottomLeft: colors.bottomLeft,
+      bottomRight: colors.bottomRight,
+      width: "1920",
+      height: "1080",
+      noise: "1"
+    });
+    return this.plexUrl("/photo/:/transcode", {
+      url: `/services/ultrablur/image?${params.toString()}`,
+      width: "1920",
+      height: "1080",
+      ...cacheBuster ? { v: cacheBuster } : {}
+    });
+  }
+  buildPlexampUltraBlurColors(colors) {
+    const corners = [
+      colors.topLeft,
+      colors.topRight,
+      colors.bottomLeft,
+      colors.bottomRight
+    ].map((color) => this.parseHexColor(color)).filter((color) => color !== null);
+    if (corners.length === 0) {
+      return {
+        light: colors,
+        dark: colors
+      };
+    }
+    const average = corners.reduce((sum, color) => ({
+      r: sum.r + color.r / corners.length,
+      g: sum.g + color.g / corners.length,
+      b: sum.b + color.b / corners.length
+    }), { r: 0, g: 0, b: 0 });
+    const averageHsl = this.rgbToHsl(average);
+    const lightBase = this.hslToRgb({
+      h: averageHsl.h,
+      s: this.clamp(averageHsl.s * 0.68, 0.36, 0.5),
+      l: 0.9
+    });
+    const darkBase = this.hslToRgb({
+      h: averageHsl.h,
+      s: this.clamp(averageHsl.s * 1.2, 0.38, 0.62),
+      l: 0.31
+    });
+    const cornerNames = [
+      "topLeft",
+      "topRight",
+      "bottomLeft",
+      "bottomRight"
+    ];
+    const themed = cornerNames.reduce((acc, name531) => {
+      const original = this.parseHexColor(colors[name531]) ?? average;
+      acc.light[name531] = this.rgbToHex(this.mixRgb(lightBase, original, 0.08));
+      acc.dark[name531] = this.rgbToHex(this.mixRgb(darkBase, original, 0.18));
+      return acc;
+    }, {
+      light: {
+        topLeft: "",
+        topRight: "",
+        bottomLeft: "",
+        bottomRight: ""
+      },
+      dark: {
+        topLeft: "",
+        topRight: "",
+        bottomLeft: "",
+        bottomRight: ""
+      }
+    });
+    return themed;
+  }
+  parseHexColor(color) {
+    const normalized = color.replace(/^#/, "").trim();
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized))
+      return null;
+    return {
+      r: Number.parseInt(normalized.slice(0, 2), 16),
+      g: Number.parseInt(normalized.slice(2, 4), 16),
+      b: Number.parseInt(normalized.slice(4, 6), 16)
+    };
+  }
+  rgbToHex(color) {
+    return [color.r, color.g, color.b].map((component) => Math.round(this.clamp(component, 0, 255)).toString(16).padStart(2, "0")).join("");
+  }
+  mixRgb(base, accent, accentAmount) {
+    const baseAmount = 1 - accentAmount;
+    return {
+      r: base.r * baseAmount + accent.r * accentAmount,
+      g: base.g * baseAmount + accent.g * accentAmount,
+      b: base.b * baseAmount + accent.b * accentAmount
+    };
+  }
+  rgbToHsl({ r, g, b }) {
+    const red = r / 255;
+    const green = g / 255;
+    const blue = b / 255;
+    const max = Math.max(red, green, blue);
+    const min = Math.min(red, green, blue);
+    const lightness = (max + min) / 2;
+    if (max === min) {
+      return { h: 0, s: 0, l: lightness };
+    }
+    const delta = max - min;
+    const saturation = lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+    let hue = 0;
+    if (max === red) {
+      hue = (green - blue) / delta + (green < blue ? 6 : 0);
+    } else if (max === green) {
+      hue = (blue - red) / delta + 2;
+    } else {
+      hue = (red - green) / delta + 4;
+    }
+    return { h: hue / 6, s: saturation, l: lightness };
+  }
+  hslToRgb({ h, s, l }) {
+    if (s === 0) {
+      const value = l * 255;
+      return { r: value, g: value, b: value };
+    }
+    const hueToRgb = (p2, q2, t) => {
+      let next = t;
+      if (next < 0)
+        next += 1;
+      if (next > 1)
+        next -= 1;
+      if (next < 1 / 6)
+        return p2 + (q2 - p2) * 6 * next;
+      if (next < 1 / 2)
+        return q2;
+      if (next < 2 / 3)
+        return p2 + (q2 - p2) * (2 / 3 - next) * 6;
+      return p2;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    return {
+      r: hueToRgb(p, q, h + 1 / 3) * 255,
+      g: hueToRgb(p, q, h) * 255,
+      b: hueToRgb(p, q, h - 1 / 3) * 255
+    };
+  }
+  clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
   }
   async getArtistAlbums(ratingKey) {
     let albums = await this.fetchMetadataChildren(ratingKey, { type: "9" });
@@ -235330,6 +235639,31 @@ class MediaService {
     this.bass.playTrack(playableTrack.track, playableTrack.streamUrl);
     return { status: "playing", track: playableTrack.track.title };
   }
+  getQueue() {
+    return this.bass.getQueue();
+  }
+  async queueAlbum(ratingKey) {
+    const tracks = await this.fetchMetadataChildren(ratingKey);
+    const playableTracks = await Promise.all(tracks.map((track) => this.toPlayableTrack(track)));
+    this.bass.replaceQueue(playableTracks);
+    return { status: "queued", count: playableTracks.length };
+  }
+  async queuePlaylist(ratingKey) {
+    const tracks = await this.fetchPlaylistItems(ratingKey);
+    const playableTracks = await Promise.all(tracks.map((track) => this.toPlayableTrack(track)));
+    this.bass.replaceQueue(playableTracks);
+    return { status: "queued", count: playableTracks.length };
+  }
+  async queueTrack(ratingKey) {
+    const track = await this.fetchMetadataItem(ratingKey);
+    const playableTrack = await this.toPlayableTrack(track);
+    this.bass.queueTrack(playableTrack.track, playableTrack.streamUrl);
+    return { status: "queued", track: playableTrack.track.title };
+  }
+  clearQueue() {
+    this.bass.clearQueue();
+    return { status: "cleared" };
+  }
   async getAlbumsFromSections({
     sort,
     limit
@@ -235390,12 +235724,14 @@ class MediaService {
   }
   async toPlayableTrack(track) {
     const streamUrl = this.getPlaybackSettings().useOriginalFileUrl ? this.originalFileUrl(track) : this.transcodeUrl(track);
+    console.log("URL ", streamUrl);
     if (!streamUrl)
       throw new Error(`Track ${track.ratingKey} does not have a playable stream`);
     return {
       track: {
         title: track.title || "",
         artist: track.originalTitle || track.grandparentTitle || "",
+        album: track.parentTitle || "",
         albumRatingKey: track.parentRatingKey || this.extractRatingKey(track.parentKey),
         artistRatingKey: track.grandparentRatingKey || this.extractRatingKey(track.grandparentKey),
         ratingKey: String(track.ratingKey || ""),
@@ -235410,18 +235746,25 @@ class MediaService {
     return this.plexUrl(part?.key);
   }
   transcodeUrl(track) {
-    return this.plexUrl("/music/:/transcode/universal/start.m3u8", {
+    const sessionId = randomUUID2();
+    return this.plexUrl("/audio/:/transcode/universal/start", {
       path: `/library/metadata/${track.ratingKey}`,
       protocol: "hls",
       directPlay: "0",
       directStream: "0",
       directStreamAudio: "0",
-      hasMDE: "1",
-      mediaIndex: "0",
-      partIndex: "0",
+      download: "0",
       musicBitrate: "320",
+      session: sessionId,
+      "X-Plex-Product": this.auth.plexProduct,
+      "X-Plex-Client-Identifier": this.auth.plexClientId,
+      "X-Plex-Device": deviceName(),
+      "X-Plex-Device-Name": deviceName(),
+      "X-Plex-Platform": platformName2(),
+      "X-Plex-Platform-Version": release(),
+      "X-Plex-Session-Identifier": sessionId,
       "X-Plex-Client-Profile-Name": "generic",
-      "X-Plex-Client-Profile-Extra": "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=mpegts&audioCodec=aac,mp3)"
+      "X-Plex-Client-Profile-Extra": "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=ogg&audioCodec=opus)"
     });
   }
   async fetchPlex(path, params = {}) {
@@ -235499,6 +235842,20 @@ class MediaService {
       thumb: this.plexUrl(album.thumb)
     };
   }
+  mapArtist(artist) {
+    return {
+      id: artist.key,
+      title: artist.title,
+      ratingKey: artist.ratingKey || this.extractRatingKey(artist.key),
+      addedAt: artist.addedAt,
+      lastViewedAt: artist.lastViewedAt,
+      thumb: this.plexUrl(artist.thumb),
+      art: this.plexUrl(artist.art),
+      albumCount: artist.childCount,
+      trackCount: artist.leafCount,
+      viewCount: artist.viewCount
+    };
+  }
   extractRatingKey(key) {
     if (typeof key !== "string")
       return null;
@@ -235518,12 +235875,328 @@ class MediaService {
     }
   }
 }
+function platformName2() {
+  if (process.platform === "darwin")
+    return "macOS";
+  if (process.platform === "win32")
+    return "Windows";
+  if (process.platform === "linux")
+    return "Linux";
+  return process.platform;
+}
+function deviceName() {
+  const name531 = hostname();
+  return name531 ? `Rayna on ${name531}` : "Rayna";
+}
+
+// src/bun/plex/timeline.ts
+import { hostname as hostname2, release as release2 } from "os";
+import { readFileSync as readFileSync3 } from "fs";
+import { resolve as resolve4 } from "path";
+import { randomUUID as randomUUID3 } from "crypto";
+var PLEX_TIMELINE_TIMEOUT_MS = 8000;
+var PLAYING_HEARTBEAT_MS = 1e4;
+var PAUSED_HEARTBEAT_TICKS = 6;
+var RAYNA_VERSION = readPackageVersion();
+
+class PlexTimelineReporter {
+  auth;
+  bass;
+  getPlaybackSettings;
+  activeBaseUrl = null;
+  activeSession = null;
+  heartbeat = null;
+  unsubscribe = null;
+  handlingTermination = false;
+  constructor(auth, bass, getPlaybackSettings) {
+    this.auth = auth;
+    this.bass = bass;
+    this.getPlaybackSettings = getPlaybackSettings;
+  }
+  start() {
+    if (this.unsubscribe)
+      return;
+    this.unsubscribe = this.bass.onPlaybackEvent((event) => this.handlePlaybackEvent(event));
+  }
+  dispose() {
+    this.stopHeartbeat();
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    this.activeSession = null;
+  }
+  handlePlaybackEvent(event) {
+    if (!this.isEnabled()) {
+      this.stopHeartbeat();
+      this.activeSession = null;
+      return;
+    }
+    if (this.handlingTermination) {
+      if (event.type === "track-stopped" && event.reason === "remote") {
+        this.stopHeartbeat();
+        this.activeSession = null;
+      }
+      return;
+    }
+    if (event.type === "track-started") {
+      this.startSession(event.track, event.position, event.duration);
+      return;
+    }
+    if (event.type === "state-changed") {
+      this.reportSessionState(event.track, event.state, event.position, event.duration);
+      return;
+    }
+    if (event.type === "seeked") {
+      this.reportSessionState(event.track, event.isPlaying ? "playing" : "paused", event.position, event.duration);
+      return;
+    }
+    this.stopSession(event.reason, event.track, event.position, event.duration);
+  }
+  startSession(track, position, duration) {
+    this.stopHeartbeat();
+    this.activeSession = {
+      sessionId: this.generateSessionId(),
+      track,
+      state: "playing",
+      pausedTicks: 0
+    };
+    this.report("playing", track, position, duration);
+    this.startHeartbeat();
+  }
+  reportSessionState(track, state, position, duration) {
+    const session = this.ensureSession(track);
+    session.state = state;
+    session.pausedTicks = 0;
+    this.report(state, track, position, duration);
+    this.startHeartbeat();
+  }
+  stopSession(reason, track, position, duration) {
+    const session = this.activeSession;
+    if (!session || session.track.ratingKey !== track.ratingKey)
+      return;
+    this.stopHeartbeat();
+    this.activeSession = null;
+    if (reason === "remote")
+      return;
+    this.report("stopped", track, position, duration, session.sessionId);
+  }
+  ensureSession(track) {
+    if (this.activeSession?.track.ratingKey === track.ratingKey) {
+      return this.activeSession;
+    }
+    this.activeSession = {
+      sessionId: this.generateSessionId(),
+      track,
+      state: "playing",
+      pausedTicks: 0
+    };
+    return this.activeSession;
+  }
+  startHeartbeat() {
+    if (this.heartbeat)
+      return;
+    this.heartbeat = setInterval(() => {
+      const session = this.activeSession;
+      if (!session || !this.isEnabled()) {
+        this.stopHeartbeat();
+        this.activeSession = null;
+        return;
+      }
+      if (session.state === "paused") {
+        session.pausedTicks += 1;
+        if (session.pausedTicks < PAUSED_HEARTBEAT_TICKS)
+          return;
+        session.pausedTicks = 0;
+      }
+      const status = this.bass.getPlaybackStatus();
+      this.report(session.state, session.track, status.position, status.duration);
+    }, PLAYING_HEARTBEAT_MS);
+  }
+  stopHeartbeat() {
+    if (!this.heartbeat)
+      return;
+    clearInterval(this.heartbeat);
+    this.heartbeat = null;
+  }
+  async report(state, track, positionSeconds, durationSeconds, sessionIdOverride) {
+    if (!this.isEnabled())
+      return;
+    const sessionId = sessionIdOverride || this.activeSession?.sessionId;
+    if (!sessionId || !track.ratingKey)
+      return;
+    try {
+      const response = await this.fetchTimeline(track, state, positionSeconds, durationSeconds || secondsFromMilliseconds(track.duration), sessionId);
+      if (this.isTerminationResponse(response)) {
+        await this.handleRemoteTermination(track, sessionId);
+      }
+    } catch {}
+  }
+  async fetchTimeline(track, state, positionSeconds, durationSeconds, sessionId) {
+    const server = await this.getSelectedServer();
+    const token = this.getServerToken(server);
+    const connections = this.orderConnections(server);
+    let lastError = null;
+    for (const connection of connections) {
+      try {
+        const url = new URL("/:/timeline", connection.uri);
+        const params = this.timelineParams(track, state, positionSeconds, durationSeconds);
+        Object.entries(params).forEach(([key, value]) => {
+          url.searchParams.set(key, value);
+        });
+        Object.entries(this.identityParams(sessionId)).forEach(([key, value]) => {
+          url.searchParams.set(key, value);
+        });
+        url.searchParams.set("X-Plex-Token", token);
+        const response = await fetch(url, {
+          method: "GET",
+          signal: AbortSignal.timeout(PLEX_TIMELINE_TIMEOUT_MS),
+          headers: this.playbackHeaders(token, sessionId)
+        });
+        if (!response.ok) {
+          lastError = new Error(`Plex timeline failed at ${connection.uri}: ${response.status}`);
+          continue;
+        }
+        this.activeBaseUrl = connection.uri;
+        return await this.parseResponse(response);
+      } catch (error2) {
+        lastError = error2;
+      }
+    }
+    throw new Error(`Plex timeline failed${lastError instanceof Error ? `: ${lastError.message}` : ""}`);
+  }
+  timelineParams(track, state, positionSeconds, durationSeconds) {
+    const ratingKey = track.ratingKey;
+    const time = String(secondsToMilliseconds(positionSeconds));
+    const duration = String(secondsToMilliseconds(durationSeconds));
+    return {
+      type: "music",
+      key: `/library/metadata/${ratingKey}`,
+      ratingKey,
+      state,
+      time,
+      playbackTime: time,
+      duration,
+      context: "source:content.library",
+      hasMDE: "1"
+    };
+  }
+  playbackHeaders(token, sessionId) {
+    const identity = this.identityParams(sessionId);
+    return {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "X-Plex-Token": token,
+      ...identity
+    };
+  }
+  identityParams(sessionId) {
+    return {
+      "X-Plex-Client-Identifier": this.auth.plexClientId,
+      "X-Plex-Session-Identifier": sessionId,
+      "X-Plex-Product": this.auth.plexProduct,
+      "X-Plex-Version": RAYNA_VERSION,
+      "X-Plex-Platform": platformName3(),
+      "X-Plex-Platform-Version": release2(),
+      "X-Plex-Device-Name": deviceName2()
+    };
+  }
+  async parseResponse(response) {
+    const text = await response.text();
+    if (!text.trim())
+      return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { rawText: text };
+    }
+  }
+  isTerminationResponse(response) {
+    const container = response?.MediaContainer || response || null;
+    if (!container)
+      return false;
+    if (typeof response?.rawText === "string" && /\btermination(Code|Text)\b/i.test(response.rawText)) {
+      return true;
+    }
+    return container.terminationCode !== undefined || container.terminationText !== undefined;
+  }
+  async handleRemoteTermination(track, sessionId) {
+    if (this.handlingTermination)
+      return;
+    this.handlingTermination = true;
+    this.stopHeartbeat();
+    const status = this.bass.getPlaybackStatus();
+    this.bass.stopFromRemote();
+    try {
+      await this.fetchTimeline(track, "stopped", status.position, status.duration || secondsFromMilliseconds(track.duration), sessionId);
+    } catch {}
+    this.activeSession = null;
+    this.handlingTermination = false;
+  }
+  orderConnections(server) {
+    const connections = server.connections.filter((connection) => connection.uri);
+    return [
+      ...connections.filter((connection) => connection.uri === this.activeBaseUrl),
+      ...connections.filter((connection) => connection.uri !== this.activeBaseUrl && connection.local && !connection.relay),
+      ...connections.filter((connection) => connection.uri !== this.activeBaseUrl && !connection.local && !connection.relay),
+      ...connections.filter((connection) => connection.uri !== this.activeBaseUrl && connection.relay)
+    ];
+  }
+  async getSelectedServer() {
+    const server = await this.auth.getUserSelectedServer();
+    if (!server?.connections?.[0]?.uri) {
+      throw new Error("No Plex server is selected");
+    }
+    return server;
+  }
+  getServerToken(server) {
+    return server.accessToken || this.auth.plexUserAccessToken;
+  }
+  isEnabled() {
+    return this.getPlaybackSettings().enableTimelineReporting !== false;
+  }
+  generateSessionId() {
+    return randomUUID3().replaceAll("-", "");
+  }
+}
+function secondsToMilliseconds(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0)
+    return 0;
+  return Math.max(0, Math.floor(seconds * 1000));
+}
+function secondsFromMilliseconds(milliseconds) {
+  if (!milliseconds || !Number.isFinite(milliseconds))
+    return 0;
+  return milliseconds / 1000;
+}
+function platformName3() {
+  if (process.platform === "darwin")
+    return "macOS";
+  if (process.platform === "win32")
+    return "Windows";
+  if (process.platform === "linux")
+    return "Linux";
+  return process.platform;
+}
+function deviceName2() {
+  const name531 = hostname2();
+  return name531 ? `Rayna on ${name531}` : "Rayna";
+}
+function readPackageVersion() {
+  try {
+    const packageJson = JSON.parse(readFileSync3(resolve4(process.cwd(), "package.json"), "utf8"));
+    return typeof packageJson.version === "string" ? packageJson.version : "0";
+  } catch {
+    return "0";
+  }
+}
 
 // src/bun/index.ts
 var db = new DatabaseManager;
 var auth = new authentication_default;
 var bass = new BassManager;
 var media = new MediaService(auth, bass, db);
+var timeline = new PlexTimelineReporter(auth, bass, () => media.getPlaybackSettings());
+timeline.start();
+var isMac = process.platform === "darwin";
 var rpc = BrowserView.defineRPC({
   maxRequestTime: 30000,
   handlers: {
@@ -235560,16 +236233,22 @@ var rpc = BrowserView.defineRPC({
       mediaGetRecentlyAddedAlbums: () => media.getRecentlyAddedAlbums(),
       mediaGetPlaylists: () => media.getPlaylists(),
       mediaGetAlbumsPage: ({ cursor, pageSize }) => media.getAlbumsPage(cursor, pageSize),
+      mediaGetArtistsPage: ({ cursor, pageSize }) => media.getArtistsPage(cursor, pageSize),
       mediaGetAlbum: ({ ratingKey }) => media.getAlbum(ratingKey),
       mediaGetArtist: ({ ratingKey }) => media.getArtist(ratingKey),
       mediaGetArtistAlbums: ({ ratingKey }) => media.getArtistAlbums(ratingKey),
       mediaGetArtistPopularTracks: ({ ratingKey }) => media.getArtistPopularTracks(ratingKey),
       mediaGetPlaylist: ({ ratingKey }) => media.getPlaylist(ratingKey),
       playerGetStatus: () => bass.getPlaybackStatus(),
+      playerGetQueue: () => media.getQueue(),
       playerPlayAlbum: ({ ratingKey }) => media.playAlbum(ratingKey),
       playerPlayPlaylist: ({ ratingKey }) => media.playPlaylist(ratingKey),
       playerPlayArtist: ({ ratingKey }) => media.playArtist(ratingKey),
       playerPlayTrack: ({ ratingKey }) => media.playTrack(ratingKey),
+      playerQueueAlbum: ({ ratingKey }) => media.queueAlbum(ratingKey),
+      playerQueuePlaylist: ({ ratingKey }) => media.queuePlaylist(ratingKey),
+      playerQueueTrack: ({ ratingKey }) => media.queueTrack(ratingKey),
+      playerClearQueue: () => media.clearQueue(),
       playerPlay: () => bass.resume(),
       playerPause: () => bass.pause(),
       playerNext: () => bass.playNext(),
@@ -235589,8 +236268,7 @@ var mainWindow = new BrowserWindow({
     height: 670
   },
   url: rendererRoute(),
-  titleBarStyle: "hidden",
-  ...process.platform !== "darwin" ? { titleBarOverlay: true } : {},
+  titleBarStyle: isMac ? "hiddenInset" : "default",
   rpc
 });
 createApplicationMenu(mainWindow);
@@ -235608,9 +236286,9 @@ function rendererRoute(route = "") {
   return `${process.env.RAYNA_RENDERER_URL || "views://main/index.html"}${hash2}`;
 }
 function createApplicationMenu(window2) {
-  const isMac = process.platform === "darwin";
+  const isMac2 = process.platform === "darwin";
   const menu = [];
-  if (isMac) {
+  if (isMac2) {
     menu.push({
       label: "Rayna",
       submenu: [
@@ -235633,7 +236311,7 @@ function createApplicationMenu(window2) {
         accelerator: "CommandOrControl+Shift+L"
       },
       { type: "separator" },
-      { role: isMac ? "close" : "quit" }
+      { role: isMac2 ? "close" : "quit" }
     ]
   }, {
     label: "Edit",
@@ -235689,5 +236367,6 @@ function extractUrl(event) {
 }
 function shutdown() {
   bass.free();
+  timeline.dispose();
   exports_Utils.quit();
 }

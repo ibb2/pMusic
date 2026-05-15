@@ -687,7 +687,7 @@ export class BassManager {
       resolve(process.cwd(), "vendor", "bass"),
       resolve(import.meta.dir, "..", "vendor", "bass"),
     ];
-    const pluginNames = ["flac", "hls"];
+    const pluginNames = ["flac", "hls", "opus"];
 
     return pluginNames.map((name) => {
       const candidates = roots.map((root) => {
