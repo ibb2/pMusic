@@ -23,6 +23,7 @@ import {
   LibraryIcon,
 } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
+import PlaylistCard from "@/components/music/playlistcard";
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
@@ -193,36 +194,6 @@ export default function Home() {
         </div>
       </div>
     </div>
-  );
-}
-
-function PlaylistCard({ playlist }: { playlist: any }) {
-  return (
-    <Link
-      key={playlist.id}
-      to={`/app/playlist/$ratingKey`}
-      params={{ ratingKey: playlist.ratingKey }}
-    >
-      <Card className="flex justify-center w-40 shrink-0 border-0 shadow-none hover:bg-zinc-100 dark:hover:bg-zinc-800/30 dark:bg-transparent p-2 rounded-md">
-        <CardHeader className="p-0">
-          <img
-            src={
-              playlist.composite?.length > 0 ? playlist.composite : BlankImage
-            }
-            alt={playlist.title}
-            className="w-full object-cover rounded-lg aspect-square"
-          />
-          <CardTitle className="overflow-hidden text-ellipsis text-nowrap text-sm">
-            {playlist.title}
-          </CardTitle>
-          <CardDescription className="text-xs">
-            {playlist.duration
-              ? `${dayjs.duration(playlist.duration).hours()}hr ${dayjs.duration(playlist.duration).minutes()}min`
-              : "0hr 0min"}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    </Link>
   );
 }
 
