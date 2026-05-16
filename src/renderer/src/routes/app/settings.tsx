@@ -194,9 +194,7 @@ export function SettingsPage() {
                 <div>
                   <Label className="mb-2 block">Transcode Audio</Label>
                   <Label className="mb-2 block text-sm text-muted-foreground">
-                    When enabled, Rayna asks Plex Media Server to convert tracks
-                    to a 320 kbps Opus stream. Off uses direct play from the
-                    original file.
+                    When enabled, Plex converts to a 320 Kbps Opus stream.
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
