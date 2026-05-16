@@ -17,7 +17,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
-import { set } from "zod";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
@@ -30,13 +29,12 @@ export function SettingsPage() {
   );
   const [selectedServer, setSelectedServer] = useState<PlexServer | null>(null);
   const [playbackSettings, setPlaybackSettings] = useState<PlaybackSettings>({
-    transcodeAudio: true,
+    transcodeAudio: false,
     enableUltraBlur: true,
     enableTimelineReporting: true,
   });
   const [loading, setLoading] = useState(true);
   const [updated, setUpdated] = useState(false);
-  const [playbackUpdated, setPlaybackUpdated] = useState(false);
   const [transcodeAudioUpdated, setTranscodeAudioUpdated] = useState(false);
   const [UltraBlurUpdated, setUltraBlurUpdated] = useState(false);
   const [timelineReportingUpdated, setTimelineReportingUpdated] =
@@ -199,7 +197,8 @@ export function SettingsPage() {
                 <div>
                   <Label className="mb-2 block">Transcode audio</Label>
                   <Label className="mb-2 block text-sm text-muted-foreground">
-                    Transcode audio to OPUS 320 Kbps.
+                    Direct play is used by default. Turn this on to have your
+                    Plex server transcode audio to a 320 kbps Opus stream.
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
@@ -211,7 +210,7 @@ export function SettingsPage() {
                   <Switch
                     checked={playbackSettings.transcodeAudio}
                     onCheckedChange={setTranscodeAudio}
-                    aria-label="Use original Plex file"
+                    aria-label="Transcode audio"
                   />
                 </div>
               </div>

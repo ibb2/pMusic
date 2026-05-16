@@ -1,5 +1,4 @@
 import { Buffer } from "node:buffer";
-import { randomUUID } from "node:crypto";
 import { hostname, release } from "node:os";
 import type { BassManager } from "../bass";
 import type { DatabaseManager } from "../database";
@@ -806,9 +805,7 @@ export class MediaService {
       ? this.transcodeUrl(track)
       : null;
 
-    const streamUrl = transcode ?? this.originalFileUrl(track);
-
-    console.log("Url", streamUrl);
+    const streamUrl = transcode ?? this.directPlayUrl(track);
 
     if (!streamUrl)
       throw new Error(
@@ -826,7 +823,6 @@ export class MediaService {
           track.grandparentRatingKey ||
           this.extractRatingKey(track.grandparentKey),
         ratingKey: String(track.ratingKey || ""),
-        plexSessionId: transcode?.sessionId,
         duration: track.duration,
         thumb: this.plexUrl(track.thumb),
       },
@@ -834,19 +830,18 @@ export class MediaService {
     };
   }
 
-  private originalFileUrl(track: PlexMetadata): string | null {
+  private directPlayUrl(track: PlexMetadata): string | null {
     const part = track.Media?.[0]?.Part?.[0];
     return this.plexUrl(part?.key);
   }
 
   private transcodeUrl(track: PlexMetadata): string | null {
-    return this.plexUrl("/music/:/transcode/universal/start.m3u8", {
+    return this.plexUrl("/audio/:/transcode/universal/start", {
       path: `/library/metadata/${track.ratingKey}`,
-      protocol: "hls",
-      hasMDE: "1",
+      protocol: "http",
       directPlay: "0",
       directStream: "0",
-      directStreamAudio: "1", // allow direct stream if codec matches, transcode if not
+      directStreamAudio: "0",
       download: "0",
       musicBitrate: "320",
       "X-Plex-Product": this.auth.plexProduct,
@@ -857,7 +852,7 @@ export class MediaService {
       "X-Plex-Platform-Version": release(),
       "X-Plex-Client-Profile-Name": "generic",
       "X-Plex-Client-Profile-Extra":
-        "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=mpegts&audioCodec=aac,mp3)",
+        "add-transcode-target(type=musicProfile&context=streaming&protocol=http&container=ogg&audioCodec=opus)",
     });
   }
 
