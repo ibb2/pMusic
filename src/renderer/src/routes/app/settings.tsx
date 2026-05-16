@@ -29,7 +29,7 @@ export function SettingsPage() {
   );
   const [selectedServer, setSelectedServer] = useState<PlexServer | null>(null);
   const [playbackSettings, setPlaybackSettings] = useState<PlaybackSettings>({
-    useOriginalFileUrl: true,
+    transcodeAudio: false,
     enableUltraBlur: true,
     enableTimelineReporting: true,
   });
@@ -72,8 +72,8 @@ export function SettingsPage() {
     }, 1500);
   };
 
-  const setUseOriginalFileUrl = async (useOriginalFileUrl: boolean) => {
-    const next = { ...playbackSettings, useOriginalFileUrl };
+  const setTranscodeAudio = async (transcodeAudio: boolean) => {
+    const next = { ...playbackSettings, transcodeAudio };
     setPlaybackSettings(next);
     await window.api.settings.setPlayback(next).catch((e) => console.error(e));
     setPlaybackUpdated(true);
@@ -192,9 +192,11 @@ export function SettingsPage() {
             <div className="border border-zinc-300 dark:border-zinc-700 rounded-lg p-6 space-y-6">
               <div className="flex items-center justify-between gap-6">
                 <div>
-                  <Label className="mb-2 block">Use original Plex file</Label>
+                  <Label className="mb-2 block">Transcode Audio</Label>
                   <Label className="mb-2 block text-sm text-muted-foreground">
-                    Play the Plex media URL directly.
+                    When enabled, Rayna asks Plex Media Server to convert tracks
+                    to a 320 kbps Opus stream. Off uses direct play from the
+                    original file.
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
@@ -204,9 +206,9 @@ export function SettingsPage() {
                     </p>
                   )}
                   <Switch
-                    checked={playbackSettings.useOriginalFileUrl}
-                    onCheckedChange={setUseOriginalFileUrl}
-                    aria-label="Use original Plex file"
+                    checked={playbackSettings.transcodeAudio}
+                    onCheckedChange={setTranscodeAudio}
+                    aria-label="Transcode Audio"
                   />
                 </div>
               </div>

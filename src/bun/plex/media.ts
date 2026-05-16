@@ -78,11 +78,22 @@ export class MediaService {
   }
 
   getPlaybackSettings(): PlaybackSettings {
+    const saved =
+      (this.db.get("playback") as
+        | (Partial<PlaybackSettings> & { useOriginalFileUrl?: unknown })
+        | null) ?? {};
+    const transcodeAudio =
+      typeof saved.transcodeAudio === "boolean"
+        ? saved.transcodeAudio
+        : typeof saved.useOriginalFileUrl === "boolean"
+          ? !saved.useOriginalFileUrl
+          : false;
+
     return {
-      useOriginalFileUrl: true,
+      ...saved,
       enableUltraBlur: true,
       enableTimelineReporting: true,
-      ...((this.db.get("playback") as PlaybackSettings | null) ?? {}),
+      transcodeAudio,
     };
   }
 
@@ -798,9 +809,9 @@ export class MediaService {
   }
 
   private async toPlayableTrack(track: PlexMetadata): Promise<PlayableTrack> {
-    const source = this.getPlaybackSettings().useOriginalFileUrl
-      ? this.originalFileSource(track)
-      : this.transcodeSource(track);
+    const source = this.getPlaybackSettings().transcodeAudio
+      ? this.transcodeSource(track)
+      : this.originalFileSource(track);
     if (!source)
       throw new Error(
         `Track ${track.ratingKey} does not have a playable stream`,
@@ -857,7 +868,7 @@ export class MediaService {
         "X-Plex-Platform-Version": release(),
         "X-Plex-Client-Profile-Name": "generic",
         "X-Plex-Client-Profile-Extra":
-          "add-transcode-target(replace=true&type=musicProfile&context=streaming&protocol=http&container=mp3&audioCodec=mp3)",
+          "add-transcode-target(replace=true&type=musicProfile&context=streaming&protocol=http&container=ogg&audioCodec=opus)",
       },
     };
   }

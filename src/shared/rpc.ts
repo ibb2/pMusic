@@ -61,7 +61,7 @@ export type PlayerStatus = {
 };
 
 export type PlaybackSettings = {
-  useOriginalFileUrl: boolean;
+  transcodeAudio: boolean;
   enableUltraBlur?: boolean;
   enableTimelineReporting?: boolean;
 };
