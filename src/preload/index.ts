@@ -23,7 +23,7 @@ const api = {
       ipcRenderer.invoke("auth:selectServer", server),
     selectLibraries: (libraries) =>
       ipcRenderer.invoke("auth:selectLibraries", libraries),
-    resolveServerConnection: (mode: string) =>
+    resolveServerConnection: (mode?: string) =>
       ipcRenderer.invoke("auth:resolveServerConnection", mode),
     getUserSelectedLibraries: () =>
       ipcRenderer.invoke("auth:getUserSelectedLibraries"),

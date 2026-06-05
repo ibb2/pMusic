@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { Spinner } from "./ui/spinner";
+import { ApiResponseError, initializePlexBackend } from "@/lib/api";
 
 const API_HEALTH_URL = "http://127.0.0.1:34567/health";
 
@@ -23,32 +24,16 @@ export function StartupLoading({
     try {
       const response = await fetch(API_HEALTH_URL);
       if (response.ok) {
-        const accessToken = await window.api.auth.getUserAccessToken();
-        const server = await window.api.auth.getUserSelectedServer();
-        const libraries = await window.api.auth.getUserSelectedLibraries();
+        try {
+          await initializePlexBackend();
+        } catch (error) {
+          if (error instanceof ApiResponseError && error.status === 401) {
+            await window.api.auth.logout();
+            router.navigate({ to: "/auth" });
+            return;
+          }
 
-        const uri = await window.api.auth.resolveServerConnection("auto");
-
-        const response = await fetch(`http://127.0.0.1:34567/init`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            serverUrl: uri,
-            libraries: libraries,
-          }),
-        });
-
-        if (response.status === 401) {
-          await window.api.auth.logout();
-          router.navigate({ to: "/auth" });
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(`Backend initialization failed (${response.status})`);
+          throw error;
         }
 
         setIsReady(true);
@@ -56,6 +41,11 @@ export function StartupLoading({
         return;
       }
     } catch (e: any) {
+      if (e instanceof ApiResponseError && e.status === 401) {
+        await window.api.auth.logout();
+        router.navigate({ to: "/auth" });
+        return;
+      }
       // Fetch failed
     }
 

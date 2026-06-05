@@ -22,12 +22,13 @@ interface Window {
       checkPinStatus: (id: string) => Promise<any>;
       getServers: () => Promise<PlexServer[]>;
       selectServer: (server: PlexServer) => Promise<void>;
-      selectLibraries: (libraries) => Promise<void>;
-      resolveSelectedServer: (mode: string) => Promise<string>;
-      isServerSelected: () => boolean;
+      selectLibraries: (libraries: any[]) => Promise<void>;
+      resolveServerConnection: (mode?: string) => Promise<string>;
+      isServerSelected: () => Promise<boolean>;
       getUserSelectedServer: () => Promise<PlexServer | null>;
       getUserSelectedLibraries: () => Promise<any | null>;
       getUserAccessToken: () => Promise<string>;
+      closeLoopbackServer: () => Promise<void>;
     };
     server: {
       getStatus: () => Promise<string>;

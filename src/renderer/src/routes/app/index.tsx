@@ -16,6 +16,7 @@ import BlankImage from "@/assets/512px-Black_colour.jpg";
 import { Spinner } from "@/components/ui/spinner";
 import { useRef } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { apiJson } from "@/lib/api";
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
@@ -50,43 +51,23 @@ export default function Home() {
   // queries
   const queryTopEight = useQuery({
     queryKey: ["top-eight"],
-    queryFn: () =>
-      fetch("http://127.0.0.1:34567/music/library/top-eight").then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      }),
+    queryFn: () => apiJson("/music/library/top-eight"),
     retry: true,
   });
 
   const queryRecentlyPlayedAlbums = useQuery({
     queryKey: ["albums"],
-    queryFn: () =>
-      fetch("http://127.0.0.1:34567/music/albums/recently-played").then(
-        (res) => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          return res.json();
-        },
-      ),
+    queryFn: () => apiJson("/music/albums/recently-played"),
   });
 
   const queryRecentlyAddedAlbums = useQuery({
     queryKey: ["album"],
-    queryFn: () =>
-      fetch("http://127.0.0.1:34567/music/albums/recently-added").then(
-        (res) => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          return res.json();
-        },
-      ),
+    queryFn: () => apiJson("/music/albums/recently-added"),
   });
 
   const queryAllPlaylists = useQuery({
     queryKey: ["playlist"],
-    queryFn: () =>
-      fetch("http://127.0.0.1:34567/music/playlists/all").then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      }),
+    queryFn: () => apiJson("/music/playlists/all"),
   });
 
   if (

@@ -5,7 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
 import qs from "qs";
 import { safeStorage } from "electron";
-import { PlexServer } from "../types";
+import { Connection, PlexServer } from "../types";
+
+type ConnectionMode = "auto" | "local" | "remote" | "relay";
 
 class Authentication {
   plexProduct = "pMusic"; //TODO: Change this to Rayna product name
@@ -259,36 +261,117 @@ class Authentication {
     this.store.set("selectedLibraries", JSON.stringify(this.selectedLibraries));
   }
 
-  public async resolveServerConnection(mode: string = "auto"): Promise<string> {
-    // Check through which endpoint the Plex server can be connected to via polling
-    // mode: auto | local | remote | relay
-    // Currently only support auto, returns local default if search fails
+  public async resolveServerConnection(
+    mode: ConnectionMode = "auto",
+  ): Promise<string> {
+    if (!this.selectedServer || this.selectedServer.connections.length === 0) {
+      throw new Error("No Plex server connection is available");
+    }
 
-    let connections = this.selectedServer.connections.reverse(); // Reverse to test if fall back works
+    const candidates = this.getConnectionCandidates(mode);
 
-    if (mode === "auto") {
-      for (let tries = 0; tries <= connections.length || tries <= 2; tries++) {
-        console.log(`Trying ${tries}:${connections[tries].uri}`);
-        const uri = connections[tries].uri;
-        const url = `${uri}/identity`;
-        const headers = {
-          "X-Plex-Token": this.plexUserAccessToken,
-        };
-
-        const response = await fetch(url, { headers });
-        if (response.ok) {
-          console.log(`Successfully connected to:${connections[tries].uri}`);
-
-          this.store.set("lastKnowGoodConnection", JSON.stringify(uri));
-          return uri;
-        }
-        console.log(`Failed to connect to:${connections[tries].uri}`);
-
-        continue;
+    for (const connection of candidates) {
+      if (await this.canReachConnection(connection.uri)) {
+        this.store.set("lastKnownGoodConnection", connection.uri);
+        return connection.uri;
       }
     }
 
-    return this.selectedServer?.connections[0].uri;
+    throw new Error("No reachable Plex server connection found");
+  }
+
+  private getConnectionCandidates(mode: ConnectionMode): Connection[] {
+    if (!this.selectedServer) {
+      return [];
+    }
+
+    const connections = [...this.selectedServer.connections];
+    const lastKnownGoodConnection = this.getLastKnownGoodConnection();
+    const ordered: Connection[] = [];
+
+    const add = (items: Connection[]) => {
+      for (const connection of items) {
+        if (!ordered.some((candidate) => candidate.uri === connection.uri)) {
+          ordered.push(connection);
+        }
+      }
+    };
+
+    if (lastKnownGoodConnection) {
+      add(
+        connections.filter(
+          (connection) => connection.uri === lastKnownGoodConnection,
+        ),
+      );
+    }
+
+    if (mode === "local") {
+      add(
+        connections.filter(
+          (connection) => connection.local && !connection.relay,
+        ),
+      );
+    } else if (mode === "remote") {
+      add(
+        connections.filter(
+          (connection) => !connection.local && !connection.relay,
+        ),
+      );
+    } else if (mode === "relay") {
+      add(connections.filter((connection) => connection.relay));
+    } else {
+      add(
+        connections.filter(
+          (connection) => connection.local && !connection.relay,
+        ),
+      );
+      add(
+        connections.filter(
+          (connection) => !connection.local && !connection.relay,
+        ),
+      );
+      add(connections.filter((connection) => connection.relay));
+    }
+
+    add(connections);
+
+    return ordered;
+  }
+
+  private getLastKnownGoodConnection(): string | null {
+    const stored =
+      (this.store.get("lastKnownGoodConnection") as string | undefined) ??
+      (this.store.get("lastKnowGoodConnection") as string | undefined);
+
+    if (!stored) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(stored) as string;
+    } catch {
+      return stored;
+    }
+  }
+
+  private async canReachConnection(uri: string): Promise<boolean> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2500);
+
+    try {
+      const response = await fetch(`${uri}/identity`, {
+        headers: {
+          "X-Plex-Token": this.plexUserAccessToken,
+        },
+        signal: controller.signal,
+      });
+
+      return response.ok;
+    } catch {
+      return false;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   public isServerSelected(): boolean {

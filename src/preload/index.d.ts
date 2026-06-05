@@ -19,12 +19,16 @@ declare global {
         getServers: () => Promise<any[]>;
         selectServer: (server: any) => Promise<void>;
         selectLibraries: (libraries: any) => Promise<void>;
-        resolveServerConnection: (mode: string) => Promise<string>;
+        resolveServerConnection: (mode?: string) => Promise<string>;
         getUserSelectedServer: () => Promise<any | null>;
         getUserSelectedLibraries: () => Promise<any | null>;
         getUserAccessToken: () => Promise<string>;
         isServerSelected: () => Promise<boolean>;
         closeLoopbackServer: () => Promise<void>;
+      };
+      server: {
+        getStatus: () => Promise<string>;
+        getLogs: () => Promise<string>;
       };
     };
   }

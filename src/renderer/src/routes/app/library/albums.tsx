@@ -3,6 +3,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import BlankImage from "@/assets/512px-Black_colour.jpg";
 import React, { useEffect, useRef } from "react";
+import { apiJson } from "@/lib/api";
 
 export const Route = createFileRoute("/app/library/albums")({
   component: RouteComponent,
@@ -12,10 +13,7 @@ function RouteComponent() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchAlbums = async ({ pageParam }) => {
-    const res = await fetch(
-      `http://127.0.0.1:34567/music/albums/all?cursor=${pageParam || ""}&page_size=20`,
-    );
-    return res.json();
+    return apiJson(`/music/albums/all?cursor=${pageParam || ""}&page_size=20`);
   };
 
   const {

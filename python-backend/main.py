@@ -6,10 +6,13 @@ from collections import deque
 from datetime import datetime
 from typing import Annotated, Optional, Union, cast
 
+import requests
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.params import Depends, Form
+from fastapi.requests import Request
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from plexapi.exceptions import Unauthorized
 from plexapi.server import PlexServer
@@ -35,6 +38,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(requests.exceptions.RequestException)
+async def plex_connection_exception_handler(
+    request: Request, exc: requests.exceptions.RequestException
+):
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": {
+                "code": "PLEX_CONNECTION_FAILED",
+                "message": "Rayna could not reach the current Plex server connection.",
+            }
+        },
+    )
 
 
 class Init(BaseModel):
