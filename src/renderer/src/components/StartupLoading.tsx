@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "@tanstack/react-router";
 import { Spinner } from "./ui/spinner";
 
 const API_HEALTH_URL = "http://127.0.0.1:34567/health";
@@ -8,6 +9,7 @@ export function StartupLoading({
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
+  const router = useRouter();
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [logs, setLogs] = useState<string>("");
@@ -25,6 +27,8 @@ export function StartupLoading({
         const server = await window.api.auth.getUserSelectedServer();
         const libraries = await window.api.auth.getUserSelectedLibraries();
 
+        const uri = await window.api.auth.resolveServerConnection("auto");
+
         const response = await fetch(`http://127.0.0.1:34567/init`, {
           method: "POST",
           headers: {
@@ -32,11 +36,20 @@ export function StartupLoading({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            serverUrl: server.connections[0].uri,
+            serverUrl: uri,
             libraries: libraries,
           }),
         });
-        await response.json();
+
+        if (response.status === 401) {
+          await window.api.auth.logout();
+          router.navigate({ to: "/auth" });
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Backend initialization failed (${response.status})`);
+        }
 
         setIsReady(true);
 
@@ -70,7 +83,7 @@ export function StartupLoading({
 
   useEffect(() => {
     checkApi();
-  }, []);
+  }, [router]);
 
   const handleRetry = () => {
     setError(null);

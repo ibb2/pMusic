@@ -11,6 +11,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.params import Depends, Form
 from fastapi.security import OAuth2PasswordBearer
+from plexapi.exceptions import Unauthorized
 from plexapi.server import PlexServer
 from pydantic import BaseModel
 
@@ -64,7 +65,10 @@ def initialize(request: Init, token: Annotated[str, Depends(oauth2_scheme)]):
     print("---------")
     print(request.libraries)
     print("---------")
-    app.state.plex = cast(PlexServer, PlexServer(request.serverUrl, token))
+    try:
+        app.state.plex = cast(PlexServer, PlexServer(request.serverUrl, token))
+    except Unauthorized:
+        raise HTTPException(status_code=401, detail="Plex authentication failed.")
     app.state.selected_libraries = request.libraries
     app.state.player = AudioPlayer()
     app.state.player.set_plex(app.state.plex)
@@ -161,16 +165,9 @@ def update_selected_libraries(request: LibrariesUpdate):
         elif isinstance(lib, str):
             selected_uuids.append(lib)
 
-    # Validate uuids exist on the Plex server
-    # sections = plex.library.sections()
-    # found = [s for s in sections if s.uuid in selected_uuids]
-    # if not found:
-    #     raise HTTPException(
-    #         status_code=404, detail="No matching libraries found on server.")
-
     # Store the original payload so other code paths that expect objects/strings continue to work
     app.state.selected_libraries = request.libraries
-    return {"status": "ok", "updated": len(found)}
+    return {"status": "ok", "updated": len(selected_uuids)}
 
 
 @app.get("/library/sections/all")

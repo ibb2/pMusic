@@ -30,6 +30,8 @@ export default function SelectServer({ progress, servers, selectServer }) {
                 await window.api.auth.selectServer(server);
 
                 const accessToken = await window.api.auth.getUserAccessToken();
+                const uri =
+                  await window.api.auth.resolveServerConnection("auto");
 
                 const response = await fetch(`http://127.0.0.1:34567/init`, {
                   method: "POST",
@@ -38,7 +40,7 @@ export default function SelectServer({ progress, servers, selectServer }) {
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify({
-                    serverUrl: server.connections[0].uri,
+                    serverUrl: uri,
                   }),
                 });
                 await response.json();

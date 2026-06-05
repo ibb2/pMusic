@@ -63,6 +63,8 @@ export function SettingsPage() {
     (async () => {
       try {
         const token = await window.api.auth.getUserAccessToken();
+        const uri = await window.api.auth.resolveServerConnection("auto");
+
         await fetch(`http://127.0.0.1:34567/init`, {
           method: "POST",
           headers: {
@@ -70,7 +72,7 @@ export function SettingsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            serverUrl: selectedServer?.connections[0].uri,
+            serverUrl: uri,
             libraries: updated,
           }),
         });
