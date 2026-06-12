@@ -1,4 +1,3 @@
-from typing import Optional
 import base64
 import json
 import time
@@ -57,7 +56,7 @@ async def plex_connection_exception_handler(
 
 class Init(BaseModel):
     serverUrl: str
-    libraries: list = []
+    libraries: Optional[list] = []
 
 
 @app.get("/")
@@ -87,7 +86,7 @@ def initialize(request: Init, token: Annotated[str, Depends(oauth2_scheme)]):
         app.state.plex = cast(PlexServer, PlexServer(request.serverUrl, token))
     except Unauthorized:
         raise HTTPException(status_code=401, detail="Plex authentication failed.")
-    app.state.selected_libraries = request.libraries
+    app.state.selected_libraries = request.libraries or []
     app.state.player = AudioPlayer()
     app.state.player.set_plex(app.state.plex)
     app.state.queue = deque()
@@ -98,16 +97,14 @@ def initialize(request: Init, token: Annotated[str, Depends(oauth2_scheme)]):
 def get_plex() -> PlexServer:
     plex = getattr(app.state, "plex", None)
     if plex is None:
-        raise HTTPException(
-            status_code=400, detail="Plex is not initialized yet.")
+        raise HTTPException(status_code=400, detail="Plex is not initialized yet.")
     return plex
 
 
 def get_player() -> AudioPlayer:
     player = getattr(app.state, "player", None)
     if player is None:
-        raise HTTPException(
-            status_code=400, detail="Player is not initialized yet.")
+        raise HTTPException(status_code=400, detail="Player is not initialized yet.")
     return player
 
 
@@ -130,8 +127,7 @@ def get_selected_music_sections(plex: PlexServer) -> list:
     selected_sections = [s for s in sections if s.uuid in selected_uuids]
 
     if not selected_sections:
-        raise HTTPException(
-            status_code=404, detail="No selected libraries found.")
+        raise HTTPException(status_code=404, detail="No selected libraries found.")
 
     return selected_sections
 
@@ -139,8 +135,7 @@ def get_selected_music_sections(plex: PlexServer) -> list:
 def fetch_recent_albums(sections, limit: int = 50):
     albums = []
     for section in sections:
-        albums.extend(section.searchAlbums(
-            sort="lastViewedAt:desc", maxresults=limit))
+        albums.extend(section.searchAlbums(sort="lastViewedAt:desc", maxresults=limit))
 
     print("Count of albums, ", len(albums))
 
@@ -158,8 +153,7 @@ def decode_cursor(cursor: Optional[str]) -> tuple[int, int]:
     if not cursor:
         return 0, 0
     try:
-        cursor_data = json.loads(
-            base64.urlsafe_b64decode(cursor.encode()).decode())
+        cursor_data = json.loads(base64.urlsafe_b64decode(cursor.encode()).decode())
         return cursor_data["s"], cursor_data["o"]
     except:
         return 0, 0
@@ -191,7 +185,7 @@ def update_selected_libraries(request: LibrariesUpdate):
 @app.get("/library/sections/all")
 def get_all_library_sections(plex: Annotated[PlexServer, Depends(get_plex)]):
     sections = plex.library.sections()
-    print(f'All sections \n ${sections}')
+    print(f"All sections \n ${sections}")
     # musicSection = next((x for x in sections if x.type == "artist"), None)
     # if musicSection is None:
     #     raise HTTPException(status_code=404, detail="No Music section(s) not found.")
@@ -203,7 +197,9 @@ def get_all_library_sections(plex: Annotated[PlexServer, Depends(get_plex)]):
             "agent": s.agent,
             "allowSync": s.allowSync,
             "art": plex.url(s.art, includeToken=True) if s.art else None,
-            "composite": plex.url(s.composite, includeToken=True) if s.composite else None,
+            "composite": plex.url(s.composite, includeToken=True)
+            if s.composite
+            else None,
             "createdAt": s.createdAt,
             "filters": s.filters,
             "key": s.key,
@@ -225,7 +221,7 @@ def get_all_library_sections(plex: Annotated[PlexServer, Depends(get_plex)]):
 def read_all_albums(
     plex: Annotated[PlexServer, Depends(get_plex)],
     cursor: Optional[str] = None,
-    page_size: int = 20
+    page_size: int = 20,
 ):
     sections = get_selected_music_sections(plex)
     section_idx, offset = decode_cursor(cursor)
@@ -239,20 +235,17 @@ def read_all_albums(
         section = sections[current_section_idx]
 
         # Fetch from current section
-        url = f'{plex._baseurl}/library/sections/{section.key}/all'
+        url = f"{plex._baseurl}/library/sections/{section.key}/all"
         params = {
-            'type': 9,
-            'X-Plex-Container-Start': current_offset,
-            'X-Plex-Container-Size': page_size - len(albums),
+            "type": 9,
+            "X-Plex-Container-Start": current_offset,
+            "X-Plex-Container-Size": page_size - len(albums),
         }
-        headers = {
-            'X-Plex-Token': plex._token,
-            'Accept': 'application/json'
-        }
+        headers = {"X-Plex-Token": plex._token, "Accept": "application/json"}
 
         response = plex._session.get(url, params=params, headers=headers)
         data = response.json()
-        album_data = data.get('MediaContainer', {}).get('Metadata', [])
+        album_data = data.get("MediaContainer", {}).get("Metadata", [])
 
         if not album_data:
             # This section is exhausted, move to next
@@ -263,40 +256,47 @@ def read_all_albums(
             current_offset += len(album_data)
 
             # Check if this section has more data
-            total_size = data.get('MediaContainer', {}).get('totalSize', 0)
+            total_size = data.get("MediaContainer", {}).get("totalSize", 0)
             if current_offset >= total_size:
                 # Section exhausted, move to next
                 current_section_idx += 1
                 current_offset = 0
 
         print(
-            f"Section: {section.title}, Got: {len(album_data)}, Total in albums list: {len(albums)}")
+            f"Section: {section.title}, Got: {len(album_data)}, Total in albums list: {len(albums)}"
+        )
 
     # Determine if there are more results
     has_more = current_section_idx < len(sections)
-    prev_cursor = encode_cursor(section_idx, max(
-        0, offset - page_size)) if offset > 0 or section_idx > 0 else None
-    next_cursor = encode_cursor(
-        current_section_idx, current_offset) if has_more else None
+    prev_cursor = (
+        encode_cursor(section_idx, max(0, offset - page_size))
+        if offset > 0 or section_idx > 0
+        else None
+    )
+    next_cursor = (
+        encode_cursor(current_section_idx, current_offset) if has_more else None
+    )
 
     print(f"Total albums returned: {len(albums)}, Next cursor: {next_cursor}")
 
     return {
         "items": [
             {
-                "id": a.get('key'),
-                "title": a.get('title'),
-                "year": a.get('year'),
-                "artist": a.get('parentTitle'),
-                "ratingKey": a.get('ratingKey'),
+                "id": a.get("key"),
+                "title": a.get("title"),
+                "year": a.get("year"),
+                "artist": a.get("parentTitle"),
+                "ratingKey": a.get("ratingKey"),
                 "parentRatingKey": a.get("parentRatingKey"),
-                "thumb": plex.url(a.get('thumb'), includeToken=True) if a.get('thumb') else None,
+                "thumb": plex.url(a.get("thumb"), includeToken=True)
+                if a.get("thumb")
+                else None,
             }
             for a in albums
         ],
         "nextCursor": next_cursor,
         "prevCursor": prev_cursor,
-        "hasMore": has_more
+        "hasMore": has_more,
     }
 
 
@@ -418,8 +418,7 @@ def read_album(rating_key: int, plex: Annotated[PlexServer, Depends(get_plex)]):
     tracks = album.tracks()
     print("Tracks title", tracks[0].originalTitle)
     # Extract numeric rating key from parentKey (e.g., '/library/metadata/123' -> '123')
-    artist_rating_key = album.parentKey.split(
-        "/")[-1] if album.parentKey else None
+    artist_rating_key = album.parentKey.split("/")[-1] if album.parentKey else None
 
     return {
         "id": album.key,
@@ -501,8 +500,7 @@ def read_artist_popular_tracks(
 def read_playlists(plex: Annotated[PlexServer, Depends(get_plex)]):
     get_selected_music_sections(plex)  # Validate selection exists
 
-    music_playlists = [
-        p for p in plex.playlists() if p.playlistType == "audio"]
+    music_playlists = [p for p in plex.playlists() if p.playlistType == "audio"]
 
     return [
         {
@@ -611,8 +609,7 @@ def get_music_queues():
     played = getattr(app.state, "played", None)
 
     if queue is None or played is None:
-        raise HTTPException(
-            status_code=400, detail="Queues are not yet created.")
+        raise HTTPException(status_code=400, detail="Queues are not yet created.")
     return (queue, played)
 
 
