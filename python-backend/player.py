@@ -126,7 +126,7 @@ class AudioPlayer:
         self.stop_event.set()
         if self.playback_thread and self.playback_thread.is_alive():
             if threading.current_thread() != self.playback_thread:
-                self.playback_thread.join()
+                self.playback_thread.join(timeout=2)
 
         if self.stream:
             try:
@@ -144,7 +144,8 @@ class AudioPlayer:
         track = self.plex.fetchItem(rating_key)
         url = track.getStreamURL()
 
-        response = requests.get(url, stream=True)
+        response = requests.get(url, stream=True, timeout=15)
+        response.raise_for_status()
         data_io = io.BytesIO(response.content)
 
         data_array, samplerate = sf.read(data_io)

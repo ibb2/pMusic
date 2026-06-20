@@ -86,6 +86,11 @@ def initialize(request: Init, token: Annotated[str, Depends(oauth2_scheme)]):
         app.state.plex = cast(PlexServer, PlexServer(request.serverUrl, token))
     except Unauthorized:
         raise HTTPException(status_code=401, detail="Plex authentication failed.")
+
+    existing_player = getattr(app.state, "player", None)
+    if existing_player is not None:
+        existing_player.stop()
+
     app.state.selected_libraries = request.libraries or []
     app.state.player = AudioPlayer()
     app.state.player.set_plex(app.state.plex)

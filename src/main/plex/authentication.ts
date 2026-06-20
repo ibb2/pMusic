@@ -297,7 +297,25 @@ class Authentication {
       }
     };
 
-    if (lastKnownGoodConnection) {
+    const prioritizeLastKnownGood = (items: Connection[]) => {
+      if (!lastKnownGoodConnection) {
+        return items;
+      }
+
+      return [...items].sort((a, b) => {
+        if (a.uri === lastKnownGoodConnection) {
+          return -1;
+        }
+
+        if (b.uri === lastKnownGoodConnection) {
+          return 1;
+        }
+
+        return 0;
+      });
+    };
+
+    if (mode !== "auto" && lastKnownGoodConnection) {
       add(
         connections.filter(
           (connection) => connection.uri === lastKnownGoodConnection,
@@ -307,30 +325,46 @@ class Authentication {
 
     if (mode === "local") {
       add(
-        connections.filter(
-          (connection) => connection.local && !connection.relay,
+        prioritizeLastKnownGood(
+          connections.filter(
+            (connection) => connection.local && !connection.relay,
+          ),
         ),
       );
     } else if (mode === "remote") {
       add(
-        connections.filter(
-          (connection) => !connection.local && !connection.relay,
+        prioritizeLastKnownGood(
+          connections.filter(
+            (connection) => !connection.local && !connection.relay,
+          ),
         ),
       );
     } else if (mode === "relay") {
-      add(connections.filter((connection) => connection.relay));
+      add(
+        prioritizeLastKnownGood(
+          connections.filter((connection) => connection.relay),
+        ),
+      );
     } else {
       add(
-        connections.filter(
-          (connection) => connection.local && !connection.relay,
+        prioritizeLastKnownGood(
+          connections.filter(
+            (connection) => connection.local && !connection.relay,
+          ),
         ),
       );
       add(
-        connections.filter(
-          (connection) => !connection.local && !connection.relay,
+        prioritizeLastKnownGood(
+          connections.filter(
+            (connection) => !connection.local && !connection.relay,
+          ),
         ),
       );
-      add(connections.filter((connection) => connection.relay));
+      add(
+        prioritizeLastKnownGood(
+          connections.filter((connection) => connection.relay),
+        ),
+      );
     }
 
     add(connections);
