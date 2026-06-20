@@ -58,7 +58,7 @@ export default function Libraries({
                   </ItemMedia>
                   <ItemContent>
                     <ItemTitle>{library.title}</ItemTitle>
-                    <ItemDescription>{library.type}</ItemDescription>
+                    {/*<ItemDescription>{library.type}</ItemDescription>*/}
                   </ItemContent>
                   <ItemActions>
                     {selectedLibraries.some((l) => l.uuid === library.uuid) && (
