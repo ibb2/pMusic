@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button'
-import { Slider } from '@/components/ui/slider'
-import { useQuery } from '@tanstack/react-query'
-import dayjs from 'dayjs'
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import {
   Play,
   Pause,
@@ -12,89 +12,86 @@ import {
   Volume2,
   Volume1,
   Volume,
-  VolumeX
-} from 'lucide-react'
-import { useState, useEffect } from 'react'
-import { Progress } from '../ui/progress'
+  VolumeX,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Progress } from "../ui/progress";
+import { apiFetch, apiJson } from "@/lib/api";
 
 export function PlayerFooter() {
   const { data: status, refetch } = useQuery({
-    queryKey: ['playerStatus'],
-    queryFn: () =>
-      fetch('http://127.0.0.1:34567/player/status').then((res) => {
-        if (!res.ok) throw new Error('Network response was not ok')
-        return res.json()
-      }),
-    refetchInterval: 1000
-  })
+    queryKey: ["playerStatus"],
+    queryFn: () => apiJson("/player/status"),
+    refetchInterval: 1000,
+  });
 
-  const [position, setPosition] = useState(0)
-  const [mute, toggleMute] = useState(false)
+  const [position, setPosition] = useState(0);
+  const [mute, toggleMute] = useState(false);
 
   useEffect(() => {
     // Reset position immediately when the track changes to avoid showing old progress
-    setPosition(0)
-  }, [status?.current_track?.ratingKey])
+    setPosition(0);
+  }, [status?.current_track?.ratingKey]);
 
   useEffect(() => {
     if (status?.position !== undefined && status.is_playing) {
       // Only sync with backend position if it's "fresh" (i.e. we have a duration)
       // This prevents jumping back to old position if the backend hasn't updated its status object yet
       if (status.duration > 0) {
-        setPosition(status.position)
+        setPosition(status.position);
       }
     }
-  }, [status?.position, status?.duration])
+  }, [status?.position, status?.duration]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    let interval: NodeJS.Timeout;
     // Only run optimistic timer if we are playing AND we have a valid duration
     // This avoids progressing before the track is actually loaded and ready
     if (status?.is_playing && status?.duration && status.duration > 0) {
       interval = setInterval(() => {
-        setPosition((prev) => prev + 0.1)
-      }, 100)
+        setPosition((prev) => prev + 0.1);
+      }, 100);
     }
-    return () => clearInterval(interval)
-  }, [status?.is_playing, status?.duration])
+    return () => clearInterval(interval);
+  }, [status?.is_playing, status?.duration]);
 
   const handlePlayPause = async () => {
     if (status?.is_playing) {
-      await fetch('http://127.0.0.1:34567/player/pause', { method: 'POST' })
+      await apiFetch("/player/pause", { method: "POST" });
     } else {
-      await fetch('http://127.0.0.1:34567/player/play', { method: 'POST' })
+      await apiFetch("/player/play", { method: "POST" });
     }
-    refetch()
-  }
+    refetch();
+  };
 
   const handleNext = async () => {
-    await fetch('http://127.0.0.1:34567/player/next', { method: 'POST' })
-    refetch()
-  }
+    await apiFetch("/player/next", { method: "POST" });
+    refetch();
+  };
 
   const handlePrev = async () => {
-    await fetch('http://127.0.0.1:34567/player/prev', { method: 'POST' })
-    refetch()
-  }
+    await apiFetch("/player/prev", { method: "POST" });
+    refetch();
+  };
 
   const handleSeek = async (pos: number) => {
-    await fetch(`http://127.0.0.1:34567/player/seek/${pos}`)
-    setPosition(pos)
-    refetch()
-  }
+    await apiFetch(`/player/seek/${pos}`);
+    setPosition(pos);
+    refetch();
+  };
 
   const handleVolume = async (newVolume: number) => {
-    await fetch(`http://127.0.0.1:34567/player/volume/${newVolume}`)
-    refetch()
-  }
+    await apiFetch(`/player/volume/${newVolume}`);
+    refetch();
+  };
 
   const handleMute = async () => {
-    await fetch(`http://127.0.0.1:34567/player/volume/mute/${!mute}`)
-    toggleMute(!mute)
-    refetch()
-  }
+    await apiFetch(`/player/volume/mute/${!mute}`);
+    toggleMute(!mute);
+    refetch();
+  };
 
-  const currentTrack = status?.current_track
+  const currentTrack = status?.current_track;
 
   return (
     <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] h-20 bg-card border-t border-border w-full">
@@ -102,15 +99,19 @@ export function PlayerFooter() {
       <div className="flex flex-row items-center gap-2 pl-2">
         <div className="h-14 w-14 bg-muted rounded-md flex items-center justify-center overflow-hidden">
           {currentTrack?.thumb && (
-            <img src={currentTrack.thumb} alt="Cover" className="w-full h-full object-cover" />
+            <img
+              src={currentTrack.thumb}
+              alt="Cover"
+              className="w-full h-full object-cover"
+            />
           )}
         </div>
         <div className="flex flex-col ">
           <span className="text-sm font-semibold hover:underline cursor-pointer truncate max-w-[200px]">
-            {currentTrack?.title || ''}
+            {currentTrack?.title || ""}
           </span>
           <span className="text-xs text-muted-foreground hover:underline cursor-pointer truncate max-w-[200px]">
-            {currentTrack?.artist || ''}
+            {currentTrack?.artist || ""}
           </span>
         </div>
       </div>
@@ -133,7 +134,11 @@ export function PlayerFooter() {
           >
             <SkipBack className="h-5 w-5 fill-current" />
           </Button>
-          <Button size="icon" className="rounded-full h-8 w-8" onClick={handlePlayPause}>
+          <Button
+            size="icon"
+            className="rounded-full h-8 w-8"
+            onClick={handlePlayPause}
+          >
             {status?.is_playing ? (
               <Pause className="h-4 w-4 fill-current" />
             ) : (
@@ -157,7 +162,9 @@ export function PlayerFooter() {
           </Button>
         </div>
         <div className="w-full max-w-md flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="w-8">{dayjs.duration(position * 1000).format('m:ss')}</span>
+          <span className="w-8">
+            {dayjs.duration(position * 1000).format("m:ss")}
+          </span>
           <div className="group relative w-full flex items-center h-6 cursor-pointer">
             {/* Progress bar - visible by default, hidden on hover */}
             <div className="w-full group-hover:hidden">
@@ -180,7 +187,9 @@ export function PlayerFooter() {
             </div>
           </div>
           <span className="w-8">
-            {status?.duration ? dayjs.duration(status.duration * 1000).format('m:ss') : '0:00'}
+            {status?.duration
+              ? dayjs.duration(status.duration * 1000).format("m:ss")
+              : "0:00"}
           </span>
         </div>
       </div>
@@ -199,11 +208,11 @@ export function PlayerFooter() {
         <div className="flex items-center gap-x-1 w-32">
           <div>
             {status?.volume === 0 ? (
-              <Button variant={'ghost'} size={'icon-sm'} onClick={handleMute}>
+              <Button variant={"ghost"} size={"icon-sm"} onClick={handleMute}>
                 <VolumeX className="h-4 w-4 text-muted-foreground" />
               </Button>
             ) : (
-              <Button variant={'ghost'} size={'icon-sm'} onClick={handleMute}>
+              <Button variant={"ghost"} size={"icon-sm"} onClick={handleMute}>
                 {status?.volume < 0.3 ? (
                   <Volume className="h-4 w-4 text-muted-foreground" />
                 ) : status?.volume < 0.7 ? (
@@ -227,5 +236,5 @@ export function PlayerFooter() {
         </div>
       </div>
     </div>
-  )
+  );
 }

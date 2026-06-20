@@ -7,6 +7,7 @@ import {
   CarouselItem,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { initializePlexBackend } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { PlexServer } from "@/types";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
@@ -61,20 +62,7 @@ function RouteComponent() {
       await window.api.auth.selectServer(selectedServer);
       await window.api.auth.selectLibraries(selectedLibraries);
 
-      const accessToken = await window.api.auth.getUserAccessToken();
-
-      const response = await fetch(`http://127.0.0.1:34567/init`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          serverUrl: selectedServer?.connections[0].uri,
-          libraries: selectedLibraries,
-        }),
-      });
-      await response.json();
+      await initializePlexBackend(selectedLibraries);
       router.navigate({ to: "/app" });
     }
   };

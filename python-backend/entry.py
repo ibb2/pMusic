@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from main import app
 
-port = int(os.environ.get("PORT", 34567))
+port = int(os.environ.get("API_PORT") or os.environ.get("PORT", 34567))
 
 if __name__ == "__main__":
     # Run the uvicorn server

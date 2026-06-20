@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/item";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
+import { apiJson, initializePlexBackend } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { PlexServer } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Music, Check } from "lucide-react";
@@ -22,18 +22,13 @@ export function SettingsPage() {
   const [selectedLibraries, setSelectedLibraries] = useState<any[] | null>(
     null,
   );
-  const [selectedServer, setSelectedServer] = useState<PlexServer | null>(null);
   const [loading, setLoading] = useState(true);
   const [updated, setUpdated] = useState(false);
 
   // queries
   const { isPending, error, data } = useQuery({
     queryKey: ["libraries"],
-    queryFn: () =>
-      fetch("http://127.0.0.1:34567/library/sections/all").then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      }),
+    queryFn: () => apiJson("/library/sections/all"),
     staleTime: 30 * 60 * 1000,
     retry: true,
   });
@@ -62,18 +57,7 @@ export function SettingsPage() {
     // Update backend immediately
     (async () => {
       try {
-        const token = await window.api.auth.getUserAccessToken();
-        await fetch(`http://127.0.0.1:34567/init`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            serverUrl: selectedServer?.connections[0].uri,
-            libraries: updated,
-          }),
-        });
+        await initializePlexBackend(updated);
         setUpdated(true);
       } catch (err) {
         console.error("Failed to update selected libraries:", err);
@@ -86,14 +70,6 @@ export function SettingsPage() {
   };
 
   useEffect(() => {
-    const fetchSelectedServer = async () => {
-      try {
-        const server = await window.api.auth.getUserSelectedServer();
-        setSelectedServer(server);
-      } catch (error) {
-        console.error("Failed to fetch selected server:", error);
-      }
-    };
     const fetchSelectedLibraries = async () => {
       try {
         const libs = await window.api.auth.getUserSelectedLibraries();
@@ -104,7 +80,6 @@ export function SettingsPage() {
         setLoading(false);
       }
     };
-    fetchSelectedServer();
     fetchSelectedLibraries();
   }, []);
 

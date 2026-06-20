@@ -7,6 +7,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import { apiJson } from "@/lib/api";
 import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Music } from "lucide-react";
@@ -18,11 +19,7 @@ export default function Libraries({
 }) {
   const { isPending, error, data } = useQuery({
     queryKey: ["libraries"],
-    queryFn: async () => {
-      const res = await fetch("http://127.0.0.1:34567/library/sections/all");
-      if (!res.ok) throw new Error("Failed to fetch libraries");
-      return res.json();
-    },
+    queryFn: () => apiJson("/library/sections/all"),
     staleTime: 30 * 60 * 1000,
     retry: true,
   });
@@ -61,7 +58,7 @@ export default function Libraries({
                   </ItemMedia>
                   <ItemContent>
                     <ItemTitle>{library.title}</ItemTitle>
-                    <ItemDescription>{library.type}</ItemDescription>
+                    {/*<ItemDescription>{library.type}</ItemDescription>*/}
                   </ItemContent>
                   <ItemActions>
                     {selectedLibraries.some((l) => l.uuid === library.uuid) && (
