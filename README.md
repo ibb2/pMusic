@@ -70,7 +70,7 @@ On install login to you Plex account and select your server[^1], that is all.
 - [ ] Offline support
 - [x] Remote playback connection handling
   - [x] Reconnect through the best available Plex route when the current connection stops responding
-  - [ ] Preserve and resume the current track, position, and queue after a network change
+  - [x] Preserve and resume the current track, position, and queue after a network change
 - [x] Multi-library support
 - [ ] Caching
 - [ ] Database support

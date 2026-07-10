@@ -328,14 +328,16 @@ class Authentication {
   getConnectionCandidates(
     mode: PlexConnectionMode = 'auto',
     server: PlexServer | null = this.selectedServer,
-    preferredUri?: string | null
+    preferredUri?: string | null,
+    excludedUris: Iterable<string> = []
   ): Connection[] {
     if (!server) return []
 
     return orderPlexConnections(server, {
       mode,
       preferredUri,
-      lastKnownGoodUri: this.getLastKnownGoodConnection()
+      lastKnownGoodUri: this.getLastKnownGoodConnection(),
+      excludedUris
     })
   }
 

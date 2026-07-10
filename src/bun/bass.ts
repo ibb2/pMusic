@@ -10,18 +10,43 @@ import type {
 
 const BASS_POS_BYTE = 0;
 const BASS_ATTRIB_VOL = 2;
+const BASS_CONFIG_NET_TIMEOUT = 11;
+const BASS_CONFIG_NET_READTIMEOUT = 37;
 const BASS_ACTIVE_STOPPED = 0;
 const BASS_ACTIVE_PLAYING = 1;
 const BASS_ACTIVE_STALLED = 2;
 const BASS_ACTIVE_PAUSED = 3;
 const PREVIOUS_TRACK_THRESHOLD_SECONDS = 3;
+const BASS_NETWORK_TIMEOUT_MS = 8_000;
+const DEFAULT_MONITOR_INTERVAL_MS = 250;
+const DEFAULT_STALL_TIMEOUT_MS = 8_000;
 
-type PlayableTrack = {
-  track: PlayerTrack;
-  streamUrl: string;
+export type PlexStreamSource = {
+  path: string;
+  params?: Record<string, string>;
 };
 
-export type BassStopReason = "manual" | "replaced" | "ended" | "remote";
+export type StreamCandidate = {
+  url: string;
+  connectionUri: string;
+};
+
+export type PlayableTrack = {
+  track: PlayerTrack;
+  source: PlexStreamSource;
+};
+
+export type StreamCandidateResolver = (
+  source: PlexStreamSource,
+  excludedConnectionUris: ReadonlySet<string>,
+) => StreamCandidate[];
+
+export type BassStopReason =
+  | "manual"
+  | "replaced"
+  | "ended"
+  | "remote"
+  | "connection-failed";
 
 export type BassPlaybackEvent =
   | {
@@ -54,7 +79,7 @@ export type BassPlaybackEvent =
 
 export type BassPlaybackListener = (event: BassPlaybackEvent) => void;
 
-type BassLibrary = {
+export type BassLibrary = {
   symbols: {
     BASS_GetVersion: () => number;
     BASS_ErrorGetCode: () => number;
@@ -65,6 +90,7 @@ type BassLibrary = {
       window: null,
       directSoundGuid: null,
     ) => boolean;
+    BASS_SetConfig: (option: number, value: number) => boolean;
     BASS_Free: () => boolean;
     BASS_PluginLoad: (file: Uint8Array, flags: number) => number;
     BASS_PluginFree: (handle: number) => boolean;
@@ -97,6 +123,13 @@ type BassLibrary = {
   };
 };
 
+type BassManagerOptions = {
+  library?: BassLibrary;
+  monitorIntervalMs?: number;
+  stallTimeoutMs?: number;
+  now?: () => number;
+};
+
 export class BassManager {
   private library: BassLibrary | null = null;
   private loadError: string | null = null;
@@ -117,10 +150,33 @@ export class BassManager {
   private volumeBeforeMute = 1;
   private monitor: Timer | null = null;
   private manuallyStopping = false;
+  private recovering = false;
+  private stalledAt: number | null = null;
+  private currentConnectionUri: string | null = null;
+  private playbackIntent: "playing" | "paused" = "playing";
+  private connectionState: PlayerStatus["connection_state"] = "connected";
+  private connectionError: string | null = null;
+  private streamResolver: StreamCandidateResolver | null = null;
+  private connectionChanged: ((connectionUri: string) => void) | null = null;
   private listeners = new Set<BassPlaybackListener>();
   private readonly libraryPath: string | null;
+  private readonly monitorIntervalMs: number;
+  private readonly stallTimeoutMs: number;
+  private readonly now: () => number;
 
-  constructor() {
+  constructor(options: BassManagerOptions = {}) {
+    this.monitorIntervalMs =
+      options.monitorIntervalMs ?? DEFAULT_MONITOR_INTERVAL_MS;
+    this.stallTimeoutMs = options.stallTimeoutMs ?? DEFAULT_STALL_TIMEOUT_MS;
+    this.now = options.now ?? Date.now;
+
+    if (options.library) {
+      this.libraryPath = null;
+      this.library = options.library;
+      this.initialized = true;
+      return;
+    }
+
     this.libraryPath = this.resolveLibraryPath();
     this.load();
   }
@@ -145,6 +201,8 @@ export class BassManager {
       position: this.getPosition(),
       duration: this.getDuration(),
       volume: this.volume,
+      connection_state: this.connectionState,
+      connection_error: this.connectionError,
     };
   }
 
@@ -161,11 +219,19 @@ export class BassManager {
     return () => this.listeners.delete(listener);
   }
 
-  playTrack(track: PlayerTrack, streamUrl: string): void {
+  setStreamResolver(
+    resolver: StreamCandidateResolver,
+    onConnectionChanged?: (connectionUri: string) => void,
+  ): void {
+    this.streamResolver = resolver;
+    this.connectionChanged = onConnectionChanged ?? null;
+  }
+
+  playTrack(track: PlayerTrack, source: PlexStreamSource): void {
     this.rememberCurrentTrack();
     this.stopCurrent("replaced");
     this.queue = [];
-    this.playStream(track, streamUrl);
+    this.playStream({ track, source });
   }
 
   playTracks(tracks: PlayableTrack[]): void {
@@ -175,8 +241,8 @@ export class BassManager {
     this.playNext();
   }
 
-  queueTrack(track: PlayerTrack, streamUrl: string): void {
-    const item = { track, streamUrl };
+  queueTrack(track: PlayerTrack, source: PlexStreamSource): void {
+    const item = { track, source };
     if (!this.currentTrack && !this.streamHandle) {
       this.playTracks([item]);
       return;
@@ -197,8 +263,7 @@ export class BassManager {
     if (!this.currentPlayable) return;
     const previousPlayable = this.previousPlayables.at(-1);
     if (
-      previousPlayable?.track.ratingKey ===
-      this.currentPlayable.track.ratingKey
+      previousPlayable?.track.ratingKey === this.currentPlayable.track.ratingKey
     )
       return;
     this.previousPlayables.push(this.currentPlayable);
@@ -206,6 +271,7 @@ export class BassManager {
 
   resume(): void {
     if (!this.library || !this.streamHandle) return;
+    this.playbackIntent = "playing";
     const resumed = this.library.symbols.BASS_ChannelPlay(
       this.streamHandle,
       false,
@@ -218,7 +284,10 @@ export class BassManager {
         position: this.getPosition(),
         duration: this.getDuration(),
       });
+      return;
     }
+
+    this.recoverCurrentPlayback();
   }
 
   pause(): void {
@@ -227,6 +296,7 @@ export class BassManager {
     const duration = this.getDuration();
     const paused = this.library.symbols.BASS_ChannelPause(this.streamHandle);
     if (paused && this.currentTrack) {
+      this.playbackIntent = "paused";
       this.emitPlaybackEvent({
         type: "state-changed",
         state: "paused",
@@ -252,7 +322,7 @@ export class BassManager {
       this.stop();
       return;
     }
-    this.playStream(next.track, next.streamUrl);
+    this.playStream(next);
   }
 
   playPrev(): void {
@@ -270,7 +340,7 @@ export class BassManager {
     if (this.currentPlayable) {
       this.queue.unshift(this.currentPlayable);
     }
-    this.playStream(previous.track, previous.streamUrl, false);
+    this.playStream(previous, false);
   }
 
   seek(position: number): void {
@@ -280,20 +350,7 @@ export class BassManager {
       0,
       duration > 0 ? Math.min(position, duration) : position,
     );
-    const bytes = this.library.symbols.BASS_ChannelSeconds2Bytes(
-      this.streamHandle,
-      safePosition,
-    );
-    const seeked = this.library.symbols.BASS_ChannelSetPosition(
-      this.streamHandle,
-      bytes,
-      BASS_POS_BYTE,
-    );
-
-    if (!seeked) {
-      this.loadError = `BASS_ChannelSetPosition failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
-      return;
-    }
+    if (!this.setPosition(safePosition)) return;
 
     if (this.currentTrack) {
       this.emitPlaybackEvent({
@@ -364,6 +421,10 @@ export class BassManager {
             FFIType.ptr,
             FFIType.ptr,
           ],
+          returns: FFIType.bool,
+        },
+        BASS_SetConfig: {
+          args: [FFIType.u32, FFIType.u32],
           returns: FFIType.bool,
         },
         BASS_Free: {
@@ -446,6 +507,15 @@ export class BassManager {
         return;
       }
 
+      this.library.symbols.BASS_SetConfig(
+        BASS_CONFIG_NET_TIMEOUT,
+        BASS_NETWORK_TIMEOUT_MS,
+      );
+      this.library.symbols.BASS_SetConfig(
+        BASS_CONFIG_NET_READTIMEOUT,
+        BASS_NETWORK_TIMEOUT_MS,
+      );
+
       this.loadPlugins();
     } catch (error) {
       this.loadError = error instanceof Error ? error.message : String(error);
@@ -485,54 +555,23 @@ export class BassManager {
     });
   }
 
-  private playStream(
-    track: PlayerTrack,
-    streamUrl: string,
-    rememberCurrent = true,
-  ): void {
+  private playStream(playable: PlayableTrack, rememberCurrent = true): void {
     if (!this.library || !this.initialized) return;
 
     if (rememberCurrent) {
       this.rememberCurrentTrack();
     }
     this.stopCurrent("replaced");
+    const opened = this.openPlayable(playable, {
+      excludedConnectionUris: new Set(),
+      position: 0,
+      shouldPlay: true,
+    });
 
-    this.streamHandle = this.library.symbols.BASS_StreamCreateURL(
-      this.toCString(streamUrl),
-      0,
-      0,
-      null,
-      null,
-    );
-
-    if (!this.streamHandle) {
-      this.loadError = `BASS_StreamCreateURL failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
-      this.currentPlayable = null;
-      this.currentTrack = null;
-      return;
-    }
-
-    this.currentPlayable = { track, streamUrl };
-    this.currentTrack = track;
-    this.setVolume(this.volume);
-    const started = this.library.symbols.BASS_ChannelPlay(
-      this.streamHandle,
-      true,
-    );
-    if (!started) {
-      this.loadError = `BASS_ChannelPlay failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
-      this.library.symbols.BASS_StreamFree(this.streamHandle);
-      this.streamHandle = 0;
-      this.currentPlayable = null;
-      this.currentTrack = null;
-      this.playNext();
-      return;
-    }
-
-    this.startMonitor();
+    if (!opened) return;
     this.emitPlaybackEvent({
       type: "track-started",
-      track,
+      track: playable.track,
       position: this.getPosition(),
       duration: this.getDuration(),
     });
@@ -540,7 +579,11 @@ export class BassManager {
 
   private startMonitor(): void {
     this.stopMonitor();
-    this.monitor = setInterval(() => this.checkPlayback(), 250);
+    if (this.monitorIntervalMs <= 0) return;
+    this.monitor = setInterval(
+      () => this.pollPlayback(),
+      this.monitorIntervalMs,
+    );
   }
 
   private stopMonitor(): void {
@@ -549,7 +592,7 @@ export class BassManager {
     this.monitor = null;
   }
 
-  private checkPlayback(): void {
+  pollPlayback(): void {
     if (
       !this.library ||
       !this.streamHandle ||
@@ -559,17 +602,183 @@ export class BassManager {
       return;
 
     const active = this.library.symbols.BASS_ChannelIsActive(this.streamHandle);
+
+    if (active === BASS_ACTIVE_STALLED) {
+      this.stalledAt ??= this.now();
+      if (this.now() - this.stalledAt >= this.stallTimeoutMs) {
+        this.recoverCurrentPlayback();
+      }
+      return;
+    }
+
+    this.stalledAt = null;
     if (active !== BASS_ACTIVE_STOPPED) return;
 
     const position = this.getPosition();
-    const duration = this.getDuration();
-    const reachedEnd =
-      duration <= 0 || position >= Math.max(0, duration - 0.75);
+    const duration =
+      this.getDuration() || (this.currentTrack.duration ?? 0) / 1_000;
+    const reachedEnd = duration > 0 && position >= Math.max(0, duration - 0.75);
 
     if (reachedEnd) {
       this.stopCurrent("ended");
       this.playNext();
+      return;
     }
+
+    this.recoverCurrentPlayback();
+  }
+
+  private openPlayable(
+    playable: PlayableTrack,
+    {
+      excludedConnectionUris,
+      position,
+      shouldPlay,
+    }: {
+      excludedConnectionUris: Set<string>;
+      position: number;
+      shouldPlay: boolean;
+    },
+  ): boolean {
+    if (!this.library || !this.streamResolver) {
+      this.failConnection("No Plex stream resolver is available");
+      return false;
+    }
+
+    let candidates: StreamCandidate[];
+    try {
+      candidates = this.streamResolver(
+        playable.source,
+        excludedConnectionUris,
+      );
+    } catch (error) {
+      this.failConnection(
+        error instanceof Error ? error.message : String(error),
+      );
+      return false;
+    }
+
+    for (const candidate of candidates) {
+      if (excludedConnectionUris.has(candidate.connectionUri)) continue;
+
+      const handle = this.library.symbols.BASS_StreamCreateURL(
+        this.toCString(candidate.url),
+        0,
+        0,
+        null,
+        null,
+      );
+
+      if (!handle) {
+        excludedConnectionUris.add(candidate.connectionUri);
+        continue;
+      }
+
+      this.streamHandle = handle;
+      this.setVolume(this.volume);
+
+      const started = this.library.symbols.BASS_ChannelPlay(handle, true);
+      if (!started) {
+        this.library.symbols.BASS_StreamFree(handle);
+        this.streamHandle = 0;
+        excludedConnectionUris.add(candidate.connectionUri);
+        continue;
+      }
+
+      if (position > 0 && !this.setPosition(position)) {
+        this.library.symbols.BASS_ChannelStop(handle);
+        this.library.symbols.BASS_StreamFree(handle);
+        this.streamHandle = 0;
+        excludedConnectionUris.add(candidate.connectionUri);
+        continue;
+      }
+      if (!shouldPlay) {
+        this.library.symbols.BASS_ChannelPause(handle);
+      }
+
+      this.currentPlayable = playable;
+      this.currentTrack = playable.track;
+      this.currentConnectionUri = candidate.connectionUri;
+      this.playbackIntent = shouldPlay ? "playing" : "paused";
+      this.connectionState = "connected";
+      this.connectionError = null;
+      this.loadError = null;
+      this.stalledAt = null;
+      try {
+        this.connectionChanged?.(candidate.connectionUri);
+      } catch (error) {
+        this.loadError = error instanceof Error ? error.message : String(error);
+      }
+      this.startMonitor();
+      return true;
+    }
+
+    this.failConnection("No reachable Plex audio stream was found");
+    return false;
+  }
+
+  private recoverCurrentPlayback(): void {
+    if (
+      this.recovering ||
+      !this.library ||
+      !this.currentPlayable ||
+      !this.currentTrack
+    )
+      return;
+
+    this.recovering = true;
+    try {
+      this.connectionState = "reconnecting";
+      this.connectionError = null;
+
+      const playable = this.currentPlayable;
+      const track = this.currentTrack;
+      const position = this.getPosition();
+      const duration = this.getDuration();
+      const wasPaused = this.playbackIntent === "paused";
+      const excludedConnectionUris = new Set<string>();
+      if (this.currentConnectionUri) {
+        excludedConnectionUris.add(this.currentConnectionUri);
+      }
+
+      this.releaseCurrentStream(false);
+      const recovered = this.openPlayable(playable, {
+        excludedConnectionUris,
+        position,
+        shouldPlay: !wasPaused,
+      });
+
+      if (recovered) {
+        this.emitPlaybackEvent({
+          type: "state-changed",
+          state: wasPaused ? "paused" : "playing",
+          track,
+          position: this.getPosition(),
+          duration: this.getDuration() || duration,
+        });
+      } else {
+        this.currentPlayable = null;
+        this.currentTrack = null;
+        this.emitPlaybackEvent({
+          type: "track-stopped",
+          reason: "connection-failed",
+          track,
+          position,
+          duration,
+        });
+      }
+    } finally {
+      this.recovering = false;
+    }
+  }
+
+  private failConnection(message: string): void {
+    this.connectionState = "failed";
+    this.connectionError = message;
+    this.loadError = message;
+    this.stopMonitor();
+    this.streamHandle = 0;
+    this.currentConnectionUri = null;
   }
 
   private stopCurrent(reason: BassStopReason): void {
@@ -579,16 +788,7 @@ export class BassManager {
     const stoppedPosition = stoppedTrack ? this.getPosition() : 0;
     const stoppedDuration = stoppedTrack ? this.getDuration() : 0;
 
-    this.manuallyStopping = true;
-    this.stopMonitor();
-    if (this.streamHandle) {
-      this.library.symbols.BASS_ChannelStop(this.streamHandle);
-      this.library.symbols.BASS_StreamFree(this.streamHandle);
-    }
-    this.streamHandle = 0;
-    this.currentPlayable = null;
-    this.currentTrack = null;
-    this.manuallyStopping = false;
+    this.releaseCurrentStream(true);
 
     if (stoppedTrack) {
       this.emitPlaybackEvent({
@@ -601,13 +801,49 @@ export class BassManager {
     }
   }
 
+  private releaseCurrentStream(clearCurrent: boolean): void {
+    if (!this.library) return;
+
+    this.manuallyStopping = true;
+    this.stopMonitor();
+    if (this.streamHandle) {
+      this.library.symbols.BASS_ChannelStop(this.streamHandle);
+      this.library.symbols.BASS_StreamFree(this.streamHandle);
+    }
+    this.streamHandle = 0;
+    this.currentConnectionUri = null;
+    this.stalledAt = null;
+    if (clearCurrent) {
+      this.currentPlayable = null;
+      this.currentTrack = null;
+    }
+    this.manuallyStopping = false;
+  }
+
+  private setPosition(position: number): boolean {
+    if (!this.library || !this.streamHandle) return false;
+    const bytes = this.library.symbols.BASS_ChannelSeconds2Bytes(
+      this.streamHandle,
+      position,
+    );
+    const seeked = this.library.symbols.BASS_ChannelSetPosition(
+      this.streamHandle,
+      bytes,
+      BASS_POS_BYTE,
+    );
+
+    if (!seeked) {
+      this.loadError = `BASS_ChannelSetPosition failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
+    }
+    return seeked;
+  }
+
   private emitPlaybackEvent(event: BassPlaybackEvent): void {
     this.listeners.forEach((listener) => {
       try {
         listener(event);
       } catch (error) {
-        this.loadError =
-          error instanceof Error ? error.message : String(error);
+        this.loadError = error instanceof Error ? error.message : String(error);
       }
     });
   }

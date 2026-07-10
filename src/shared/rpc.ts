@@ -56,6 +56,8 @@ export type PlayerStatus = {
   position: number;
   duration: number;
   volume: number;
+  connection_state: "connected" | "reconnecting" | "failed";
+  connection_error: string | null;
 };
 
 export type PlaybackSettings = {

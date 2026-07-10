@@ -1,5 +1,10 @@
 import { Buffer } from "node:buffer";
-import type { BassManager } from "../bass";
+import type {
+  BassManager,
+  PlayableTrack,
+  PlexStreamSource,
+  StreamCandidate,
+} from "../bass";
 import type { DatabaseManager } from "../database";
 import type Authentication from "./authentication";
 import { selectMusicLibraries } from "./library-selection";
@@ -59,7 +64,16 @@ export class MediaService {
     private readonly auth: Authentication,
     private readonly bass: BassManager,
     private readonly db: DatabaseManager,
-  ) {}
+  ) {
+    this.bass.setStreamResolver(
+      (source, excludedConnectionUris) =>
+        this.resolveStreamCandidates(source, excludedConnectionUris),
+      (connectionUri) => {
+        this.activeBaseUrl = connectionUri;
+        this.auth.setLastKnownGoodConnection(connectionUri);
+      },
+    );
+  }
 
   getPlaybackSettings(): PlaybackSettings {
     return {
@@ -663,7 +677,7 @@ export class MediaService {
   async playTrack(ratingKey: string): Promise<unknown> {
     const track = await this.fetchMetadataItem(ratingKey);
     const playableTrack = await this.toPlayableTrack(track);
-    this.bass.playTrack(playableTrack.track, playableTrack.streamUrl);
+    this.bass.playTrack(playableTrack.track, playableTrack.source);
     return { status: "playing", track: playableTrack.track.title };
   }
 
@@ -692,7 +706,7 @@ export class MediaService {
   async queueTrack(ratingKey: string): Promise<unknown> {
     const track = await this.fetchMetadataItem(ratingKey);
     const playableTrack = await this.toPlayableTrack(track);
-    this.bass.queueTrack(playableTrack.track, playableTrack.streamUrl);
+    this.bass.queueTrack(playableTrack.track, playableTrack.source);
     return { status: "queued", track: playableTrack.track.title };
   }
 
@@ -781,13 +795,11 @@ export class MediaService {
     return data.MediaContainer?.Metadata || [];
   }
 
-  private async toPlayableTrack(
-    track: PlexMetadata,
-  ): Promise<{ track: PlayerTrack; streamUrl: string }> {
-    const streamUrl = this.getPlaybackSettings().useOriginalFileUrl
-      ? this.originalFileUrl(track)
-      : this.transcodeUrl(track);
-    if (!streamUrl)
+  private async toPlayableTrack(track: PlexMetadata): Promise<PlayableTrack> {
+    const source = this.getPlaybackSettings().useOriginalFileUrl
+      ? this.originalFileSource(track)
+      : this.transcodeSource(track);
+    if (!source)
       throw new Error(
         `Track ${track.ratingKey} does not have a playable stream`,
       );
@@ -806,30 +818,62 @@ export class MediaService {
         duration: track.duration,
         thumb: this.plexUrl(track.thumb),
       },
-      streamUrl,
+      source,
     };
   }
 
-  private originalFileUrl(track: PlexMetadata): string | null {
+  private originalFileSource(track: PlexMetadata): PlexStreamSource | null {
     const part = track.Media?.[0]?.Part?.[0];
-    return this.plexUrl(part?.key);
+    if (typeof part?.key !== "string" || !part.key) return null;
+    return { path: part.key };
   }
 
-  private transcodeUrl(track: PlexMetadata): string | null {
-    return this.plexUrl("/music/:/transcode/universal/start.m3u8", {
-      path: `/library/metadata/${track.ratingKey}`,
-      protocol: "hls",
-      directPlay: "0",
-      directStream: "0",
-      directStreamAudio: "0",
-      hasMDE: "1",
-      mediaIndex: "0",
-      partIndex: "0",
-      musicBitrate: "320",
-      "X-Plex-Client-Profile-Name": "generic",
-      "X-Plex-Client-Profile-Extra":
-        "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=mpegts&audioCodec=aac,mp3)",
-    });
+  private transcodeSource(track: PlexMetadata): PlexStreamSource {
+    return {
+      path: "/music/:/transcode/universal/start.m3u8",
+      params: {
+        path: `/library/metadata/${track.ratingKey}`,
+        protocol: "hls",
+        directPlay: "0",
+        directStream: "0",
+        directStreamAudio: "0",
+        hasMDE: "1",
+        mediaIndex: "0",
+        partIndex: "0",
+        musicBitrate: "320",
+        "X-Plex-Client-Profile-Name": "generic",
+        "X-Plex-Client-Profile-Extra":
+          "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=mpegts&audioCodec=aac,mp3)",
+      },
+    };
+  }
+
+  private resolveStreamCandidates(
+    source: PlexStreamSource,
+    excludedConnectionUris: ReadonlySet<string>,
+  ): StreamCandidate[] {
+    const server = this.auth.selectedServer;
+    if (!server) return [];
+
+    const token = this.getServerToken(server);
+    if (!token) return [];
+
+    return this.auth
+      .getConnectionCandidates(
+        "auto",
+        server,
+        this.activeBaseUrl,
+        excludedConnectionUris,
+      )
+      .map((connection) => ({
+        connectionUri: connection.uri,
+        url: this.buildPlexUrl(
+          source.path,
+          connection.uri,
+          token,
+          source.params,
+        ),
+      }));
   }
 
   private async fetchPlex(
@@ -905,6 +949,15 @@ export class MediaService {
     const baseUrl = this.activeBaseUrl || server?.connections?.[0]?.uri;
     if (!baseUrl || !token) return null;
 
+    return this.buildPlexUrl(path, baseUrl, token, params);
+  }
+
+  private buildPlexUrl(
+    path: string,
+    baseUrl: string,
+    token: string,
+    params: Record<string, string> = {},
+  ): string {
     const url = new URL(path, baseUrl);
     Object.entries(params).forEach(([key, value]) =>
       url.searchParams.set(key, value),

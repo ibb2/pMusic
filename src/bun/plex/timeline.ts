@@ -2,11 +2,7 @@ import { hostname, platform, release } from "node:os";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
-import type {
-  BassManager,
-  BassPlaybackEvent,
-  BassStopReason,
-} from "../bass";
+import type { BassManager, BassPlaybackEvent, BassStopReason } from "../bass";
 import type Authentication from "./authentication";
 import type { PlaybackSettings, PlayerTrack } from "../../shared/rpc";
 import type { PlexServer } from "../../shared/types";
@@ -271,6 +267,7 @@ export class PlexTimelineReporter {
         }
 
         this.activeBaseUrl = connection.uri;
+        this.auth.setLastKnownGoodConnection(connection.uri);
         return await this.parseResponse(response);
       } catch (error) {
         lastError = error;
@@ -387,31 +384,11 @@ export class PlexTimelineReporter {
   }
 
   private orderConnections(server: PlexServer): PlexServer["connections"] {
-    const connections = server.connections.filter(
-      (connection) => connection.uri,
+    return this.auth.getConnectionCandidates(
+      "auto",
+      server,
+      this.activeBaseUrl,
     );
-
-    return [
-      ...connections.filter(
-        (connection) => connection.uri === this.activeBaseUrl,
-      ),
-      ...connections.filter(
-        (connection) =>
-          connection.uri !== this.activeBaseUrl &&
-          connection.local &&
-          !connection.relay,
-      ),
-      ...connections.filter(
-        (connection) =>
-          connection.uri !== this.activeBaseUrl &&
-          !connection.local &&
-          !connection.relay,
-      ),
-      ...connections.filter(
-        (connection) =>
-          connection.uri !== this.activeBaseUrl && connection.relay,
-      ),
-    ];
   }
 
   private async getSelectedServer(): Promise<PlexServer> {
