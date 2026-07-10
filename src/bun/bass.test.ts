@@ -21,6 +21,7 @@ describe("BASS Plex route recovery", () => {
     ]);
     expect(selectedConnections).toEqual([REMOTE]);
     expect(bass.getPlaybackStatus().connection_state).toBe("connected");
+    expect(bass.getPlaybackStatus().duration).toBe(180);
   });
 
   test("resumes the same paused track and preserves history and queue", () => {
@@ -97,6 +98,7 @@ describe("BASS Plex route recovery", () => {
 function manager(fake: FakeBassLibrary, now: () => number = Date.now) {
   const bass = new BassManager({
     library: fake.library,
+    streamProxy: null,
     monitorIntervalMs: 0,
     stallTimeoutMs: 8_000,
     now,

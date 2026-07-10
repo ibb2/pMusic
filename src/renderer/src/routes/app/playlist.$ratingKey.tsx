@@ -27,6 +27,11 @@ function PlaylistPage() {
     queryClient.invalidateQueries({ queryKey: ["playerQueue"] });
   };
 
+  const playTrack = async (trackRatingKey: string) => {
+    await window.api.player.playTrack(trackRatingKey);
+    invalidatePlayerQueries();
+  };
+
   // queries
   const queryPlaylist = useQuery({
     queryKey: ["playlist", ratingKey],
@@ -115,16 +120,16 @@ function PlaylistPage() {
         {playlist.tracks.map((track: any, index: number) => (
           <div
             key={track.id}
-            className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors cursor-pointer"
+            className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors"
           >
             <div className="text-center w-8 group-hover:hidden self-center">
               {index + 1}
             </div>
             <button
               className="hidden group-hover:block"
-              onClick={async () => {
-                await window.api.player.playTrack(String(track.ratingKey));
-                invalidatePlayerQueries();
+              onClick={(event) => {
+                event.stopPropagation();
+                void playTrack(String(track.ratingKey));
               }}
               aria-label={`Play ${track.title}`}
             >
@@ -136,11 +141,21 @@ function PlaylistPage() {
               className="w-12 rounded-lg"
             />
             <div>
-              <div>{track.title}</div>
+              <button
+                className="w-full text-left"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void playTrack(String(track.ratingKey));
+                }}
+                aria-label={`Play ${track.title}`}
+              >
+                {track.title}
+              </button>
               <div className="flex flex-row items-center gap-2">
                 <Link
                   to={"/app/artist/$ratingKey"}
                   params={{ ratingKey: track.artistRatingKey }}
+                  onClick={(event) => event.stopPropagation()}
                 >
                   <div className="text-slate-400 text-sm hover:text-slate-700/50 hover:underline">
                     {track.artistTitle}
@@ -150,6 +165,7 @@ function PlaylistPage() {
                 <Link
                   to={"/app/album/$ratingKey"}
                   params={{ ratingKey: track.albumRatingKey }}
+                  onClick={(event) => event.stopPropagation()}
                 >
                   <div className="text-slate-400 text-sm hover:text-slate-700/50 hover:underline">
                     {track.albumTitle}
@@ -159,7 +175,8 @@ function PlaylistPage() {
             </div>
             <button
               className="opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={async () => {
+              onClick={async (event) => {
+                event.stopPropagation();
                 await window.api.player.queueTrack(String(track.ratingKey));
                 invalidatePlayerQueries();
               }}
@@ -167,7 +184,10 @@ function PlaylistPage() {
             >
               <HugeiconsIcon icon={PlusSignIcon} />
             </button>
-            <button className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(event) => event.stopPropagation()}
+            >
               <HugeiconsIcon icon={FavouriteIcon} />
             </button>
             <div className="text-zinc-400 text-sm text-right self-center">

@@ -1,4 +1,6 @@
 import { Buffer } from "node:buffer";
+import { randomUUID } from "node:crypto";
+import { hostname, release } from "node:os";
 import type {
   BassManager,
   PlayableTrack,
@@ -829,21 +831,33 @@ export class MediaService {
   }
 
   private transcodeSource(track: PlexMetadata): PlexStreamSource {
+    const plexSessionId = randomUUID().replaceAll("-", "");
     return {
-      path: "/music/:/transcode/universal/start.m3u8",
+      path: "/music/:/transcode/universal/start",
       params: {
         path: `/library/metadata/${track.ratingKey}`,
-        protocol: "hls",
+        protocol: "http",
         directPlay: "0",
         directStream: "0",
         directStreamAudio: "0",
         hasMDE: "1",
         mediaIndex: "0",
         partIndex: "0",
+        download: "0",
+        location: "lan",
+        mediaBufferSize: "102400",
         musicBitrate: "320",
+        session: plexSessionId,
+        "X-Plex-Product": this.auth.plexProduct,
+        "X-Plex-Client-Identifier": this.auth.plexClientId,
+        "X-Plex-Session-Identifier": plexSessionId,
+        "X-Plex-Device": deviceName(),
+        "X-Plex-Device-Name": deviceName(),
+        "X-Plex-Platform": "Generic",
+        "X-Plex-Platform-Version": release(),
         "X-Plex-Client-Profile-Name": "generic",
         "X-Plex-Client-Profile-Extra":
-          "add-transcode-target(type=musicProfile&context=streaming&protocol=hls&container=mpegts&audioCodec=aac,mp3)",
+          "add-transcode-target(replace=true&type=musicProfile&context=streaming&protocol=http&container=mp3&audioCodec=mp3)",
       },
     };
   }
@@ -1027,4 +1041,9 @@ export class MediaService {
       return { sectionIndex: 0, offset: 0 };
     }
   }
+}
+
+function deviceName(): string {
+  const name = hostname();
+  return name ? `Rayna on ${name}` : "Rayna";
 }

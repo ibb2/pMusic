@@ -1,6 +1,7 @@
 import { dlopen, FFIType } from "bun:ffi";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { BassStreamProxy } from "./bass-stream-proxy";
 import type {
   BassStatus,
   PlayerQueue,
@@ -125,6 +126,7 @@ export type BassLibrary = {
 
 type BassManagerOptions = {
   library?: BassLibrary;
+  streamProxy?: BassStreamProxy | null;
   monitorIntervalMs?: number;
   stallTimeoutMs?: number;
   now?: () => number;
@@ -163,12 +165,17 @@ export class BassManager {
   private readonly monitorIntervalMs: number;
   private readonly stallTimeoutMs: number;
   private readonly now: () => number;
+  private readonly streamProxy: BassStreamProxy | null;
 
   constructor(options: BassManagerOptions = {}) {
     this.monitorIntervalMs =
       options.monitorIntervalMs ?? DEFAULT_MONITOR_INTERVAL_MS;
     this.stallTimeoutMs = options.stallTimeoutMs ?? DEFAULT_STALL_TIMEOUT_MS;
     this.now = options.now ?? Date.now;
+    this.streamProxy =
+      options.streamProxy === undefined
+        ? new BassStreamProxy()
+        : options.streamProxy;
 
     if (options.library) {
       this.libraryPath = null;
@@ -386,6 +393,7 @@ export class BassManager {
 
   free(): void {
     this.stop();
+    this.streamProxy?.dispose();
     this.pluginHandles.forEach((handle) => {
       this.library?.symbols.BASS_PluginFree(handle);
     });
@@ -646,6 +654,7 @@ export class BassManager {
     }
 
     let candidates: StreamCandidate[];
+    let lastCandidateError: string | null = null;
     try {
       candidates = this.streamResolver(
         playable.source,
@@ -662,7 +671,9 @@ export class BassManager {
       if (excludedConnectionUris.has(candidate.connectionUri)) continue;
 
       const handle = this.library.symbols.BASS_StreamCreateURL(
-        this.toCString(candidate.url),
+        this.toCString(
+          this.streamProxy?.urlFor(candidate.url) ?? candidate.url,
+        ),
         0,
         0,
         null,
@@ -670,6 +681,7 @@ export class BassManager {
       );
 
       if (!handle) {
+        lastCandidateError = `BASS_StreamCreateURL error ${this.library.symbols.BASS_ErrorGetCode()}`;
         excludedConnectionUris.add(candidate.connectionUri);
         continue;
       }
@@ -679,6 +691,7 @@ export class BassManager {
 
       const started = this.library.symbols.BASS_ChannelPlay(handle, true);
       if (!started) {
+        lastCandidateError = `BASS_ChannelPlay error ${this.library.symbols.BASS_ErrorGetCode()}`;
         this.library.symbols.BASS_StreamFree(handle);
         this.streamHandle = 0;
         excludedConnectionUris.add(candidate.connectionUri);
@@ -713,7 +726,11 @@ export class BassManager {
       return true;
     }
 
-    this.failConnection("No reachable Plex audio stream was found");
+    this.failConnection(
+      lastCandidateError
+        ? `No reachable Plex audio stream was found (${lastCandidateError})`
+        : "No reachable Plex audio stream was found",
+    );
     return false;
   }
 
@@ -868,6 +885,8 @@ export class BassManager {
   }
 
   private getDuration(): number {
+    const plexDuration = (this.currentTrack?.duration ?? 0) / 1_000;
+    if (plexDuration > 0) return plexDuration;
     if (!this.library || !this.streamHandle) return 0;
     const length = this.library.symbols.BASS_ChannelGetLength(
       this.streamHandle,

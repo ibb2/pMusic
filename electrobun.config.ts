@@ -17,6 +17,7 @@ const config: ElectrobunConfig = {
     copy: {
       "out/renderer": "views/main",
       "vendor/bass": "vendor/bass",
+      "src/bun/bass-stream-proxy-worker.ts": "bun/bass-stream-proxy-worker.ts",
     },
     watch: ["src/bun", "src/shared", "src/renderer", "vendor/bass"],
     mac: {

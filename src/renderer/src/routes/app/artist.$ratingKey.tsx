@@ -34,6 +34,11 @@ export function ArtistPage() {
     queryClient.invalidateQueries({ queryKey: ["playerQueue"] });
   };
 
+  const playTrack = async (trackRatingKey: string) => {
+    await window.api.player.playTrack(trackRatingKey);
+    invalidatePlayerQueries();
+  };
+
   const scroll = (
     ref: React.RefObject<HTMLDivElement | null>,
     direction: "left" | "right",
@@ -148,23 +153,32 @@ export function ArtistPage() {
             popularTracks.map((track: any, index: number) => (
               <div
                 key={track.id}
-                className="flex items-center gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors cursor-pointer"
+                className="flex items-center gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors"
               >
                 <div className="text-center w-8 group-hover:hidden">
                   {index + 1}
                 </div>
                 <Button
                   className="hidden group-hover:block"
-                  onClick={async () => {
-                    await window.api.player.playTrack(String(track.ratingKey));
-                    invalidatePlayerQueries();
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void playTrack(String(track.ratingKey));
                   }}
                   aria-label={`Play ${track.title}`}
                 >
                   <HugeiconsIcon icon={PlayIcon} className="fill-current" />
                 </Button>
                 <div className="flex-1">
-                  <div className="">{track.title}</div>
+                  <button
+                    className="w-full text-left"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void playTrack(String(track.ratingKey));
+                    }}
+                    aria-label={`Play ${track.title}`}
+                  >
+                    {track.title}
+                  </button>
                   <div className="text-zinc-400 text-sm">
                     {Intl.NumberFormat("en-US", {
                       notation: "compact",
@@ -179,7 +193,8 @@ export function ArtistPage() {
                   variant="ghost"
                   size="icon"
                   className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={async () => {
+                  onClick={async (event) => {
+                    event.stopPropagation();
                     await window.api.player.queueTrack(String(track.ratingKey));
                     invalidatePlayerQueries();
                   }}
@@ -187,7 +202,10 @@ export function ArtistPage() {
                 >
                   <HugeiconsIcon icon={PlusSignIcon} />
                 </Button>
-                <Button className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(event) => event.stopPropagation()}
+                >
                   <HugeiconsIcon icon={FavouriteIcon} />
                 </Button>
               </div>

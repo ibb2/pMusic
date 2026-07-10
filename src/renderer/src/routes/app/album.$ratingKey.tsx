@@ -28,6 +28,11 @@ export function AlbumPage() {
     queryClient.invalidateQueries({ queryKey: ["playerQueue"] });
   };
 
+  const playTrack = async (trackRatingKey: string) => {
+    await window.api.player.playTrack(trackRatingKey);
+    invalidatePlayerQueries();
+  };
+
   // queries
   const queryAlbum = useQuery({
     queryKey: ["album", ratingKey],
@@ -134,25 +139,35 @@ export function AlbumPage() {
         {album.tracks.map((track: any, index: number) => (
           <div
             key={track.id}
-            className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors cursor-pointer"
+            className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors"
           >
             <div className="text-center w-8 group-hover:hidden">
               {index + 1}
             </div>
             <button
               className="hidden group-hover:block w-8"
-              onClick={async () => {
-                await window.api.player.playTrack(String(track.ratingKey));
-                invalidatePlayerQueries();
+              onClick={(event) => {
+                event.stopPropagation();
+                void playTrack(String(track.ratingKey));
               }}
               aria-label={`Play ${track.title}`}
             >
               <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
             </button>
-            <div>{track.title}</div>
+            <button
+              className="w-full text-left"
+              onClick={(event) => {
+                event.stopPropagation();
+                void playTrack(String(track.ratingKey));
+              }}
+              aria-label={`Play ${track.title}`}
+            >
+              {track.title}
+            </button>
             <button
               className="opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={async () => {
+              onClick={async (event) => {
+                event.stopPropagation();
                 await window.api.player.queueTrack(String(track.ratingKey));
                 invalidatePlayerQueries();
               }}
@@ -160,7 +175,10 @@ export function AlbumPage() {
             >
               <HugeiconsIcon icon={PlusSignIcon} />
             </button>
-            <button className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(event) => event.stopPropagation()}
+            >
               <HugeiconsIcon icon={FavouriteIcon} />
             </button>
             <div className="text-sm w-16 text-right">
