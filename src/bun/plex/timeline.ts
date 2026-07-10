@@ -108,7 +108,7 @@ export class PlexTimelineReporter {
   ): void {
     this.stopHeartbeat();
     this.activeSession = {
-      sessionId: this.generateSessionId(),
+      sessionId: track.plexSessionId || this.generateSessionId(),
       track,
       state: "playing",
       pausedTicks: 0,
@@ -148,11 +148,15 @@ export class PlexTimelineReporter {
 
   private ensureSession(track: PlayerTrack): ActiveTimelineSession {
     if (this.activeSession?.track.ratingKey === track.ratingKey) {
+      this.activeSession.track = track;
+      if (track.plexSessionId) {
+        this.activeSession.sessionId = track.plexSessionId;
+      }
       return this.activeSession;
     }
 
     this.activeSession = {
-      sessionId: this.generateSessionId(),
+      sessionId: track.plexSessionId || this.generateSessionId(),
       track,
       state: "playing",
       pausedTicks: 0,

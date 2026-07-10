@@ -17,6 +17,7 @@ const BASS_ACTIVE_STOPPED = 0;
 const BASS_ACTIVE_PLAYING = 1;
 const BASS_ACTIVE_STALLED = 2;
 const BASS_ACTIVE_PAUSED = 3;
+const BASS_QWORD_FAILED = 0xffffffffffffffffn;
 const PREVIOUS_TRACK_THRESHOLD_SECONDS = 3;
 const BASS_NETWORK_TIMEOUT_MS = 8_000;
 const DEFAULT_MONITOR_INTERVAL_MS = 250;
@@ -41,7 +42,6 @@ export type StreamCandidateResolver = (
   source: PlexStreamSource,
   excludedConnectionUris: ReadonlySet<string>,
 ) => StreamCandidate[];
-
 export type BassStopReason =
   | "manual"
   | "replaced"
@@ -260,6 +260,72 @@ export class BassManager {
 
   replaceQueue(tracks: PlayableTrack[]): void {
     this.playTracks(tracks);
+  }
+
+  replaceCurrentSource(source: PlexStreamSource): boolean {
+    if (
+      !this.library ||
+      !this.initialized ||
+      !this.currentPlayable ||
+      !this.currentTrack
+    )
+      return false;
+
+    const previousPlayable = this.currentPlayable;
+    const track = this.currentTrack;
+    const position = this.getPosition();
+    const duration = this.getDuration();
+    const shouldPlay = this.playbackIntent === "playing";
+    const replacement = { ...previousPlayable, source };
+
+    this.releaseCurrentStream(false);
+    const replaced = this.openPlayable(replacement, {
+      excludedConnectionUris: new Set(),
+      position,
+      shouldPlay,
+    });
+
+    if (replaced) {
+      this.emitPlaybackEvent({
+        type: "state-changed",
+        state: shouldPlay ? "playing" : "paused",
+        track,
+        position: this.getPosition(),
+        duration: this.getDuration() || duration,
+      });
+      return true;
+    }
+
+    const replacementError =
+      this.connectionError || "The requested playback source could not open";
+    const restored = this.openPlayable(previousPlayable, {
+      excludedConnectionUris: new Set(),
+      position,
+      shouldPlay,
+    });
+
+    if (restored) {
+      this.loadError = replacementError;
+      this.emitPlaybackEvent({
+        type: "state-changed",
+        state: shouldPlay ? "playing" : "paused",
+        track,
+        position: this.getPosition(),
+        duration: this.getDuration() || duration,
+      });
+      return false;
+    }
+
+    this.currentPlayable = null;
+    this.currentTrack = null;
+    this.emitPlaybackEvent({
+      type: "track-stopped",
+      reason: "connection-failed",
+      track,
+      position,
+      duration,
+    });
+    return false;
   }
 
   clearQueue(): void {
@@ -656,10 +722,7 @@ export class BassManager {
     let candidates: StreamCandidate[];
     let lastCandidateError: string | null = null;
     try {
-      candidates = this.streamResolver(
-        playable.source,
-        excludedConnectionUris,
-      );
+      candidates = this.streamResolver(playable.source, excludedConnectionUris);
     } catch (error) {
       this.failConnection(
         error instanceof Error ? error.message : String(error),
@@ -843,6 +906,10 @@ export class BassManager {
       this.streamHandle,
       position,
     );
+    if (bytes === BASS_QWORD_FAILED) {
+      this.loadError = `BASS_ChannelSeconds2Bytes failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
+      return false;
+    }
     const seeked = this.library.symbols.BASS_ChannelSetPosition(
       this.streamHandle,
       bytes,
@@ -877,26 +944,31 @@ export class BassManager {
       this.streamHandle,
       BASS_POS_BYTE,
     );
-    if (position < 0n) return 0;
-    return this.library.symbols.BASS_ChannelBytes2Seconds(
+    if (position === BASS_QWORD_FAILED) return 0;
+    const seconds = this.library.symbols.BASS_ChannelBytes2Seconds(
       this.streamHandle,
       position,
     );
+    return Number.isFinite(seconds) && seconds >= 0 ? seconds : 0;
   }
 
   private getDuration(): number {
-    const plexDuration = (this.currentTrack?.duration ?? 0) / 1_000;
-    if (plexDuration > 0) return plexDuration;
-    if (!this.library || !this.streamHandle) return 0;
+    const trackDuration = this.currentTrack?.duration
+      ? this.currentTrack.duration / 1000
+      : 0;
+    if (!this.library || !this.streamHandle) return trackDuration;
     const length = this.library.symbols.BASS_ChannelGetLength(
       this.streamHandle,
       BASS_POS_BYTE,
     );
-    if (length < 0n) return 0;
-    return this.library.symbols.BASS_ChannelBytes2Seconds(
+    if (length === BASS_QWORD_FAILED || length === 0n) return trackDuration;
+    const seconds = this.library.symbols.BASS_ChannelBytes2Seconds(
       this.streamHandle,
       length,
     );
+    return Number.isFinite(seconds) && seconds >= 1
+      ? Math.max(seconds, trackDuration)
+      : trackDuration;
   }
 
   private resolveLibraryPath(): string | null {
@@ -942,7 +1014,7 @@ export class BassManager {
       resolve(process.cwd(), "vendor", "bass"),
       resolve(import.meta.dir, "..", "vendor", "bass"),
     ];
-    const pluginNames = ["flac", "hls"];
+    const pluginNames = ["flac", "hls", "opus"];
 
     return pluginNames.map((name) => {
       const candidates = roots.map((root) => {

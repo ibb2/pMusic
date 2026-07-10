@@ -12,6 +12,7 @@ import type Authentication from "./authentication";
 import { selectMusicLibraries } from "./library-selection";
 import type {
   PlaybackSettings,
+  PlaybackSettingsPatch,
   PlayerQueue,
   PlayerTrack,
 } from "../../shared/rpc";
@@ -59,6 +60,104 @@ type HslColor = {
 
 const PLEX_REQUEST_TIMEOUT_MS = 8_000;
 
+type StoredPlaybackSettings = Partial<PlaybackSettings> & {
+  useOriginalFileUrl?: unknown;
+};
+
+type AudioTranscodeSourceOptions = {
+  ratingKey: string;
+  transcodeSessionId: string;
+  plexSessionId: string;
+  product: string;
+  clientIdentifier: string;
+  device: string;
+  platformVersion: string;
+};
+
+type PlexPlaybackIdentityOptions = Omit<
+  AudioTranscodeSourceOptions,
+  "ratingKey" | "transcodeSessionId"
+>;
+
+export function normalizePlaybackSettings(saved: unknown): PlaybackSettings {
+  const stored =
+    saved && typeof saved === "object" ? (saved as StoredPlaybackSettings) : {};
+
+  return {
+    transcodeAudio:
+      typeof stored.transcodeAudio === "boolean"
+        ? stored.transcodeAudio
+        : typeof stored.useOriginalFileUrl === "boolean"
+          ? !stored.useOriginalFileUrl
+          : false,
+    enableUltraBlur:
+      typeof stored.enableUltraBlur === "boolean"
+        ? stored.enableUltraBlur
+        : true,
+    enableTimelineReporting:
+      typeof stored.enableTimelineReporting === "boolean"
+        ? stored.enableTimelineReporting
+        : true,
+  };
+}
+
+export function createAudioTranscodeSource({
+  ratingKey,
+  transcodeSessionId,
+  plexSessionId,
+  product,
+  clientIdentifier,
+  device,
+  platformVersion,
+}: AudioTranscodeSourceOptions): PlexStreamSource {
+  return {
+    path: "/music/:/transcode/universal/start",
+    params: {
+      path: `/library/metadata/${ratingKey}`,
+      protocol: "http",
+      directPlay: "0",
+      directStream: "0",
+      directStreamAudio: "0",
+      hasMDE: "1",
+      mediaIndex: "0",
+      partIndex: "0",
+      download: "0",
+      location: "lan",
+      mediaBufferSize: "102400",
+      musicBitrate: "320",
+      session: transcodeSessionId,
+      ...createPlexPlaybackIdentity({
+        plexSessionId,
+        product,
+        clientIdentifier,
+        device,
+        platformVersion,
+      }),
+      "X-Plex-Client-Profile-Name": "generic",
+      "X-Plex-Client-Profile-Extra":
+        "add-transcode-target(replace=true&type=musicProfile&context=streaming&protocol=http&container=ogg&audioCodec=opus)",
+    },
+  };
+}
+
+export function createPlexPlaybackIdentity({
+  plexSessionId,
+  product,
+  clientIdentifier,
+  device,
+  platformVersion,
+}: PlexPlaybackIdentityOptions): Record<string, string> {
+  return {
+    "X-Plex-Product": product,
+    "X-Plex-Client-Identifier": clientIdentifier,
+    "X-Plex-Session-Identifier": plexSessionId,
+    "X-Plex-Device": device,
+    "X-Plex-Device-Name": device,
+    "X-Plex-Platform": "Generic",
+    "X-Plex-Platform-Version": platformVersion,
+  };
+}
+
 export class MediaService {
   private activeBaseUrl: string | null = null;
 
@@ -78,19 +177,22 @@ export class MediaService {
   }
 
   getPlaybackSettings(): PlaybackSettings {
-    return {
-      useOriginalFileUrl: true,
-      enableUltraBlur: true,
-      enableTimelineReporting: true,
-      ...((this.db.get("playback") as PlaybackSettings | null) ?? {}),
-    };
+    return normalizePlaybackSettings(this.db.get("playback"));
   }
 
-  setPlaybackSettings(settings: PlaybackSettings): PlaybackSettings {
-    const next = {
-      ...this.getPlaybackSettings(),
+  async setPlaybackSettings(
+    settings: PlaybackSettingsPatch,
+  ): Promise<PlaybackSettings> {
+    const current = this.getPlaybackSettings();
+    const next = normalizePlaybackSettings({
+      ...current,
       ...settings,
-    };
+    });
+
+    if (current.transcodeAudio !== next.transcodeAudio) {
+      await this.replaceCurrentPlaybackSource(next.transcodeAudio);
+    }
+
     this.db.set("playback", next);
     return next;
   }
@@ -798,9 +900,10 @@ export class MediaService {
   }
 
   private async toPlayableTrack(track: PlexMetadata): Promise<PlayableTrack> {
-    const source = this.getPlaybackSettings().useOriginalFileUrl
-      ? this.originalFileSource(track)
-      : this.transcodeSource(track);
+    const plexSessionId = randomUUID().replaceAll("-", "");
+    const source = this.getPlaybackSettings().transcodeAudio
+      ? this.transcodeSource(track, plexSessionId)
+      : this.originalFileSource(track, plexSessionId);
     if (!source)
       throw new Error(
         `Track ${track.ratingKey} does not have a playable stream`,
@@ -817,6 +920,7 @@ export class MediaService {
           track.grandparentRatingKey ||
           this.extractRatingKey(track.grandparentKey),
         ratingKey: String(track.ratingKey || ""),
+        plexSessionId,
         duration: track.duration,
         thumb: this.plexUrl(track.thumb),
       },
@@ -824,42 +928,61 @@ export class MediaService {
     };
   }
 
-  private originalFileSource(track: PlexMetadata): PlexStreamSource | null {
-    const part = track.Media?.[0]?.Part?.[0];
-    if (typeof part?.key !== "string" || !part.key) return null;
-    return { path: part.key };
+  private async replaceCurrentPlaybackSource(
+    transcodeAudio: boolean,
+  ): Promise<void> {
+    const currentTrack = this.bass.getPlaybackStatus().current_track;
+    if (!currentTrack?.ratingKey) return;
+
+    const metadata = await this.fetchMetadataItem(currentTrack.ratingKey);
+    const plexSessionId =
+      currentTrack.plexSessionId || randomUUID().replaceAll("-", "");
+    currentTrack.plexSessionId = plexSessionId;
+    const source = transcodeAudio
+      ? this.transcodeSource(metadata, plexSessionId)
+      : this.originalFileSource(metadata, plexSessionId);
+    if (!source) {
+      throw new Error(
+        `Track ${currentTrack.ratingKey} does not have a playable stream`,
+      );
+    }
+
+    if (!this.bass.replaceCurrentSource(source)) {
+      throw new Error("Unable to switch the current playback source");
+    }
   }
 
-  private transcodeSource(track: PlexMetadata): PlexStreamSource {
-    const plexSessionId = randomUUID().replaceAll("-", "");
+  private originalFileSource(
+    track: PlexMetadata,
+    plexSessionId: string,
+  ): PlexStreamSource | null {
+    const part = track.Media?.[0]?.Part?.[0];
+    if (typeof part?.key !== "string" || !part.key) return null;
     return {
-      path: "/music/:/transcode/universal/start",
-      params: {
-        path: `/library/metadata/${track.ratingKey}`,
-        protocol: "http",
-        directPlay: "0",
-        directStream: "0",
-        directStreamAudio: "0",
-        hasMDE: "1",
-        mediaIndex: "0",
-        partIndex: "0",
-        download: "0",
-        location: "lan",
-        mediaBufferSize: "102400",
-        musicBitrate: "320",
-        session: plexSessionId,
-        "X-Plex-Product": this.auth.plexProduct,
-        "X-Plex-Client-Identifier": this.auth.plexClientId,
-        "X-Plex-Session-Identifier": plexSessionId,
-        "X-Plex-Device": deviceName(),
-        "X-Plex-Device-Name": deviceName(),
-        "X-Plex-Platform": "Generic",
-        "X-Plex-Platform-Version": release(),
-        "X-Plex-Client-Profile-Name": "generic",
-        "X-Plex-Client-Profile-Extra":
-          "add-transcode-target(replace=true&type=musicProfile&context=streaming&protocol=http&container=mp3&audioCodec=mp3)",
-      },
+      path: part.key,
+      params: createPlexPlaybackIdentity({
+        plexSessionId,
+        product: this.auth.plexProduct,
+        clientIdentifier: this.auth.plexClientId,
+        device: deviceName(),
+        platformVersion: release(),
+      }),
     };
+  }
+
+  private transcodeSource(
+    track: PlexMetadata,
+    plexSessionId: string,
+  ): PlexStreamSource {
+    return createAudioTranscodeSource({
+      ratingKey: String(track.ratingKey || ""),
+      transcodeSessionId: randomUUID().replaceAll("-", ""),
+      plexSessionId,
+      product: this.auth.plexProduct,
+      clientIdentifier: this.auth.plexClientId,
+      device: deviceName(),
+      platformVersion: release(),
+    });
   }
 
   private resolveStreamCandidates(

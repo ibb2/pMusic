@@ -39,6 +39,7 @@ export type PlayerTrack = {
   album: string;
   albumRatingKey: string;
   ratingKey: string;
+  plexSessionId?: string;
   duration?: number;
   thumb?: string | null;
 };
@@ -61,10 +62,12 @@ export type PlayerStatus = {
 };
 
 export type PlaybackSettings = {
-  useOriginalFileUrl: boolean;
+  transcodeAudio: boolean;
   enableUltraBlur?: boolean;
   enableTimelineReporting?: boolean;
 };
+
+export type PlaybackSettingsPatch = Partial<PlaybackSettings>;
 
 export type UserProfile = {
   id: string;
@@ -90,7 +93,7 @@ export type RaynaRPC = {
         response: PlaybackSettings;
       };
       settingsSetPlayback: {
-        params: { settings: PlaybackSettings };
+        params: { settings: PlaybackSettingsPatch };
         response: PlaybackSettings;
       };
       authGenerateClientIdentifier: {

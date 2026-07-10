@@ -10,17 +10,23 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import type { PlaybackSettings } from "../../../../shared/rpc";
+import type {
+  PlaybackSettings,
+  PlaybackSettingsPatch,
+} from "../../../../shared/rpc";
 import { PlexServer } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
 });
+
+type PlaybackSettingKey = keyof PlaybackSettings;
+type PlaybackFieldState = Partial<Record<PlaybackSettingKey, boolean>>;
 
 export function SettingsPage() {
   const { setEnabled } = useUltraBlur();
@@ -29,13 +35,21 @@ export function SettingsPage() {
   );
   const [selectedServer, setSelectedServer] = useState<PlexServer | null>(null);
   const [playbackSettings, setPlaybackSettings] = useState<PlaybackSettings>({
-    useOriginalFileUrl: true,
+    transcodeAudio: false,
     enableUltraBlur: true,
     enableTimelineReporting: true,
   });
   const [loading, setLoading] = useState(true);
   const [updated, setUpdated] = useState(false);
-  const [playbackUpdated, setPlaybackUpdated] = useState(false);
+  const [playbackUpdated, setPlaybackUpdated] = useState<PlaybackFieldState>(
+    {},
+  );
+  const [playbackPending, setPlaybackPending] = useState<PlaybackFieldState>(
+    {},
+  );
+  const playbackUpdateTimers = useRef<
+    Partial<Record<PlaybackSettingKey, ReturnType<typeof setTimeout>>>
+  >({});
 
   // queries
   const { isPending, error, data } = useQuery({
@@ -72,41 +86,62 @@ export function SettingsPage() {
     }, 1500);
   };
 
-  const setUseOriginalFileUrl = async (useOriginalFileUrl: boolean) => {
-    const next = { ...playbackSettings, useOriginalFileUrl };
-    setPlaybackSettings(next);
-    await window.api.settings.setPlayback(next).catch((e) => console.error(e));
-    setPlaybackUpdated(true);
+  const markPlaybackUpdated = (key: PlaybackSettingKey) => {
+    const existingTimer = playbackUpdateTimers.current[key];
+    if (existingTimer) clearTimeout(existingTimer);
 
-    setTimeout(() => {
-      setPlaybackUpdated(false);
+    setPlaybackUpdated((current) => ({ ...current, [key]: true }));
+    playbackUpdateTimers.current[key] = setTimeout(() => {
+      setPlaybackUpdated((current) => ({ ...current, [key]: false }));
+      delete playbackUpdateTimers.current[key];
     }, 1500);
   };
 
-  const setEnableUltraBlur = async (enableUltraBlur: boolean) => {
-    const next = { ...playbackSettings, enableUltraBlur };
-    setPlaybackSettings(next);
-    setEnabled(enableUltraBlur);
-    await window.api.settings.setPlayback(next).catch((e) => console.error(e));
-    setPlaybackUpdated(true);
-
-    setTimeout(() => {
-      setPlaybackUpdated(false);
-    }, 1500);
-  };
-
-  const setEnableTimelineReporting = async (
-    enableTimelineReporting: boolean,
+  const updatePlaybackSetting = async <K extends PlaybackSettingKey>(
+    key: K,
+    value: PlaybackSettings[K],
   ) => {
-    const next = { ...playbackSettings, enableTimelineReporting };
-    setPlaybackSettings(next);
-    await window.api.settings.setPlayback(next).catch((e) => console.error(e));
-    setPlaybackUpdated(true);
+    if (playbackPending[key]) return;
 
-    setTimeout(() => {
-      setPlaybackUpdated(false);
-    }, 1500);
+    const previousValue = playbackSettings[key];
+    const patch = { [key]: value } as PlaybackSettingsPatch;
+    setPlaybackSettings((current) => ({ ...current, [key]: value }));
+    setPlaybackPending((current) => ({ ...current, [key]: true }));
+
+    if (key === "enableUltraBlur") setEnabled(value !== false);
+
+    try {
+      await window.api.settings.setPlayback(patch);
+      markPlaybackUpdated(key);
+    } catch (error) {
+      console.error(error);
+      setPlaybackSettings((current) => ({
+        ...current,
+        [key]: previousValue,
+      }));
+      if (key === "enableUltraBlur") setEnabled(previousValue !== false);
+    } finally {
+      setPlaybackPending((current) => ({ ...current, [key]: false }));
+    }
   };
+
+  const setTranscodeAudio = (transcodeAudio: boolean) =>
+    updatePlaybackSetting("transcodeAudio", transcodeAudio);
+
+  const setEnableUltraBlur = (enableUltraBlur: boolean) =>
+    updatePlaybackSetting("enableUltraBlur", enableUltraBlur);
+
+  const setEnableTimelineReporting = async (enableTimelineReporting: boolean) =>
+    updatePlaybackSetting("enableTimelineReporting", enableTimelineReporting);
+
+  useEffect(
+    () => () => {
+      Object.values(playbackUpdateTimers.current).forEach((timer) => {
+        if (timer) clearTimeout(timer);
+      });
+    },
+    [],
+  );
 
   useEffect(() => {
     const fetchSelectedServer = async () => {
@@ -192,21 +227,22 @@ export function SettingsPage() {
             <div className="border border-zinc-300 dark:border-zinc-700 rounded-lg p-6 space-y-6">
               <div className="flex items-center justify-between gap-6">
                 <div>
-                  <Label className="mb-2 block">Use original Plex file</Label>
+                  <Label className="mb-2 block">Transcode Audio</Label>
                   <Label className="mb-2 block text-sm text-muted-foreground">
-                    Play the Plex media URL directly.
+                    When enabled, Plex converts to a 320 kbps Opus stream.
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
-                  {playbackUpdated && (
+                  {playbackUpdated.transcodeAudio && (
                     <p className="text-green-700 dark:text-green-300">
                       Updated
                     </p>
                   )}
                   <Switch
-                    checked={playbackSettings.useOriginalFileUrl}
-                    onCheckedChange={setUseOriginalFileUrl}
-                    aria-label="Use original Plex file"
+                    checked={playbackSettings.transcodeAudio}
+                    onCheckedChange={setTranscodeAudio}
+                    aria-label="Transcode Audio"
+                    disabled={playbackPending.transcodeAudio}
                   />
                 </div>
               </div>
@@ -218,7 +254,7 @@ export function SettingsPage() {
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
-                  {playbackUpdated && (
+                  {playbackUpdated.enableUltraBlur && (
                     <p className="text-green-700 dark:text-green-300">
                       Updated
                     </p>
@@ -227,6 +263,7 @@ export function SettingsPage() {
                     checked={playbackSettings.enableUltraBlur !== false}
                     onCheckedChange={setEnableUltraBlur}
                     aria-label="UltraBlur Background"
+                    disabled={playbackPending.enableUltraBlur}
                   />
                 </div>
               </div>
@@ -238,7 +275,7 @@ export function SettingsPage() {
                   </Label>
                 </div>
                 <div className="flex items-center gap-4">
-                  {playbackUpdated && (
+                  {playbackUpdated.enableTimelineReporting && (
                     <p className="text-green-700 dark:text-green-300">
                       Updated
                     </p>
@@ -247,6 +284,7 @@ export function SettingsPage() {
                     checked={playbackSettings.enableTimelineReporting !== false}
                     onCheckedChange={setEnableTimelineReporting}
                     aria-label="Report playback to Plex"
+                    disabled={playbackPending.enableTimelineReporting}
                   />
                 </div>
               </div>
