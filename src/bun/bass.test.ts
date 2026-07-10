@@ -5,6 +5,10 @@ import type { PlayerTrack } from "../shared/rpc";
 const LOCAL = "http://local:32400";
 const REMOTE = "https://remote:32400";
 const source: PlexStreamSource = { path: "/library/parts/1/file.flac" };
+const opusSource: PlexStreamSource = {
+  path: "/music/:/transcode/universal/start",
+  params: { musicBitrate: "320" },
+};
 
 describe("BASS Plex route recovery", () => {
   test("falls through to a remote route when initial stream creation fails", () => {
@@ -49,6 +53,76 @@ describe("BASS Plex route recovery", () => {
     expect(bass.getQueue().previous_track?.ratingKey).toBe(previous.ratingKey);
     expect(bass.getQueue().tracks[0]?.ratingKey).toBe(queued.ratingKey);
     expect(selectedConnections.at(-1)).toBe(REMOTE);
+  });
+
+  test("replaces a paused source without losing position, history, or queue", () => {
+    const fake = new FakeBassLibrary();
+    const { bass } = manager(fake);
+    const previous = track("previous");
+    const current = track("current");
+    const queued = track("queued");
+
+    bass.playTrack(previous, source);
+    bass.playTrack(current, source);
+    bass.queueTrack(queued, source);
+    fake.position = 42;
+    bass.pause();
+
+    expect(bass.replaceCurrentSource(opusSource)).toBe(true);
+    expect(new URL(fake.createdUrls.at(-1)!).pathname).toBe(opusSource.path);
+    expect(
+      new URL(fake.createdUrls.at(-1)!).searchParams.get("musicBitrate"),
+    ).toBe("320");
+
+    const replaced = bass.getPlaybackStatus();
+    expect(replaced.current_track?.ratingKey).toBe(current.ratingKey);
+    expect(replaced.position).toBe(42);
+    expect(replaced.is_playing).toBe(false);
+    expect(replaced.queue_len).toBe(1);
+    expect(bass.getQueue().previous_track?.ratingKey).toBe(previous.ratingKey);
+
+    bass.resume();
+    fake.position = 180;
+    fake.active = 0;
+    bass.pollPlayback();
+    expect(bass.getPlaybackStatus().current_track?.ratingKey).toBe(
+      queued.ratingKey,
+    );
+  });
+
+  test("replaces a playing source without interrupting playback", () => {
+    const fake = new FakeBassLibrary();
+    const { bass } = manager(fake);
+    const current = track("current");
+
+    bass.playTrack(current, source);
+    fake.position = 18;
+
+    expect(bass.replaceCurrentSource(opusSource)).toBe(true);
+    expect(bass.getPlaybackStatus().current_track?.ratingKey).toBe(
+      current.ratingKey,
+    );
+    expect(bass.getPlaybackStatus().position).toBe(18);
+    expect(bass.getPlaybackStatus().is_playing).toBe(true);
+  });
+
+  test("restores the previous source when a replacement cannot open", () => {
+    const fake = new FakeBassLibrary();
+    const { bass } = manager(fake);
+    const current = track("current");
+
+    bass.playTrack(current, source);
+    fake.position = 27;
+    fake.setPathReachable(opusSource.path, false);
+
+    expect(bass.replaceCurrentSource(opusSource)).toBe(false);
+    expect(new URL(fake.createdUrls.at(-1)!).pathname).toBe(source.path);
+    expect(bass.getPlaybackStatus().current_track?.ratingKey).toBe(
+      current.ratingKey,
+    );
+    expect(bass.getPlaybackStatus().position).toBe(27);
+    expect(bass.getPlaybackStatus().is_playing).toBe(true);
+    expect(bass.getPlaybackStatus().connection_state).toBe("connected");
   });
 
   test("recovers a stream after it remains stalled for eight seconds", () => {
@@ -110,7 +184,7 @@ function manager(fake: FakeBassLibrary, now: () => number = Date.now) {
         .filter((connectionUri) => !excluded.has(connectionUri))
         .map((connectionUri) => ({
           connectionUri,
-          url: new URL(playableSource.path, connectionUri).toString(),
+          url: streamUrl(playableSource, connectionUri),
         })),
     (connectionUri) => selectedConnections.push(connectionUri),
   );
@@ -135,6 +209,7 @@ class FakeBassLibrary {
   duration = 180;
   createdUrls: string[] = [];
   private nextHandle = 1;
+  private unreachablePaths = new Set<string>();
   private reachable = new Map<string, boolean>([
     [LOCAL, true],
     [REMOTE, true],
@@ -152,7 +227,12 @@ class FakeBassLibrary {
       BASS_StreamCreateURL: (value) => {
         const url = new TextDecoder().decode(value).replace(/\0.*$/, "");
         this.createdUrls.push(url);
-        if (!this.reachable.get(new URL(url).origin)) return 0;
+        const parsed = new URL(url);
+        if (
+          this.unreachablePaths.has(parsed.pathname) ||
+          !this.reachable.get(parsed.origin)
+        )
+          return 0;
         this.active = 0;
         this.position = 0;
         return this.nextHandle++;
@@ -189,4 +269,23 @@ class FakeBassLibrary {
   setReachable(connectionUri: string, reachable: boolean): void {
     this.reachable.set(connectionUri, reachable);
   }
+
+  setPathReachable(path: string, reachable: boolean): void {
+    if (reachable) {
+      this.unreachablePaths.delete(path);
+      return;
+    }
+    this.unreachablePaths.add(path);
+  }
+}
+
+function streamUrl(
+  playableSource: PlexStreamSource,
+  connectionUri: string,
+): string {
+  const url = new URL(playableSource.path, connectionUri);
+  Object.entries(playableSource.params ?? {}).forEach(([key, value]) => {
+    url.searchParams.set(key, value);
+  });
+  return url.toString();
 }

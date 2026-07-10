@@ -1,5 +1,5 @@
 import { createRPC, Electroview } from "electrobun/view";
-import type { PlaybackSettings, RaynaRPC } from "../../shared/rpc";
+import type { PlaybackSettingsPatch, RaynaRPC } from "../../shared/rpc";
 import type {
   PlexConnectionMode,
   PlexLibrarySelection,
@@ -19,7 +19,7 @@ window.api = {
   },
   settings: {
     getPlayback: () => rpc.request.settingsGetPlayback(),
-    setPlayback: (settings: PlaybackSettings) =>
+    setPlayback: (settings: PlaybackSettingsPatch) =>
       rpc.request.settingsSetPlayback({ settings }),
   },
   auth: {

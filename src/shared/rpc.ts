@@ -66,6 +66,8 @@ export type PlaybackSettings = {
   enableTimelineReporting?: boolean;
 };
 
+export type PlaybackSettingsPatch = Partial<PlaybackSettings>;
+
 export type UserProfile = {
   id: string;
   username: string;
@@ -90,7 +92,7 @@ export type RaynaRPC = {
         response: PlaybackSettings;
       };
       settingsSetPlayback: {
-        params: { settings: PlaybackSettings };
+        params: { settings: PlaybackSettingsPatch };
         response: PlaybackSettings;
       };
       authGenerateClientIdentifier: {

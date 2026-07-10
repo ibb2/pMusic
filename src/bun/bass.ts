@@ -262,6 +262,72 @@ export class BassManager {
     this.playTracks(tracks);
   }
 
+  replaceCurrentSource(source: PlexStreamSource): boolean {
+    if (
+      !this.library ||
+      !this.initialized ||
+      !this.currentPlayable ||
+      !this.currentTrack
+    )
+      return false;
+
+    const previousPlayable = this.currentPlayable;
+    const track = this.currentTrack;
+    const position = this.getPosition();
+    const duration = this.getDuration();
+    const shouldPlay = this.playbackIntent === "playing";
+    const replacement = { ...previousPlayable, source };
+
+    this.releaseCurrentStream(false);
+    const replaced = this.openPlayable(replacement, {
+      excludedConnectionUris: new Set(),
+      position,
+      shouldPlay,
+    });
+
+    if (replaced) {
+      this.emitPlaybackEvent({
+        type: "state-changed",
+        state: shouldPlay ? "playing" : "paused",
+        track,
+        position: this.getPosition(),
+        duration: this.getDuration() || duration,
+      });
+      return true;
+    }
+
+    const replacementError =
+      this.connectionError || "The requested playback source could not open";
+    const restored = this.openPlayable(previousPlayable, {
+      excludedConnectionUris: new Set(),
+      position,
+      shouldPlay,
+    });
+
+    if (restored) {
+      this.loadError = replacementError;
+      this.emitPlaybackEvent({
+        type: "state-changed",
+        state: shouldPlay ? "playing" : "paused",
+        track,
+        position: this.getPosition(),
+        duration: this.getDuration() || duration,
+      });
+      return false;
+    }
+
+    this.currentPlayable = null;
+    this.currentTrack = null;
+    this.emitPlaybackEvent({
+      type: "track-stopped",
+      reason: "connection-failed",
+      track,
+      position,
+      duration,
+    });
+    return false;
+  }
+
   clearQueue(): void {
     this.queue = [];
   }
@@ -656,10 +722,7 @@ export class BassManager {
     let candidates: StreamCandidate[];
     let lastCandidateError: string | null = null;
     try {
-      candidates = this.streamResolver(
-        playable.source,
-        excludedConnectionUris,
-      );
+      candidates = this.streamResolver(playable.source, excludedConnectionUris);
     } catch (error) {
       this.failConnection(
         error instanceof Error ? error.message : String(error),
@@ -843,6 +906,10 @@ export class BassManager {
       this.streamHandle,
       position,
     );
+    if (bytes === BASS_QWORD_FAILED) {
+      this.loadError = `BASS_ChannelSeconds2Bytes failed with error ${this.library.symbols.BASS_ErrorGetCode()}`;
+      return false;
+    }
     const seeked = this.library.symbols.BASS_ChannelSetPosition(
       this.streamHandle,
       bytes,

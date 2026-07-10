@@ -3,6 +3,7 @@
 import type {
   BassStatus,
   PlaybackSettings,
+  PlaybackSettingsPatch,
   PlayerQueue,
   PlayerStatus,
   UserProfile,
@@ -23,7 +24,9 @@ declare global {
       };
       settings: {
         getPlayback: () => Promise<PlaybackSettings>;
-        setPlayback: (settings: PlaybackSettings) => Promise<PlaybackSettings>;
+        setPlayback: (
+          settings: PlaybackSettingsPatch,
+        ) => Promise<PlaybackSettings>;
       };
       auth: {
         isUserSignedIn: () => Promise<boolean>;
