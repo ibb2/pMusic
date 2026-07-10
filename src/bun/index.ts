@@ -6,7 +6,7 @@ import { MediaService } from "./plex/media";
 import { PlexTimelineReporter } from "./plex/timeline";
 import type { ApplicationMenuItemConfig } from "electrobun";
 import type { RaynaRPC } from "../shared/rpc";
-import type { PlexServer } from "../shared/types";
+import type { PlexLibrarySelection, PlexServer } from "../shared/types";
 
 const db = new DatabaseManager();
 const auth = new Authentication();
@@ -43,8 +43,13 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       authGetLibraries: () => auth.getLibraries(),
       authSelectServer: ({ server }: { server: PlexServer }) =>
         auth.selectServer(server),
-      authSelectLibraries: ({ libraries }: { libraries: unknown[] }) =>
-        auth.selectLibraries(libraries),
+      authSelectLibraries: ({
+        libraries,
+      }: {
+        libraries: PlexLibrarySelection[];
+      }) => auth.selectLibraries(libraries),
+      authResolveServerConnection: ({ mode }) =>
+        auth.resolveServerConnection(mode),
       authIsServerSelected: () => auth.isServerSelected(),
       authGetUserSelectedServer: () => auth.getUserSelectedServer(),
       authGetUserAccessToken: () => auth.getUserAccessToken(),

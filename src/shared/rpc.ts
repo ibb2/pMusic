@@ -1,4 +1,9 @@
-import type { PlexLibrary, PlexServer } from "./types";
+import type {
+  PlexConnectionMode,
+  PlexLibrary,
+  PlexLibrarySelection,
+  PlexServer,
+} from "./types";
 
 type RPCSchema<
   I extends {
@@ -127,8 +132,12 @@ export type RaynaRPC = {
         response: void;
       };
       authSelectLibraries: {
-        params: { libraries: unknown[] };
+        params: { libraries: PlexLibrarySelection[] };
         response: void;
+      };
+      authResolveServerConnection: {
+        params: { mode?: PlexConnectionMode };
+        response: string;
       };
       authIsServerSelected: {
         params: void;
@@ -148,7 +157,7 @@ export type RaynaRPC = {
       };
       authGetUserSelectedLibraries: {
         params: void;
-        response: unknown[] | null;
+        response: PlexLibrarySelection[] | null;
       };
       authCloseLoopbackServer: {
         params: void;

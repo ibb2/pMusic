@@ -2,6 +2,7 @@ import { Buffer } from "node:buffer";
 import type { BassManager } from "../bass";
 import type { DatabaseManager } from "../database";
 import type Authentication from "./authentication";
+import { selectMusicLibraries } from "./library-selection";
 import type {
   PlaybackSettings,
   PlayerQueue,
@@ -752,24 +753,7 @@ export class MediaService {
     const libraries = await this.auth.getLibraries();
     const selectedLibraries =
       (await this.auth.getUserSelectedLibraries()) || [];
-    const selectedUuids = selectedLibraries
-      .map((library) => {
-        if (typeof library === "string") return library;
-        if (library && typeof library === "object" && "uuid" in library) {
-          return String((library as { uuid: unknown }).uuid);
-        }
-        return null;
-      })
-      .filter(Boolean);
-
-    const musicLibraries = libraries.filter(
-      (library) => library.type === "artist",
-    );
-    if (selectedUuids.length === 0) return musicLibraries;
-
-    return musicLibraries.filter((library) =>
-      selectedUuids.includes(library.uuid),
-    );
+    return selectMusicLibraries(libraries, selectedLibraries);
   }
 
   private async fetchMetadataItem(ratingKey: string): Promise<PlexMetadata> {
@@ -854,30 +838,11 @@ export class MediaService {
   ): Promise<PlexResponse> {
     const server = await this.getSelectedServer();
     const token = this.getServerToken(server);
-    const connections = server.connections.filter(
-      (connection) => connection.uri,
+    const orderedConnections = this.auth.getConnectionCandidates(
+      "auto",
+      server,
+      this.activeBaseUrl,
     );
-    const orderedConnections = [
-      ...connections.filter(
-        (connection) => connection.uri === this.activeBaseUrl,
-      ),
-      ...connections.filter(
-        (connection) =>
-          connection.uri !== this.activeBaseUrl &&
-          connection.local &&
-          !connection.relay,
-      ),
-      ...connections.filter(
-        (connection) =>
-          connection.uri !== this.activeBaseUrl &&
-          !connection.local &&
-          !connection.relay,
-      ),
-      ...connections.filter(
-        (connection) =>
-          connection.uri !== this.activeBaseUrl && connection.relay,
-      ),
-    ];
     let lastError: unknown = null;
 
     for (const connection of orderedConnections) {
@@ -907,6 +872,7 @@ export class MediaService {
         }
 
         this.activeBaseUrl = connection.uri;
+        this.auth.setLastKnownGoodConnection(connection.uri);
         return (await response.json()) as PlexResponse;
       } catch (error) {
         lastError = error;

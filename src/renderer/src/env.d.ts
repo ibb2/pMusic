@@ -7,7 +7,12 @@ import type {
   PlayerStatus,
   UserProfile,
 } from "../../shared/rpc";
-import type { PlexLibrary, PlexServer } from "../../shared/types";
+import type {
+  PlexConnectionMode,
+  PlexLibrary,
+  PlexLibrarySelection,
+  PlexServer,
+} from "../../shared/types";
 
 declare global {
   interface Window {
@@ -35,10 +40,11 @@ declare global {
         getServers: () => Promise<PlexServer[]>;
         getLibraries: () => Promise<PlexLibrary[]>;
         selectServer: (server: PlexServer) => Promise<void>;
-        selectLibraries: (libraries: unknown[]) => Promise<void>;
+        selectLibraries: (libraries: PlexLibrarySelection[]) => Promise<void>;
+        resolveServerConnection: (mode?: PlexConnectionMode) => Promise<string>;
         isServerSelected: () => Promise<boolean>;
         getUserSelectedServer: () => Promise<PlexServer | null>;
-        getUserSelectedLibraries: () => Promise<unknown[] | null>;
+        getUserSelectedLibraries: () => Promise<PlexLibrarySelection[] | null>;
         getUserAccessToken: () => Promise<string>;
         getUserProfile: () => Promise<UserProfile | null>;
         closeLoopbackServer: () => Promise<void>;

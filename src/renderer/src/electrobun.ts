@@ -1,6 +1,10 @@
 import { createRPC, Electroview } from "electrobun/view";
 import type { PlaybackSettings, RaynaRPC } from "../../shared/rpc";
-import type { PlexServer } from "../../shared/types";
+import type {
+  PlexConnectionMode,
+  PlexLibrarySelection,
+  PlexServer,
+} from "../../shared/types";
 
 const rpc = createRPC<RaynaRPC["webview"], RaynaRPC["bun"]>({
   maxRequestTime: 30_000,
@@ -30,8 +34,10 @@ window.api = {
     getLibraries: () => rpc.request.authGetLibraries(),
     selectServer: (server: PlexServer) =>
       rpc.request.authSelectServer({ server }),
-    selectLibraries: (libraries: unknown[]) =>
+    selectLibraries: (libraries: PlexLibrarySelection[]) =>
       rpc.request.authSelectLibraries({ libraries }),
+    resolveServerConnection: (mode?: PlexConnectionMode) =>
+      rpc.request.authResolveServerConnection({ mode }),
     isServerSelected: () => rpc.request.authIsServerSelected(),
     getUserSelectedServer: () => rpc.request.authGetUserSelectedServer(),
     getUserAccessToken: () => rpc.request.authGetUserAccessToken(),

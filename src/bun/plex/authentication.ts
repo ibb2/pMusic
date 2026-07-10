@@ -3,11 +3,22 @@ import qs from 'qs'
 import { v4 as uuidv4 } from 'uuid'
 import { LoopbackAuthServer } from './loopback'
 import { JsonStore } from '../store'
+import {
+  PLEX_CONNECTION_PROBE_TIMEOUT_MS,
+  findReachablePlexConnection,
+  orderPlexConnections,
+  probePlexConnection
+} from './connections'
 import type { UserProfile } from '../../shared/rpc'
-import type { PlexLibrary, PlexServer } from '../../shared/types'
+import type {
+  Connection,
+  PlexConnectionMode,
+  PlexLibrary,
+  PlexLibrarySelection,
+  PlexServer
+} from '../../shared/types'
 
 const USER_PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000
-
 type CachedUserProfile = {
   profile: UserProfile
   fetchedAt: number
@@ -23,7 +34,7 @@ class Authentication {
   privateKey: string | null = null
   publicKey: string | null = null
   selectedServer: PlexServer | null = null
-  selectedLibraries: unknown[] | null = null
+  selectedLibraries: PlexLibrarySelection[] | null = null
   private userProfileRefresh: Promise<UserProfile | null> | null = null
   store = new JsonStore('auth.json')
 
@@ -182,6 +193,8 @@ class Authentication {
       this.store.delete('selectedServer')
       this.store.delete('selectedLibraries')
       this.store.delete('userProfile')
+      this.store.delete('lastKnownGoodConnection')
+      this.store.delete('lastKnowGoodConnection')
       this.plexUserAccessToken = ''
       this.plexId = ''
       this.plexCode = ''
@@ -219,8 +232,9 @@ class Authentication {
       this.plexUserAccessToken ||
       this.store.get<string>('plexUserAccessToken') ||
       ''
-    const connections =
-      selectedServer?.connections?.filter((connection) => connection.uri) || []
+    const connections = selectedServer
+      ? this.getConnectionCandidates('auto', selectedServer)
+      : []
 
     if (connections.length === 0 || !token) {
       return []
@@ -234,6 +248,7 @@ class Authentication {
         url.searchParams.set('X-Plex-Token', token)
 
         const response = await fetch(url, {
+          signal: AbortSignal.timeout(PLEX_CONNECTION_PROBE_TIMEOUT_MS),
           headers: {
             Accept: 'application/json',
             'X-Plex-Product': this.plexProduct,
@@ -250,6 +265,8 @@ class Authentication {
           continue
         }
 
+        this.setLastKnownGoodConnection(connection.uri)
+
         const data = (await response.json()) as {
           MediaContainer?: {
             Directory?: Array<Record<string, unknown>>
@@ -265,18 +282,69 @@ class Authentication {
     }
 
     throw new Error(
-      `Failed to fetch Plex libraries${
-        lastError instanceof Error ? `: ${lastError.message}` : ''
-      }`
+      `Failed to fetch Plex libraries${lastError instanceof Error ? `: ${lastError.message}` : ''}`
     )
   }
 
   async selectServer(server: PlexServer): Promise<void> {
+    const selectedServer =
+      this.selectedServer || this.store.get<PlexServer>('selectedServer')
+    if (selectedServer?.clientIdentifier !== server.clientIdentifier) {
+      this.clearLastKnownGoodConnection()
+    }
     this.selectedServer = server
     this.store.set('selectedServer', server)
   }
 
-  async selectLibraries(libraries: unknown[]): Promise<void> {
+  async resolveServerConnection(
+    mode: PlexConnectionMode = 'auto'
+  ): Promise<string> {
+    const selectedServer =
+      this.selectedServer || this.store.get<PlexServer>('selectedServer')
+
+    if (!selectedServer) {
+      throw new Error('No Plex server connection is available')
+    }
+
+    const candidates = this.getConnectionCandidates(mode, selectedServer)
+
+    if (candidates.length === 0) {
+      throw new Error('No Plex server connection is available')
+    }
+
+    const reachable = await findReachablePlexConnection(
+      candidates,
+      (connection) => this.canReachConnection(connection.uri, selectedServer)
+    )
+
+    if (reachable) {
+      this.setLastKnownGoodConnection(reachable.uri)
+      return reachable.uri
+    }
+
+    throw new Error('No reachable Plex server connection found')
+  }
+
+  getConnectionCandidates(
+    mode: PlexConnectionMode = 'auto',
+    server: PlexServer | null = this.selectedServer,
+    preferredUri?: string | null
+  ): Connection[] {
+    if (!server) return []
+
+    return orderPlexConnections(server, {
+      mode,
+      preferredUri,
+      lastKnownGoodUri: this.getLastKnownGoodConnection()
+    })
+  }
+
+  setLastKnownGoodConnection(uri: string): void {
+    this.store.set('lastKnownGoodConnection', uri)
+    this.store.delete('lastKnowGoodConnection')
+  }
+
+  async selectLibraries(libraries: PlexLibrarySelection[]): Promise<void> {
     this.selectedLibraries = libraries
     this.store.set('selectedLibraries', libraries)
   }
@@ -289,7 +357,7 @@ class Authentication {
     return this.selectedServer
   }
 
-  async getUserSelectedLibraries(): Promise<unknown[] | null> {
+  async getUserSelectedLibraries(): Promise<PlexLibrarySelection[] | null> {
     return this.selectedLibraries
   }
 
@@ -366,6 +434,36 @@ class Authentication {
     return profile
   }
 
+  private clearLastKnownGoodConnection(): void {
+    this.store.delete('lastKnownGoodConnection')
+    this.store.delete('lastKnowGoodConnection')
+  }
+
+  private getLastKnownGoodConnection(): string | null {
+    const stored =
+      this.store.get<string>('lastKnownGoodConnection') ??
+      this.store.get<string>('lastKnowGoodConnection')
+
+    if (!stored) return null
+
+    try {
+      const parsed = JSON.parse(stored) as unknown
+      return typeof parsed === 'string' ? parsed : stored
+    } catch {
+      return stored
+    }
+  }
+
+  private async canReachConnection(
+    uri: string,
+    server: PlexServer
+  ): Promise<boolean> {
+    const token = server.accessToken || this.plexUserAccessToken
+    if (!token) return false
+
+    return probePlexConnection(uri, { token })
+  }
+
   private normalizeUserProfile(data: Record<string, unknown>): UserProfile {
     const username = String(
       data.username || data.title || data.email || 'Rayna User'
@@ -438,7 +536,7 @@ class Authentication {
     this.publicKey = this.store.get<string>('publicKey') || null
     this.selectedServer = this.store.get<PlexServer>('selectedServer') || null
     this.selectedLibraries =
-      this.store.get<unknown[]>('selectedLibraries') || null
+      this.store.get<PlexLibrarySelection[]>('selectedLibraries') || null
   }
 }
 

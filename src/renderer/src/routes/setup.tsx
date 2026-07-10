@@ -8,7 +8,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { PlexServer } from "@/types";
+import type { PlexLibrary, PlexServer } from "@/types";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -25,7 +25,7 @@ function RouteComponent() {
   const [load, onLoad] = useState(false);
   const [servers, setServers] = useState<PlexServer[]>([]);
   const [selectedServer, setSelectedServer] = useState<PlexServer | null>(null);
-  const [selectedLibraries, setSelectedLibraries] = useState<string[]>([]);
+  const [selectedLibraries, setSelectedLibraries] = useState<PlexLibrary[]>([]);
 
   const getServers = async () => {
     const s = await window.api.auth.getServers();
@@ -36,17 +36,17 @@ function RouteComponent() {
     setSelectedServer(server);
   };
 
-  const selectLibrary = (key: string) => {
-    if (selectedLibraries.includes(key)) {
+  const selectLibrary = (library: PlexLibrary) => {
+    if (selectedLibraries.some(({ uuid }) => uuid === library.uuid)) {
       const selectedItemRemoved = selectedLibraries.filter((s) => {
-        return s !== key;
+        return s.uuid !== library.uuid;
       });
       setSelectedLibraries([...selectedItemRemoved]);
 
       return;
     }
 
-    setSelectedLibraries([...selectedLibraries, key]);
+    setSelectedLibraries([...selectedLibraries, library]);
   };
 
   const progressForwards = () => {
@@ -55,7 +55,7 @@ function RouteComponent() {
   };
 
   const complete = async () => {
-    if (selectedServer && selectedLibraries.length > 0) {
+    if (selectedServer) {
       await window.api.auth.selectServer(selectedServer);
       await window.api.auth.selectLibraries(selectedLibraries);
       router.navigate({ to: "/app" });
@@ -76,11 +76,16 @@ function RouteComponent() {
     const checkSetupComplete = async () => {
       const isServerSelected = await window.api.auth.isServerSelected();
       if (isServerSelected) {
-        router.navigate({ to: "/app" });
+        try {
+          await window.api.auth.resolveServerConnection("auto");
+          router.navigate({ to: "/app" });
+        } catch {
+          // Keep setup visible so the user can choose another reachable route.
+        }
       }
     };
     checkSetupComplete();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!load) {

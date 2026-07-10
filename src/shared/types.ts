@@ -8,6 +8,8 @@ export type Connection = {
   IPv6: boolean
 }
 
+export type PlexConnectionMode = 'auto' | 'local' | 'remote' | 'relay'
+
 export type PlexServer = {
   name: string
   product: string
@@ -53,3 +55,5 @@ export type PlexLibrary = {
   thumb?: string
   updatedAt?: number
 }
+
+export type PlexLibrarySelection = PlexLibrary | string

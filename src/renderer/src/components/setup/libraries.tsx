@@ -3,7 +3,6 @@ import {
   Item,
   ItemActions,
   ItemContent,
-  ItemDescription,
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
@@ -11,13 +10,21 @@ import { Spinner } from "@/components/ui/spinner";
 import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
+import type { PlexLibrary, PlexServer } from "@/types";
+
+type LibrariesProps = {
+  complete: () => void | Promise<void>;
+  selectedServer: PlexServer | null;
+  selectedLibraries: PlexLibrary[];
+  selectLibrary: (library: PlexLibrary) => void;
+};
 
 export default function Libraries({
   complete,
   selectedServer,
   selectedLibraries,
   selectLibrary,
-}) {
+}: LibrariesProps) {
   const { isPending, error, data } = useQuery({
     queryKey: ["libraries", selectedServer?.clientIdentifier],
     queryFn: () => window.api.auth.getLibraries(),
@@ -61,7 +68,6 @@ export default function Libraries({
                 </ItemMedia>
                 <ItemContent>
                   <ItemTitle>{library.title}</ItemTitle>
-                  <ItemDescription>{library.type}</ItemDescription>
                 </ItemContent>
                 <ItemActions>
                   {selectedLibraries.some((l) => l.uuid === library.uuid) && (
