@@ -12,7 +12,8 @@ describe("Plex audio transcoding", () => {
   test("builds a forced 320 kbps Ogg Opus source", () => {
     const source = createAudioTranscodeSource({
       ratingKey: "123",
-      sessionId: "session-id",
+      transcodeSessionId: "transcode-session",
+      plexSessionId: "playback-session",
       product: "Rayna",
       clientIdentifier: "client-id",
       device: "Rayna on test-host",
@@ -27,8 +28,8 @@ describe("Plex audio transcoding", () => {
       directStream: "0",
       directStreamAudio: "0",
       musicBitrate: "320",
-      session: "session-id",
-      "X-Plex-Session-Identifier": "session-id",
+      session: "transcode-session",
+      "X-Plex-Session-Identifier": "playback-session",
     });
     expect(source.params?.["X-Plex-Client-Profile-Extra"]).toBe(
       "add-transcode-target(replace=true&type=musicProfile&context=streaming&protocol=http&container=ogg&audioCodec=opus)",

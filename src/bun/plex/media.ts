@@ -66,12 +66,18 @@ type StoredPlaybackSettings = Partial<PlaybackSettings> & {
 
 type AudioTranscodeSourceOptions = {
   ratingKey: string;
-  sessionId: string;
+  transcodeSessionId: string;
+  plexSessionId: string;
   product: string;
   clientIdentifier: string;
   device: string;
   platformVersion: string;
 };
+
+type PlexPlaybackIdentityOptions = Omit<
+  AudioTranscodeSourceOptions,
+  "ratingKey" | "transcodeSessionId"
+>;
 
 export function normalizePlaybackSettings(saved: unknown): PlaybackSettings {
   const stored =
@@ -97,7 +103,8 @@ export function normalizePlaybackSettings(saved: unknown): PlaybackSettings {
 
 export function createAudioTranscodeSource({
   ratingKey,
-  sessionId,
+  transcodeSessionId,
+  plexSessionId,
   product,
   clientIdentifier,
   device,
@@ -118,18 +125,36 @@ export function createAudioTranscodeSource({
       location: "lan",
       mediaBufferSize: "102400",
       musicBitrate: "320",
-      session: sessionId,
-      "X-Plex-Product": product,
-      "X-Plex-Client-Identifier": clientIdentifier,
-      "X-Plex-Session-Identifier": sessionId,
-      "X-Plex-Device": device,
-      "X-Plex-Device-Name": device,
-      "X-Plex-Platform": "Generic",
-      "X-Plex-Platform-Version": platformVersion,
+      session: transcodeSessionId,
+      ...createPlexPlaybackIdentity({
+        plexSessionId,
+        product,
+        clientIdentifier,
+        device,
+        platformVersion,
+      }),
       "X-Plex-Client-Profile-Name": "generic",
       "X-Plex-Client-Profile-Extra":
         "add-transcode-target(replace=true&type=musicProfile&context=streaming&protocol=http&container=ogg&audioCodec=opus)",
     },
+  };
+}
+
+export function createPlexPlaybackIdentity({
+  plexSessionId,
+  product,
+  clientIdentifier,
+  device,
+  platformVersion,
+}: PlexPlaybackIdentityOptions): Record<string, string> {
+  return {
+    "X-Plex-Product": product,
+    "X-Plex-Client-Identifier": clientIdentifier,
+    "X-Plex-Session-Identifier": plexSessionId,
+    "X-Plex-Device": device,
+    "X-Plex-Device-Name": device,
+    "X-Plex-Platform": "Generic",
+    "X-Plex-Platform-Version": platformVersion,
   };
 }
 
@@ -875,9 +900,10 @@ export class MediaService {
   }
 
   private async toPlayableTrack(track: PlexMetadata): Promise<PlayableTrack> {
+    const plexSessionId = randomUUID().replaceAll("-", "");
     const source = this.getPlaybackSettings().transcodeAudio
-      ? this.transcodeSource(track)
-      : this.originalFileSource(track);
+      ? this.transcodeSource(track, plexSessionId)
+      : this.originalFileSource(track, plexSessionId);
     if (!source)
       throw new Error(
         `Track ${track.ratingKey} does not have a playable stream`,
@@ -894,6 +920,7 @@ export class MediaService {
           track.grandparentRatingKey ||
           this.extractRatingKey(track.grandparentKey),
         ratingKey: String(track.ratingKey || ""),
+        plexSessionId,
         duration: track.duration,
         thumb: this.plexUrl(track.thumb),
       },
@@ -908,9 +935,12 @@ export class MediaService {
     if (!currentTrack?.ratingKey) return;
 
     const metadata = await this.fetchMetadataItem(currentTrack.ratingKey);
+    const plexSessionId =
+      currentTrack.plexSessionId || randomUUID().replaceAll("-", "");
+    currentTrack.plexSessionId = plexSessionId;
     const source = transcodeAudio
-      ? this.transcodeSource(metadata)
-      : this.originalFileSource(metadata);
+      ? this.transcodeSource(metadata, plexSessionId)
+      : this.originalFileSource(metadata, plexSessionId);
     if (!source) {
       throw new Error(
         `Track ${currentTrack.ratingKey} does not have a playable stream`,
@@ -922,16 +952,32 @@ export class MediaService {
     }
   }
 
-  private originalFileSource(track: PlexMetadata): PlexStreamSource | null {
+  private originalFileSource(
+    track: PlexMetadata,
+    plexSessionId: string,
+  ): PlexStreamSource | null {
     const part = track.Media?.[0]?.Part?.[0];
     if (typeof part?.key !== "string" || !part.key) return null;
-    return { path: part.key };
+    return {
+      path: part.key,
+      params: createPlexPlaybackIdentity({
+        plexSessionId,
+        product: this.auth.plexProduct,
+        clientIdentifier: this.auth.plexClientId,
+        device: deviceName(),
+        platformVersion: release(),
+      }),
+    };
   }
 
-  private transcodeSource(track: PlexMetadata): PlexStreamSource {
+  private transcodeSource(
+    track: PlexMetadata,
+    plexSessionId: string,
+  ): PlexStreamSource {
     return createAudioTranscodeSource({
       ratingKey: String(track.ratingKey || ""),
-      sessionId: randomUUID().replaceAll("-", ""),
+      transcodeSessionId: randomUUID().replaceAll("-", ""),
+      plexSessionId,
       product: this.auth.plexProduct,
       clientIdentifier: this.auth.plexClientId,
       device: deviceName(),

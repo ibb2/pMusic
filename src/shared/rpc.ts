@@ -39,6 +39,7 @@ export type PlayerTrack = {
   album: string;
   albumRatingKey: string;
   ratingKey: string;
+  plexSessionId?: string;
   duration?: number;
   thumb?: string | null;
 };
