@@ -1,9 +1,77 @@
 import type {
+  AlbumPageRequest,
+  DownloadItem,
+  DownloadProgress,
+  DownloadTargetType,
+  LyricsResult,
+  MediaAlbum,
+  MediaPage,
+  MediaTrack,
+  OfflineStorageStatus,
   PlexConnectionMode,
   PlexLibrary,
   PlexLibrarySelection,
   PlexServer,
+  ServerChangeResult,
+  SyncStatus,
+  TrackPageRequest,
 } from "./types";
+
+/**
+ * Typed request contracts for roadmap features. These are kept separate from
+ * `RaynaRPC` until their Bun handlers land, allowing each implementation phase
+ * to opt in without weakening the existing RPC handler exhaustiveness check.
+ */
+export type RoadmapRPCRequests = {
+  mediaGetFilteredAlbumsPage: {
+    params: AlbumPageRequest;
+    response: MediaPage<MediaAlbum>;
+  };
+  mediaGetTracksPage: {
+    params: TrackPageRequest;
+    response: MediaPage<MediaTrack>;
+  };
+  mediaGetLyrics: {
+    params: { ratingKey: string };
+    response: LyricsResult;
+  };
+  downloadsCreate: {
+    params: { targetType: DownloadTargetType; ratingKey: string };
+    response: DownloadItem[];
+  };
+  downloadsList: {
+    params: { states?: DownloadItem["state"][] };
+    response: DownloadItem[];
+  };
+  downloadsRetry: {
+    params: { downloadId: string };
+    response: DownloadItem;
+  };
+  downloadsRemove: {
+    params: { downloadId: string; deleteFile?: boolean };
+    response: void;
+  };
+  downloadsGetProgress: {
+    params: { downloadIds?: string[] };
+    response: DownloadProgress[];
+  };
+  offlineGetStorageStatus: {
+    params: void;
+    response: OfflineStorageStatus;
+  };
+  syncStart: {
+    params: void;
+    response: SyncStatus;
+  };
+  syncGetStatus: {
+    params: void;
+    response: SyncStatus;
+  };
+  authChangeServer: {
+    params: { server: PlexServer; mode?: PlexConnectionMode };
+    response: ServerChangeResult;
+  };
+};
 
 type RPCSchema<
   I extends {
