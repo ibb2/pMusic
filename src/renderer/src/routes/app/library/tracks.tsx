@@ -38,6 +38,7 @@ function TracksPage() {
     getNextPageParam: (page) => page.nextCursor ?? undefined,
   });
   const tracks = result.data?.pages.flatMap((page) => page.items) ?? [];
+  const isStale = result.data?.pages.some((page) => page.freshness === "stale");
   const artists = [
     ...new Map(
       tracks
@@ -117,6 +118,11 @@ function TracksPage() {
           </select>
         </div>
       </header>
+      {isStale && (
+        <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+          Showing saved track data while Plex is offline.
+        </p>
+      )}
       {result.isPending ? (
         <div className="flex items-center gap-2 py-12 text-muted-foreground">
           <Spinner className="size-4" /> Loading tracks…

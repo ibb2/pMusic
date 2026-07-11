@@ -105,7 +105,7 @@ Owner: Library sub-agent
 - [x] Replace the Tracks placeholder route with a paginated track table.
 - [x] Support playing and queueing individual tracks.
 - [x] Add Tracks to the library sidebar.
-- [ ] Provide loading, empty, error, stale-offline, and end-of-list states.
+- [x] Provide loading, empty, error, stale-offline, and end-of-list states.
 - [x] Reuse shared filter and track-row components where practical.
 
 Completion gate:
