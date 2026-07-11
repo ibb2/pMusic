@@ -188,13 +188,13 @@ Completion gate:
 
 Owner: Primary agent
 
-- [ ] Integrate all sub-agent changes against the locked shared contracts.
-- [ ] Resolve shared RPC, renderer bridge, and route-tree conflicts.
-- [ ] Regenerate the TanStack route tree when required.
-- [ ] Run `bun test`.
-- [ ] Run `bun run lint`.
-- [ ] Run `bun run typecheck`.
-- [ ] Run `bun run build:renderer`.
+- [x] Integrate all sub-agent changes against the locked shared contracts.
+- [x] Resolve shared RPC, renderer bridge, and route-tree conflicts.
+- [x] Regenerate the TanStack route tree when required.
+- [x] Run `bun test`.
+- [x] Run `bun run lint`.
+- [x] Run `bun run typecheck`.
+- [x] Run `bun run build:renderer`.
 - [ ] Run the available desktop build.
 - [ ] Smoke-test the authenticated desktop application against Plex.
 - [ ] Verify albums and tracks filters against complete libraries.
@@ -203,7 +203,7 @@ Owner: Primary agent
 
 Completion gate:
 
-- [ ] Automated validation passes.
+- [x] Automated validation passes.
 - [ ] Desktop runtime validation passes for every completed roadmap item.
 - [ ] No roadmap item is marked complete based only on code presence.
 
