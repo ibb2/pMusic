@@ -128,7 +128,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              asChild
               className="flex items-center data-[slot=sidebar-menu-button]:p-2 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0!"
             >
               <a

@@ -89,7 +89,7 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
     if (tooltip) {
       return (
         <Tooltip>
-          <TooltipTrigger asChild>{content}</TooltipTrigger>
+          <TooltipTrigger>{content}</TooltipTrigger>
           <TooltipContent side="top">
             <div className="flex items-center gap-2">
               <span>{tooltip}</span>
