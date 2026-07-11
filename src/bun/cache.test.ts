@@ -59,7 +59,7 @@ describe('CacheService', () => {
       expiresAt: 999,
     })
 
-    const result = await new CacheService(repository, () => 1_000).readThrough({
+    const result = await new CacheService(repository, () => 1_000).readThrough<string[]>({
       serverId: 'server-a',
       key: 'artists',
       ttlMs: 200,
