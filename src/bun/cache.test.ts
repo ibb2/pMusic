@@ -86,7 +86,7 @@ describe('CacheService', () => {
       expiresAt: 200,
     })
 
-    const result = await new CacheService(repository, () => 1_000).readThrough({
+    const result = await new CacheService(repository, () => 1_000).readThrough<string[]>({
       serverId: 'server-a',
       key: 'tracks',
       ttlMs: 200,
