@@ -14,8 +14,10 @@ import type {
   ResolvedDownloadTrack,
 } from "../download-manager";
 import type { LocalPlaybackServer } from "../local-playback-server";
+import type { SyncResolver, LibraryRefreshResult } from "../sync-service";
 import type Authentication from "./authentication";
 import { selectMusicLibraries } from "./library-selection";
+import { findLyricsStreamKey, parseLyrics } from "./lyrics";
 import type {
   PlaybackSettings,
   PlaybackSettingsPatch,
@@ -32,6 +34,7 @@ import type {
   PlexLibrary,
   PlexServer,
   TrackPageRequest,
+  LyricsResult,
 } from "../../shared/types";
 
 type PlexMetadata = Record<string, any>;
@@ -179,10 +182,11 @@ export function createPlexPlaybackIdentity({
   };
 }
 
-export class MediaService implements DownloadMediaResolver {
+export class MediaService implements DownloadMediaResolver, SyncResolver {
   private activeBaseUrl: string | null = null;
   private readonly cache: CacheService;
   private localPlaybackServer: LocalPlaybackServer | null = null;
+  private networkRestored: (() => void) | null = null;
 
   constructor(
     private readonly auth: Authentication,
@@ -196,12 +200,112 @@ export class MediaService implements DownloadMediaResolver {
       (connectionUri) => {
         this.activeBaseUrl = connectionUri;
         this.auth.setLastKnownGoodConnection(connectionUri);
+        this.networkRestored?.();
       },
     );
   }
 
   setLocalPlaybackServer(server: LocalPlaybackServer): void {
     this.localPlaybackServer = server;
+  }
+
+  setNetworkRestoredCallback(callback: () => void): void {
+    this.networkRestored = callback;
+  }
+
+  async refreshLibrary({
+    serverId,
+    libraryKey,
+  }: {
+    serverId: string;
+    libraryKey: string;
+    cursor: string | null;
+  }): Promise<LibraryRefreshResult> {
+    const server = await this.getSelectedServer();
+    if (server.clientIdentifier !== serverId) {
+      throw new Error(
+        "Cannot sync a library from a server that is not selected",
+      );
+    }
+    const data = await this.fetchPlex(`/library/sections/${libraryKey}/all`, {
+      type: "10",
+      "X-Plex-Container-Start": "0",
+      "X-Plex-Container-Size": "100",
+      sort: "updatedAt:desc",
+    });
+    const items = data.MediaContainer?.Metadata || [];
+    this.db.setMediaCache({
+      serverId,
+      cacheKey: `sync-library:${libraryKey}`,
+      value: items.map((item) => this.mapTrack(item)),
+      updatedAt: Date.now(),
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+    return { cursor: null, refreshedItems: items.length };
+  }
+
+  async trackExists({
+    serverId,
+    ratingKey,
+  }: {
+    serverId: string;
+    ratingKey: string;
+  }): Promise<boolean> {
+    const server = await this.getSelectedServer();
+    if (server.clientIdentifier !== serverId) return false;
+    try {
+      await this.fetchMetadataItem(ratingKey);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async getLyrics(ratingKey: string): Promise<LyricsResult> {
+    const server = await this.getSelectedServer();
+    const cacheKey = `lyrics:${ratingKey}`;
+    try {
+      const cached = await this.cache.readThrough({
+        serverId: server.clientIdentifier,
+        key: cacheKey,
+        ttlMs: 24 * 60 * 60 * 1000,
+        fetch: async () => {
+          const metadata = await this.fetchMetadataItem(ratingKey);
+          const streamKey = findLyricsStreamKey(metadata);
+          if (!streamKey) return null;
+          return this.fetchPlexText(streamKey);
+        },
+      });
+      if (cached.value === null)
+        return { status: "unavailable", reason: "not-found" };
+      const parsed = parseLyrics(cached.value);
+      if (!parsed.lines.length)
+        return { status: "unavailable", reason: "not-found" };
+      return {
+        status: "available",
+        lyrics: {
+          ratingKey,
+          ...parsed,
+          freshness:
+            cached.source === "network"
+              ? "live"
+              : cached.isStale
+                ? "stale"
+                : "fresh",
+          cachedAt:
+            cached.source === "network" ? null : new Date().toISOString(),
+        },
+      };
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code === "OFFLINE_UNAVAILABLE"
+      ) {
+        return { status: "unavailable", reason: "offline-not-cached" };
+      }
+      throw error;
+    }
   }
 
   async resolveTracks({
@@ -931,7 +1035,10 @@ export class MediaService implements DownloadMediaResolver {
   }
 
   async playAlbum(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchTracksWithOfflineFallback("album", ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback(
+      "album",
+      ratingKey,
+    );
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
@@ -975,7 +1082,10 @@ export class MediaService implements DownloadMediaResolver {
   }
 
   async queueAlbum(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchTracksWithOfflineFallback("album", ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback(
+      "album",
+      ratingKey,
+    );
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
@@ -1005,6 +1115,12 @@ export class MediaService implements DownloadMediaResolver {
   clearQueue(): unknown {
     this.bass.clearQueue();
     return { status: "cleared" };
+  }
+
+  resetForServerChange(): void {
+    this.bass.stop();
+    this.bass.clearQueue();
+    this.activeBaseUrl = null;
   }
 
   private async getAlbumsFromSections({
@@ -1323,6 +1439,45 @@ export class MediaService implements DownloadMediaResolver {
 
     throw new Error(
       `Plex request failed${lastError instanceof Error ? `: ${lastError.message}` : ""}`,
+    );
+  }
+
+  private async fetchPlexText(path: string): Promise<string> {
+    const server = await this.getSelectedServer();
+    const token = this.getServerToken(server);
+    const connections = this.auth.getConnectionCandidates(
+      "auto",
+      server,
+      this.activeBaseUrl,
+    );
+    let lastError: unknown = null;
+    for (const connection of connections) {
+      try {
+        const url = new URL(path, connection.uri);
+        url.searchParams.set("X-Plex-Token", token);
+        const response = await fetch(url, {
+          signal: AbortSignal.timeout(PLEX_REQUEST_TIMEOUT_MS),
+          headers: {
+            Accept: "text/plain, application/x-subrip, */*",
+            "X-Plex-Product": this.auth.plexProduct,
+            "X-Plex-Client-Identifier": this.auth.plexClientId,
+          },
+        });
+        if (!response.ok) {
+          lastError = new Error(
+            `Plex lyrics request failed: ${response.status}`,
+          );
+          continue;
+        }
+        this.activeBaseUrl = connection.uri;
+        this.auth.setLastKnownGoodConnection(connection.uri);
+        return response.text();
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw new Error(
+      `Plex lyrics request failed${lastError instanceof Error ? `: ${lastError.message}` : ""}`,
     );
   }
 

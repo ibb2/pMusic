@@ -21,6 +21,7 @@ import {
   VolumeMute02Icon,
   Queue02Icon,
 } from "@hugeicons/core-free-icons";
+import { LyricsPanel } from "./LyricsPanel";
 
 type PlayerFooterProps = {
   queueOpen: boolean;
@@ -38,10 +39,12 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
   const [position, setPosition] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
   const [mute, toggleMute] = useState(false);
+  const [lyricsOpen, setLyricsOpen] = useState(false);
 
   useEffect(() => {
     // Reset position immediately when the track changes to avoid showing old progress
     setPosition(0);
+    if (!status?.current_track) setLyricsOpen(false);
   }, [status?.current_track?.ratingKey]);
 
   useEffect(() => {
@@ -110,7 +113,8 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
   const volume = status?.volume ?? 1;
 
   return (
-    <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] p-2">
+    <div className="relative grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] p-2">
+      {lyricsOpen && <LyricsPanel status={status} />}
       {/* Now Playing Info */}
       <div className="flex flex-row items-center gap-2">
         <div className="h-14 w-14 rounded-md flex items-center justify-center overflow-hidden">
@@ -239,6 +243,16 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
           <Laptop2 className="h-4 w-4" />
         </Button>*/}
+        <Button
+          variant={lyricsOpen ? "secondary" : "ghost"}
+          size="icon"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={() => setLyricsOpen((open) => !open)}
+          disabled={!currentTrack}
+          aria-label={lyricsOpen ? "Close lyrics" : "Open lyrics"}
+        >
+          <HugeiconsIcon icon={MusicNote03Icon} />
+        </Button>
         <Button
           variant={queueOpen ? "secondary" : "ghost"}
           size="icon"

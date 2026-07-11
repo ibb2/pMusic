@@ -119,70 +119,70 @@ Completion gate:
 
 Owner: Lyrics sub-agent
 
-- [ ] Discover Plex lyric or text streams from track metadata.
-- [ ] Fetch lyric streams through the authenticated, failover-capable Plex connection.
-- [ ] Normalize plain text and LRC-style timestamps into a shared lyric model.
-- [ ] Cache lyrics for offline access.
-- [ ] Add a lyrics panel accessible from the player.
-- [ ] Display loading, unavailable, error, plain-text, and synchronized states.
-- [ ] Highlight and scroll synchronized lines during playback.
-- [ ] Reset lyric state when the current track changes.
-- [ ] Do not introduce a third-party lyrics provider.
+- [x] Discover Plex lyric or text streams from track metadata.
+- [x] Fetch lyric streams through the authenticated, failover-capable Plex connection.
+- [x] Normalize plain text and LRC-style timestamps into a shared lyric model.
+- [x] Cache lyrics for offline access.
+- [x] Add a lyrics panel accessible from the player.
+- [x] Display loading, unavailable, error, plain-text, and synchronized states.
+- [x] Highlight and scroll synchronized lines during playback.
+- [x] Reset lyric state when the current track changes.
+- [x] Do not introduce a third-party lyrics provider.
 
 Completion gate:
 
-- [ ] Plain and timed lyrics render correctly.
-- [ ] Missing and malformed lyric streams fail gracefully.
-- [ ] Cached lyrics remain available offline.
-- [ ] Lyrics update correctly when playback changes tracks.
+- [x] Plain and timed lyrics render correctly.
+- [x] Missing and malformed lyric streams fail gracefully.
+- [x] Cached lyrics remain available offline.
+- [x] Lyrics update correctly when playback changes tracks.
 
 ## Phase 6 — Safe Server Switching and Settings
 
 Owner: Settings/server sub-agent
 
-- [ ] Add an atomic server-change operation in the Bun process.
-- [ ] Validate that the destination server is reachable before committing the switch.
-- [ ] Stop playback and clear the queue during a successful switch.
-- [ ] Clear old selected libraries and active connection state.
-- [ ] Reset the media service's active server route.
-- [ ] Preserve server-scoped downloads and caches for later switching back.
-- [ ] Roll back to the original state when the destination cannot be reached.
-- [ ] Invalidate all server-derived renderer queries after a successful switch.
-- [ ] Require explicit music-library selection on the new server.
-- [ ] Finish the Settings page with:
+- [x] Add an atomic server-change operation in the Bun process.
+- [x] Validate that the destination server is reachable before committing the switch.
+- [x] Stop playback and clear the queue during a successful switch.
+- [x] Clear old selected libraries and active connection state.
+- [x] Reset the media service's active server route.
+- [x] Preserve server-scoped downloads and caches for later switching back.
+- [x] Roll back to the original state when the destination cannot be reached.
+- [x] Invalidate all server-derived renderer queries after a successful switch.
+- [x] Require explicit music-library selection on the new server.
+- [x] Finish the Settings page with:
   - Connected server and server-change controls.
   - Library selection.
   - Existing playback preferences.
   - Download storage and management.
   - Sync status and actions.
-- [ ] Centralize selected-library checks so UUID strings and full library objects render consistently.
+- [x] Centralize selected-library checks so UUID strings and full library objects render consistently.
 
 Completion gate:
 
-- [ ] Failed switching leaves the original server usable.
-- [ ] Successful switching cannot show stale media from the previous server.
-- [ ] Playback and queue state are cleared before browsing the new server.
-- [ ] Switching back exposes that server's preserved downloads and cache.
+- [x] Failed switching leaves the original server usable.
+- [x] Successful switching cannot show stale media from the previous server.
+- [x] Playback and queue state are cleared before browsing the new server.
+- [x] Switching back exposes that server's preserved downloads and cache.
 
 ## Phase 7 — Startup and Manual Sync
 
 Owner: Persistence/offline sub-agent
 
-- [ ] Refresh cached metadata for selected libraries.
-- [ ] Reconcile explicitly downloaded items without mirroring the entire library.
-- [ ] Run synchronization at startup and after network recovery.
-- [ ] Add a manual “Sync Now” action.
-- [ ] Enforce single-flight execution.
-- [ ] Persist last-run time, state, and partial errors.
-- [ ] Preserve local downloads when Plex items disappear; mark them orphaned instead of deleting them silently.
-- [ ] Display current and last sync state in Settings.
+- [x] Refresh cached metadata for selected libraries.
+- [x] Reconcile explicitly downloaded items without mirroring the entire library.
+- [x] Run synchronization at startup and after network recovery.
+- [x] Add a manual “Sync Now” action.
+- [x] Enforce single-flight execution.
+- [x] Persist last-run time, state, and partial errors.
+- [x] Preserve local downloads when Plex items disappear; mark them orphaned instead of deleting them silently.
+- [x] Display current and last sync state in Settings.
 
 Completion gate:
 
-- [ ] Startup and manual sync both complete successfully.
-- [ ] Partial failures are visible and retryable.
-- [ ] Concurrent triggers do not create duplicate sync jobs.
-- [ ] Sync operates only on selected libraries and explicit downloads.
+- [x] Startup and manual sync both complete successfully.
+- [x] Partial failures are visible and retryable.
+- [x] Concurrent triggers do not create duplicate sync jobs.
+- [x] Sync operates only on selected libraries and explicit downloads.
 
 ## Phase 8 — Integration and Regression Validation
 

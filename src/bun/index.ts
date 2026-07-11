@@ -8,6 +8,8 @@ import { DownloadManager } from "./download-manager";
 import { LocalPlaybackServer } from "./local-playback-server";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { SyncService } from "./sync-service";
+import { selectMusicLibraries } from "./plex/library-selection";
 import type { ApplicationMenuItemConfig } from "electrobun";
 import type { RaynaRPC } from "../shared/rpc";
 import type { PlexLibrarySelection, PlexServer } from "../shared/types";
@@ -27,6 +29,27 @@ const downloads = new DownloadManager({
       ? "Library/Application Support/com.ib.rayna/downloads"
       : ".rayna/downloads",
   ),
+});
+const sync = new SyncService({
+  database: db,
+  resolver: media,
+  selectedLibraries: async (serverId) => {
+    const server = await auth.getUserSelectedServer();
+    if (server?.clientIdentifier !== serverId) return [];
+    const libraries = await auth.getLibraries();
+    const selected = (await auth.getUserSelectedLibraries()) || [];
+    return selectMusicLibraries(libraries, selected).map(
+      (library) => library.key,
+    );
+  },
+});
+media.setNetworkRestoredCallback(() => {
+  void auth.getUserSelectedServer().then((server) => {
+    if (server) void sync.networkRestored(server.clientIdentifier);
+  });
+});
+void auth.getUserSelectedServer().then((server) => {
+  if (server) void sync.startup(server.clientIdentifier);
 });
 const timeline = new PlexTimelineReporter(auth, bass, () =>
   media.getPlaybackSettings(),
@@ -57,6 +80,8 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       authGetLibraries: () => auth.getLibraries(),
       authSelectServer: ({ server }: { server: PlexServer }) =>
         auth.selectServer(server),
+      authChangeServer: ({ server, mode }) =>
+        auth.changeServer(server, mode, () => media.resetForServerChange()),
       authSelectLibraries: ({
         libraries,
       }: {
@@ -87,6 +112,7 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
         media.getArtistPopularTracks(ratingKey),
       mediaGetPlaylist: ({ ratingKey }) => media.getPlaylist(ratingKey),
       mediaSearch: ({ query, limit }) => media.search(query, limit),
+      mediaGetLyrics: ({ ratingKey }) => media.getLyrics(ratingKey),
       downloadsCreate: async ({ targetType, ratingKey }) => {
         const server = await auth.getUserSelectedServer();
         if (!server) throw new Error("Select a Plex server before downloading");
@@ -127,6 +153,27 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
         const server = await auth.getUserSelectedServer();
         if (!server) return downloads.storageStatus("");
         return downloads.storageStatus(server.clientIdentifier);
+      },
+      syncStart: async () => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) throw new Error("Select a Plex server before syncing");
+        return sync.manual(server.clientIdentifier);
+      },
+      syncGetStatus: async () => {
+        const server = await auth.getUserSelectedServer();
+        return server
+          ? sync.getStatus(server.clientIdentifier)
+          : {
+              serverId: null,
+              state: "idle" as const,
+              trigger: null,
+              startedAt: null,
+              completedAt: null,
+              refreshedLibraries: 0,
+              failedLibraries: 0,
+              reconciledDownloads: 0,
+              error: null,
+            };
       },
       playerGetStatus: () => bass.getPlaybackStatus(),
       playerGetQueue: () => media.getQueue(),

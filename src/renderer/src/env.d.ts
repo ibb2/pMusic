@@ -24,6 +24,9 @@ import type {
   DownloadState,
   DownloadTargetType,
   OfflineStorageStatus,
+  SyncStatus,
+  LyricsResult,
+  ServerChangeResult,
 } from "../../shared/types";
 
 declare global {
@@ -50,6 +53,10 @@ declare global {
         getServers: () => Promise<PlexServer[]>;
         getLibraries: () => Promise<PlexLibrary[]>;
         selectServer: (server: PlexServer) => Promise<void>;
+        changeServer: (
+          server: PlexServer,
+          mode?: PlexConnectionMode,
+        ) => Promise<ServerChangeResult>;
         selectLibraries: (libraries: PlexLibrarySelection[]) => Promise<void>;
         resolveServerConnection: (mode?: PlexConnectionMode) => Promise<string>;
         isServerSelected: () => Promise<boolean>;
@@ -86,6 +93,7 @@ declare global {
         getArtistPopularTracks: (ratingKey: string) => Promise<any>;
         getPlaylist: (ratingKey: string) => Promise<any>;
         search: (query: string, limit?: number) => Promise<SearchResults>;
+        getLyrics: (ratingKey: string) => Promise<LyricsResult>;
       };
       downloads: {
         create: (
@@ -97,6 +105,10 @@ declare global {
         remove: (downloadId: string) => Promise<void>;
         getProgress: (downloadIds?: string[]) => Promise<DownloadProgress[]>;
         getStorageStatus: () => Promise<OfflineStorageStatus>;
+      };
+      sync: {
+        start: () => Promise<SyncStatus>;
+        getStatus: () => Promise<SyncStatus>;
       };
       player: {
         getStatus: () => Promise<PlayerStatus>;

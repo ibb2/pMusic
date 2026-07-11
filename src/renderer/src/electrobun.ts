@@ -32,6 +32,8 @@ window.api = {
     getLibraries: () => rpc.request.authGetLibraries(),
     selectServer: (server: PlexServer) =>
       rpc.request.authSelectServer({ server }),
+    changeServer: (server: PlexServer, mode?: PlexConnectionMode) =>
+      rpc.request.authChangeServer({ server, mode }),
     selectLibraries: (libraries: PlexLibrarySelection[]) =>
       rpc.request.authSelectLibraries({ libraries }),
     resolveServerConnection: (mode?: PlexConnectionMode) =>
@@ -68,6 +70,7 @@ window.api = {
       rpc.request.mediaGetPlaylist({ ratingKey }),
     search: (query: string, limit = 8) =>
       rpc.request.mediaSearch({ query, limit }),
+    getLyrics: (ratingKey: string) => rpc.request.mediaGetLyrics({ ratingKey }),
   },
   downloads: {
     create: (targetType, ratingKey) =>
@@ -78,6 +81,10 @@ window.api = {
     getProgress: (downloadIds) =>
       rpc.request.downloadsGetProgress({ downloadIds }),
     getStorageStatus: () => rpc.request.offlineGetStorageStatus(),
+  },
+  sync: {
+    start: () => rpc.request.syncStart(),
+    getStatus: () => rpc.request.syncGetStatus(),
   },
   player: {
     getStatus: () => rpc.request.playerGetStatus(),

@@ -211,6 +211,7 @@ export type RaynaRPC = {
         params: { server: PlexServer };
         response: void;
       };
+      authChangeServer: RoadmapRPCRequests["authChangeServer"];
       authSelectLibraries: {
         params: { libraries: PlexLibrarySelection[] };
         response: void;
@@ -308,12 +309,15 @@ export type RaynaRPC = {
         params: { query: string; limit?: number };
         response: SearchResults;
       };
+      mediaGetLyrics: RoadmapRPCRequests["mediaGetLyrics"];
       downloadsCreate: RoadmapRPCRequests["downloadsCreate"];
       downloadsList: RoadmapRPCRequests["downloadsList"];
       downloadsRetry: RoadmapRPCRequests["downloadsRetry"];
       downloadsRemove: RoadmapRPCRequests["downloadsRemove"];
       downloadsGetProgress: RoadmapRPCRequests["downloadsGetProgress"];
       offlineGetStorageStatus: RoadmapRPCRequests["offlineGetStorageStatus"];
+      syncStart: RoadmapRPCRequests["syncStart"];
+      syncGetStatus: RoadmapRPCRequests["syncGetStatus"];
       playerGetStatus: {
         params: void;
         response: PlayerStatus;
