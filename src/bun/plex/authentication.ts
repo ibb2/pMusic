@@ -225,8 +225,7 @@ class Authentication {
   }
 
   async getLibraries(): Promise<PlexLibrary[]> {
-    const selectedServer =
-      this.selectedServer || this.store.get<PlexServer>('selectedServer')
+    const selectedServer = await this.refreshSelectedServer()
     const token =
       selectedServer?.accessToken ||
       this.plexUserAccessToken ||
@@ -299,8 +298,7 @@ class Authentication {
   async resolveServerConnection(
     mode: PlexConnectionMode = 'auto'
   ): Promise<string> {
-    const selectedServer =
-      this.selectedServer || this.store.get<PlexServer>('selectedServer')
+    const selectedServer = await this.refreshSelectedServer()
 
     if (!selectedServer) {
       throw new Error('No Plex server connection is available')
@@ -464,6 +462,30 @@ class Authentication {
     if (!token) return false
 
     return probePlexConnection(uri, { token })
+  }
+
+  private async refreshSelectedServer(): Promise<PlexServer | null> {
+    const selectedServer =
+      this.selectedServer || this.store.get<PlexServer>('selectedServer')
+    if (!selectedServer) return null
+
+    try {
+      const servers = await this.getServers()
+      const refreshedServer = servers.find(
+        (server) =>
+          server.clientIdentifier === selectedServer.clientIdentifier
+      )
+
+      if (refreshedServer) {
+        this.selectedServer = refreshedServer
+        this.store.set('selectedServer', refreshedServer)
+        return refreshedServer
+      }
+    } catch {
+      // Keep the saved server available when plex.tv cannot be reached.
+    }
+
+    return selectedServer
   }
 
   private normalizeUserProfile(data: Record<string, unknown>): UserProfile {

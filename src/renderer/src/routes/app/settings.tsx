@@ -329,7 +329,6 @@ export function SettingsPage() {
                           <Item
                             variant={"outline"}
                             size="sm"
-                            asChild
                             onClick={() => selectLibrary(library)}
                             className={cn(
                               "hover:border-zinc-400 hover:bg-zinc-50/50",

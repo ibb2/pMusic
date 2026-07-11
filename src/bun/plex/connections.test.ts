@@ -26,6 +26,26 @@ describe('Plex connection ordering', () => {
     ).toEqual([local.uri, remote.uri, relay.uri])
   })
 
+  test('tries direct LAN HTTP before remote and relay routes', () => {
+    const secureLocal = connection(
+      'https://192-168-50-112.server.plex.direct:32400',
+      true,
+      false
+    )
+    secureLocal.address = '192.168.50.112'
+
+    expect(
+      orderPlexConnections(server([relay, remote, secureLocal])).map(
+        ({ uri }) => uri
+      )
+    ).toEqual([
+      secureLocal.uri,
+      'http://192.168.50.112:32400',
+      remote.uri,
+      relay.uri
+    ])
+  })
+
   test('filters explicit modes and excluded routes', () => {
     expect(
       orderPlexConnections(server([local, remote, relay]), {
@@ -41,6 +61,7 @@ describe('Plex connection ordering', () => {
       remote
     ])
   })
+
 })
 
 describe('Plex connection probing', () => {
@@ -65,6 +86,32 @@ describe('Plex connection probing', () => {
       async () => false
     )
     expect(reachable).toBeNull()
+  })
+
+  test('tries the canonical origin for a custom HTTPS hostname', () => {
+    const reverseProxy = connection(
+      'https://perplexed.example:14688',
+      false,
+      false
+    )
+
+    expect(
+      orderPlexConnections(server([reverseProxy, relay])).map(({ uri }) => uri)
+    ).toEqual([
+      'https://perplexed.example:14688',
+      'https://perplexed.example',
+      relay.uri
+    ])
+  })
+
+  test('does not rewrite Plex direct connections', () => {
+    const plexDirect = connection(
+      'https://203-0-113-1.server.plex.direct:14688',
+      false,
+      false
+    )
+
+    expect(orderPlexConnections(server([plexDirect]))).toEqual([plexDirect])
   })
 })
 

@@ -32,12 +32,13 @@ export function orderPlexConnections(
   const connections = server.connections.filter(
     (connection) => connection.uri && !excluded.has(connection.uri)
   )
-  const allowed =
+  const matchingConnections =
     mode === 'auto'
       ? connections
       : connections.filter((connection) =>
           connectionMatchesMode(connection, mode)
         )
+  const allowed = matchingConnections.flatMap(withConnectionFallbacks)
   const ordered: Connection[] = []
 
   const add = (items: Connection[]) => {
@@ -59,6 +60,68 @@ export function orderPlexConnections(
 
   add(allowed)
   return ordered
+}
+
+function withConnectionFallbacks(connection: Connection): Connection[] {
+  if (connection.local) {
+    return withLocalHttpFallback(connection)
+  }
+
+  if (
+    connection.relay ||
+    connection.protocol !== 'https' ||
+    connection.port === 443 ||
+    connection.port === 32400
+  ) {
+    return [connection]
+  }
+
+  try {
+    const advertisedUrl = new URL(connection.uri)
+    if (!advertisedUrl.port || advertisedUrl.hostname.endsWith('.plex.direct')) {
+      return [connection]
+    }
+
+    advertisedUrl.port = ''
+    return [
+      connection,
+      {
+        ...connection,
+        port: 443,
+        uri: advertisedUrl.origin
+      }
+    ]
+  } catch {
+    return [connection]
+  }
+}
+
+function withLocalHttpFallback(connection: Connection): Connection[] {
+  if (connection.protocol === 'http' || !connection.address || !connection.port) {
+    return [connection]
+  }
+
+  try {
+    const hostname = connection.IPv6
+      ? `[${connection.address.replace(/^\[|\]$/g, '')}]`
+      : connection.address
+    const fallbackUri = new URL(
+      `http://${hostname}:${connection.port}`
+    ).origin
+
+    if (fallbackUri === connection.uri) return [connection]
+
+    return [
+      connection,
+      {
+        ...connection,
+        protocol: 'http',
+        uri: fallbackUri
+      }
+    ]
+  } catch {
+    return [connection]
+  }
 }
 
 export async function probePlexConnection(
