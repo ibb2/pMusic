@@ -18,7 +18,15 @@ import type {
   SearchResult,
   SearchResults,
 } from "../../shared/rpc";
-import type { PlexLibrary, PlexServer } from "../../shared/types";
+import type {
+  AlbumPageRequest,
+  MediaAlbum,
+  MediaPage,
+  MediaTrack,
+  PlexLibrary,
+  PlexServer,
+  TrackPageRequest,
+} from "../../shared/types";
 
 type PlexMetadata = Record<string, any>;
 
@@ -204,33 +212,45 @@ export class MediaService {
     return next;
   }
 
-  async getAlbumsPage(cursor = "", pageSize = 20): Promise<unknown> {
-    const sections = await this.getSelectedMusicSections();
-    let { sectionIndex, offset } = this.decodeCursor(cursor);
-    const initialSectionIndex = sectionIndex;
-    const initialOffset = offset;
-    const albums: PlexMetadata[] = [];
+  async getAlbumsPage(request: AlbumPageRequest): Promise<MediaPage<MediaAlbum>> {
+    return this.getMediaPage(request, "9", (item) => this.mapTypedAlbum(item));
+  }
 
-    while (albums.length < pageSize && sectionIndex < sections.length) {
+  async getTracksPage(request: TrackPageRequest): Promise<MediaPage<MediaTrack>> {
+    return this.getMediaPage(request, "10", (item) => this.mapTrack(item));
+  }
+
+  private async getMediaPage<T>(
+    request: AlbumPageRequest | TrackPageRequest,
+    type: "9" | "10",
+    mapper: (item: PlexMetadata) => T,
+  ): Promise<MediaPage<T>> {
+    const sections = await this.getSelectedMusicSections();
+    let { sectionIndex, offset } = this.decodeCursor(request.cursor);
+    const items: PlexMetadata[] = [];
+    const pageSize = Math.min(Math.max(request.pageSize, 1), 100);
+    const params = this.mediaPageParams(request, type);
+
+    while (items.length < pageSize && sectionIndex < sections.length) {
       const section = sections[sectionIndex];
       const data = await this.fetchPlex(
         `/library/sections/${section.key}/all`,
         {
-          type: "9",
+          ...params,
           "X-Plex-Container-Start": String(offset),
-          "X-Plex-Container-Size": String(pageSize - albums.length),
+          "X-Plex-Container-Size": String(pageSize - items.length),
         },
       );
-      const albumData = data.MediaContainer?.Metadata || [];
+      const pageItems = data.MediaContainer?.Metadata || [];
 
-      if (albumData.length === 0) {
+      if (pageItems.length === 0) {
         sectionIndex += 1;
         offset = 0;
         continue;
       }
 
-      albums.push(...albumData);
-      offset += albumData.length;
+      items.push(...pageItems);
+      offset += pageItems.length;
 
       const totalSize = data.MediaContainer?.totalSize || 0;
       if (offset >= totalSize) {
@@ -240,20 +260,46 @@ export class MediaService {
     }
 
     return {
-      items: albums.map((album) => this.mapAlbum(album)),
+      items: items.map(mapper),
       nextCursor:
         sectionIndex < sections.length
           ? this.encodeCursor(sectionIndex, offset)
           : null,
-      prevCursor:
-        initialOffset > 0 || initialSectionIndex > 0
-          ? this.encodeCursor(
-              initialSectionIndex,
-              Math.max(0, initialOffset - pageSize),
-            )
-          : null,
-      hasMore: sectionIndex < sections.length,
+      total: null,
+      freshness: "live",
+      cachedAt: null,
     };
+  }
+
+  private mediaPageParams(
+    request: AlbumPageRequest | TrackPageRequest,
+    type: "9" | "10",
+  ): Record<string, string> {
+    const params: Record<string, string> = { type };
+    if (request.query?.trim()) params.title = request.query.trim();
+
+    const filters = request.filters;
+    if (filters && "artistRatingKeys" in filters && filters.artistRatingKeys?.length) {
+      params.artist = filters.artistRatingKeys.join(",");
+    }
+    if (filters && "years" in filters && filters.years?.length) {
+      params.year = filters.years.join(",");
+    }
+    if (filters && "albumRatingKeys" in filters && filters.albumRatingKeys?.length) {
+      params.album = filters.albumRatingKeys.join(",");
+    }
+
+    if (request.sort) {
+      const sortFields: Record<string, string> = {
+        title: "titleSort",
+        artist: "artist.titleSort",
+        album: "album.titleSort",
+        year: "year",
+        dateAdded: "addedAt",
+      };
+      params.sort = `${sortFields[request.sort.field]}:${request.sort.direction}`;
+    }
+    return params;
   }
 
   async getArtistsPage(cursor = "", pageSize = 30): Promise<unknown> {
@@ -1155,6 +1201,38 @@ export class MediaService {
       addedAt: album.addedAt,
       lastViewedAt: album.lastViewedAt,
       thumb: this.plexUrl(album.thumb),
+    };
+  }
+
+  private mapTypedAlbum(album: PlexMetadata): MediaAlbum {
+    return {
+      ratingKey: String(album.ratingKey || this.extractRatingKey(album.key) || ""),
+      title: String(album.title || "Untitled album"),
+      artist: String(album.parentTitle || "Unknown artist"),
+      artistRatingKey:
+        album.parentRatingKey || this.extractRatingKey(album.parentKey),
+      year: Number.isFinite(Number(album.year)) ? Number(album.year) : null,
+      thumb: this.plexUrl(album.thumb),
+      trackCount: Number.isFinite(Number(album.leafCount)) ? Number(album.leafCount) : null,
+      addedAt: Number.isFinite(Number(album.addedAt)) ? Number(album.addedAt) : null,
+    };
+  }
+
+  private mapTrack(track: PlexMetadata): MediaTrack {
+    return {
+      ratingKey: String(track.ratingKey || this.extractRatingKey(track.key) || ""),
+      title: String(track.title || "Untitled track"),
+      artist: String(track.grandparentTitle || track.originalTitle || "Unknown artist"),
+      artistRatingKey:
+        track.grandparentRatingKey || this.extractRatingKey(track.grandparentKey),
+      album: String(track.parentTitle || "Unknown album"),
+      albumRatingKey:
+        track.parentRatingKey || this.extractRatingKey(track.parentKey),
+      duration: Number.isFinite(Number(track.duration)) ? Number(track.duration) : null,
+      index: Number.isFinite(Number(track.index)) ? Number(track.index) : null,
+      disc: Number.isFinite(Number(track.parentIndex)) ? Number(track.parentIndex) : null,
+      thumb: this.plexUrl(track.thumb || track.parentThumb || track.grandparentThumb),
+      addedAt: Number.isFinite(Number(track.addedAt)) ? Number(track.addedAt) : null,
     };
   }
 

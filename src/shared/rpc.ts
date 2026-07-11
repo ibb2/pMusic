@@ -281,8 +281,12 @@ export type RaynaRPC = {
         response: unknown[];
       };
       mediaGetAlbumsPage: {
-        params: { cursor?: string; pageSize: number };
-        response: unknown;
+        params: AlbumPageRequest;
+        response: MediaPage<MediaAlbum>;
+      };
+      mediaGetTracksPage: {
+        params: TrackPageRequest;
+        response: MediaPage<MediaTrack>;
       };
       mediaGetArtistsPage: {
         params: { cursor?: string; pageSize: number };

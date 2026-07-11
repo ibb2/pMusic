@@ -62,8 +62,8 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       mediaGetRecentlyPlayedAlbums: () => media.getRecentlyPlayedAlbums(),
       mediaGetRecentlyAddedAlbums: () => media.getRecentlyAddedAlbums(),
       mediaGetPlaylists: () => media.getPlaylists(),
-      mediaGetAlbumsPage: ({ cursor, pageSize }) =>
-        media.getAlbumsPage(cursor, pageSize),
+      mediaGetAlbumsPage: (request) => media.getAlbumsPage(request),
+      mediaGetTracksPage: (request) => media.getTracksPage(request),
       mediaGetArtistsPage: ({ cursor, pageSize }) =>
         media.getArtistsPage(cursor, pageSize),
       mediaGetAlbum: ({ ratingKey }) => media.getAlbum(ratingKey),

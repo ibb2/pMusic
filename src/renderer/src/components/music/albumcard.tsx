@@ -36,7 +36,7 @@ export function AlbumCard({ album }: { album: any }) {
           <CardDescription className="truncate text-xs leading-tight text-black/80 dark:text-muted-foreground">
             <Link
               to={`/app/artist/$ratingKey`}
-              params={{ ratingKey: album.parentRatingKey }}
+              params={{ ratingKey: album.artistRatingKey ?? album.parentRatingKey }}
             >
               <p className="hover:underline text-xs">{album.artist}</p>
             </Link>

@@ -95,25 +95,25 @@ Completion gate:
 
 Owner: Library sub-agent
 
-- [ ] Extend album paging with typed server-side filter and sort parameters.
-- [ ] Add track paging across all selected music libraries.
-- [ ] Add server-side text search for albums and tracks.
-- [ ] Add common sort options appropriate to each media type.
-- [ ] Add album facets for artist and year.
-- [ ] Add track facets for artist and album.
-- [ ] Include all filters in React Query keys and reset pagination when they change.
-- [ ] Replace the Tracks placeholder route with a paginated track table.
-- [ ] Support playing and queueing individual tracks.
-- [ ] Add Tracks to the library sidebar.
+- [x] Extend album paging with typed server-side filter and sort parameters.
+- [x] Add track paging across all selected music libraries.
+- [x] Add server-side text search for albums and tracks.
+- [x] Add common sort options appropriate to each media type.
+- [x] Add album facets for artist and year.
+- [x] Add track facets for artist and album.
+- [x] Include all filters in React Query keys and reset pagination when they change.
+- [x] Replace the Tracks placeholder route with a paginated track table.
+- [x] Support playing and queueing individual tracks.
+- [x] Add Tracks to the library sidebar.
 - [ ] Provide loading, empty, error, stale-offline, and end-of-list states.
-- [ ] Reuse shared filter and track-row components where practical.
+- [x] Reuse shared filter and track-row components where practical.
 
 Completion gate:
 
-- [ ] Filters apply to the complete Plex library rather than only loaded pages.
-- [ ] Pagination remains stable across multiple selected libraries.
-- [ ] Tracks can be browsed, played, and queued.
-- [ ] Albums and Tracks expose search, sorting, and the required facets.
+- [x] Filters apply to the complete Plex library rather than only loaded pages.
+- [x] Pagination remains stable across multiple selected libraries.
+- [x] Tracks can be browsed, played, and queued.
+- [x] Albums and Tracks expose search, sorting, and the required facets.
 
 ## Phase 5 — Lyrics
 

@@ -122,6 +122,41 @@ describe("Plex audio transcoding", () => {
   });
 });
 
+describe("library page filters", () => {
+  const createMedia = () => new MediaService(
+    {} as Authentication,
+    { setStreamResolver: () => {} } as unknown as BassManager,
+    new FakeDatabase({}) as unknown as DatabaseManager,
+  );
+
+  test("maps album search, facets, and sorting to Plex query parameters", () => {
+    const media = createMedia() as unknown as {
+      mediaPageParams: (request: unknown, type: "9") => Record<string, string>;
+    };
+    expect(media.mediaPageParams({
+      pageSize: 40,
+      query: "Blue",
+      filters: { artistRatingKeys: ["12", "34"], years: [2024] },
+      sort: { field: "dateAdded", direction: "desc" },
+    }, "9")).toEqual({
+      type: "9", title: "Blue", artist: "12,34", year: "2024", sort: "addedAt:desc",
+    });
+  });
+
+  test("maps track album facets and clamps page requests independently", () => {
+    const media = createMedia() as unknown as {
+      mediaPageParams: (request: unknown, type: "10") => Record<string, string>;
+    };
+    expect(media.mediaPageParams({
+      pageSize: 50,
+      filters: { artistRatingKeys: ["7"], albumRatingKeys: ["9"] },
+      sort: { field: "album", direction: "asc" },
+    }, "10")).toEqual({
+      type: "10", artist: "7", album: "9", sort: "album.titleSort:asc",
+    });
+  });
+});
+
 class FakeDatabase {
   constructor(private readonly values: Record<string, unknown>) {}
 

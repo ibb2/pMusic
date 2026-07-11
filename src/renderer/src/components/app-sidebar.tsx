@@ -108,6 +108,7 @@ const data = {
     //   icon: Heart,
     // },
     { name: "Albums", url: "/app/library/albums", icon: Vynil03Icon },
+    { name: "Tracks", url: "/app/library/tracks", icon: AudioWave01FreeIcons },
     { name: "Artists", url: "/app/library/artists", icon: MusicNote03Icon },
     { name: "Playlists", url: "/app/library/playlists", icon: LibraryIcon },
     // {

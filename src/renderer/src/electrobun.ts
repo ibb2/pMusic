@@ -1,9 +1,11 @@
 import { createRPC, Electroview } from "electrobun/view";
 import type { PlaybackSettingsPatch, RaynaRPC } from "../../shared/rpc";
 import type {
+  AlbumPageRequest,
   PlexConnectionMode,
   PlexLibrarySelection,
   PlexServer,
+  TrackPageRequest,
 } from "../../shared/types";
 
 const rpc = createRPC<RaynaRPC["webview"], RaynaRPC["bun"]>({
@@ -54,8 +56,10 @@ window.api = {
     getRecentlyPlayedAlbums: () => rpc.request.mediaGetRecentlyPlayedAlbums(),
     getRecentlyAddedAlbums: () => rpc.request.mediaGetRecentlyAddedAlbums(),
     getPlaylists: () => rpc.request.mediaGetPlaylists(),
-    getAlbumsPage: (cursor: string, pageSize: number) =>
-      rpc.request.mediaGetAlbumsPage({ cursor, pageSize }),
+    getAlbumsPage: (request: AlbumPageRequest) =>
+      rpc.request.mediaGetAlbumsPage(request),
+    getTracksPage: (request: TrackPageRequest) =>
+      rpc.request.mediaGetTracksPage(request),
     getArtistsPage: (cursor: string, pageSize: number) =>
       rpc.request.mediaGetArtistsPage({ cursor, pageSize }),
     getAlbum: (ratingKey: string) => rpc.request.mediaGetAlbum({ ratingKey }),

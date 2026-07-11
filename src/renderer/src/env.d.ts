@@ -1,6 +1,10 @@
 /// <reference types="vite/client" />
 
 import type {
+  AlbumPageRequest,
+  MediaAlbum,
+  MediaPage,
+  MediaTrack,
   BassStatus,
   PlaybackSettings,
   PlaybackSettingsPatch,
@@ -14,6 +18,7 @@ import type {
   PlexLibrary,
   PlexLibrarySelection,
   PlexServer,
+  TrackPageRequest,
 } from "../../shared/types";
 
 declare global {
@@ -67,7 +72,8 @@ declare global {
         getRecentlyPlayedAlbums: () => Promise<any[]>;
         getRecentlyAddedAlbums: () => Promise<any[]>;
         getPlaylists: () => Promise<any[]>;
-        getAlbumsPage: (cursor: string, pageSize: number) => Promise<any>;
+        getAlbumsPage: (request: AlbumPageRequest) => Promise<MediaPage<MediaAlbum>>;
+        getTracksPage: (request: TrackPageRequest) => Promise<MediaPage<MediaTrack>>;
         getArtistsPage: (cursor: string, pageSize: number) => Promise<any>;
         getAlbum: (ratingKey: string) => Promise<any>;
         getArtist: (ratingKey: string) => Promise<any>;
