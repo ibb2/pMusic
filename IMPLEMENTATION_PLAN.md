@@ -47,13 +47,13 @@ Completion gate:
 
 Owner: Persistence/offline sub-agent
 
-- [ ] Add versioned, idempotent SQLite migrations.
-- [ ] Preserve the existing settings and playback-history data.
-- [ ] Add typed repositories for server-scoped media cache, downloads, and per-library sync state.
-- [ ] Index cache expiry and download/sync state fields.
-- [ ] Handle corrupt persisted JSON without crashing application startup.
+- [x] Add versioned, idempotent SQLite migrations.
+- [x] Preserve the existing settings and playback-history data.
+- [x] Add typed repositories for server-scoped media cache, downloads, and per-library sync state.
+- [x] Index cache expiry and download/sync state fields.
+- [x] Handle corrupt persisted JSON without crashing application startup.
 - [ ] Remove generic renderer-facing `dbGet` and `dbSet` access after confirming no renderer callers remain.
-- [ ] Implement read-through metadata caching:
+- [x] Implement read-through metadata caching:
   - Fresh cache hit returns immediately.
   - Stale data is refreshed from Plex.
   - Stale data is returned when Plex cannot be reached.
