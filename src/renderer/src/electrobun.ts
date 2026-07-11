@@ -66,6 +66,8 @@ window.api = {
       rpc.request.mediaGetArtistPopularTracks({ ratingKey }),
     getPlaylist: (ratingKey: string) =>
       rpc.request.mediaGetPlaylist({ ratingKey }),
+    search: (query: string, limit = 8) =>
+      rpc.request.mediaSearch({ query, limit }),
   },
   player: {
     getStatus: () => rpc.request.playerGetStatus(),

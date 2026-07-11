@@ -62,7 +62,7 @@ On install login to you Plex account and select your server[^1], that is all.
 - [ ] Tracks page
   - [ ] Tracks library page
   - [ ] Filtering options
-- [ ] Search
+- [x] Search
 - [x] Queue's
   - [x] Queue Albums
   - [x] Queue individual tracks

@@ -15,6 +15,8 @@ import type {
   PlaybackSettingsPatch,
   PlayerQueue,
   PlayerTrack,
+  SearchResult,
+  SearchResults,
 } from "../../shared/rpc";
 import type { PlexLibrary, PlexServer } from "../../shared/types";
 
@@ -24,6 +26,11 @@ type PlexResponse = {
   MediaContainer?: {
     Metadata?: PlexMetadata[];
     Directory?: PlexMetadata[];
+    Hub?: Array<{
+      type?: string;
+      Metadata?: PlexMetadata[];
+      Directory?: PlexMetadata[];
+    }>;
     totalSize?: number;
     UltraBlurColors?: Array<{
       topLeft: string;
@@ -715,6 +722,35 @@ export class MediaService {
     }));
   }
 
+  async search(query: string, limit = 8): Promise<SearchResults> {
+    const normalizedQuery = query.trim();
+    const empty: SearchResults = {
+      artists: [],
+      albums: [],
+      tracks: [],
+      playlists: [],
+    };
+    if (!normalizedQuery) return empty;
+
+    const safeLimit = Math.min(Math.max(limit, 1), 25);
+    const data = await this.fetchPlex("/hubs/search", {
+      query: normalizedQuery,
+      limit: String(safeLimit),
+      includeCollections: "0",
+    });
+
+    for (const hub of data.MediaContainer?.Hub || []) {
+      for (const item of hub.Metadata || hub.Directory || []) {
+        const result = this.mapSearchResult(item);
+        if (!result) continue;
+        const bucket = `${result.type}s` as keyof SearchResults;
+        if (empty[bucket].length < safeLimit) empty[bucket].push(result);
+      }
+    }
+
+    return empty;
+  }
+
   async getPlaylist(ratingKey: string): Promise<unknown> {
     const playlist = await this.fetchMetadataItem(ratingKey);
     const tracks = await this.fetchPlaylistItems(ratingKey);
@@ -1134,6 +1170,32 @@ export class MediaService {
       albumCount: artist.childCount,
       trackCount: artist.leafCount,
       viewCount: artist.viewCount,
+    };
+  }
+
+  private mapSearchResult(item: PlexMetadata): SearchResult | null {
+    const type = item.type as SearchResult["type"];
+    if (!["artist", "album", "track", "playlist"].includes(type)) return null;
+    const ratingKey = String(
+      item.ratingKey || this.extractRatingKey(item.key) || "",
+    );
+    if (!ratingKey) return null;
+
+    const subtitle =
+      type === "artist"
+        ? "Artist"
+        : type === "album"
+          ? item.parentTitle || "Album"
+          : type === "track"
+            ? [item.grandparentTitle, item.parentTitle].filter(Boolean).join(" • ")
+            : "Playlist";
+
+    return {
+      type,
+      ratingKey,
+      title: String(item.title || "Untitled"),
+      subtitle: String(subtitle),
+      thumb: this.plexUrl(item.thumb || item.parentThumb || item.grandparentThumb || item.composite),
     };
   }
 

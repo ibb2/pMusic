@@ -31,6 +31,7 @@ import {
   Sun03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { FormEvent, useEffect, useState } from "react";
 
 export function TopBar() {
   const router = useRouter();
@@ -39,6 +40,18 @@ export function TopBar() {
   const { theme, setTheme } = useTheme();
   const { ultraBlur, enabled } = useUltraBlur();
   const hasUltraBlur = !!ultraBlur && enabled;
+  const currentQuery = new URLSearchParams(
+    routerState.location.searchStr,
+  ).get("q") ?? "";
+  const [searchQuery, setSearchQuery] = useState(currentQuery);
+
+  useEffect(() => setSearchQuery(currentQuery), [currentQuery]);
+
+  const submitSearch = (event: FormEvent) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (query) router.navigate({ to: "/app/search", search: { q: query } });
+  };
 
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile"],
@@ -91,7 +104,7 @@ export function TopBar() {
         </Button>
       </div>
 
-      <div className="flex flex-1 max-w-md mx-4">
+      <form className="flex flex-1 max-w-md mx-4" onSubmit={submitSearch}>
         <div className="relative w-full">
           <HugeiconsIcon
             icon={Search01Icon}
@@ -100,9 +113,12 @@ export function TopBar() {
           <Input
             placeholder="What do you want to play?"
             className="pl-8 rounded-full bg-secondary border-0 w-full"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            aria-label="Search music"
           />
         </div>
-      </div>
+      </form>
 
       <div className="flex items-center">
         {/* <Link to={'/app/settings'}> */}
