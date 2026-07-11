@@ -52,20 +52,20 @@ Owner: Persistence/offline sub-agent
 - [x] Add typed repositories for server-scoped media cache, downloads, and per-library sync state.
 - [x] Index cache expiry and download/sync state fields.
 - [x] Handle corrupt persisted JSON without crashing application startup.
-- [ ] Remove generic renderer-facing `dbGet` and `dbSet` access after confirming no renderer callers remain.
+- [x] Remove generic renderer-facing `dbGet` and `dbSet` access after confirming no renderer callers remain.
 - [x] Implement read-through metadata caching:
   - Fresh cache hit returns immediately.
   - Stale data is refreshed from Plex.
   - Stale data is returned when Plex cannot be reached.
   - An uncached offline request returns a typed unavailable state.
 - [ ] Cache artwork in server-scoped storage.
-- [ ] Add cache isolation and expiration tests.
+- [x] Add cache isolation and expiration tests.
 
 Completion gate:
 
-- [ ] Migrations pass from an empty and existing database.
-- [ ] Cached metadata supports fresh, stale, offline-fallback, and unavailable paths.
-- [ ] Data from one Plex server cannot leak into another server's results.
+- [x] Migrations pass from an empty and existing database.
+- [x] Cached metadata supports fresh, stale, offline-fallback, and unavailable paths.
+- [x] Data from one Plex server cannot leak into another server's results.
 
 ## Phase 3 — Offline Downloads and Playback
 

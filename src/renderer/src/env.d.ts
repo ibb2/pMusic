@@ -24,10 +24,6 @@ import type {
 declare global {
   interface Window {
     api: {
-      db: {
-        get: (key: string) => Promise<unknown>;
-        set: (key: string, value: unknown) => Promise<void>;
-      };
       settings: {
         getPlayback: () => Promise<PlaybackSettings>;
         setPlayback: (

@@ -163,14 +163,6 @@ export type SearchResults = {
 export type RaynaRPC = {
   bun: RPCSchema<{
     requests: {
-      dbGet: {
-        params: { key: string };
-        response: unknown;
-      };
-      dbSet: {
-        params: { key: string; value: unknown };
-        response: void;
-      };
       settingsGetPlayback: {
         params: void;
         response: PlaybackSettings;

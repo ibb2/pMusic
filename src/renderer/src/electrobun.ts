@@ -15,10 +15,6 @@ const rpc = createRPC<RaynaRPC["webview"], RaynaRPC["bun"]>({
 new Electroview({ rpc });
 
 window.api = {
-  db: {
-    get: (key: string) => rpc.request.dbGet({ key }),
-    set: (key: string, value: unknown) => rpc.request.dbSet({ key, value }),
-  },
   settings: {
     getPlayback: () => rpc.request.settingsGetPlayback(),
     setPlayback: (settings: PlaybackSettingsPatch) =>

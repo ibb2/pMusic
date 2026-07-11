@@ -8,6 +8,7 @@ import type {
   StreamCandidate,
 } from "../bass";
 import type { DatabaseManager } from "../database";
+import { CacheService } from "../cache";
 import type Authentication from "./authentication";
 import { selectMusicLibraries } from "./library-selection";
 import type {
@@ -175,12 +176,14 @@ export function createPlexPlaybackIdentity({
 
 export class MediaService {
   private activeBaseUrl: string | null = null;
+  private readonly cache: CacheService;
 
   constructor(
     private readonly auth: Authentication,
     private readonly bass: BassManager,
     private readonly db: DatabaseManager,
   ) {
+    this.cache = new CacheService(db);
     this.bass.setStreamResolver(
       (source, excludedConnectionUris) =>
         this.resolveStreamCandidates(source, excludedConnectionUris),
@@ -213,11 +216,43 @@ export class MediaService {
   }
 
   async getAlbumsPage(request: AlbumPageRequest): Promise<MediaPage<MediaAlbum>> {
-    return this.getMediaPage(request, "9", (item) => this.mapTypedAlbum(item));
+    return this.getCachedMediaPage("albums", request, "9", (item) =>
+      this.mapTypedAlbum(item),
+    );
   }
 
   async getTracksPage(request: TrackPageRequest): Promise<MediaPage<MediaTrack>> {
-    return this.getMediaPage(request, "10", (item) => this.mapTrack(item));
+    return this.getCachedMediaPage("tracks", request, "10", (item) =>
+      this.mapTrack(item),
+    );
+  }
+
+  private async getCachedMediaPage<T>(
+    resource: string,
+    request: AlbumPageRequest | TrackPageRequest,
+    type: "9" | "10",
+    mapper: (item: PlexMetadata) => T,
+  ): Promise<MediaPage<T>> {
+    const server = await this.getSelectedServer();
+    const cacheKey = `${resource}:${JSON.stringify(request)}`;
+    const result = await this.cache.readThrough({
+      serverId: server.clientIdentifier,
+      key: cacheKey,
+      ttlMs: 5 * 60 * 1000,
+      fetch: () => this.getMediaPage(request, type, mapper),
+    });
+
+    return {
+      ...result.value,
+      freshness:
+        result.source === "network"
+          ? "live"
+          : result.isStale
+            ? "stale"
+            : "fresh",
+      cachedAt:
+        result.source === "network" ? null : new Date().toISOString(),
+    };
   }
 
   private async getMediaPage<T>(

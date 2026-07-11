@@ -23,8 +23,6 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
   maxRequestTime: 30_000,
   handlers: {
     requests: {
-      dbGet: ({ key }) => db.get(key),
-      dbSet: ({ key, value }) => db.set(key, value),
       settingsGetPlayback: () => media.getPlaybackSettings(),
       settingsSetPlayback: ({ settings }) =>
         media.setPlaybackSettings(settings),
