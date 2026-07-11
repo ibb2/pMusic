@@ -308,6 +308,12 @@ export type RaynaRPC = {
         params: { query: string; limit?: number };
         response: SearchResults;
       };
+      downloadsCreate: RoadmapRPCRequests["downloadsCreate"];
+      downloadsList: RoadmapRPCRequests["downloadsList"];
+      downloadsRetry: RoadmapRPCRequests["downloadsRetry"];
+      downloadsRemove: RoadmapRPCRequests["downloadsRemove"];
+      downloadsGetProgress: RoadmapRPCRequests["downloadsGetProgress"];
+      offlineGetStorageStatus: RoadmapRPCRequests["offlineGetStorageStatus"];
       playerGetStatus: {
         params: void;
         response: PlayerStatus;

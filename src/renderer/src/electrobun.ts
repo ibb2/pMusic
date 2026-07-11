@@ -69,6 +69,16 @@ window.api = {
     search: (query: string, limit = 8) =>
       rpc.request.mediaSearch({ query, limit }),
   },
+  downloads: {
+    create: (targetType, ratingKey) =>
+      rpc.request.downloadsCreate({ targetType, ratingKey }),
+    list: (states) => rpc.request.downloadsList({ states }),
+    retry: (downloadId) => rpc.request.downloadsRetry({ downloadId }),
+    remove: (downloadId) => rpc.request.downloadsRemove({ downloadId }),
+    getProgress: (downloadIds) =>
+      rpc.request.downloadsGetProgress({ downloadIds }),
+    getStorageStatus: () => rpc.request.offlineGetStorageStatus(),
+  },
   player: {
     getStatus: () => rpc.request.playerGetStatus(),
     getQueue: () => rpc.request.playerGetQueue(),

@@ -71,18 +71,18 @@ Completion gate:
 
 Owner: Persistence/offline sub-agent
 
-- [ ] Implement explicit track downloads using original Plex audio files.
-- [ ] Add album and playlist download orchestration using the track download pipeline.
-- [ ] Stream downloads into resumable `.partial` files.
-- [ ] Validate completed downloads and atomically rename them.
-- [ ] Persist byte progress, completion state, errors, and required media metadata.
-- [ ] Implement retry, cancellation, and removal.
-- [ ] Add a restricted loopback file endpoint with `HEAD` and byte-range support.
-- [ ] Prevent path traversal and arbitrary local-file access.
-- [ ] Prefer completed local downloads during playback, then fall back to live Plex streaming.
-- [ ] Ensure offline queues can advance between downloaded tracks.
-- [ ] Add renderer controls for downloading tracks, albums, and playlists.
-- [ ] Add download progress, retry, remove, and storage-usage UI in Settings.
+- [x] Implement explicit track downloads using original Plex audio files.
+- [x] Add album and playlist download orchestration using the track download pipeline.
+- [x] Stream downloads into resumable `.partial` files.
+- [x] Validate completed downloads and atomically rename them.
+- [x] Persist byte progress, completion state, errors, and required media metadata.
+- [x] Implement retry, cancellation, and removal.
+- [x] Add a restricted loopback file endpoint with `HEAD` and byte-range support.
+- [x] Prevent path traversal and arbitrary local-file access.
+- [x] Prefer completed local downloads during playback, then fall back to live Plex streaming.
+- [x] Ensure offline queues can advance between downloaded tracks.
+- [x] Add renderer controls for downloading tracks, albums, and playlists.
+- [x] Add download progress, retry, remove, and storage-usage UI in Settings.
 
 Completion gate:
 

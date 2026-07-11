@@ -19,6 +19,11 @@ import type {
   PlexLibrarySelection,
   PlexServer,
   TrackPageRequest,
+  DownloadItem,
+  DownloadProgress,
+  DownloadState,
+  DownloadTargetType,
+  OfflineStorageStatus,
 } from "../../shared/types";
 
 declare global {
@@ -68,8 +73,12 @@ declare global {
         getRecentlyPlayedAlbums: () => Promise<any[]>;
         getRecentlyAddedAlbums: () => Promise<any[]>;
         getPlaylists: () => Promise<any[]>;
-        getAlbumsPage: (request: AlbumPageRequest) => Promise<MediaPage<MediaAlbum>>;
-        getTracksPage: (request: TrackPageRequest) => Promise<MediaPage<MediaTrack>>;
+        getAlbumsPage: (
+          request: AlbumPageRequest,
+        ) => Promise<MediaPage<MediaAlbum>>;
+        getTracksPage: (
+          request: TrackPageRequest,
+        ) => Promise<MediaPage<MediaTrack>>;
         getArtistsPage: (cursor: string, pageSize: number) => Promise<any>;
         getAlbum: (ratingKey: string) => Promise<any>;
         getArtist: (ratingKey: string) => Promise<any>;
@@ -77,6 +86,17 @@ declare global {
         getArtistPopularTracks: (ratingKey: string) => Promise<any>;
         getPlaylist: (ratingKey: string) => Promise<any>;
         search: (query: string, limit?: number) => Promise<SearchResults>;
+      };
+      downloads: {
+        create: (
+          targetType: DownloadTargetType,
+          ratingKey: string,
+        ) => Promise<DownloadItem[]>;
+        list: (states?: DownloadState[]) => Promise<DownloadItem[]>;
+        retry: (downloadId: string) => Promise<DownloadItem>;
+        remove: (downloadId: string) => Promise<void>;
+        getProgress: (downloadIds?: string[]) => Promise<DownloadProgress[]>;
+        getStorageStatus: () => Promise<OfflineStorageStatus>;
       };
       player: {
         getStatus: () => Promise<PlayerStatus>;

@@ -13,6 +13,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useEffect } from "react";
+import { DownloadButton, downloadsApi } from "@/components/downloads";
 
 export const Route = createFileRoute("/app/album/$ratingKey")({
   component: AlbumPage,
@@ -122,6 +123,10 @@ export function AlbumPage() {
         <Button variant="ghost" size="icon">
           <HugeiconsIcon icon={MoreVerticalIcon} />
         </Button>
+        <DownloadButton
+          api={downloadsApi}
+          target={{ type: "album", ratingKey, title: album.title }}
+        />
       </div>
 
       {/* Track List */}

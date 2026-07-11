@@ -9,6 +9,11 @@ import type {
 } from "../bass";
 import type { DatabaseManager } from "../database";
 import { CacheService } from "../cache";
+import type {
+  DownloadMediaResolver,
+  ResolvedDownloadTrack,
+} from "../download-manager";
+import type { LocalPlaybackServer } from "../local-playback-server";
 import type Authentication from "./authentication";
 import { selectMusicLibraries } from "./library-selection";
 import type {
@@ -174,9 +179,10 @@ export function createPlexPlaybackIdentity({
   };
 }
 
-export class MediaService {
+export class MediaService implements DownloadMediaResolver {
   private activeBaseUrl: string | null = null;
   private readonly cache: CacheService;
+  private localPlaybackServer: LocalPlaybackServer | null = null;
 
   constructor(
     private readonly auth: Authentication,
@@ -192,6 +198,54 @@ export class MediaService {
         this.auth.setLastKnownGoodConnection(connectionUri);
       },
     );
+  }
+
+  setLocalPlaybackServer(server: LocalPlaybackServer): void {
+    this.localPlaybackServer = server;
+  }
+
+  async resolveTracks({
+    serverId,
+    targetType,
+    ratingKey,
+  }: {
+    serverId: string;
+    targetType: "track" | "album" | "playlist";
+    ratingKey: string;
+  }): Promise<ResolvedDownloadTrack[]> {
+    const server = await this.getSelectedServer();
+    if (server.clientIdentifier !== serverId) {
+      throw new Error("Downloads can only be created for the selected server");
+    }
+    const tracks =
+      targetType === "track"
+        ? [await this.fetchMetadataItem(ratingKey)]
+        : targetType === "playlist"
+          ? await this.fetchPlaylistItems(ratingKey)
+          : await this.fetchMetadataChildren(ratingKey);
+    const token = this.getServerToken(server);
+    const connection = this.auth.getConnectionCandidates(
+      "auto",
+      server,
+      this.activeBaseUrl,
+    )[0];
+    if (!connection)
+      throw new Error("No reachable Plex connection is available");
+
+    return tracks.map((track) => {
+      const part = track.Media?.[0]?.Part?.[0];
+      if (typeof part?.key !== "string" || !part.key) {
+        throw new Error(`Track ${track.ratingKey} has no original media part`);
+      }
+      return {
+        ratingKey: String(track.ratingKey || ""),
+        title: String(track.title || "Untitled track"),
+        artist: String(track.originalTitle || track.grandparentTitle || ""),
+        album: String(track.parentTitle || ""),
+        url: this.buildPlexUrl(part.key, connection.uri, token),
+        fileName: typeof part.file === "string" ? part.file : undefined,
+      };
+    });
   }
 
   getPlaybackSettings(): PlaybackSettings {
@@ -215,13 +269,17 @@ export class MediaService {
     return next;
   }
 
-  async getAlbumsPage(request: AlbumPageRequest): Promise<MediaPage<MediaAlbum>> {
+  async getAlbumsPage(
+    request: AlbumPageRequest,
+  ): Promise<MediaPage<MediaAlbum>> {
     return this.getCachedMediaPage("albums", request, "9", (item) =>
       this.mapTypedAlbum(item),
     );
   }
 
-  async getTracksPage(request: TrackPageRequest): Promise<MediaPage<MediaTrack>> {
+  async getTracksPage(
+    request: TrackPageRequest,
+  ): Promise<MediaPage<MediaTrack>> {
     return this.getCachedMediaPage("tracks", request, "10", (item) =>
       this.mapTrack(item),
     );
@@ -250,8 +308,7 @@ export class MediaService {
           : result.isStale
             ? "stale"
             : "fresh",
-      cachedAt:
-        result.source === "network" ? null : new Date().toISOString(),
+      cachedAt: result.source === "network" ? null : new Date().toISOString(),
     };
   }
 
@@ -314,13 +371,21 @@ export class MediaService {
     if (request.query?.trim()) params.title = request.query.trim();
 
     const filters = request.filters;
-    if (filters && "artistRatingKeys" in filters && filters.artistRatingKeys?.length) {
+    if (
+      filters &&
+      "artistRatingKeys" in filters &&
+      filters.artistRatingKeys?.length
+    ) {
       params.artist = filters.artistRatingKeys.join(",");
     }
     if (filters && "years" in filters && filters.years?.length) {
       params.year = filters.years.join(",");
     }
-    if (filters && "albumRatingKeys" in filters && filters.albumRatingKeys?.length) {
+    if (
+      filters &&
+      "albumRatingKeys" in filters &&
+      filters.albumRatingKeys?.length
+    ) {
       params.album = filters.albumRatingKeys.join(",");
     }
 
@@ -866,7 +931,7 @@ export class MediaService {
   }
 
   async playAlbum(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchMetadataChildren(ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback("album", ratingKey);
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
@@ -875,7 +940,10 @@ export class MediaService {
   }
 
   async playPlaylist(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchPlaylistItems(ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback(
+      "playlist",
+      ratingKey,
+    );
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
@@ -896,7 +964,7 @@ export class MediaService {
   }
 
   async playTrack(ratingKey: string): Promise<unknown> {
-    const track = await this.fetchMetadataItem(ratingKey);
+    const track = await this.fetchTrackWithOfflineFallback(ratingKey);
     const playableTrack = await this.toPlayableTrack(track);
     this.bass.playTrack(playableTrack.track, playableTrack.source);
     return { status: "playing", track: playableTrack.track.title };
@@ -907,7 +975,7 @@ export class MediaService {
   }
 
   async queueAlbum(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchMetadataChildren(ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback("album", ratingKey);
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
@@ -916,7 +984,10 @@ export class MediaService {
   }
 
   async queuePlaylist(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchPlaylistItems(ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback(
+      "playlist",
+      ratingKey,
+    );
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
@@ -925,7 +996,7 @@ export class MediaService {
   }
 
   async queueTrack(ratingKey: string): Promise<unknown> {
-    const track = await this.fetchMetadataItem(ratingKey);
+    const track = await this.fetchTrackWithOfflineFallback(ratingKey);
     const playableTrack = await this.toPlayableTrack(track);
     this.bass.queueTrack(playableTrack.track, playableTrack.source);
     return { status: "queued", track: playableTrack.track.title };
@@ -1016,11 +1087,81 @@ export class MediaService {
     return data.MediaContainer?.Metadata || [];
   }
 
+  private async fetchTrackWithOfflineFallback(
+    ratingKey: string,
+  ): Promise<PlexMetadata> {
+    try {
+      return await this.fetchMetadataItem(ratingKey);
+    } catch (error) {
+      const tracks = await this.offlineTracks("track", ratingKey);
+      if (tracks[0]) return tracks[0];
+      throw error;
+    }
+  }
+
+  private async fetchTracksWithOfflineFallback(
+    targetType: "album" | "playlist",
+    ratingKey: string,
+  ): Promise<PlexMetadata[]> {
+    try {
+      return targetType === "album"
+        ? await this.fetchMetadataChildren(ratingKey)
+        : await this.fetchPlaylistItems(ratingKey);
+    } catch (error) {
+      const tracks = await this.offlineTracks(targetType, ratingKey);
+      if (tracks.length) return tracks;
+      throw error;
+    }
+  }
+
+  private async offlineTracks(
+    targetType: "track" | "album" | "playlist",
+    targetRatingKey: string,
+  ): Promise<PlexMetadata[]> {
+    const server = await this.getSelectedServer();
+    return this.db
+      .listDownloads(server.clientIdentifier)
+      .filter((record) => {
+        const metadata = record.metadata as {
+          targetType?: string;
+          targetRatingKey?: string;
+        };
+        return (
+          record.status === "completed" &&
+          metadata.targetType === targetType &&
+          metadata.targetRatingKey === targetRatingKey
+        );
+      })
+      .map((record) => {
+        const metadata = record.metadata as {
+          artist?: string;
+          album?: string;
+        };
+        return {
+          ratingKey: record.ratingKey,
+          title: record.title,
+          originalTitle: metadata.artist,
+          parentTitle: metadata.album,
+        };
+      });
+  }
+
   private async toPlayableTrack(track: PlexMetadata): Promise<PlayableTrack> {
     const plexSessionId = randomUUID().replaceAll("-", "");
-    const source = this.getPlaybackSettings().transcodeAudio
-      ? this.transcodeSource(track, plexSessionId)
-      : this.originalFileSource(track, plexSessionId);
+    const server = await this.getSelectedServer();
+    const downloaded = this.db.getCompletedDownload(
+      server.clientIdentifier,
+      String(track.ratingKey || ""),
+    );
+    const local =
+      downloaded?.filePath && this.localPlaybackServer
+        ? this.localPlaybackServer.register(downloaded.filePath)
+        : null;
+    const source = local
+      ? { path: local.url }
+      : this.getPlaybackSettings().transcodeAudio
+        ? this.transcodeSource(track, plexSessionId)
+        : this.originalFileSource(track, plexSessionId);
     if (!source)
       throw new Error(
         `Track ${track.ratingKey} does not have a playable stream`,
@@ -1106,6 +1247,9 @@ export class MediaService {
     source: PlexStreamSource,
     excludedConnectionUris: ReadonlySet<string>,
   ): StreamCandidate[] {
+    if (source.path.startsWith("http://127.0.0.1:")) {
+      return [{ connectionUri: "offline", url: source.path }];
+    }
     const server = this.auth.selectedServer;
     if (!server) return [];
 
@@ -1241,33 +1385,52 @@ export class MediaService {
 
   private mapTypedAlbum(album: PlexMetadata): MediaAlbum {
     return {
-      ratingKey: String(album.ratingKey || this.extractRatingKey(album.key) || ""),
+      ratingKey: String(
+        album.ratingKey || this.extractRatingKey(album.key) || "",
+      ),
       title: String(album.title || "Untitled album"),
       artist: String(album.parentTitle || "Unknown artist"),
       artistRatingKey:
         album.parentRatingKey || this.extractRatingKey(album.parentKey),
       year: Number.isFinite(Number(album.year)) ? Number(album.year) : null,
       thumb: this.plexUrl(album.thumb),
-      trackCount: Number.isFinite(Number(album.leafCount)) ? Number(album.leafCount) : null,
-      addedAt: Number.isFinite(Number(album.addedAt)) ? Number(album.addedAt) : null,
+      trackCount: Number.isFinite(Number(album.leafCount))
+        ? Number(album.leafCount)
+        : null,
+      addedAt: Number.isFinite(Number(album.addedAt))
+        ? Number(album.addedAt)
+        : null,
     };
   }
 
   private mapTrack(track: PlexMetadata): MediaTrack {
     return {
-      ratingKey: String(track.ratingKey || this.extractRatingKey(track.key) || ""),
+      ratingKey: String(
+        track.ratingKey || this.extractRatingKey(track.key) || "",
+      ),
       title: String(track.title || "Untitled track"),
-      artist: String(track.grandparentTitle || track.originalTitle || "Unknown artist"),
+      artist: String(
+        track.grandparentTitle || track.originalTitle || "Unknown artist",
+      ),
       artistRatingKey:
-        track.grandparentRatingKey || this.extractRatingKey(track.grandparentKey),
+        track.grandparentRatingKey ||
+        this.extractRatingKey(track.grandparentKey),
       album: String(track.parentTitle || "Unknown album"),
       albumRatingKey:
         track.parentRatingKey || this.extractRatingKey(track.parentKey),
-      duration: Number.isFinite(Number(track.duration)) ? Number(track.duration) : null,
+      duration: Number.isFinite(Number(track.duration))
+        ? Number(track.duration)
+        : null,
       index: Number.isFinite(Number(track.index)) ? Number(track.index) : null,
-      disc: Number.isFinite(Number(track.parentIndex)) ? Number(track.parentIndex) : null,
-      thumb: this.plexUrl(track.thumb || track.parentThumb || track.grandparentThumb),
-      addedAt: Number.isFinite(Number(track.addedAt)) ? Number(track.addedAt) : null,
+      disc: Number.isFinite(Number(track.parentIndex))
+        ? Number(track.parentIndex)
+        : null,
+      thumb: this.plexUrl(
+        track.thumb || track.parentThumb || track.grandparentThumb,
+      ),
+      addedAt: Number.isFinite(Number(track.addedAt))
+        ? Number(track.addedAt)
+        : null,
     };
   }
 
@@ -1300,7 +1463,9 @@ export class MediaService {
         : type === "album"
           ? item.parentTitle || "Album"
           : type === "track"
-            ? [item.grandparentTitle, item.parentTitle].filter(Boolean).join(" • ")
+            ? [item.grandparentTitle, item.parentTitle]
+                .filter(Boolean)
+                .join(" • ")
             : "Playlist";
 
     return {
@@ -1308,7 +1473,12 @@ export class MediaService {
       ratingKey,
       title: String(item.title || "Untitled"),
       subtitle: String(subtitle),
-      thumb: this.plexUrl(item.thumb || item.parentThumb || item.grandparentThumb || item.composite),
+      thumb: this.plexUrl(
+        item.thumb ||
+          item.parentThumb ||
+          item.grandparentThumb ||
+          item.composite,
+      ),
     };
   }
 

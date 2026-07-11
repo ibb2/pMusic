@@ -4,6 +4,10 @@ import { DatabaseManager } from "./database";
 import Authentication from "./plex/authentication";
 import { MediaService } from "./plex/media";
 import { PlexTimelineReporter } from "./plex/timeline";
+import { DownloadManager } from "./download-manager";
+import { LocalPlaybackServer } from "./local-playback-server";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import type { ApplicationMenuItemConfig } from "electrobun";
 import type { RaynaRPC } from "../shared/rpc";
 import type { PlexLibrarySelection, PlexServer } from "../shared/types";
@@ -12,6 +16,18 @@ const db = new DatabaseManager();
 const auth = new Authentication();
 const bass = new BassManager();
 const media = new MediaService(auth, bass, db);
+const localPlayback = new LocalPlaybackServer();
+media.setLocalPlaybackServer(localPlayback);
+const downloads = new DownloadManager({
+  database: db,
+  resolver: media,
+  storageDirectory: join(
+    homedir(),
+    process.platform === "darwin"
+      ? "Library/Application Support/com.ib.rayna/downloads"
+      : ".rayna/downloads",
+  ),
+});
 const timeline = new PlexTimelineReporter(auth, bass, () =>
   media.getPlaybackSettings(),
 );
@@ -71,6 +87,47 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
         media.getArtistPopularTracks(ratingKey),
       mediaGetPlaylist: ({ ratingKey }) => media.getPlaylist(ratingKey),
       mediaSearch: ({ query, limit }) => media.search(query, limit),
+      downloadsCreate: async ({ targetType, ratingKey }) => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) throw new Error("Select a Plex server before downloading");
+        return downloads.enqueue(
+          server.clientIdentifier,
+          targetType,
+          ratingKey,
+        );
+      },
+      downloadsList: async ({ states }) => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) return [];
+        const items = downloads.list(server.clientIdentifier);
+        return states?.length
+          ? items.filter((item) => states.includes(item.state))
+          : items;
+      },
+      downloadsRetry: ({ downloadId }) => downloads.retry(downloadId),
+      downloadsRemove: ({ downloadId }) => downloads.remove(downloadId),
+      downloadsGetProgress: async ({ downloadIds }) => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) return [];
+        return downloads
+          .list(server.clientIdentifier)
+          .filter((item) => !downloadIds || downloadIds.includes(item.id))
+          .map(
+            ({ id, state, bytesDownloaded, bytesTotal, error, updatedAt }) => ({
+              id,
+              state,
+              bytesDownloaded,
+              bytesTotal,
+              error,
+              updatedAt,
+            }),
+          );
+      },
+      offlineGetStorageStatus: async () => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) return downloads.storageStatus("");
+        return downloads.storageStatus(server.clientIdentifier);
+      },
       playerGetStatus: () => bass.getPlaybackStatus(),
       playerGetQueue: () => media.getQueue(),
       playerPlayAlbum: ({ ratingKey }) => media.playAlbum(ratingKey),
@@ -219,6 +276,7 @@ function extractUrl(event: unknown): string | null {
 }
 
 function shutdown(): void {
+  localPlayback.dispose();
   bass.free();
   timeline.dispose();
   Utils.quit();

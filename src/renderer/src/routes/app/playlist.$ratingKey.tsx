@@ -13,6 +13,7 @@ import {
   PlayIcon,
   PlusSignIcon,
 } from "@hugeicons/core-free-icons";
+import { DownloadButton, downloadsApi } from "@/components/downloads";
 
 export const Route = createFileRoute("/app/playlist/$ratingKey")({
   component: PlaylistPage,
@@ -102,6 +103,10 @@ function PlaylistPage() {
         <Button variant="ghost" size="icon">
           <HugeiconsIcon icon={MoreVerticalIcon} />
         </Button>
+        <DownloadButton
+          api={downloadsApi}
+          target={{ type: "playlist", ratingKey, title: playlist.title }}
+        />
       </div>
 
       {/* Track List */}

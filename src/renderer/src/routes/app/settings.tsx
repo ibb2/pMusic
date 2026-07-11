@@ -20,6 +20,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { DownloadManagerPanel, downloadsApi } from "@/components/downloads";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
@@ -378,6 +379,11 @@ export function SettingsPage() {
                 </ul>
               </div> */}
             </div>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl">Offline</h2>
+            <DownloadManagerPanel api={downloadsApi} />
           </section>
 
           {/* <Separator className="" /> */}
