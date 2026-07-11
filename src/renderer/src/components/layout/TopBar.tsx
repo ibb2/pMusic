@@ -31,7 +31,15 @@ import {
   Sun03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { FormEvent, useEffect, useState } from "react";
+import type { SearchResult } from "../../../../shared/rpc";
+import {
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export function TopBar() {
   const router = useRouter();
@@ -44,13 +52,92 @@ export function TopBar() {
     routerState.location.searchStr,
   ).get("q") ?? "";
   const [searchQuery, setSearchQuery] = useState(currentQuery);
+  const [debouncedQuery, setDebouncedQuery] = useState(currentQuery);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setSearchQuery(currentQuery), [currentQuery]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(
+      () => setDebouncedQuery(searchQuery.trim()),
+      250,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [searchQuery]);
+
+  const autocomplete = useQuery({
+    queryKey: ["search-autocomplete", debouncedQuery],
+    queryFn: () => window.api.media.search(debouncedQuery, 3),
+    enabled: debouncedQuery.length >= 2 && searchFocused,
+    staleTime: 30_000,
+  });
+  const suggestions = useMemo(
+    () =>
+      autocomplete.data
+        ? [
+            ...autocomplete.data.artists,
+            ...autocomplete.data.albums,
+            ...autocomplete.data.tracks,
+            ...autocomplete.data.playlists,
+          ].slice(0, 8)
+        : [],
+    [autocomplete.data],
+  );
+  const showSuggestions =
+    searchFocused && searchQuery.trim().length >= 2;
+
+  useEffect(() => setActiveSuggestion(-1), [debouncedQuery]);
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault();
     const query = searchQuery.trim();
-    if (query) router.navigate({ to: "/app/search", search: { q: query } });
+    if (activeSuggestion >= 0 && suggestions[activeSuggestion]) {
+      selectSuggestion(suggestions[activeSuggestion]);
+    } else if (query) {
+      setSearchFocused(false);
+      router.navigate({ to: "/app/search", search: { q: query } });
+    }
+  };
+
+  const selectSuggestion = (suggestion: SearchResult) => {
+    setSearchQuery(suggestion.title);
+    setSearchFocused(false);
+    if (suggestion.type === "track") {
+      void window.api.player.playTrack(suggestion.ratingKey);
+      return;
+    }
+    const to =
+      suggestion.type === "artist"
+        ? "/app/artist/$ratingKey"
+        : suggestion.type === "album"
+          ? "/app/album/$ratingKey"
+          : "/app/playlist/$ratingKey";
+    router.navigate({ to, params: { ratingKey: suggestion.ratingKey } });
+  };
+
+  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveSuggestion((current) => (current + 1) % suggestions.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveSuggestion((current) =>
+        current <= 0 ? suggestions.length - 1 : current - 1,
+      );
+    } else if (event.key === "Escape") {
+      setSearchFocused(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setDebouncedQuery("");
+    setActiveSuggestion(-1);
+    setSearchFocused(true);
+    window.requestAnimationFrame(() => searchInputRef.current?.focus());
   };
 
   const { data: userProfile } = useQuery({
@@ -111,12 +198,93 @@ export function TopBar() {
             className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"
           />
           <Input
+            ref={searchInputRef}
             placeholder="What do you want to play?"
-            className="pl-8 rounded-full bg-secondary border-0 w-full"
+            className="w-full rounded-full border-0 bg-secondary pl-8 pr-9"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => window.setTimeout(() => setSearchFocused(false), 150)}
+            onKeyDown={handleSearchKeyDown}
             aria-label="Search music"
+            aria-autocomplete="list"
+            aria-expanded={showSuggestions}
+            aria-controls="search-suggestions"
           />
+          {searchQuery.length > 0 && (
+            <button
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={clearSearch}
+              aria-label="Clear search"
+              className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="size-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <path d="m7 7 10 10M17 7 7 17" />
+              </svg>
+            </button>
+          )}
+          {showSuggestions && (
+            <div
+              id="search-suggestions"
+              role="listbox"
+              className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg"
+            >
+              {autocomplete.isFetching ? (
+                <div className="px-3 py-2 text-sm text-muted-foreground">
+                  Searching…
+                </div>
+              ) : suggestions.length > 0 ? (
+                suggestions.map((suggestion, index) => (
+                  <button
+                    key={`${suggestion.type}-${suggestion.ratingKey}`}
+                    type="button"
+                    role="option"
+                    aria-selected={activeSuggestion === index}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => selectSuggestion(suggestion)}
+                    onMouseEnter={() => setActiveSuggestion(index)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left",
+                      activeSuggestion === index && "bg-accent",
+                    )}
+                  >
+                    {suggestion.thumb ? (
+                      <img
+                        src={suggestion.thumb}
+                        alt=""
+                        className="size-10 shrink-0 rounded-md object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
+                        <HugeiconsIcon icon={Search01Icon} className="size-4" />
+                      </div>
+                    )}
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium">
+                        {suggestion.title}
+                      </span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {suggestion.subtitle} · {suggestion.type}
+                      </span>
+                    </span>
+                  </button>
+                ))
+              ) : debouncedQuery === searchQuery.trim() ? (
+                <div className="px-3 py-2 text-sm text-muted-foreground">
+                  No suggestions found
+                </div>
+              ) : null}
+            </div>
+          )}
         </div>
       </form>
 
