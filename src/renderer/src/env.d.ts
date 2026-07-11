@@ -7,6 +7,7 @@ import type {
   PlayerQueue,
   PlayerStatus,
   UserProfile,
+  SearchResults,
 } from "../../shared/rpc";
 import type {
   PlexConnectionMode,
@@ -73,6 +74,7 @@ declare global {
         getArtistAlbums: (ratingKey: string) => Promise<any[]>;
         getArtistPopularTracks: (ratingKey: string) => Promise<any>;
         getPlaylist: (ratingKey: string) => Promise<any>;
+        search: (query: string, limit?: number) => Promise<SearchResults>;
       };
       player: {
         getStatus: () => Promise<PlayerStatus>;

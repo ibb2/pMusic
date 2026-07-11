@@ -72,6 +72,7 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       mediaGetArtistPopularTracks: ({ ratingKey }) =>
         media.getArtistPopularTracks(ratingKey),
       mediaGetPlaylist: ({ ratingKey }) => media.getPlaylist(ratingKey),
+      mediaSearch: ({ query, limit }) => media.search(query, limit),
       playerGetStatus: () => bass.getPlaybackStatus(),
       playerGetQueue: () => media.getQueue(),
       playerPlayAlbum: ({ ratingKey }) => media.playAlbum(ratingKey),

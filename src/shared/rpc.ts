@@ -77,6 +77,21 @@ export type UserProfile = {
   thumb: string;
 };
 
+export type SearchResult = {
+  type: "artist" | "album" | "track" | "playlist";
+  ratingKey: string;
+  title: string;
+  subtitle: string;
+  thumb: string | null;
+};
+
+export type SearchResults = {
+  artists: SearchResult[];
+  albums: SearchResult[];
+  tracks: SearchResult[];
+  playlists: SearchResult[];
+};
+
 export type RaynaRPC = {
   bun: RPCSchema<{
     requests: {
@@ -224,6 +239,10 @@ export type RaynaRPC = {
       mediaGetPlaylist: {
         params: { ratingKey: string };
         response: unknown;
+      };
+      mediaSearch: {
+        params: { query: string; limit?: number };
+        response: SearchResults;
       };
       playerGetStatus: {
         params: void;
