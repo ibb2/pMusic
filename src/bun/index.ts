@@ -10,6 +10,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { SyncService } from "./sync-service";
 import { selectMusicLibraries } from "./plex/library-selection";
+import { ArtworkCacheServer } from "./artwork-cache-server";
 import type { ApplicationMenuItemConfig } from "electrobun";
 import type { RaynaRPC } from "../shared/rpc";
 import type { PlexLibrarySelection, PlexServer } from "../shared/types";
@@ -20,6 +21,10 @@ const bass = new BassManager();
 const media = new MediaService(auth, bass, db);
 const localPlayback = new LocalPlaybackServer();
 media.setLocalPlaybackServer(localPlayback);
+const artworkCache = new ArtworkCacheServer(
+  join(homedir(), ".rayna", "artwork-cache"),
+);
+media.setArtworkCacheServer(artworkCache);
 const downloads = new DownloadManager({
   database: db,
   resolver: media,
@@ -323,6 +328,7 @@ function extractUrl(event: unknown): string | null {
 }
 
 function shutdown(): void {
+  artworkCache.dispose();
   localPlayback.dispose();
   bass.free();
   timeline.dispose();

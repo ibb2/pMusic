@@ -15,6 +15,7 @@ import type {
 } from "../download-manager";
 import type { LocalPlaybackServer } from "../local-playback-server";
 import type { SyncResolver, LibraryRefreshResult } from "../sync-service";
+import type { ArtworkCacheServer } from "../artwork-cache-server";
 import type Authentication from "./authentication";
 import { selectMusicLibraries } from "./library-selection";
 import { findLyricsStreamKey, parseLyrics } from "./lyrics";
@@ -187,6 +188,7 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   private readonly cache: CacheService;
   private localPlaybackServer: LocalPlaybackServer | null = null;
   private networkRestored: (() => void) | null = null;
+  private artworkCache: ArtworkCacheServer | null = null;
 
   constructor(
     private readonly auth: Authentication,
@@ -211,6 +213,10 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
 
   setNetworkRestoredCallback(callback: () => void): void {
     this.networkRestored = callback;
+  }
+
+  setArtworkCacheServer(server: ArtworkCacheServer): void {
+    this.artworkCache = server;
   }
 
   async refreshLibrary({
@@ -1502,7 +1508,10 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     const baseUrl = this.activeBaseUrl || server?.connections?.[0]?.uri;
     if (!baseUrl || !token) return null;
 
-    return this.buildPlexUrl(path, baseUrl, token, params);
+    const remoteUrl = this.buildPlexUrl(path, baseUrl, token, params);
+    return server && this.artworkCache
+      ? this.artworkCache.register(server.clientIdentifier, remoteUrl)
+      : remoteUrl;
   }
 
   private buildPlexUrl(

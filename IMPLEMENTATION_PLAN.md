@@ -58,7 +58,7 @@ Owner: Persistence/offline sub-agent
   - Stale data is refreshed from Plex.
   - Stale data is returned when Plex cannot be reached.
   - An uncached offline request returns a typed unavailable state.
-- [ ] Cache artwork in server-scoped storage.
+- [x] Cache artwork in server-scoped storage.
 - [x] Add cache isolation and expiration tests.
 
 Completion gate:
