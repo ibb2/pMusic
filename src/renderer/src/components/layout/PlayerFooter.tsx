@@ -14,21 +14,26 @@ import {
   Repeat1,
   RepeatIcon,
   ShuffleIcon,
-  MusicNote03Icon,
   VolumeHighIcon,
   VolumeLowIcon,
   VolumeMute01Icon,
   VolumeMute02Icon,
   Queue02Icon,
 } from "@hugeicons/core-free-icons";
-import { LyricsPanel } from "./LyricsPanel";
 
 type PlayerFooterProps = {
   queueOpen: boolean;
   onToggleQueue: () => void;
+  lyricsOpen: boolean;
+  onToggleLyrics: () => void;
 };
 
-export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
+export function PlayerFooter({
+  queueOpen,
+  onToggleQueue,
+  lyricsOpen,
+  onToggleLyrics,
+}: PlayerFooterProps) {
   const queryClient = useQueryClient();
   const { data: status, refetch } = useQuery({
     queryKey: ["playerStatus"],
@@ -39,12 +44,10 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
   const [position, setPosition] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
   const [mute, toggleMute] = useState(false);
-  const [lyricsOpen, setLyricsOpen] = useState(false);
 
   useEffect(() => {
     // Reset position immediately when the track changes to avoid showing old progress
     setPosition(0);
-    if (!status?.current_track) setLyricsOpen(false);
   }, [status?.current_track?.ratingKey]);
 
   useEffect(() => {
@@ -114,7 +117,6 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
 
   return (
     <div className="relative grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] p-2">
-      {lyricsOpen && <LyricsPanel status={status} />}
       {/* Now Playing Info */}
       <div className="flex flex-row items-center gap-2">
         <div className="h-14 w-14 rounded-md flex items-center justify-center overflow-hidden">
@@ -247,11 +249,11 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
           variant={lyricsOpen ? "secondary" : "ghost"}
           size="icon"
           className="text-muted-foreground hover:text-foreground"
-          onClick={() => setLyricsOpen((open) => !open)}
+          onClick={onToggleLyrics}
           disabled={!currentTrack}
           aria-label={lyricsOpen ? "Close lyrics" : "Open lyrics"}
         >
-          <HugeiconsIcon icon={MusicNote03Icon} />
+          <LyricsIcon className="h-4 w-4" />
         </Button>
         <Button
           variant={queueOpen ? "secondary" : "ghost"}
@@ -307,5 +309,28 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** Lucide's MicVocal glyph, kept local so the player does not need another icon runtime. */
+function LyricsIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="m11 7.601-5.994 8.19a1 1 0 0 0 .1 1.298l.817.818a1 1 0 0 0 1.314.087L15.09 12" />
+      <path d="M16.5 21.174C15.5 20.5 14.372 20 13 20c-2.058 0-3.928 2.356-6 2-2.072-.356-2.775-3.369-1.5-4.5" />
+      <circle cx="16" cy="7" r="5" />
+    </svg>
   );
 }

@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { PlayerFooter } from "@/components/layout/PlayerFooter";
+import { LyricsPanel } from "@/components/layout/LyricsPanel";
 import { QueueSidebar } from "@/components/layout/QueueSidebar";
 import {
   UltraBlurProvider,
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/app")({
 
 function AppLayoutComponent() {
   const [queueOpen, setQueueOpen] = useState(false);
+  const [lyricsOpen, setLyricsOpen] = useState(false);
 
   return (
     // <StartupLoading>
@@ -49,7 +51,7 @@ function AppLayoutComponent() {
                 data-app-scroll-container
                 className="relative z-10 min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
               >
-                <Outlet />
+                {lyricsOpen ? <LyricsPanel /> : <Outlet />}
               </div>
             </SidebarInset>
             <QueueSidebar open={queueOpen} />
@@ -58,6 +60,8 @@ function AppLayoutComponent() {
         <PlayerFooter
           queueOpen={queueOpen}
           onToggleQueue={() => setQueueOpen((open) => !open)}
+          lyricsOpen={lyricsOpen}
+          onToggleLyrics={() => setLyricsOpen((open) => !open)}
         />
       </div>
     </UltraBlurProvider>

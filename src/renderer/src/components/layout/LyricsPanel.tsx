@@ -1,7 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef } from "react";
 import type { PlayerStatus } from "../../../../shared/rpc";
+import type { TrackLyrics } from "../../../../shared/types";
 
-export function LyricsPanel({ status }: { status: PlayerStatus | undefined }) {
+export function LyricsPanel() {
+  const { data: status } = useQuery({
+    queryKey: ["playerStatus"],
+    queryFn: () => window.api.player.getStatus(),
+    refetchInterval: 1000,
+  });
   const ratingKey = status?.current_track?.ratingKey;
   const query = useQuery({
     queryKey: ["trackLyrics", ratingKey],
@@ -25,39 +32,68 @@ export function LyricsPanel({ status }: { status: PlayerStatus | undefined }) {
     );
   }
 
-  const { lyrics } = query.data;
+  return <AvailableLyrics status={status} lyrics={query.data.lyrics} />;
+}
+
+function AvailableLyrics({
+  status,
+  lyrics,
+}: {
+  status: PlayerStatus;
+  lyrics: TrackLyrics;
+}) {
   const positionMs = (status?.position || 0) * 1000;
-  const timedLines = lyrics.lines.filter((line) => line.startTimeMs !== null);
-  let activeTime: number | null = null;
-  for (const line of timedLines) {
-    if ((line.startTimeMs ?? Infinity) <= positionMs)
-      activeTime = line.startTimeMs;
-    else break;
-  }
+  const activeIndex = useMemo(() => {
+    if (lyrics.format !== "lrc") return -1;
+    let current = -1;
+    lyrics.lines.forEach((line, index) => {
+      if (line.startTimeMs !== null && line.startTimeMs <= positionMs) {
+        current = index;
+      }
+    });
+    return current;
+  }, [lyrics, positionMs]);
+  const activeLineRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    activeLineRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [activeIndex]);
 
   return (
     <section
       aria-label="Lyrics"
-      className="absolute bottom-full right-2 z-50 mb-2 flex h-96 w-[min(28rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-xl"
+      className="mx-auto flex min-h-full w-full max-w-6xl flex-col px-6 pb-24 pt-8 sm:px-10 lg:px-16"
     >
-      <header className="border-b px-4 py-3">
-        <h2 className="font-semibold">Lyrics</h2>
-        <p className="truncate text-xs text-muted-foreground">
-          {status?.current_track?.title}
+      <header className="mb-8 shrink-0">
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          Lyrics
+        </p>
+        <h1 className="mt-2 truncate text-2xl font-bold">
+          {status.current_track?.title}
+        </h1>
+        <p className="truncate text-sm text-muted-foreground">
+          {status.current_track?.artist}
         </p>
       </header>
-      <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+      <div className="space-y-4 sm:space-y-5">
         {lyrics.lines.map((line, index) => {
-          const active =
-            lyrics.format === "lrc" && line.startTimeMs === activeTime;
+          const active = index === activeIndex;
           return (
             <p
               key={`${line.startTimeMs ?? "plain"}-${index}`}
-              className={
-                active
-                  ? "text-base font-semibold text-foreground"
-                  : "text-sm text-muted-foreground"
-              }
+              ref={active ? activeLineRef : undefined}
+              className={`max-w-4xl text-3xl font-bold leading-tight transition-all duration-300 sm:text-4xl lg:text-5xl lg:leading-tight ${
+                lyrics.format === "lrc"
+                  ? active
+                    ? "text-foreground opacity-100"
+                    : index < activeIndex
+                      ? "text-foreground/30"
+                      : "text-foreground/55"
+                  : "text-foreground/85"
+              }`}
             >
               {line.text || "♪"}
             </p>
@@ -65,7 +101,7 @@ export function LyricsPanel({ status }: { status: PlayerStatus | undefined }) {
         })}
       </div>
       {lyrics.freshness === "stale" && (
-        <p className="border-t px-4 py-2 text-xs text-muted-foreground">
+        <p className="mt-10 text-xs text-muted-foreground">
           Showing cached lyrics while offline
         </p>
       )}
@@ -77,7 +113,7 @@ function PanelMessage({ children }: { children: React.ReactNode }) {
   return (
     <section
       aria-label="Lyrics"
-      className="absolute bottom-full right-2 z-50 mb-2 flex h-48 w-[min(28rem,calc(100vw-1rem))] items-center justify-center rounded-xl border bg-popover p-6 text-center text-sm text-muted-foreground shadow-xl"
+      className="flex min-h-full items-center justify-center p-8 text-center text-sm text-muted-foreground"
     >
       {children}
     </section>
