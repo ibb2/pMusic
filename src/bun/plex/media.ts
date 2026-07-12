@@ -1527,15 +1527,17 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
       server.clientIdentifier,
       String(track.ratingKey || ""),
     );
+    const completedPath = downloaded?.filePath ?? null;
     const local =
-      downloaded?.filePath && this.localPlaybackServer
-        ? this.localPlaybackServer.register(downloaded.filePath)
+      completedPath && this.localPlaybackServer
+        ? this.localPlaybackServer.register(completedPath)
         : null;
-    const source = local
-      ? { path: local.url }
-      : this.getPlaybackSettings().transcodeAudio
-        ? this.transcodeSource(track, plexSessionId)
-        : this.originalFileSource(track, plexSessionId);
+    const source: PlexStreamSource | null =
+      local && completedPath
+        ? { path: local.url, localPath: completedPath }
+        : this.getPlaybackSettings().transcodeAudio
+          ? this.transcodeSource(track, plexSessionId)
+          : this.originalFileSource(track, plexSessionId);
     if (!source)
       throw new Error(
         `Track ${track.ratingKey} does not have a playable stream`,
@@ -1622,7 +1624,13 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     excludedConnectionUris: ReadonlySet<string>,
   ): StreamCandidate[] {
     if (source.path.startsWith("http://127.0.0.1:")) {
-      return [{ connectionUri: "offline", url: source.path }];
+      return [
+        {
+          connectionUri: "offline",
+          url: source.path,
+          localPath: source.localPath,
+        },
+      ];
     }
     const server = this.auth.selectedServer;
     if (!server) return [];

@@ -11,7 +11,7 @@ const opusSource: PlexStreamSource = {
 };
 
 describe("BASS Plex route recovery", () => {
-  test("opens registered offline loopback files without the network proxy", () => {
+  test("opens completed offline files directly without URL or network proxy", () => {
     const fake = new FakeBassLibrary();
     let proxyCalls = 0;
     const bass = new BassManager({
@@ -25,17 +25,29 @@ describe("BASS Plex route recovery", () => {
       } as never,
       monitorIntervalMs: 0,
     });
-    const offlineUrl = "http://127.0.0.1:54321/media/offline-track";
-    fake.setReachable("http://127.0.0.1:54321", true);
+    const offlineUrl = "http://127.0.0.1:54321/media/offline-track.flac";
+    const localPath = "/offline/music/offline-track.flac";
     bass.setStreamResolver(() => [
-      { connectionUri: "offline", url: offlineUrl },
+      { connectionUri: "offline", url: offlineUrl, localPath },
     ]);
 
-    bass.playTrack(track("offline"), { path: offlineUrl });
+    bass.playTrack(track("offline"), { path: offlineUrl, localPath });
 
     expect(proxyCalls).toBe(0);
-    expect(fake.createdUrls).toEqual([offlineUrl]);
+    expect(fake.createdFiles).toEqual([localPath]);
+    expect(fake.createdUrls).toEqual([]);
     expect(bass.getPlaybackStatus().is_playing).toBe(true);
+  });
+
+  test("continues to open remote candidates through URL streaming", () => {
+    const fake = new FakeBassLibrary();
+    const { bass } = manager(fake);
+
+    bass.playTrack(track("remote"), source);
+
+    expect(fake.createdFiles).toEqual([]);
+    expect(fake.createdUrls).toHaveLength(1);
+    expect(new URL(fake.createdUrls[0]!).origin).toBe(LOCAL);
   });
 
   test("falls through to a remote route when initial stream creation fails", () => {
@@ -235,6 +247,7 @@ class FakeBassLibrary {
   position = 0;
   duration = 180;
   createdUrls: string[] = [];
+  createdFiles: string[] = [];
   private nextHandle = 1;
   private unreachablePaths = new Set<string>();
   private reachable = new Map<string, boolean>([
@@ -260,6 +273,13 @@ class FakeBassLibrary {
           !this.reachable.get(parsed.origin)
         )
           return 0;
+        this.active = 0;
+        this.position = 0;
+        return this.nextHandle++;
+      },
+      BASS_StreamCreateFile: (_memory, value) => {
+        const path = new TextDecoder().decode(value).replace(/\0.*$/, "");
+        this.createdFiles.push(path);
         this.active = 0;
         this.position = 0;
         return this.nextHandle++;
