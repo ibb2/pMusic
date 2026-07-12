@@ -129,6 +129,140 @@ export function buildLibraryFacets(
   };
 }
 
+type LocallyPageableMedia = MediaAlbum | MediaTrack;
+
+/**
+ * Apply library controls to a complete, stable media corpus. Plex's advanced
+ * filter parameters differ between server versions and agents, so library
+ * pages deliberately filter and sort locally instead of trusting those
+ * parameters to be honoured by `/library/sections/:key/all`.
+ */
+export function pageAlbumCorpus(
+  corpus: MediaAlbum[],
+  request: AlbumPageRequest,
+): Pick<MediaPage<MediaAlbum>, "items" | "nextCursor" | "total"> {
+  const artistKeys = new Set(request.filters?.artistRatingKeys ?? []);
+  const years = new Set(request.filters?.years ?? []);
+  const query = request.query?.trim().toLocaleLowerCase() ?? "";
+  const filtered = corpus.filter(
+    (album) =>
+      (!query || album.title.toLocaleLowerCase().includes(query)) &&
+      (!artistKeys.size ||
+        (album.artistRatingKey !== null &&
+          artistKeys.has(album.artistRatingKey))) &&
+      (!years.size || (album.year !== null && years.has(album.year))),
+  );
+
+  if (request.sort) {
+    const { field, direction } = request.sort;
+    filtered.sort((left, right) => {
+      const compared =
+        field === "title"
+          ? compareText(left.title, right.title)
+          : field === "artist"
+            ? compareText(left.artist, right.artist)
+            : field === "year"
+              ? compareNullableNumber(left.year, right.year)
+              : compareNullableNumber(left.addedAt, right.addedAt);
+      return (
+        (compared || compareText(left.ratingKey, right.ratingKey)) *
+        (direction === "desc" ? -1 : 1)
+      );
+    });
+  }
+
+  return paginateLocalCorpus(filtered, request);
+}
+
+export function pageTrackCorpus(
+  corpus: MediaTrack[],
+  request: TrackPageRequest,
+): Pick<MediaPage<MediaTrack>, "items" | "nextCursor" | "total"> {
+  const artistKeys = new Set(request.filters?.artistRatingKeys ?? []);
+  const albumKeys = new Set(request.filters?.albumRatingKeys ?? []);
+  const query = request.query?.trim().toLocaleLowerCase() ?? "";
+  const filtered = corpus.filter(
+    (track) =>
+      (!query || track.title.toLocaleLowerCase().includes(query)) &&
+      (!artistKeys.size ||
+        (track.artistRatingKey !== null &&
+          artistKeys.has(track.artistRatingKey))) &&
+      (!albumKeys.size ||
+        (track.albumRatingKey !== null && albumKeys.has(track.albumRatingKey))),
+  );
+
+  if (request.sort) {
+    const { field, direction } = request.sort;
+    filtered.sort((left, right) => {
+      const compared =
+        field === "title"
+          ? compareText(left.title, right.title)
+          : field === "artist"
+            ? compareText(left.artist, right.artist)
+            : field === "album"
+              ? compareText(left.album, right.album)
+              : compareNullableNumber(left.addedAt, right.addedAt);
+      return (
+        (compared || compareText(left.ratingKey, right.ratingKey)) *
+        (direction === "desc" ? -1 : 1)
+      );
+    });
+  }
+
+  return paginateLocalCorpus(filtered, request);
+}
+
+function paginateLocalCorpus<T extends LocallyPageableMedia>(
+  corpus: T[],
+  request: { cursor?: string; pageSize: number },
+): Pick<MediaPage<T>, "items" | "nextCursor" | "total"> {
+  const pageSize = Math.min(Math.max(request.pageSize, 1), 100);
+  const offset = decodeLocalOffset(request.cursor);
+  const nextOffset = Math.min(offset + pageSize, corpus.length);
+  return {
+    items: corpus.slice(offset, nextOffset),
+    nextCursor:
+      nextOffset < corpus.length
+        ? Buffer.from(JSON.stringify({ aggregateOffset: nextOffset })).toString(
+            "base64url",
+          )
+        : null,
+    total: corpus.length,
+  };
+}
+
+function decodeLocalOffset(cursor?: string): number {
+  if (!cursor) return 0;
+  try {
+    const decoded = JSON.parse(Buffer.from(cursor, "base64url").toString()) as {
+      aggregateOffset?: unknown;
+    };
+    return typeof decoded.aggregateOffset === "number" &&
+      Number.isSafeInteger(decoded.aggregateOffset) &&
+      decoded.aggregateOffset >= 0
+      ? decoded.aggregateOffset
+      : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function compareText(left: string, right: string): number {
+  return left.localeCompare(right, undefined, {
+    sensitivity: "base",
+    numeric: true,
+  });
+}
+
+function compareNullableNumber(
+  left: number | null,
+  right: number | null,
+): number {
+  if (left === null) return right === null ? 0 : 1;
+  if (right === null) return -1;
+  return left - right;
+}
+
 const PLEX_REQUEST_TIMEOUT_MS = 8_000;
 
 type StoredPlaybackSettings = Partial<PlaybackSettings> & {
@@ -443,40 +577,20 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
 
   async getLibraryFacets(): Promise<LibraryFacets> {
     const server = await this.getSelectedServer();
-    const sectionKey = (await this.getSelectedMusicSections())
-      .map((section) => section.uuid || section.key)
-      .sort()
-      .join(",");
+    const sectionKey = await this.selectedSectionCacheSuffix();
     const result = await this.cache.readThrough({
       serverId: server.clientIdentifier,
-      key: `library-facets:v1:${sectionKey}`,
+      key: `library-facets:v2:${sectionKey}`,
       ttlMs: 5 * 60 * 1000,
       fetch: async () => {
-        const albums: MediaAlbum[] = [];
-        const tracks: MediaTrack[] = [];
-        let albumCursor: string | undefined;
-        let trackCursor: string | undefined;
-
-        do {
-          const page = await this.getMediaPage(
-            { cursor: albumCursor, pageSize: 100 },
-            "9",
-            (item) => this.mapTypedAlbum(item),
-          );
-          albums.push(...page.items);
-          albumCursor = page.nextCursor ?? undefined;
-        } while (albumCursor);
-
-        do {
-          const page = await this.getMediaPage(
-            { cursor: trackCursor, pageSize: 100 },
-            "10",
-            (item) => this.mapTrack(item),
-          );
-          tracks.push(...page.items);
-          trackCursor = page.nextCursor ?? undefined;
-        } while (trackCursor);
-
+        const [albums, tracks] = await Promise.all([
+          this.getCompleteMediaCorpus("albums", "9", (item) =>
+            this.mapTypedAlbum(item),
+          ),
+          this.getCompleteMediaCorpus("tracks", "10", (item) =>
+            this.mapTrack(item),
+          ),
+        ]);
         return buildLibraryFacets(albums, tracks);
       },
     });
@@ -500,16 +614,30 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     mapper: (item: PlexMetadata) => T,
   ): Promise<MediaPage<T>> {
     const server = await this.getSelectedServer();
-    const cacheKey = `${resource}:${JSON.stringify(request)}`;
+    const cacheKey = await this.completeCorpusCacheKey(resource);
     const result = await this.cache.readThrough({
       serverId: server.clientIdentifier,
       key: cacheKey,
       ttlMs: 5 * 60 * 1000,
-      fetch: () => this.getMediaPage(request, type, mapper),
+      fetch: () => this.fetchCompleteMediaCorpus(type, mapper),
     });
 
+    const page =
+      resource === "albums"
+        ? pageAlbumCorpus(
+            result.value as unknown as MediaAlbum[],
+            request as AlbumPageRequest,
+          )
+        : pageTrackCorpus(
+            result.value as unknown as MediaTrack[],
+            request as TrackPageRequest,
+          );
+
     return {
-      ...result.value,
+      ...(page as unknown as Pick<
+        MediaPage<T>,
+        "items" | "nextCursor" | "total"
+      >),
       freshness:
         result.source === "network"
           ? "live"
@@ -518,6 +646,51 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
             : "fresh",
       cachedAt: result.source === "network" ? null : new Date().toISOString(),
     };
+  }
+
+  private async getCompleteMediaCorpus<T>(
+    resource: string,
+    type: "9" | "10",
+    mapper: (item: PlexMetadata) => T,
+  ): Promise<T[]> {
+    const server = await this.getSelectedServer();
+    const cacheKey = await this.completeCorpusCacheKey(resource);
+    const result = await this.cache.readThrough({
+      serverId: server.clientIdentifier,
+      key: cacheKey,
+      ttlMs: 5 * 60 * 1000,
+      fetch: () => this.fetchCompleteMediaCorpus(type, mapper),
+    });
+    return result.value;
+  }
+
+  private async completeCorpusCacheKey(resource: string): Promise<string> {
+    return `${resource}-complete-corpus:v2:${await this.selectedSectionCacheSuffix()}`;
+  }
+
+  private async selectedSectionCacheSuffix(): Promise<string> {
+    return (await this.getSelectedMusicSections())
+      .map((section) => section.uuid || section.key)
+      .sort()
+      .join(",");
+  }
+
+  private async fetchCompleteMediaCorpus<T>(
+    type: "9" | "10",
+    mapper: (item: PlexMetadata) => T,
+  ): Promise<T[]> {
+    const items: T[] = [];
+    let cursor: string | undefined;
+    do {
+      const page = await this.getMediaPage(
+        { cursor, pageSize: 100 },
+        type,
+        mapper,
+      );
+      items.push(...page.items);
+      cursor = page.nextCursor ?? undefined;
+    } while (cursor);
+    return items;
   }
 
   private async getMediaPage<T>(
@@ -577,25 +750,6 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   ): Record<string, string> {
     const params: Record<string, string> = { type };
     if (request.query?.trim()) params.title = request.query.trim();
-
-    const filters = request.filters;
-    if (
-      filters &&
-      "artistRatingKeys" in filters &&
-      filters.artistRatingKeys?.length
-    ) {
-      params.artist = filters.artistRatingKeys.join(",");
-    }
-    if (filters && "years" in filters && filters.years?.length) {
-      params.year = filters.years.join(",");
-    }
-    if (
-      filters &&
-      "albumRatingKeys" in filters &&
-      filters.albumRatingKeys?.length
-    ) {
-      params.album = filters.albumRatingKeys.join(",");
-    }
 
     if (request.sort) {
       const sortFields: Record<string, string> = {

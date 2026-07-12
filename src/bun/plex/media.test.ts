@@ -7,6 +7,8 @@ import {
   buildLibraryFacets,
   MediaService,
   normalizePlaybackSettings,
+  pageAlbumCorpus,
+  pageTrackCorpus,
 } from "./media";
 
 describe("Plex audio transcoding", () => {
@@ -131,7 +133,7 @@ describe("library page filters", () => {
       new FakeDatabase({}) as unknown as DatabaseManager,
     );
 
-  test("maps album search, facets, and sorting to Plex query parameters", () => {
+  test("does not delegate album facets to unreliable Plex parameters", () => {
     const media = createMedia() as unknown as {
       mediaPageParams: (request: unknown, type: "9") => Record<string, string>;
     };
@@ -148,13 +150,11 @@ describe("library page filters", () => {
     ).toEqual({
       type: "9",
       title: "Blue",
-      artist: "12,34",
-      year: "2024",
       sort: "addedAt:desc",
     });
   });
 
-  test("maps track album facets and clamps page requests independently", () => {
+  test("does not delegate track facets to unreliable Plex parameters", () => {
     const media = createMedia() as unknown as {
       mediaPageParams: (request: unknown, type: "10") => Record<string, string>;
     };
@@ -169,10 +169,91 @@ describe("library page filters", () => {
       ),
     ).toEqual({
       type: "10",
-      artist: "7",
-      album: "9",
       sort: "album.titleSort:asc",
     });
+  });
+});
+
+describe("complete library paging", () => {
+  const albums = [
+    album("a1", "Blonde", "Frank Ocean", "frank", 2016, 20),
+    album("a2", "Channel Orange", "Frank Ocean", "frank", 2012, 10),
+    album("a3", "After Hours", "The Weeknd", "weeknd", 2020, null),
+    album("a4", "Endless", "Frank Ocean", "frank", null, 30),
+  ];
+  const tracks = [
+    track("t1", "Nikes", "Frank Ocean", "frank", "Blonde", "a1", 20),
+    track("t2", "Ivy", "Frank Ocean", "frank", "Blonde", "a1", 30),
+    track(
+      "t3",
+      "Blinding Lights",
+      "The Weeknd",
+      "weeknd",
+      "After Hours",
+      "a3",
+      10,
+    ),
+    track(
+      "t4",
+      "Thinkin Bout You",
+      "Frank Ocean",
+      "frank",
+      "Channel Orange",
+      "a2",
+      null,
+    ),
+  ];
+
+  test("filters albums locally by exact artist id and year", () => {
+    const result = pageAlbumCorpus(albums, {
+      pageSize: 40,
+      filters: { artistRatingKeys: ["frank"], years: [2016] },
+      sort: { field: "title", direction: "asc" },
+    });
+    expect(result.items.map((item) => item.ratingKey)).toEqual(["a1"]);
+    expect(result.total).toBe(1);
+    expect(result.nextCursor).toBeNull();
+  });
+
+  test("sorts null album values last and paginates the filtered corpus stably", () => {
+    const first = pageAlbumCorpus(albums, {
+      pageSize: 2,
+      filters: { artistRatingKeys: ["frank"] },
+      sort: { field: "year", direction: "asc" },
+    });
+    expect(first.items.map((item) => item.ratingKey)).toEqual(["a2", "a1"]);
+    expect(first.total).toBe(3);
+    expect(first.nextCursor).not.toBeNull();
+
+    const second = pageAlbumCorpus(albums, {
+      cursor: first.nextCursor ?? undefined,
+      pageSize: 2,
+      filters: { artistRatingKeys: ["frank"] },
+      sort: { field: "year", direction: "asc" },
+    });
+    expect(second.items.map((item) => item.ratingKey)).toEqual(["a4"]);
+    expect(second.nextCursor).toBeNull();
+  });
+
+  test("combines track artist and album filters and applies descending sort", () => {
+    const result = pageTrackCorpus(tracks, {
+      pageSize: 50,
+      filters: { artistRatingKeys: ["frank"], albumRatingKeys: ["a1"] },
+      sort: { field: "title", direction: "desc" },
+    });
+    expect(result.items.map((item) => item.ratingKey)).toEqual(["t1", "t2"]);
+    expect(result.total).toBe(2);
+  });
+
+  test("invalid cursors restart safely and never skip matching tracks", () => {
+    const result = pageTrackCorpus(tracks, {
+      cursor: "not-a-cursor",
+      pageSize: 1,
+      filters: { artistRatingKeys: ["weeknd"] },
+      sort: { field: "album", direction: "asc" },
+    });
+    expect(result.items.map((item) => item.ratingKey)).toEqual(["t3"]);
+    expect(result.nextCursor).toBeNull();
   });
 });
 
@@ -256,6 +337,50 @@ describe("library facets", () => {
     ]);
   });
 });
+
+function album(
+  ratingKey: string,
+  title: string,
+  artist: string,
+  artistRatingKey: string,
+  year: number | null,
+  addedAt: number | null,
+) {
+  return {
+    ratingKey,
+    title,
+    artist,
+    artistRatingKey,
+    year,
+    thumb: null,
+    trackCount: null,
+    addedAt,
+  };
+}
+
+function track(
+  ratingKey: string,
+  title: string,
+  artist: string,
+  artistRatingKey: string,
+  albumTitle: string,
+  albumRatingKey: string,
+  addedAt: number | null,
+) {
+  return {
+    ratingKey,
+    title,
+    artist,
+    artistRatingKey,
+    album: albumTitle,
+    albumRatingKey,
+    duration: null,
+    index: null,
+    disc: null,
+    thumb: null,
+    addedAt,
+  };
+}
 
 class FakeDatabase {
   constructor(private readonly values: Record<string, unknown>) {}
