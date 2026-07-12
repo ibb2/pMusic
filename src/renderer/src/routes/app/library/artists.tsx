@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export const Route = createFileRoute("/app/library/artists")({
   component: RouteComponent,
@@ -12,6 +12,9 @@ export const Route = createFileRoute("/app/library/artists")({
 function RouteComponent() {
   const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<HTMLDivElement>(null);
+  const [sortField, setSortField] = useState<"title" | "dateAdded">("title");
+  const [direction, setDirection] = useState<"asc" | "desc">("asc");
+  const [initial, setInitial] = useState("all");
 
   const fetchArtists = async ({ pageParam }: { pageParam: string }) => {
     return window.api.media.getArtistsPage(pageParam || "", 30);
@@ -60,6 +63,29 @@ function RouteComponent() {
     };
   }, [hasNextPage, isFetching, fetchNextPage]);
 
+  const artists = useMemo(() => {
+    const items = data?.pages.flatMap((group) => group.items) ?? [];
+    return items
+      .filter((artist: any) =>
+        initial === "all"
+          ? true
+          : String(artist.title ?? "")
+              .toLocaleUpperCase()
+              .startsWith(initial),
+      )
+      .sort((left: any, right: any) => {
+        const comparison =
+          sortField === "dateAdded"
+            ? Number(left.addedAt ?? 0) - Number(right.addedAt ?? 0)
+            : String(left.title ?? "").localeCompare(
+                String(right.title ?? ""),
+                undefined,
+                { sensitivity: "base" },
+              );
+        return direction === "asc" ? comparison : -comparison;
+      });
+  }, [data?.pages, direction, initial, sortField]);
+
   if (status === "pending") {
     return (
       <div className="flex min-h-full items-center justify-center">
@@ -76,22 +102,58 @@ function RouteComponent() {
     );
   }
 
-  const artists = data.pages.flatMap((group) => group.items);
-
   return (
     <div ref={containerRef} className="flex min-h-full flex-col px-6">
-      <div className="sticky top-0 z-10 w-full bg-background py-2">
-        <p className="text-2xl font-bold">Artists</p>
-      </div>
+      <header className="sticky top-0 z-10 space-y-3 bg-background py-3">
+        <div>
+          <h1 className="text-2xl font-bold">Artists</h1>
+          <p className="text-sm text-muted-foreground">
+            Browse artists across your selected libraries.
+          </p>
+        </div>
+        <div className="grid gap-2 md:grid-cols-3">
+          <select
+            aria-label="Filter artists by initial"
+            className="h-9 rounded-md border bg-background px-3 text-sm"
+            value={initial}
+            onChange={(event) => setInitial(event.target.value)}
+          >
+            <option value="all">All artists</option>
+            {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => (
+              <option key={letter} value={letter}>
+                Starts with {letter}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="Sort artists"
+            className="h-9 rounded-md border bg-background px-3 text-sm"
+            value={sortField}
+            onChange={(event) =>
+              setSortField(event.target.value as "title" | "dateAdded")
+            }
+          >
+            <option value="title">Name</option>
+            <option value="dateAdded">Date added</option>
+          </select>
+          <select
+            aria-label="Sort direction"
+            className="h-9 rounded-md border bg-background px-3 text-sm"
+            value={direction}
+            onChange={(event) =>
+              setDirection(event.target.value as "asc" | "desc")
+            }
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+      </header>
 
       {artists.length > 0 ? (
         <div className="flex w-full flex-wrap">
-          {data.pages.map((group, i) => (
-            <React.Fragment key={i}>
-              {group.items.map((artist: any) => (
-                <ArtistCard key={artist.id} artist={artist} />
-              ))}
-            </React.Fragment>
+          {artists.map((artist: any) => (
+            <ArtistCard key={artist.ratingKey} artist={artist} />
           ))}
         </div>
       ) : (
@@ -101,9 +163,7 @@ function RouteComponent() {
       )}
 
       <div ref={observerRef} className="flex h-12 items-center justify-center">
-        {isFetching && !isFetchingNextPage ? (
-          <Spinner className="size-4" />
-        ) : null}
+        {isFetchingNextPage ? <Spinner className="size-4" /> : null}
       </div>
     </div>
   );

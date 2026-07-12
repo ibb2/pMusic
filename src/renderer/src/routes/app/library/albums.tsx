@@ -1,5 +1,4 @@
 import { AlbumCard } from "@/components/music/albumcard";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import type { AlbumSortField } from "../../../../../shared/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -11,7 +10,6 @@ export const Route = createFileRoute("/app/library/albums")({
 });
 
 function AlbumsPage() {
-  const [query, setQuery] = useState("");
   const [artistKeys, setArtistKeys] = useState("");
   const [years, setYears] = useState("");
   const [sortField, setSortField] = useState<AlbumSortField>("title");
@@ -25,13 +23,12 @@ function AlbumsPage() {
   );
 
   const result = useInfiniteQuery({
-    queryKey: ["albums", query, filters, sortField, direction],
+    queryKey: ["albums", filters, sortField, direction],
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       window.api.media.getAlbumsPage({
         cursor: pageParam,
         pageSize: 40,
-        query: query || undefined,
         filters,
         sort: { field: sortField, direction },
       }),
@@ -61,13 +58,7 @@ function AlbumsPage() {
             Browse every selected music library.
           </p>
         </div>
-        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-5">
-          <Input
-            aria-label="Search albums"
-            placeholder="Search albums"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
           <select
             aria-label="Filter by artist"
             className="rounded-md border bg-background px-3 text-sm"

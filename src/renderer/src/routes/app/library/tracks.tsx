@@ -1,10 +1,9 @@
 import BlankImage from "@/assets/512px-Black_colour.jpg";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import type { MediaTrack, TrackSortField } from "../../../../../shared/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DownloadButton, downloadsApi } from "@/components/downloads";
 
 export const Route = createFileRoute("/app/library/tracks")({
@@ -12,7 +11,7 @@ export const Route = createFileRoute("/app/library/tracks")({
 });
 
 function TracksPage() {
-  const [query, setQuery] = useState("");
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const [artistKeys, setArtistKeys] = useState("");
   const [albumKeys, setAlbumKeys] = useState("");
   const [sortField, setSortField] = useState<TrackSortField>("title");
@@ -25,18 +24,18 @@ function TracksPage() {
     [artistKeys, albumKeys],
   );
   const result = useInfiniteQuery({
-    queryKey: ["tracks", query, filters, sortField, direction],
+    queryKey: ["tracks", filters, sortField, direction],
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       window.api.media.getTracksPage({
         cursor: pageParam,
         pageSize: 50,
-        query: query || undefined,
         filters,
         sort: { field: sortField, direction },
       }),
     getNextPageParam: (page) => page.nextCursor ?? undefined,
   });
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = result;
   const tracks = result.data?.pages.flatMap((page) => page.items) ?? [];
   const isStale = result.data?.pages.some((page) => page.freshness === "stale");
   const artists = [
@@ -54,6 +53,22 @@ function TracksPage() {
     ).entries(),
   ];
 
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || !hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: "240px 0px" },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
   return (
     <div className="flex min-h-full flex-col gap-4 px-6 pb-8">
       <header className="sticky top-0 z-10 space-y-3 bg-background py-3">
@@ -63,13 +78,7 @@ function TracksPage() {
             Play or queue tracks across your selected libraries.
           </p>
         </div>
-        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-5">
-          <Input
-            aria-label="Search tracks"
-            placeholder="Search tracks"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
           <select
             aria-label="Filter by artist"
             className="rounded-md border bg-background px-3 text-sm"
@@ -144,13 +153,19 @@ function TracksPage() {
         </div>
       )}
       {result.hasNextPage ? (
-        <button
-          className="mx-auto rounded-md border px-4 py-2 text-sm hover:bg-accent disabled:opacity-50"
-          disabled={result.isFetchingNextPage}
-          onClick={() => result.fetchNextPage()}
+        <div
+          ref={loadMoreRef}
+          className="flex min-h-12 items-center justify-center text-sm text-muted-foreground"
+          aria-live="polite"
         >
-          {result.isFetchingNextPage ? "Loading…" : "Load more"}
-        </button>
+          {result.isFetchingNextPage ? (
+            <span className="flex items-center gap-2">
+              <Spinner className="size-4" /> Loading more tracks…
+            </span>
+          ) : (
+            "More tracks load as you scroll"
+          )}
+        </div>
       ) : tracks.length > 0 ? (
         <p className="text-center text-sm text-muted-foreground">
           End of library

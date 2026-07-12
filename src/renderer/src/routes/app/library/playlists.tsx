@@ -17,6 +17,13 @@ const PLAYLIST_BATCH_SIZE = 80;
 function RouteComponent() {
   const observerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(PLAYLIST_BATCH_SIZE);
+  const [playlistType, setPlaylistType] = useState<"all" | "smart" | "manual">(
+    "all",
+  );
+  const [sortField, setSortField] = useState<
+    "title" | "dateAdded" | "duration"
+  >("title");
+  const [direction, setDirection] = useState<"asc" | "desc">("asc");
 
   const queryPlaylists = useQuery({
     queryKey: ["playlists"],
@@ -24,10 +31,28 @@ function RouteComponent() {
     staleTime: 60_000,
   });
 
-  const playlists = useMemo(
-    () => queryPlaylists.data ?? [],
-    [queryPlaylists.data],
-  );
+  const playlists = useMemo(() => {
+    const items = (queryPlaylists.data ?? []).filter((playlist: any) =>
+      playlistType === "all"
+        ? true
+        : playlistType === "smart"
+          ? Boolean(playlist.smart)
+          : !playlist.smart,
+    );
+    return [...items].sort((left: any, right: any) => {
+      const comparison =
+        sortField === "title"
+          ? String(left.title ?? "").localeCompare(
+              String(right.title ?? ""),
+              undefined,
+              {
+                sensitivity: "base",
+              },
+            )
+          : Number(left[sortField] ?? 0) - Number(right[sortField] ?? 0);
+      return direction === "asc" ? comparison : -comparison;
+    });
+  }, [direction, playlistType, queryPlaylists.data, sortField]);
   const visiblePlaylists = useMemo(
     () => playlists.slice(0, visibleCount),
     [playlists, visibleCount],
@@ -36,7 +61,7 @@ function RouteComponent() {
 
   useEffect(() => {
     setVisibleCount(PLAYLIST_BATCH_SIZE);
-  }, [playlists.length]);
+  }, [direction, playlistType, playlists.length, sortField]);
 
   useEffect(() => {
     if (!observerRef.current || !hasMore) {
@@ -77,12 +102,54 @@ function RouteComponent() {
 
   return (
     <div className="flex min-h-full flex-col px-6 pb-8">
-      <div className="sticky top-0 z-10 w-full bg-background py-2">
-        <p className="text-2xl font-bold">Playlists</p>
-        <p className="text-sm text-muted-foreground">
-          {playlists.length} {playlists.length === 1 ? "playlist" : "playlists"}
-        </p>
-      </div>
+      <header className="sticky top-0 z-10 space-y-3 bg-background py-3">
+        <div>
+          <h1 className="text-2xl font-bold">Playlists</h1>
+          <p className="text-sm text-muted-foreground">
+            {playlists.length}{" "}
+            {playlists.length === 1 ? "playlist" : "playlists"}
+          </p>
+        </div>
+        <div className="grid gap-2 md:grid-cols-3">
+          <select
+            aria-label="Filter playlists by type"
+            className="h-9 rounded-md border bg-background px-3 text-sm"
+            value={playlistType}
+            onChange={(event) =>
+              setPlaylistType(event.target.value as "all" | "smart" | "manual")
+            }
+          >
+            <option value="all">All playlists</option>
+            <option value="manual">Manual playlists</option>
+            <option value="smart">Smart playlists</option>
+          </select>
+          <select
+            aria-label="Sort playlists"
+            className="h-9 rounded-md border bg-background px-3 text-sm"
+            value={sortField}
+            onChange={(event) =>
+              setSortField(
+                event.target.value as "title" | "dateAdded" | "duration",
+              )
+            }
+          >
+            <option value="title">Title</option>
+            <option value="dateAdded">Date added</option>
+            <option value="duration">Duration</option>
+          </select>
+          <select
+            aria-label="Sort direction"
+            className="h-9 rounded-md border bg-background px-3 text-sm"
+            value={direction}
+            onChange={(event) =>
+              setDirection(event.target.value as "asc" | "desc")
+            }
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+      </header>
 
       {playlists.length === 0 ? (
         <div className="mt-4 flex min-h-32 items-center rounded-md border border-dashed border-zinc-300 bg-zinc-50/60 px-6 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400">
@@ -105,7 +172,8 @@ function RouteComponent() {
 }
 
 function PlaylistCard({ playlist }: { playlist: any }) {
-  const image = playlist.composite?.length > 0 ? playlist.composite : BlankImage;
+  const image =
+    playlist.composite?.length > 0 ? playlist.composite : BlankImage;
   const length = playlist.duration
     ? `${dayjs.duration(playlist.duration).hours()}hr ${dayjs
         .duration(playlist.duration)
