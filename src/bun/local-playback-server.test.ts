@@ -25,6 +25,33 @@ async function fixture() {
 }
 
 describe("local playback server", () => {
+  test("keeps identifiers opaque while adding a decoder format hint", async () => {
+    const { registered } = await fixture();
+    const url = new URL(registered.url);
+    expect(url.pathname).toBe(`/media/${registered.id}.flac`);
+    expect(url.pathname).not.toContain("track.flac");
+
+    const withoutHint = `${url.origin}/media/${registered.id}`;
+    const wrongHint = `${url.origin}/media/${registered.id}.mp3`;
+    expect((await fetch(withoutHint)).status).toBe(404);
+    expect((await fetch(wrongHint)).status).toBe(404);
+    expect((await fetch(registered.url)).status).toBe(200);
+  });
+
+  test("derives a safe format hint from content type when a path has none", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "rayna-local-playback-"));
+    directories.push(directory);
+    const path = join(directory, "opaque-download");
+    await writeFile(path, new Uint8Array([1, 2, 3]));
+    const server = new LocalPlaybackServer();
+    servers.push(server);
+
+    const registered = server.register(path, "audio/flac; charset=binary");
+    expect(new URL(registered.url).pathname).toBe(
+      `/media/${registered.id}.flac`,
+    );
+  });
+
   test("serves registered files with correct metadata and HEAD semantics", async () => {
     const { registered } = await fixture();
     const head = await fetch(registered.url, { method: "HEAD" });

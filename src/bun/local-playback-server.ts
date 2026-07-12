@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { extname } from "node:path";
 
 export interface RegisteredLocalFile {
   id: string;
@@ -8,6 +9,7 @@ export interface RegisteredLocalFile {
 interface LocalFileTarget {
   path: string;
   contentType?: string;
+  extension: string;
 }
 
 const OPAQUE_ID =
@@ -33,8 +35,12 @@ export class LocalPlaybackServer {
   register(path: string, contentType?: string): RegisteredLocalFile {
     this.assertRunning();
     const id = randomUUID();
-    this.targets.set(id, { path, contentType });
-    return { id, url: `http://127.0.0.1:${this.server.port}/media/${id}` };
+    const extension = formatExtension(path, contentType);
+    this.targets.set(id, { path, contentType, extension });
+    return {
+      id,
+      url: `http://127.0.0.1:${this.server.port}/media/${id}${extension}`,
+    };
   }
 
   unregister(id: string): boolean {
@@ -58,12 +64,13 @@ export class LocalPlaybackServer {
     }
 
     const url = new URL(request.url);
-    const match = /^\/media\/([^/]+)$/.exec(url.pathname);
+    const match = /^\/media\/([0-9a-f-]+)(\.[a-z0-9]+)?$/i.exec(url.pathname);
     const id = match?.[1];
     if (!id || !OPAQUE_ID.test(id)) return new Response(null, { status: 404 });
 
     const target = this.targets.get(id);
-    if (!target) return new Response(null, { status: 404 });
+    if (!target || (match?.[2] ?? "") !== target.extension)
+      return new Response(null, { status: 404 });
     const file = Bun.file(target.path);
     if (!(await file.exists())) return new Response(null, { status: 404 });
 
@@ -98,6 +105,30 @@ export class LocalPlaybackServer {
   private assertRunning(): void {
     if (this.disposed) throw new Error("Local playback server is disposed");
   }
+}
+
+/**
+ * Native stream decoders use the URL suffix as a format hint before reading
+ * response bytes. Keep the registered URL opaque, but retain a conservative
+ * audio extension so plugins such as BASSFLAC can select the right decoder.
+ */
+function formatExtension(path: string, contentType?: string): string {
+  const fromPath = extname(path).toLowerCase();
+  if (/^\.[a-z0-9]{1,10}$/.test(fromPath)) return fromPath;
+
+  const normalizedType = contentType?.split(";", 1)[0]?.trim().toLowerCase();
+  const byContentType: Record<string, string> = {
+    "audio/flac": ".flac",
+    "audio/x-flac": ".flac",
+    "audio/ogg": ".ogg",
+    "audio/opus": ".opus",
+    "audio/mpeg": ".mp3",
+    "audio/mp4": ".m4a",
+    "audio/aac": ".aac",
+    "audio/wav": ".wav",
+    "audio/x-wav": ".wav",
+  };
+  return normalizedType ? (byContentType[normalizedType] ?? "") : "";
 }
 
 function parseSingleRange(
