@@ -11,6 +11,33 @@ const opusSource: PlexStreamSource = {
 };
 
 describe("BASS Plex route recovery", () => {
+  test("opens registered offline loopback files without the network proxy", () => {
+    const fake = new FakeBassLibrary();
+    let proxyCalls = 0;
+    const bass = new BassManager({
+      library: fake.library,
+      streamProxy: {
+        urlFor: () => {
+          proxyCalls += 1;
+          return "http://127.0.0.1:1/unreachable";
+        },
+        dispose() {},
+      } as never,
+      monitorIntervalMs: 0,
+    });
+    const offlineUrl = "http://127.0.0.1:54321/media/offline-track";
+    fake.setReachable("http://127.0.0.1:54321", true);
+    bass.setStreamResolver(() => [
+      { connectionUri: "offline", url: offlineUrl },
+    ]);
+
+    bass.playTrack(track("offline"), { path: offlineUrl });
+
+    expect(proxyCalls).toBe(0);
+    expect(fake.createdUrls).toEqual([offlineUrl]);
+    expect(bass.getPlaybackStatus().is_playing).toBe(true);
+  });
+
   test("falls through to a remote route when initial stream creation fails", () => {
     const fake = new FakeBassLibrary();
     fake.setReachable(LOCAL, false);

@@ -735,7 +735,9 @@ export class BassManager {
 
       const handle = this.library.symbols.BASS_StreamCreateURL(
         this.toCString(
-          this.streamProxy?.urlFor(candidate.url) ?? candidate.url,
+          candidate.connectionUri === "offline"
+            ? candidate.url
+            : (this.streamProxy?.urlFor(candidate.url) ?? candidate.url),
         ),
         0,
         0,
