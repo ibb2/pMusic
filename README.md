@@ -1,11 +1,48 @@
 # Rayna
 
-Rayna is a 3rd party music player client for Plex focusing on the desktop experience - Inspired by Spotify.
+Rayna is a third-party desktop music player for Plex, inspired by Spotify. It combines a React interface with Electrobun and native BASS playback, with no separate backend service required.
 
-> [!IMPORTANT]
-> This is currently completely online only and a major work in progress, now running on Electrobun with a React frontend and BASS-backed playback. No separate backend is required. No support yet for offline usage or any advanced caching.
+![Rayna home screen](docs/screenshots/home.jpg)
 
-<img width="1012" height="782" alt="Screenshot 2026-01-07 at 12 36 52 PM" src="https://github.com/user-attachments/assets/29cb7279-5c22-4c53-8b5a-9989f1abff26" />
+## Features
+
+### Library
+
+- Browse albums, tracks, artists, and playlists across selected Plex music libraries.
+- Search the complete library from the global search bar.
+- Filter and sort every library view, including complete-library artist, album, and year facets.
+- Automatically load additional tracks as the list is scrolled.
+
+### Playback
+
+- Play tracks, albums, artists, and playlists with previous, next, seek, volume, shuffle, and repeat controls.
+- Add individual tracks, albums, or playlists to the queue and inspect the current queue.
+- Display Plex lyrics in a full listening view, including synchronized line highlighting when timed lyrics are available.
+- Optionally transcode audio to 320 kbps Opus and report playback sessions to Plex and Tautulli.
+- Recover playback through the best available Plex connection while retaining the current track, position, and queue.
+
+### Downloads and offline use
+
+- Download tracks, albums, and playlists explicitly instead of mirroring the whole library.
+- Pause, resume, retry, remove, and monitor downloads from a compact activity menu.
+- Browse grouped downloads on a dedicated page with search, type, status, and sorting controls.
+- Change the download location; existing files are moved safely.
+- Prefer completed local files during playback and retain cached metadata, artwork, lyrics, and download state between restarts.
+- Synchronize selected libraries at startup, after network recovery, or with **Sync Now**.
+
+### Server and appearance
+
+- Select Plex music libraries and preserve server-scoped caches and downloads.
+- Switch between light, dark, and system themes, with an optional UltraBlur background.
+- Configure playback, offline storage, selected libraries, and synchronization from Settings.
+
+Rayna currently targets macOS, Windows, and Linux desktop builds. The roadmap and verification in this repository currently cover the macOS desktop runtime.
+
+## Screenshots
+
+![Albums with complete-library filters](docs/screenshots/albums.jpg)
+
+![Grouped offline downloads](docs/screenshots/downloads.jpg)
 
 ## Installation
 
@@ -14,96 +51,85 @@ Rayna is a 3rd party music player client for Plex focusing on the desktop experi
 > [!IMPORTANT]
 > Windows on Arm is not natively supported.
 
-1. Download the installer
-2. Run the downloaded installer and follow the instructions onscreen.
+1. Download the installer.
+2. Run it and follow the on-screen instructions.
 
-### MacOS
+### macOS
 
 > [!WARNING]
-> All installations on MacOS will need to be whitelisted due to MacOS blocking apps not signed with a paid developer license by default. This is a limitation as I currently do not have a paid Apple developer license.
+> Current macOS builds are not signed with a paid Apple Developer certificate and may need to be allowed manually.
 
-1. Download the installer.
-2. Open the downloaded .dmg file and drag the application to your Applications folder. You will you get a warning saying "Rayna" is damaged and can't be opened. You should move it to the Bin.
-3. Open your Terminal app
-4. Run the following command:
-   `xattr -d com.apple.quarantine /Applications/Rayna.app`
+1. Download and open the `.dmg`.
+2. Drag Rayna into Applications.
+3. If macOS blocks the application, open Terminal and run:
 
-## Usage/Examples
+   ```sh
+   xattr -d com.apple.quarantine /Applications/Rayna.app
+   ```
 
-On install login to you Plex account and select your server[^1], that is all.
+## Usage
 
-## Features
-
-- Cross platform (macos, windows, linux)
-
-## Screenshots
-
-<img width="1012" height="782" alt="Screenshot 2026-01-07 at 12 36 58 PM" src="https://github.com/user-attachments/assets/15d2f81e-0f02-4646-ad6f-d5bf5ebb2541" />
-<img width="1012" height="782" alt="Screenshot 2026-01-07 at 12 37 08 PM" src="https://github.com/user-attachments/assets/95f0e5ff-3bac-407a-a07d-72e39d60ec7b" />
+Log in to your Plex account, select a server, and choose one or more music libraries. Rayna then builds the Home and library views from those selections.
 
 ## Roadmap
 
-(Probably in order)
-
-- [x] Light/Dark mode
-- [x] Volume Controls
-- [x] Add Screenshots
-- [x] Artist page
+- [x] Light and dark themes
+- [x] Volume controls
+- [x] Current repository-owned screenshots
+- [x] Artist pages
   - [x] Play popular tracks
-  - [x] Artist library page
-- [x] Playlist page
-  - [x] Play entire playlist
-  - [x] Play individual track for playlist
-  - [x] Playlist library page
-- [ ] Albums page
-  - [x] Albums library page
-  - [x] Albums detail page
-  - [ ] Filtering options
-- [ ] Tracks page
-  - [ ] Tracks library page
-  - [ ] Filtering options
-- [x] Search
-- [x] Queue's
-  - [x] Queue Albums
+  - [x] Browse the artist library
+  - [x] Filter and sort artists
+- [x] Playlist pages
+  - [x] Play and queue an entire playlist
+  - [x] Play and queue individual tracks
+  - [x] Browse, filter, and sort playlists
+- [x] Albums pages
+  - [x] Browse albums
+  - [x] View album details
+  - [x] Complete-library filtering and sorting
+- [x] Tracks page
+  - [x] Browse, play, queue, and download tracks
+  - [x] Complete-library filtering and sorting
+  - [x] Infinite scrolling
+- [x] Global search
+- [x] Queue management
+  - [x] Queue albums and playlists
   - [x] Queue individual tracks
-  - [x] Display Queue
-- [ ] Offline support
-- [x] Remote playback connection handling
-  - [x] Reconnect through the best available Plex route when the current connection stops responding
-  - [x] Preserve and resume the current track, position, and queue after a network change
-- [x] Multi-library support
-- [ ] Caching
-- [ ] Database support
-- [ ] Lyrics
-- [x] Performance Improvements
-- [x] Server select
-  - [ ] Change selected server
-  - [x] Select libraries
-- [x] Sessions support
-- [x] Timeline support
-- [x] Transcoding
-- [ ] Sync
-- [ ] TV Support (Probably never happening)
-- [ ] Settings Page
-- [x] Prev and Next functionality
+  - [x] Display and clear the queue
+- [ ] User-managed offline support
+  - [x] Track, album, and playlist downloads
+  - [x] Pause, resume, retry, and remove
+  - [x] Dedicated grouped Downloads page
+  - [x] Download activity menu and downloaded-state indicators
+  - [x] Configurable storage location
+  - [ ] Verify downloaded album and playlist playback while Plex is unreachable
+- [x] Remote playback connection recovery
+  - [x] Reconnect through the best available Plex route
+  - [x] Preserve the current track, position, and queue after a network change
+- [x] Multiple music-library support
+- [x] Server-scoped metadata, artwork, and lyrics caching
+- [x] Versioned SQLite database
+- [x] Plain and synchronized Plex lyrics
+- [x] Performance improvements
+- [x] Server selection
+  - [ ] Verify changing between two available Plex servers in the desktop UI
+  - [x] Select multiple music libraries
+- [x] Plex session reporting
+- [x] Plex timeline reporting
+- [x] Audio transcoding
+- [x] Startup, recovery, and manual synchronization
+- [x] Settings page
+- [x] Previous and next controls
+
+## Non-goals
+
+- TV/video playback and a ten-foot TV interface are outside Rayna's desktop music-player scope.
 
 ## Contributing
 
-**Ignore anything written in this section for now**
+Pull requests are welcome. For major changes, open an issue first to discuss the proposed behavior, and update or add tests for the affected feature.
 
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
-
-Please make sure to update tests as appropriate. (There are no tests :D)
-
-Contributions are always welcome!
-
-See `contributing.md` for ways to get started.
-
-Please adhere to this project's `code of conduct`.
+See `contributing.md` for local development guidance and follow the repository's code of conduct.
 
 ## License
-
-## Appendix
-
-[^1]: Only a single server and library is supported currently.

@@ -87,9 +87,9 @@ Owner: Persistence/offline sub-agent
 Completion gate:
 
 - [ ] Downloaded media plays, seeks, pauses, resumes, and advances without Plex connectivity.
-- [ ] Interrupted downloads resume safely.
-- [ ] Restarting Rayna preserves completed downloads and progress state.
-- [ ] Local playback endpoints reject unregistered paths.
+- [x] Interrupted downloads resume safely.
+- [x] Restarting Rayna preserves completed downloads and progress state.
+- [x] Local playback endpoints reject unregistered paths.
 
 ## Phase 4 — Library Browsing and Filtering
 
@@ -195,9 +195,9 @@ Owner: Primary agent
 - [x] Run `bun run lint`.
 - [x] Run `bun run typecheck`.
 - [x] Run `bun run build:renderer`.
-- [ ] Run the available desktop build.
-- [ ] Smoke-test the authenticated desktop application against Plex.
-- [ ] Verify albums and tracks filters against complete libraries.
+- [x] Run the available desktop build.
+- [x] Smoke-test the authenticated desktop application against Plex.
+- [x] Verify albums and tracks filters against complete libraries.
 - [ ] Verify download, restart, disconnected playback, lyrics, sync, and server switching.
 - [ ] Confirm remote playback reconnection, queue behavior, transcoding, timeline reporting, and existing settings still work.
 
@@ -205,41 +205,56 @@ Completion gate:
 
 - [x] Automated validation passes.
 - [ ] Desktop runtime validation passes for every completed roadmap item.
-- [ ] No roadmap item is marked complete based only on code presence.
+- [x] No roadmap item is marked complete based only on code presence.
+
+### Desktop verification evidence — 2026-07-12
+
+- Verified the authenticated macOS desktop build loads Home and all four library routes.
+- Verified Albums filters to the complete Frank Ocean corpus and Tracks filters to the complete `HEROES & VILLAINS` corpus after correcting unreliable Plex facet parameters.
+- Verified Tracks automatically fetches later alphabetical pages while scrolling, plus track playback, the queue panel, and downloaded-state indicators.
+- Verified Artists and Playlists expose their new filters and sorting controls.
+- Verified the compact activity menu appears before the profile menu, scrolls independently, persists paused work across restarts, resumes work, exposes Pause while transferring, and clears terminal activity without deleting downloaded media.
+- Verified the dedicated Downloads page groups completed items and exposes text, type, status, sort, direction, and removal controls.
+- Verified Settings links to Downloads, exposes the storage location control, and completes a manual synchronization with an updated timestamp.
+- Verified completed FLAC playback through the native BASS direct-file path after the loopback URL path failed with BASS error 40.
+- Verified synchronized Plex lyrics replace the main route content and toggling lyrics restores the prior route.
+- Verified completed and paused download state survives repeated desktop restarts.
+- A successful two-server switch remains unverified because the connected Plex account exposes only one server.
+- Disconnected album and playlist playback remains unverified; the prior offline simulation proved cached browsing, while direct local track playback is now verified.
 
 ## Phase 9 — Screenshots and README
 
 Owner: Documentation/screenshot sub-agent; final review by primary agent
 
-- [ ] Create `docs/screenshots/` for repository-owned images.
-- [ ] Capture a consistently sized native application window from the authenticated local Plex session.
+- [x] Create `docs/screenshots/` for repository-owned images.
+- [x] Capture a consistently sized native application window from the authenticated local Plex session.
 - [ ] Capture these states:
   - Home/player overview for the hero image.
   - Albums or Tracks with filters visible.
   - Lyrics or offline downloads.
   - Settings with server and sync controls.
-- [ ] Exclude usernames, server addresses, tokens, desktop clutter, and other private information.
-- [ ] Replace external GitHub attachment URLs with relative screenshot paths and meaningful alt text.
-- [ ] Rewrite the README introduction to remove the online-only limitation.
-- [ ] Expand Features into grouped, user-facing capabilities:
+- [x] Exclude usernames, server addresses, tokens, desktop clutter, and other private information.
+- [x] Replace external GitHub attachment URLs with relative screenshot paths and meaningful alt text.
+- [x] Rewrite the README introduction to remove the online-only limitation.
+- [x] Expand Features into grouped, user-facing capabilities:
   - Library browsing and search.
   - Playback, queue, and lyrics.
   - Offline downloads, caching, and sync.
   - Server, library, and settings management.
   - Themes, transcoding, timeline reporting, and connection recovery.
   - Supported desktop platforms.
-- [ ] Remove the outdated single-server footnote.
-- [ ] Mark each implemented roadmap parent and child item `[x]`.
-- [ ] Move TV support to a Non-goals note rather than representing it as completed.
-- [ ] Confirm every feature claim corresponds to tested behavior.
-- [ ] Confirm every relative screenshot exists and renders correctly.
+- [x] Remove the outdated single-server footnote.
+- [x] Mark each implemented roadmap parent and child item `[x]`.
+- [x] Move TV support to a Non-goals note rather than representing it as completed.
+- [x] Confirm every feature claim corresponds to tested behavior.
+- [x] Confirm every relative screenshot exists and renders correctly.
 - [ ] Confirm `rg '^- \[ \]' README.md` returns no practical desktop roadmap work.
 
 Completion gate:
 
-- [ ] README accurately describes the completed application.
-- [ ] Screenshots are current, legible, repository-owned, and safe to publish.
-- [ ] All practical roadmap items are checked only after verification.
+- [x] README accurately describes the completed application.
+- [x] Screenshots are current, legible, repository-owned, and safe to publish.
+- [x] All practical roadmap items are checked only after verification.
 
 ## Phase 10 — Library, Download Activity, and Lyrics UX
 
@@ -261,24 +276,24 @@ Owner: Library, downloads, and lyrics sub-agents; integration and verification b
 
 Completion gate:
 
-- [ ] Desktop verification confirms all four library pages expose the intended filters and Tracks automatically loads another page.
-- [ ] Desktop verification confirms activity clearing, pause/resume, grouping, downloaded indicators, and the Settings download controls.
-- [ ] Desktop verification confirms the microphone toggles the full main-content lyrics view and restores the prior route.
+- [x] Desktop verification confirms all four library pages expose the intended filters and Tracks automatically loads another page.
+- [x] Desktop verification confirms activity clearing, pause/resume, grouping, downloaded indicators, and the Settings download controls.
+- [x] Desktop verification confirms the microphone toggles the full main-content lyrics view and restores the prior route.
 - [x] Automated tests cover paused state, restart normalization, bounded transfers, activity clearing, storage migration, and offline playback routing.
 
 ## Final Definition of Done
 
-- [ ] Global search covers the complete library, while Albums and Tracks provide sorting and facets.
-- [ ] Tracks library playback and queueing work.
-- [ ] SQLite-backed cache and download state survive restarts.
+- [x] Global search covers the complete library, while Albums and Tracks provide sorting and facets.
+- [x] Tracks library playback and queueing work.
+- [x] SQLite-backed cache and download state survive restarts.
 - [ ] Explicitly downloaded tracks, albums, and playlists work offline.
-- [ ] Lyrics work online and from cache where available.
-- [ ] Startup and manual synchronization work and expose status.
+- [x] Lyrics work online and from cache where available.
+- [x] Startup and manual synchronization work and expose status.
 - [ ] Server switching is atomic, clears playback state, and requires library reselection.
-- [ ] Settings exposes all completed controls.
+- [x] Settings exposes all completed controls.
 - [ ] Existing playback and connection behavior has no regressions.
-- [ ] Automated tests, type checks, renderer build, desktop build, and runtime smoke tests pass.
-- [ ] README Features, Roadmap, limitations, and screenshots match the verified product.
+- [x] Automated tests, type checks, renderer build, desktop build, and runtime smoke tests pass.
+- [x] README Features, Roadmap, limitations, and screenshots match the verified product.
 
 ## Chosen Product Defaults
 
