@@ -58,6 +58,7 @@ window.api = {
       rpc.request.mediaGetAlbumsPage(request),
     getTracksPage: (request: TrackPageRequest) =>
       rpc.request.mediaGetTracksPage(request),
+    getLibraryFacets: () => rpc.request.mediaGetLibraryFacets(),
     getArtistsPage: (cursor: string, pageSize: number) =>
       rpc.request.mediaGetArtistsPage({ cursor, pageSize }),
     getAlbum: (ratingKey: string) => rpc.request.mediaGetAlbum({ ratingKey }),
@@ -73,20 +74,22 @@ window.api = {
     getLyrics: (ratingKey: string) => rpc.request.mediaGetLyrics({ ratingKey }),
   },
   downloads: {
-    create: (targetType, ratingKey) =>
-      rpc.request.downloadsCreate({ targetType, ratingKey }),
+    create: (targetType, ratingKey, targetTitle) =>
+      rpc.request.downloadsCreate({ targetType, ratingKey, targetTitle }),
     list: (states) => rpc.request.downloadsList({ states }),
     retry: (downloadId) => rpc.request.downloadsRetry({ downloadId }),
     pause: (downloadId) => rpc.request.downloadsPause({ downloadId }),
     resume: (downloadId) => rpc.request.downloadsResume({ downloadId }),
     getActivity: () => rpc.request.downloadsGetActivity(),
-    clearActivity: (downloadIds) => rpc.request.downloadsClearActivity({ downloadIds }),
+    clearActivity: (downloadIds) =>
+      rpc.request.downloadsClearActivity({ downloadIds }),
     getStatus: (targets) => rpc.request.downloadsGetStatus({ targets }),
     remove: (downloadId) => rpc.request.downloadsRemove({ downloadId }),
     getProgress: (downloadIds) =>
       rpc.request.downloadsGetProgress({ downloadIds }),
     getStorageStatus: () => rpc.request.offlineGetStorageStatus(),
-    setStorageDirectory: (directory) => rpc.request.offlineSetStorageDirectory({ directory }),
+    setStorageDirectory: (directory) =>
+      rpc.request.offlineSetStorageDirectory({ directory }),
   },
   sync: {
     start: () => rpc.request.syncStart(),

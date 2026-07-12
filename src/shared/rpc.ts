@@ -6,6 +6,7 @@ import type {
   DownloadProgress,
   DownloadTargetType,
   LyricsResult,
+  LibraryFacets,
   MediaAlbum,
   MediaPage,
   MediaTrack,
@@ -38,7 +39,11 @@ export type RoadmapRPCRequests = {
     response: LyricsResult;
   };
   downloadsCreate: {
-    params: { targetType: DownloadTargetType; ratingKey: string };
+    params: {
+      targetType: DownloadTargetType;
+      ratingKey: string;
+      targetTitle?: string;
+    };
     response: DownloadItem[];
   };
   downloadsList: {
@@ -66,7 +71,9 @@ export type RoadmapRPCRequests = {
     response: void;
   };
   downloadsGetStatus: {
-    params: { targets: Array<{ targetType: DownloadTargetType; ratingKey: string }> };
+    params: {
+      targets: Array<{ targetType: DownloadTargetType; ratingKey: string }>;
+    };
     response: DownloadedStatus[];
   };
   downloadsRemove: {
@@ -306,6 +313,10 @@ export type RaynaRPC = {
       mediaGetTracksPage: {
         params: TrackPageRequest;
         response: MediaPage<MediaTrack>;
+      };
+      mediaGetLibraryFacets: {
+        params: void;
+        response: LibraryFacets;
       };
       mediaGetArtistsPage: {
         params: { cursor?: string; pageSize: number };

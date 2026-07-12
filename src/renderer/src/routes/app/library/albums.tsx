@@ -1,15 +1,17 @@
 import { AlbumCard } from "@/components/music/albumcard";
 import { Spinner } from "@/components/ui/spinner";
 import type { AlbumSortField } from "../../../../../shared/types";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useSelectedServerId } from "@/hooks/use-selected-server-id";
 
 export const Route = createFileRoute("/app/library/albums")({
   component: AlbumsPage,
 });
 
 function AlbumsPage() {
+  const selectedServer = useSelectedServerId();
   const [artistKeys, setArtistKeys] = useState("");
   const [years, setYears] = useState("");
   const [sortField, setSortField] = useState<AlbumSortField>("title");
@@ -23,7 +25,8 @@ function AlbumsPage() {
   );
 
   const result = useInfiniteQuery({
-    queryKey: ["albums", filters, sortField, direction],
+    queryKey: [selectedServer.data, "albums", filters, sortField, direction],
+    enabled: Boolean(selectedServer.data),
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       window.api.media.getAlbumsPage({
@@ -34,20 +37,15 @@ function AlbumsPage() {
       }),
     getNextPageParam: (page) => page.nextCursor ?? undefined,
   });
+  const facets = useQuery({
+    queryKey: ["library-facets"],
+    queryFn: () => window.api.media.getLibraryFacets(),
+    staleTime: 5 * 60_000,
+  });
   const albums = result.data?.pages.flatMap((page) => page.items) ?? [];
   const isStale = result.data?.pages.some((page) => page.freshness === "stale");
-  const artists = [
-    ...new Map(
-      albums
-        .filter((a) => a.artistRatingKey)
-        .map((a) => [a.artistRatingKey!, a.artist]),
-    ).entries(),
-  ];
-  const availableYears = [
-    ...new Set(
-      albums.map((a) => a.year).filter((year): year is number => year !== null),
-    ),
-  ].sort((a, b) => b - a);
+  const artists = facets.data?.albumArtists ?? [];
+  const availableYears = facets.data?.albumYears ?? [];
 
   return (
     <div className="flex min-h-full flex-col gap-4 px-6 pb-8">
@@ -66,9 +64,9 @@ function AlbumsPage() {
             onChange={(e) => setArtistKeys(e.target.value)}
           >
             <option value="">All artists</option>
-            {artists.map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
+            {artists.map((artist) => (
+              <option key={artist.ratingKey} value={artist.ratingKey}>
+                {artist.title}
               </option>
             ))}
           </select>

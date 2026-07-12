@@ -1,6 +1,7 @@
 import {
   createWriteStream,
   copyFileSync,
+  constants,
   existsSync,
   mkdirSync,
   renameSync,
@@ -55,6 +56,7 @@ type DownloadMetadata = {
   targetRatingKey: string;
   artist: string;
   album: string;
+  targetTitle?: string;
   url: string;
   headers?: Record<string, string>;
   completedAt?: number;
@@ -95,7 +97,17 @@ export class DownloadManager {
     serverId: string,
     targetType: DownloadTargetType,
     ratingKey: string,
+    targetTitle?: string,
   ): Promise<DownloadItem[]> {
+    const existing = this.database.listDownloads(serverId).filter((record) => {
+      const metadata = record.metadata as DownloadMetadata;
+      return (
+        metadata.targetType === targetType &&
+        metadata.targetRatingKey === ratingKey
+      );
+    });
+    if (existing.length > 0)
+      return existing.map((record) => this.toItem(record));
     const tracks = await this.resolver.resolveTracks({
       serverId,
       targetType,
@@ -127,6 +139,7 @@ export class DownloadManager {
           targetRatingKey: ratingKey,
           artist: track.artist,
           album: track.album,
+          targetTitle: targetTitle?.trim() || undefined,
           url: track.url,
           headers: track.headers,
         } satisfies DownloadMetadata,
@@ -208,6 +221,7 @@ export class DownloadManager {
         return (
           record.status === "queued" ||
           record.status === "downloading" ||
+          record.status === "paused" ||
           !metadata.activityClearedAt
         );
       })
@@ -224,8 +238,7 @@ export class DownloadManager {
   clearActivity(serverId: string, ids?: string[]): void {
     for (const record of this.database.listDownloads(serverId)) {
       if (ids && !ids.includes(record.id)) continue;
-      if (record.status === "downloading" || record.status === "queued")
-        continue;
+      if (record.status !== "completed" && record.status !== "failed") continue;
       this.database.upsertDownload({
         ...record,
         metadata: {
@@ -252,14 +265,23 @@ export class DownloadManager {
       const completedTracks = matching.filter(
         (record) => record.status === "completed",
       ).length;
+      const active = matching.find(
+        (record) => record.status !== "completed" && record.status !== "failed",
+      );
       return {
         ...target,
         state:
-          completedTracks === 0
+          matching.length === 0 || (completedTracks === 0 && !active)
             ? "not-downloaded"
             : completedTracks === matching.length
               ? "downloaded"
               : "partial",
+        activeState:
+          active?.status === "queued" ||
+          active?.status === "downloading" ||
+          active?.status === "paused"
+            ? active.status
+            : null,
         completedTracks,
         totalTracks: matching.length,
       };
@@ -270,7 +292,10 @@ export class DownloadManager {
     const next = resolve(directory.trim());
     if (!directory.trim()) throw new Error("Choose a download directory");
     if (next === this.storageDirectory) return this.storageStatus("");
+    const resumableIds: string[] = [];
     for (const record of this.database.listDownloadsAll()) {
+      if (record.status === "queued" || record.status === "downloading")
+        resumableIds.push(record.id);
       if (record.status === "queued" || record.status === "downloading")
         this.pause(record.id);
     }
@@ -278,26 +303,53 @@ export class DownloadManager {
       await new Promise((resolve) => setTimeout(resolve, 10));
     mkdirSync(next, { recursive: true });
     const previous = this.storageDirectory;
-    for (const record of this.database.listDownloadsAll()) {
-      const directoryForServer = join(next, safeSegment(record.serverId));
-      mkdirSync(directoryForServer, { recursive: true });
-      const move = (path: string | null) => {
-        if (!path || !resolve(path).startsWith(`${previous}${sep}`))
-          return path;
-        const destination = join(directoryForServer, basename(path));
-        if (existsSync(path)) copyFileSync(path, destination);
-        return destination;
-      };
-      const filePath = move(record.filePath);
-      const partialPath = move(record.partialPath);
-      this.database.upsertDownload({ ...record, filePath, partialPath });
+    const records = this.database.listDownloadsAll();
+    const destinationFor = (record: DownloadRecord, path: string | null) => {
+      if (!path || !resolve(path).startsWith(`${previous}${sep}`)) return path;
+      return join(next, safeSegment(record.serverId), basename(path));
+    };
+    const relocations = records.map((record) => ({
+      id: record.id,
+      filePath: destinationFor(record, record.filePath),
+      partialPath: destinationFor(record, record.partialPath),
+    }));
+    const copiedPaths = new Set<string>();
+    try {
+      for (let index = 0; index < records.length; index += 1) {
+        const record = records[index];
+        const relocation = relocations[index];
+        mkdirSync(join(next, safeSegment(record.serverId)), {
+          recursive: true,
+        });
+        for (const [source, destination] of [
+          [record.filePath, relocation.filePath],
+          [record.partialPath, relocation.partialPath],
+        ] as const) {
+          if (
+            source &&
+            destination &&
+            source !== destination &&
+            existsSync(source)
+          ) {
+            copyFileSync(source, destination, constants.COPYFILE_EXCL);
+            copiedPaths.add(destination);
+          }
+        }
+      }
+      this.database.relocateDownloads(relocations, next);
+    } catch (error) {
+      for (const path of copiedPaths) rmSync(path, { force: true });
+      for (const id of resumableIds) this.resume(id);
+      throw error;
+    }
+    for (const record of records) {
       for (const path of [record.filePath, record.partialPath]) {
         if (path && resolve(path).startsWith(`${previous}${sep}`))
           rmSync(path, { force: true });
       }
     }
     this.storageDirectory = next;
-    this.database.set("downloads.storageDirectory", next);
+    for (const id of resumableIds) this.resume(id);
     return this.storageStatus("");
   }
 
@@ -356,8 +408,8 @@ export class DownloadManager {
       });
       if (!response.ok)
         throw new Error(`Download failed with HTTP ${response.status}`);
-      if (offset > 0 && response.status !== 206)
-        throw new Error("Server did not honor the resume range");
+      const resumed = offset > 0 && response.status === 206;
+      const writeOffset = resumed ? offset : 0;
       if (!response.body) throw new Error("Download response had no body");
       const responseBytes = numberHeader(
         response.headers.get("content-length"),
@@ -367,12 +419,12 @@ export class DownloadManager {
       );
       const totalBytes =
         contentRangeTotal ??
-        (responseBytes === null ? null : offset + responseBytes);
+        (responseBytes === null ? null : writeOffset + responseBytes);
       const stream = createWriteStream(partialPath, {
-        flags: offset ? "a" : "w",
+        flags: writeOffset ? "a" : "w",
       });
       const reader = response.body.getReader();
-      let downloaded = offset;
+      let downloaded = writeOffset;
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -461,6 +513,11 @@ export class DownloadManager {
       title: record.title,
       artist: metadata.artist ?? "",
       album: metadata.album ?? "",
+      targetTitle:
+        metadata.targetTitle ??
+        (metadata.targetType === "track"
+          ? record.title
+          : (metadata.album ?? record.title)),
       state: record.status,
       bytesDownloaded: record.bytesDownloaded,
       bytesTotal: record.totalBytes,

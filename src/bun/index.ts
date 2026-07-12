@@ -108,6 +108,7 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       mediaGetPlaylists: () => media.getPlaylists(),
       mediaGetAlbumsPage: (request) => media.getAlbumsPage(request),
       mediaGetTracksPage: (request) => media.getTracksPage(request),
+      mediaGetLibraryFacets: () => media.getLibraryFacets(),
       mediaGetArtistsPage: ({ cursor, pageSize }) =>
         media.getArtistsPage(cursor, pageSize),
       mediaGetAlbum: ({ ratingKey }) => media.getAlbum(ratingKey),
@@ -118,13 +119,14 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       mediaGetPlaylist: ({ ratingKey }) => media.getPlaylist(ratingKey),
       mediaSearch: ({ query, limit }) => media.search(query, limit),
       mediaGetLyrics: ({ ratingKey }) => media.getLyrics(ratingKey),
-      downloadsCreate: async ({ targetType, ratingKey }) => {
+      downloadsCreate: async ({ targetType, ratingKey, targetTitle }) => {
         const server = await auth.getUserSelectedServer();
         if (!server) throw new Error("Select a Plex server before downloading");
         return downloads.enqueue(
           server.clientIdentifier,
           targetType,
           ratingKey,
+          targetTitle,
         );
       },
       downloadsList: async ({ states }) => {
@@ -140,15 +142,26 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       downloadsResume: ({ downloadId }) => downloads.resume(downloadId),
       downloadsGetActivity: async () => {
         const server = await auth.getUserSelectedServer();
-        return server ? downloads.activity(server.clientIdentifier) : { items: [], activeCount: 0, failedCount: 0 };
+        return server
+          ? downloads.activity(server.clientIdentifier)
+          : { items: [], activeCount: 0, failedCount: 0 };
       },
       downloadsClearActivity: async ({ downloadIds }) => {
         const server = await auth.getUserSelectedServer();
-        if (server) downloads.clearActivity(server.clientIdentifier, downloadIds);
+        if (server)
+          downloads.clearActivity(server.clientIdentifier, downloadIds);
       },
       downloadsGetStatus: async ({ targets }) => {
         const server = await auth.getUserSelectedServer();
-        return server ? downloads.statuses(server.clientIdentifier, targets) : targets.map((target) => ({ ...target, state: "not-downloaded" as const, completedTracks: 0, totalTracks: 0 }));
+        return server
+          ? downloads.statuses(server.clientIdentifier, targets)
+          : targets.map((target) => ({
+              ...target,
+              state: "not-downloaded" as const,
+              activeState: null,
+              completedTracks: 0,
+              totalTracks: 0,
+            }));
       },
       downloadsRemove: ({ downloadId }) => downloads.remove(downloadId),
       downloadsGetProgress: async ({ downloadIds }) => {

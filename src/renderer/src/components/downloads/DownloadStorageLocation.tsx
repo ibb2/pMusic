@@ -2,12 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useSelectedServerId } from "@/hooks/use-selected-server-id";
 
 export function DownloadStorageLocation() {
   const client = useQueryClient();
+  const selectedServer = useSelectedServerId();
   const storage = useQuery({
-    queryKey: ["download-storage"],
+    queryKey: [selectedServer.data, "download-storage"],
     queryFn: () => window.api.downloads.getStorageStatus(),
+    enabled: Boolean(selectedServer.data),
   });
   const [directory, setDirectory] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +24,9 @@ export function DownloadStorageLocation() {
     setError(null);
     try {
       await window.api.downloads.setStorageDirectory(directory);
-      await client.invalidateQueries({ queryKey: ["download-storage"] });
+      await client.invalidateQueries({
+        queryKey: [selectedServer.data, "download-storage"],
+      });
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "Could not move downloads.",

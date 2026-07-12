@@ -1,16 +1,18 @@
 import BlankImage from "@/assets/512px-Black_colour.jpg";
 import { Spinner } from "@/components/ui/spinner";
 import type { MediaTrack, TrackSortField } from "../../../../../shared/types";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DownloadButton, downloadsApi } from "@/components/downloads";
+import { useSelectedServerId } from "@/hooks/use-selected-server-id";
 
 export const Route = createFileRoute("/app/library/tracks")({
   component: TracksPage,
 });
 
 function TracksPage() {
+  const selectedServer = useSelectedServerId();
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [artistKeys, setArtistKeys] = useState("");
   const [albumKeys, setAlbumKeys] = useState("");
@@ -24,7 +26,8 @@ function TracksPage() {
     [artistKeys, albumKeys],
   );
   const result = useInfiniteQuery({
-    queryKey: ["tracks", filters, sortField, direction],
+    queryKey: [selectedServer.data, "tracks", filters, sortField, direction],
+    enabled: Boolean(selectedServer.data),
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       window.api.media.getTracksPage({
@@ -35,23 +38,16 @@ function TracksPage() {
       }),
     getNextPageParam: (page) => page.nextCursor ?? undefined,
   });
+  const facets = useQuery({
+    queryKey: ["library-facets"],
+    queryFn: () => window.api.media.getLibraryFacets(),
+    staleTime: 5 * 60_000,
+  });
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = result;
   const tracks = result.data?.pages.flatMap((page) => page.items) ?? [];
   const isStale = result.data?.pages.some((page) => page.freshness === "stale");
-  const artists = [
-    ...new Map(
-      tracks
-        .filter((t) => t.artistRatingKey)
-        .map((t) => [t.artistRatingKey!, t.artist]),
-    ).entries(),
-  ];
-  const albums = [
-    ...new Map(
-      tracks
-        .filter((t) => t.albumRatingKey)
-        .map((t) => [t.albumRatingKey!, t.album]),
-    ).entries(),
-  ];
+  const artists = facets.data?.trackArtists ?? [];
+  const albums = facets.data?.trackAlbums ?? [];
 
   useEffect(() => {
     const target = loadMoreRef.current;
@@ -86,9 +82,9 @@ function TracksPage() {
             onChange={(e) => setArtistKeys(e.target.value)}
           >
             <option value="">All artists</option>
-            {artists.map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
+            {artists.map((artist) => (
+              <option key={artist.ratingKey} value={artist.ratingKey}>
+                {artist.title}
               </option>
             ))}
           </select>
@@ -99,9 +95,9 @@ function TracksPage() {
             onChange={(e) => setAlbumKeys(e.target.value)}
           >
             <option value="">All albums</option>
-            {albums.map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
+            {albums.map((album) => (
+              <option key={album.ratingKey} value={album.ratingKey}>
+                {album.title}
               </option>
             ))}
           </select>

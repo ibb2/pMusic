@@ -28,6 +28,7 @@ import type {
   OfflineStorageStatus,
   SyncStatus,
   LyricsResult,
+  LibraryFacets,
   ServerChangeResult,
 } from "../../shared/types";
 
@@ -88,6 +89,7 @@ declare global {
         getTracksPage: (
           request: TrackPageRequest,
         ) => Promise<MediaPage<MediaTrack>>;
+        getLibraryFacets: () => Promise<LibraryFacets>;
         getArtistsPage: (cursor: string, pageSize: number) => Promise<any>;
         getAlbum: (ratingKey: string) => Promise<any>;
         getArtist: (ratingKey: string) => Promise<any>;
@@ -101,6 +103,7 @@ declare global {
         create: (
           targetType: DownloadTargetType,
           ratingKey: string,
+          targetTitle?: string,
         ) => Promise<DownloadItem[]>;
         list: (states?: DownloadState[]) => Promise<DownloadItem[]>;
         retry: (downloadId: string) => Promise<DownloadItem>;
@@ -108,11 +111,15 @@ declare global {
         resume: (downloadId: string) => Promise<DownloadItem>;
         getActivity: () => Promise<DownloadActivity>;
         clearActivity: (downloadIds?: string[]) => Promise<void>;
-        getStatus: (targets: Array<{ targetType: DownloadTargetType; ratingKey: string }>) => Promise<DownloadedStatus[]>;
+        getStatus: (
+          targets: Array<{ targetType: DownloadTargetType; ratingKey: string }>,
+        ) => Promise<DownloadedStatus[]>;
         remove: (downloadId: string) => Promise<void>;
         getProgress: (downloadIds?: string[]) => Promise<DownloadProgress[]>;
         getStorageStatus: () => Promise<OfflineStorageStatus>;
-        setStorageDirectory: (directory: string) => Promise<OfflineStorageStatus>;
+        setStorageDirectory: (
+          directory: string,
+        ) => Promise<OfflineStorageStatus>;
       };
       sync: {
         start: () => Promise<SyncStatus>;

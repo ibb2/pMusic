@@ -5,6 +5,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSelectedServerId } from "@/hooks/use-selected-server-id";
+import { DownloadStatusIndicator } from "@/components/downloads";
 
 dayjs.extend(duration);
 
@@ -15,6 +17,7 @@ export const Route = createFileRoute("/app/library/playlists")({
 const PLAYLIST_BATCH_SIZE = 80;
 
 function RouteComponent() {
+  const selectedServer = useSelectedServerId();
   const observerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(PLAYLIST_BATCH_SIZE);
   const [playlistType, setPlaylistType] = useState<"all" | "smart" | "manual">(
@@ -26,8 +29,9 @@ function RouteComponent() {
   const [direction, setDirection] = useState<"asc" | "desc">("asc");
 
   const queryPlaylists = useQuery({
-    queryKey: ["playlists"],
+    queryKey: [selectedServer.data, "playlists"],
     queryFn: () => window.api.media.getPlaylists(),
+    enabled: Boolean(selectedServer.data),
     staleTime: 60_000,
   });
 
@@ -187,7 +191,12 @@ function PlaylistCard({ playlist }: { playlist: any }) {
       preload="intent"
       className="h-fit"
     >
-      <div className="flex w-40 shrink-0 justify-center rounded-md bg-transparent p-3 hover:bg-zinc-300/60 dark:hover:bg-zinc-800/60">
+      <div className="relative flex w-40 shrink-0 justify-center rounded-md bg-transparent p-3 hover:bg-zinc-300/60 dark:hover:bg-zinc-800/60">
+        <DownloadStatusIndicator
+          targetType="playlist"
+          ratingKey={String(playlist.ratingKey)}
+          className="absolute right-4 top-4 z-10"
+        />
         <div className="min-w-0">
           <img
             src={image}

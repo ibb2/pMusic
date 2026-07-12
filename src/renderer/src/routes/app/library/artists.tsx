@@ -1,71 +1,30 @@
 import BlankImage from "@/assets/512px-Black_colour.jpg";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+import { useSelectedServerId } from "@/hooks/use-selected-server-id";
 
 export const Route = createFileRoute("/app/library/artists")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<HTMLDivElement>(null);
+  const selectedServer = useSelectedServerId();
   const [sortField, setSortField] = useState<"title" | "dateAdded">("title");
   const [direction, setDirection] = useState<"asc" | "desc">("asc");
   const [initial, setInitial] = useState("all");
 
-  const fetchArtists = async ({ pageParam }: { pageParam: string }) => {
-    return window.api.media.getArtistsPage(pageParam || "", 30);
-  };
-
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: ["allArtists"],
-    queryFn: fetchArtists,
-    initialPageParam: "",
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  const { data, error, status } = useQuery({
+    queryKey: [selectedServer.data, "artists", "complete"],
+    queryFn: fetchAllArtists,
+    enabled: Boolean(selectedServer.data),
+    staleTime: 60_000,
   });
 
-  useEffect(() => {
-    if (!containerRef.current || !hasNextPage || isFetching) return;
-
-    const container = containerRef.current;
-    const hasScroll = container.scrollHeight > container.clientHeight;
-
-    if (!hasScroll) {
-      fetchNextPage();
-    }
-  }, [data, hasNextPage, isFetching, fetchNextPage]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage && !isFetching) {
-        fetchNextPage();
-      }
-    });
-
-    const target = observerRef.current;
-    if (target) {
-      observer.observe(target);
-    }
-
-    return () => {
-      if (target) observer.unobserve(target);
-    };
-  }, [hasNextPage, isFetching, fetchNextPage]);
-
   const artists = useMemo(() => {
-    const items = data?.pages.flatMap((group) => group.items) ?? [];
-    return items
+    return (data ?? [])
       .filter((artist: any) =>
         initial === "all"
           ? true
@@ -84,7 +43,7 @@ function RouteComponent() {
               );
         return direction === "asc" ? comparison : -comparison;
       });
-  }, [data?.pages, direction, initial, sortField]);
+  }, [data, direction, initial, sortField]);
 
   if (status === "pending") {
     return (
@@ -103,7 +62,7 @@ function RouteComponent() {
   }
 
   return (
-    <div ref={containerRef} className="flex min-h-full flex-col px-6">
+    <div className="flex min-h-full flex-col px-6">
       <header className="sticky top-0 z-10 space-y-3 bg-background py-3">
         <div>
           <h1 className="text-2xl font-bold">Artists</h1>
@@ -161,12 +120,29 @@ function RouteComponent() {
           No artists found
         </div>
       )}
-
-      <div ref={observerRef} className="flex h-12 items-center justify-center">
-        {isFetchingNextPage ? <Spinner className="size-4" /> : null}
-      </div>
     </div>
   );
+}
+
+async function fetchAllArtists(): Promise<any[]> {
+  const artists: any[] = [];
+  let cursor = "";
+  const seenCursors = new Set<string>();
+
+  do {
+    if (seenCursors.has(cursor)) {
+      throw new Error("Artist pagination returned a repeated cursor");
+    }
+    seenCursors.add(cursor);
+    const page = (await window.api.media.getArtistsPage(cursor, 200)) as {
+      items?: any[];
+      nextCursor?: string | null;
+    };
+    artists.push(...(page.items ?? []));
+    cursor = page.nextCursor ?? "";
+  } while (cursor);
+
+  return artists;
 }
 
 function ArtistCard({ artist }: { artist: any }) {

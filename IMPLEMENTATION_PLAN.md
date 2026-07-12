@@ -113,7 +113,7 @@ Completion gate:
 - [x] Filters apply to the complete Plex library rather than only loaded pages.
 - [x] Pagination remains stable across multiple selected libraries.
 - [x] Tracks can be browsed, played, and queued.
-- [x] Albums and Tracks expose search, sorting, and the required facets.
+- [x] Global search covers albums and tracks; their library pages expose sorting and the required facets.
 
 ## Phase 5 — Lyrics
 
@@ -268,7 +268,7 @@ Completion gate:
 
 ## Final Definition of Done
 
-- [ ] Albums and Tracks provide complete-library search, sorting, and facets.
+- [ ] Global search covers the complete library, while Albums and Tracks provide sorting and facets.
 - [ ] Tracks library playback and queueing work.
 - [ ] SQLite-backed cache and download state survive restarts.
 - [ ] Explicitly downloaded tracks, albums, and playlists work offline.

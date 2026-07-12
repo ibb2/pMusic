@@ -4,6 +4,7 @@ import type { DatabaseManager } from "../database";
 import type Authentication from "./authentication";
 import {
   createAudioTranscodeSource,
+  buildLibraryFacets,
   MediaService,
   normalizePlaybackSettings,
 } from "./media";
@@ -123,23 +124,33 @@ describe("Plex audio transcoding", () => {
 });
 
 describe("library page filters", () => {
-  const createMedia = () => new MediaService(
-    {} as Authentication,
-    { setStreamResolver: () => {} } as unknown as BassManager,
-    new FakeDatabase({}) as unknown as DatabaseManager,
-  );
+  const createMedia = () =>
+    new MediaService(
+      {} as Authentication,
+      { setStreamResolver: () => {} } as unknown as BassManager,
+      new FakeDatabase({}) as unknown as DatabaseManager,
+    );
 
   test("maps album search, facets, and sorting to Plex query parameters", () => {
     const media = createMedia() as unknown as {
       mediaPageParams: (request: unknown, type: "9") => Record<string, string>;
     };
-    expect(media.mediaPageParams({
-      pageSize: 40,
-      query: "Blue",
-      filters: { artistRatingKeys: ["12", "34"], years: [2024] },
-      sort: { field: "dateAdded", direction: "desc" },
-    }, "9")).toEqual({
-      type: "9", title: "Blue", artist: "12,34", year: "2024", sort: "addedAt:desc",
+    expect(
+      media.mediaPageParams(
+        {
+          pageSize: 40,
+          query: "Blue",
+          filters: { artistRatingKeys: ["12", "34"], years: [2024] },
+          sort: { field: "dateAdded", direction: "desc" },
+        },
+        "9",
+      ),
+    ).toEqual({
+      type: "9",
+      title: "Blue",
+      artist: "12,34",
+      year: "2024",
+      sort: "addedAt:desc",
     });
   });
 
@@ -147,13 +158,102 @@ describe("library page filters", () => {
     const media = createMedia() as unknown as {
       mediaPageParams: (request: unknown, type: "10") => Record<string, string>;
     };
-    expect(media.mediaPageParams({
-      pageSize: 50,
-      filters: { artistRatingKeys: ["7"], albumRatingKeys: ["9"] },
-      sort: { field: "album", direction: "asc" },
-    }, "10")).toEqual({
-      type: "10", artist: "7", album: "9", sort: "album.titleSort:asc",
+    expect(
+      media.mediaPageParams(
+        {
+          pageSize: 50,
+          filters: { artistRatingKeys: ["7"], albumRatingKeys: ["9"] },
+          sort: { field: "album", direction: "asc" },
+        },
+        "10",
+      ),
+    ).toEqual({
+      type: "10",
+      artist: "7",
+      album: "9",
+      sort: "album.titleSort:asc",
     });
+  });
+});
+
+describe("library facets", () => {
+  test("deduplicates and sorts options from the complete media corpus", () => {
+    const facets = buildLibraryFacets(
+      [
+        {
+          ratingKey: "album-2",
+          title: "Zulu",
+          artist: "Beta",
+          artistRatingKey: "artist-2",
+          year: 2020,
+          thumb: null,
+          trackCount: 1,
+          addedAt: null,
+        },
+        {
+          ratingKey: "album-1",
+          title: "Alpha",
+          artist: "alpha",
+          artistRatingKey: "artist-1",
+          year: 2024,
+          thumb: null,
+          trackCount: 1,
+          addedAt: null,
+        },
+        {
+          ratingKey: "album-3",
+          title: "Another",
+          artist: "Alpha duplicate",
+          artistRatingKey: "artist-1",
+          year: 2024,
+          thumb: null,
+          trackCount: 1,
+          addedAt: null,
+        },
+      ],
+      [
+        {
+          ratingKey: "track-1",
+          title: "One",
+          artist: "Beta",
+          artistRatingKey: "artist-2",
+          album: "Zulu",
+          albumRatingKey: "album-2",
+          duration: null,
+          index: null,
+          disc: null,
+          thumb: null,
+          addedAt: null,
+        },
+        {
+          ratingKey: "track-2",
+          title: "Two",
+          artist: "Alpha",
+          artistRatingKey: "artist-1",
+          album: "Alpha",
+          albumRatingKey: "album-1",
+          duration: null,
+          index: null,
+          disc: null,
+          thumb: null,
+          addedAt: null,
+        },
+      ],
+    );
+
+    expect(facets.albumArtists.map((item) => item.ratingKey)).toEqual([
+      "artist-1",
+      "artist-2",
+    ]);
+    expect(facets.albumYears).toEqual([2024, 2020]);
+    expect(facets.trackArtists.map((item) => item.ratingKey)).toEqual([
+      "artist-1",
+      "artist-2",
+    ]);
+    expect(facets.trackAlbums.map((item) => item.ratingKey)).toEqual([
+      "album-1",
+      "album-2",
+    ]);
   });
 });
 

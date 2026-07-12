@@ -36,6 +36,7 @@ import type {
   PlexServer,
   TrackPageRequest,
   LyricsResult,
+  LibraryFacets,
 } from "../../shared/types";
 
 type PlexMetadata = Record<string, any>;
@@ -82,6 +83,51 @@ type HslColor = {
   s: number;
   l: number;
 };
+
+export function buildLibraryFacets(
+  albums: MediaAlbum[],
+  tracks: MediaTrack[],
+): Omit<LibraryFacets, "freshness" | "cachedAt"> {
+  const options = <T extends { ratingKey: string; title: string }>(
+    entries: T[],
+  ) =>
+    [...new Map(entries.map((entry) => [entry.ratingKey, entry])).values()]
+      .map(({ ratingKey, title }) => ({ ratingKey, title }))
+      .sort((left, right) =>
+        left.title.localeCompare(right.title, undefined, {
+          sensitivity: "base",
+        }),
+      );
+
+  return {
+    albumArtists: options(
+      albums.flatMap((album) =>
+        album.artistRatingKey
+          ? [{ ratingKey: album.artistRatingKey, title: album.artist }]
+          : [],
+      ),
+    ),
+    albumYears: [
+      ...new Set(
+        albums.flatMap((album) => (album.year === null ? [] : [album.year])),
+      ),
+    ].sort((left, right) => right - left),
+    trackArtists: options(
+      tracks.flatMap((track) =>
+        track.artistRatingKey
+          ? [{ ratingKey: track.artistRatingKey, title: track.artist }]
+          : [],
+      ),
+    ),
+    trackAlbums: options(
+      tracks.flatMap((track) =>
+        track.albumRatingKey
+          ? [{ ratingKey: track.albumRatingKey, title: track.album }]
+          : [],
+      ),
+    ),
+  };
+}
 
 const PLEX_REQUEST_TIMEOUT_MS = 8_000;
 
@@ -393,6 +439,58 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     return this.getCachedMediaPage("tracks", request, "10", (item) =>
       this.mapTrack(item),
     );
+  }
+
+  async getLibraryFacets(): Promise<LibraryFacets> {
+    const server = await this.getSelectedServer();
+    const sectionKey = (await this.getSelectedMusicSections())
+      .map((section) => section.uuid || section.key)
+      .sort()
+      .join(",");
+    const result = await this.cache.readThrough({
+      serverId: server.clientIdentifier,
+      key: `library-facets:v1:${sectionKey}`,
+      ttlMs: 5 * 60 * 1000,
+      fetch: async () => {
+        const albums: MediaAlbum[] = [];
+        const tracks: MediaTrack[] = [];
+        let albumCursor: string | undefined;
+        let trackCursor: string | undefined;
+
+        do {
+          const page = await this.getMediaPage(
+            { cursor: albumCursor, pageSize: 100 },
+            "9",
+            (item) => this.mapTypedAlbum(item),
+          );
+          albums.push(...page.items);
+          albumCursor = page.nextCursor ?? undefined;
+        } while (albumCursor);
+
+        do {
+          const page = await this.getMediaPage(
+            { cursor: trackCursor, pageSize: 100 },
+            "10",
+            (item) => this.mapTrack(item),
+          );
+          tracks.push(...page.items);
+          trackCursor = page.nextCursor ?? undefined;
+        } while (trackCursor);
+
+        return buildLibraryFacets(albums, tracks);
+      },
+    });
+
+    return {
+      ...result.value,
+      freshness:
+        result.source === "network"
+          ? "live"
+          : result.isStale
+            ? "stale"
+            : "fresh",
+      cachedAt: result.source === "network" ? null : new Date().toISOString(),
+    };
   }
 
   private async getCachedMediaPage<T>(

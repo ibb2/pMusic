@@ -13,19 +13,24 @@ import {
   IconPlayerPlay,
   IconX,
 } from "@tabler/icons-react";
+import { useSelectedServerId } from "@/hooks/use-selected-server-id";
 
 const percent = (value: number, total: number | null) =>
   total ? Math.min(100, (value / total) * 100) : null;
 
 export function DownloadActivityMenu() {
   const client = useQueryClient();
+  const selectedServer = useSelectedServerId();
   const activity = useQuery({
-    queryKey: ["download-activity"],
+    queryKey: [selectedServer.data, "download-activity"],
     queryFn: () => window.api.downloads.getActivity(),
+    enabled: Boolean(selectedServer.data),
     refetchInterval: 1_000,
   });
   const refresh = () =>
-    client.invalidateQueries({ queryKey: ["download-activity"] });
+    client.invalidateQueries({
+      queryKey: [selectedServer.data, "download-activity"],
+    });
   const act = async (action: () => Promise<unknown>) => {
     await action();
     await refresh();
@@ -56,10 +61,7 @@ export function DownloadActivityMenu() {
         <div className="flex items-center justify-between border-b px-3 py-2">
           <span className="text-sm font-semibold">Activity</span>
           {!!activity.data?.items.some(
-            (item) =>
-              item.state === "completed" ||
-              item.state === "failed" ||
-              item.state === "paused",
+            (item) => item.state === "completed" || item.state === "failed",
           ) && (
             <Button
               size="xs"
@@ -117,9 +119,7 @@ export function DownloadActivityMenu() {
                       <IconPlayerPlay />
                     </Button>
                   ) : null}
-                  {(item.state === "completed" ||
-                    item.state === "failed" ||
-                    item.state === "paused") && (
+                  {(item.state === "completed" || item.state === "failed") && (
                     <Button
                       size="icon-xs"
                       variant="ghost"

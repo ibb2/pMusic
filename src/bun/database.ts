@@ -11,7 +11,12 @@ export type MediaCacheEntry<T = unknown> = {
   expiresAt: number;
 };
 
-export type DownloadStatus = "queued" | "downloading" | "paused" | "completed" | "failed";
+export type DownloadStatus =
+  | "queued"
+  | "downloading"
+  | "paused"
+  | "completed"
+  | "failed";
 
 export type DownloadRecord = {
   id: string;
@@ -280,11 +285,38 @@ export class DatabaseManager {
   }
 
   listDownloadsAll(): DownloadRecord[] {
-    return (this.db.query("SELECT * FROM downloads ORDER BY created_at DESC").all() as DownloadRow[]).map(mapDownload);
+    return (
+      this.db
+        .query("SELECT * FROM downloads ORDER BY created_at DESC")
+        .all() as DownloadRow[]
+    ).map(mapDownload);
   }
 
   deleteDownload(id: string): void {
     this.db.query("DELETE FROM downloads WHERE id = ?").run(id);
+  }
+
+  relocateDownloads(
+    entries: Array<{
+      id: string;
+      filePath: string | null;
+      partialPath: string | null;
+    }>,
+    storageDirectory: string,
+  ): void {
+    this.db.transaction(() => {
+      const now = Date.now();
+      const update = this.db.query(
+        "UPDATE downloads SET file_path = ?, partial_path = ?, updated_at = ? WHERE id = ?",
+      );
+      for (const entry of entries)
+        update.run(entry.filePath, entry.partialPath, now, entry.id);
+      this.db
+        .query(
+          "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        )
+        .run("downloads.storageDirectory", JSON.stringify(storageDirectory));
+    })();
   }
 
   getDownloadStorageBytes(serverId?: string): number {

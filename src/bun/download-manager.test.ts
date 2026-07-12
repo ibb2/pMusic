@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { DatabaseManager } from "./database";
 import {
   DownloadManager,
@@ -109,7 +115,7 @@ describe("DownloadManager", () => {
     database.close();
   });
 
-  test("rejects a server that ignores a resume range and preserves the partial", async () => {
+  test("safely restarts from zero when a server ignores a resume range", async () => {
     let attempt = 0;
     const { manager, database } = fixture(
       [track("3", "No Resume", "https://plex.test/no-resume.mp3")],
@@ -126,11 +132,10 @@ describe("DownloadManager", () => {
     writeFileSync(record.partialPath!, "kept");
 
     await manager.retry(failed.id);
-    const [retried] = await waitForDownloads(manager, "server", "failed");
+    const [retried] = await waitForDownloads(manager, "server", "completed");
 
-    expect(retried.state).toBe("failed");
-    expect(retried.error).toContain("resume range");
-    expect(readFileSync(record.partialPath!, "utf8")).toBe("kept");
+    expect(retried.state).toBe("completed");
+    expect(readFileSync(record.filePath!, "utf8")).toBe("replacement");
     database.close();
   });
 
@@ -162,25 +167,115 @@ describe("DownloadManager", () => {
 
     expect(manager.activity("server").items).toHaveLength(0);
     expect(readFileSync(path, "utf8")).toBe("sound");
-    expect(manager.statuses("server", [{ targetType: "track", ratingKey: "5" }])[0]).toMatchObject({ state: "downloaded", completedTracks: 1 });
+    expect(
+      manager.statuses("server", [{ targetType: "track", ratingKey: "5" }])[0],
+    ).toMatchObject({ state: "downloaded", completedTracks: 1 });
+    database.close();
+  });
+
+  test("deduplicates a target and reports active state and target title", async () => {
+    let release!: () => void;
+    const { manager, database } = fixture(
+      [track("active", "Active", "https://plex.test/active.flac")],
+      async () => {
+        await new Promise<void>((resolve) => (release = resolve));
+        return new Response("audio");
+      },
+    );
+    const first = await manager.enqueue(
+      "server",
+      "playlist",
+      "playlist-1",
+      "Road Trip",
+    );
+    await Bun.sleep(5);
+    const second = await manager.enqueue(
+      "server",
+      "playlist",
+      "playlist-1",
+      "Road Trip",
+    );
+    expect(second.map((item) => item.id)).toEqual(first.map((item) => item.id));
+    expect(manager.list("server")).toHaveLength(1);
+    expect(manager.list("server")[0].targetTitle).toBe("Road Trip");
+    expect(
+      manager.statuses("server", [
+        { targetType: "playlist", ratingKey: "playlist-1" },
+      ])[0],
+    ).toMatchObject({ state: "partial", activeState: "downloading" });
+    release();
+    await waitForDownloads(manager, "server", "completed");
+    database.close();
+  });
+
+  test("does not clear paused activity", () => {
+    const { manager, database, directory } = fixture(
+      [],
+      async () => new Response(),
+    );
+    database.upsertDownload({
+      id: "paused-visible",
+      serverId: "server",
+      ratingKey: "paused",
+      mediaType: "track",
+      title: "Paused",
+      filePath: join(directory, "paused.flac"),
+      partialPath: join(directory, "paused.flac.partial"),
+      status: "paused",
+      bytesDownloaded: 4,
+      totalBytes: 10,
+      error: null,
+      metadata: {
+        targetType: "track",
+        targetRatingKey: "paused",
+        targetTitle: "Paused",
+        artist: "Artist",
+        album: "Album",
+        url: "https://plex.test/paused",
+      },
+    });
+    manager.clearActivity("server", ["paused-visible"]);
+    expect(manager.activity("server").items.map((item) => item.id)).toContain(
+      "paused-visible",
+    );
     database.close();
   });
 
   test("stores paused downloads as a first-class persisted state", () => {
     const { manager, database } = fixture([], async () => new Response());
     database.upsertDownload({
-      id: "paused", serverId: "server", ratingKey: "6", mediaType: "track", title: "Paused",
-      filePath: null, partialPath: null, status: "paused", bytesDownloaded: 12, totalBytes: 20,
-      error: null, metadata: { targetType: "track", targetRatingKey: "6", artist: "Artist", album: "Album", url: "https://plex.test/6" },
+      id: "paused",
+      serverId: "server",
+      ratingKey: "6",
+      mediaType: "track",
+      title: "Paused",
+      filePath: null,
+      partialPath: null,
+      status: "paused",
+      bytesDownloaded: 12,
+      totalBytes: 20,
+      error: null,
+      metadata: {
+        targetType: "track",
+        targetRatingKey: "6",
+        artist: "Artist",
+        album: "Album",
+        url: "https://plex.test/6",
+      },
     });
-    expect(manager.list("server")[0]).toMatchObject({ state: "paused", bytesDownloaded: 12 });
+    expect(manager.list("server")[0]).toMatchObject({
+      state: "paused",
+      bytesDownloaded: 12,
+    });
     database.close();
   });
 
   test("bounds concurrent transfers and starts queued work as slots free", async () => {
     const releases: Array<() => void> = [];
     let started = 0;
-    const tracks = Array.from({ length: 6 }, (_, index) => track(String(index), `Track ${index}`, `https://plex.test/${index}`));
+    const tracks = Array.from({ length: 6 }, (_, index) =>
+      track(String(index), `Track ${index}`, `https://plex.test/${index}`),
+    );
     const { manager, database } = fixture(tracks, async () => {
       started += 1;
       await new Promise<void>((resolve) => releases.push(resolve));
@@ -194,7 +289,10 @@ describe("DownloadManager", () => {
     expect(started).toBe(4);
     for (const release of releases.splice(0)) release();
     // Release subsequently scheduled jobs until all finish.
-    for (let attempt = 0; attempt < 10; attempt += 1) { await Bun.sleep(5); for (const release of releases.splice(0)) release(); }
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      await Bun.sleep(5);
+      for (const release of releases.splice(0)) release();
+    }
     database.close();
   });
 
@@ -203,18 +301,40 @@ describe("DownloadManager", () => {
     temporaryDirectories.push(directory);
     const database = new DatabaseManager({ path: ":memory:" });
     database.upsertDownload({
-      id: "interrupted", serverId: "server", ratingKey: "7", mediaType: "track", title: "Interrupted",
-      filePath: join(directory, "7.flac"), partialPath: join(directory, "7.flac.partial"), status: "downloading",
-      bytesDownloaded: 4, totalBytes: 10, error: null,
-      metadata: { targetType: "track", targetRatingKey: "7", artist: "Artist", album: "Album", url: "https://plex.test/7" },
+      id: "interrupted",
+      serverId: "server",
+      ratingKey: "7",
+      mediaType: "track",
+      title: "Interrupted",
+      filePath: join(directory, "7.flac"),
+      partialPath: join(directory, "7.flac.partial"),
+      status: "downloading",
+      bytesDownloaded: 4,
+      totalBytes: 10,
+      error: null,
+      metadata: {
+        targetType: "track",
+        targetRatingKey: "7",
+        artist: "Artist",
+        album: "Album",
+        url: "https://plex.test/7",
+      },
     });
-    const manager = new DownloadManager({ database, resolver: { resolveTracks: async () => [] }, storageDirectory: directory, fetch: async () => new Response() });
+    const manager = new DownloadManager({
+      database,
+      resolver: { resolveTracks: async () => [] },
+      storageDirectory: directory,
+      fetch: async () => new Response(),
+    });
     expect(manager.list("server")[0].state).toBe("paused");
     database.close();
   });
 
   test("moves completed media and persists the chosen storage directory", async () => {
-    const { manager, database } = fixture([track("8", "Move", "https://plex.test/8.flac")], async () => new Response("audio"));
+    const { manager, database } = fixture(
+      [track("8", "Move", "https://plex.test/8.flac")],
+      async () => new Response("audio"),
+    );
     await manager.enqueue("server", "track", "8");
     const [item] = await waitForDownloads(manager, "server", "completed");
     const previous = database.getDownload(item.id)!.filePath!;
@@ -226,6 +346,39 @@ describe("DownloadManager", () => {
     expect(readFileSync(moved, "utf8")).toBe("audio");
     expect(Bun.file(previous).size).toBe(0);
     expect(database.get("downloads.storageDirectory")).toBe(destination);
+    database.close();
+  });
+
+  test("rolls back a storage move before changing records when a destination conflicts", async () => {
+    const { manager, database, directory } = fixture(
+      [
+        track(
+          "move-conflict",
+          "Move Conflict",
+          "https://plex.test/conflict.flac",
+        ),
+      ],
+      async () => new Response("original"),
+    );
+    await manager.enqueue("server", "track", "move-conflict");
+    const [item] = await waitForDownloads(manager, "server", "completed");
+    const previous = database.getDownload(item.id)!.filePath!;
+    const destination = mkdtempSync(join(tmpdir(), "rayna-conflict-"));
+    temporaryDirectories.push(destination);
+    mkdirSync(join(destination, "server"), { recursive: true });
+    writeFileSync(
+      join(destination, "server", basename(previous)),
+      "do-not-overwrite",
+    );
+
+    await expect(manager.setStorageDirectory(destination)).rejects.toThrow();
+
+    expect(database.getDownload(item.id)!.filePath).toBe(previous);
+    expect(readFileSync(previous, "utf8")).toBe("original");
+    expect(manager.storageStatus("server").storageDirectory).toBe(directory);
+    expect(
+      readFileSync(join(destination, "server", basename(previous)), "utf8"),
+    ).toBe("do-not-overwrite");
     database.close();
   });
 });

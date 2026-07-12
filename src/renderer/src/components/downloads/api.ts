@@ -2,7 +2,11 @@ import type { DownloadsApi } from "./types";
 
 export const downloadsApi: DownloadsApi = {
   async start(target) {
-    await window.api.downloads.create(target.type, target.ratingKey);
+    await window.api.downloads.create(
+      target.type,
+      target.ratingKey,
+      target.title,
+    );
   },
   async list() {
     const [items, storage] = await Promise.all([
