@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
 import { Route as AppSearchRouteImport } from './routes/app/search'
+import { Route as AppDownloadsRouteImport } from './routes/app/downloads'
 import { Route as AppLibraryRouteRouteImport } from './routes/app/library/route'
 import { Route as AppPlaylistRatingKeyRouteImport } from './routes/app/playlist.$ratingKey'
 import { Route as AppLibraryTracksRouteImport } from './routes/app/library/tracks'
@@ -58,6 +59,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AppSearchRoute = AppSearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppDownloadsRoute = AppDownloadsRouteImport.update({
+  id: '/downloads',
+  path: '/downloads',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppLibraryRouteRoute = AppLibraryRouteRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/setup': typeof SetupRoute
   '/app/library': typeof AppLibraryRouteRouteWithChildren
+  '/app/downloads': typeof AppDownloadsRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/': typeof AppIndexRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/setup': typeof SetupRoute
   '/app/library': typeof AppLibraryRouteRouteWithChildren
+  '/app/downloads': typeof AppDownloadsRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRoute
   '/app': typeof AppIndexRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/setup': typeof SetupRoute
   '/app/library': typeof AppLibraryRouteRouteWithChildren
+  '/app/downloads': typeof AppDownloadsRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/': typeof AppIndexRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/setup'
     | '/app/library'
+    | '/app/downloads'
     | '/app/search'
     | '/app/settings'
     | '/app/'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/setup'
     | '/app/library'
+    | '/app/downloads'
     | '/app/search'
     | '/app/settings'
     | '/app'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/setup'
     | '/app/library'
+    | '/app/downloads'
     | '/app/search'
     | '/app/settings'
     | '/app/'
@@ -261,6 +273,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/app/search'
       preLoaderRoute: typeof AppSearchRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/downloads': {
+      id: '/app/downloads'
+      path: '/downloads'
+      fullPath: '/app/downloads'
+      preLoaderRoute: typeof AppDownloadsRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/app/library': {
@@ -342,6 +361,7 @@ const AppLibraryRouteRouteWithChildren = AppLibraryRouteRoute._addFileChildren(
 
 interface AppRouteRouteChildren {
   AppLibraryRouteRoute: typeof AppLibraryRouteRouteWithChildren
+  AppDownloadsRoute: typeof AppDownloadsRoute
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -352,6 +372,7 @@ interface AppRouteRouteChildren {
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppLibraryRouteRoute: AppLibraryRouteRouteWithChildren,
+  AppDownloadsRoute: AppDownloadsRoute,
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,

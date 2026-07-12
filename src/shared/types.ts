@@ -179,6 +179,29 @@ export type DownloadProgress = Pick<
   'id' | 'state' | 'bytesDownloaded' | 'bytesTotal' | 'error' | 'updatedAt'
 >
 
+export type DownloadActivity = {
+  items: DownloadItem[]
+  activeCount: number
+  failedCount: number
+}
+
+export type DownloadedStatus = {
+  targetType: DownloadTargetType
+  ratingKey: string
+  state: 'not-downloaded' | 'partial' | 'downloaded'
+  completedTracks: number
+  totalTracks: number
+}
+
+export type DownloadGroup = {
+  targetType: DownloadTargetType
+  targetRatingKey: string
+  title: string
+  artist: string
+  items: DownloadItem[]
+  bytesTotal: number
+}
+
 export type OfflineStorageStatus = {
   storageDirectory: string
   usedBytes: number

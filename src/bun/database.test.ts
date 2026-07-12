@@ -26,7 +26,7 @@ describe("DatabaseManager", () => {
     manager.close();
 
     const reopened = new DatabaseManager({ path });
-    expect(reopened.getSchemaVersion()).toBe(2);
+    expect(reopened.getSchemaVersion()).toBe(3);
     expect(reopened.get("playback")).toEqual({ transcodeAudio: true });
     reopened.close();
   });
@@ -49,7 +49,7 @@ describe("DatabaseManager", () => {
     legacy.close();
 
     const manager = new DatabaseManager({ path });
-    expect(manager.getSchemaVersion()).toBe(2);
+    expect(manager.getSchemaVersion()).toBe(3);
     expect(manager.get("theme")).toBe("dark");
     manager.close();
     const check = new Database(path, { readonly: true });

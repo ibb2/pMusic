@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import BlankImage from "@/assets/512px-Black_colour.jpg";
+import { DownloadStatusIndicator } from "@/components/downloads";
 
 export function AlbumCard({ album }: { album: any }) {
   return (
@@ -16,7 +17,12 @@ export function AlbumCard({ album }: { album: any }) {
       params={{ ratingKey: album.ratingKey }}
       className="h-fit"
     >
-      <Card className="flex w-40 shrink-0 justify-center border-0 p-3 shadow-none ring-0 hover:rounded-lg hover:bg-zinc-300/60 bg-transparent dark:hover:bg-zinc-800/60">
+      <Card className="relative flex w-40 shrink-0 justify-center border-0 p-3 shadow-none ring-0 hover:rounded-lg hover:bg-zinc-300/60 bg-transparent dark:hover:bg-zinc-800/60">
+        <DownloadStatusIndicator
+          targetType="album"
+          ratingKey={String(album.ratingKey)}
+          className="absolute right-4 top-4 z-10"
+        />
         <CardHeader className="p-0 gap-0">
           <img
             src={album.thumb ?? BlankImage}
@@ -36,7 +42,9 @@ export function AlbumCard({ album }: { album: any }) {
           <CardDescription className="truncate text-xs leading-tight text-black/80 dark:text-muted-foreground">
             <Link
               to={`/app/artist/$ratingKey`}
-              params={{ ratingKey: album.artistRatingKey ?? album.parentRatingKey }}
+              params={{
+                ratingKey: album.artistRatingKey ?? album.parentRatingKey,
+              }}
             >
               <p className="hover:underline text-xs">{album.artist}</p>
             </Link>

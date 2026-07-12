@@ -17,11 +17,11 @@ import type {
 } from "../../../../shared/rpc";
 import { PlexServer } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MusicNote03Icon, Tick01Icon } from "@hugeicons/core-free-icons";
-import { DownloadManagerPanel, downloadsApi } from "@/components/downloads";
+import { DownloadStorageLocation } from "@/components/downloads";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
@@ -489,7 +489,24 @@ export function SettingsPage() {
 
           <section className="space-y-4">
             <h2 className="text-xl">Offline</h2>
-            <DownloadManagerPanel api={downloadsApi} />
+            <div className="space-y-5 rounded-lg border border-zinc-300 p-6 dark:border-zinc-700">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-medium">Offline downloads</p>
+                  <p className="text-sm text-muted-foreground">
+                    Browse downloaded albums, playlists, and tracks on their own
+                    page.
+                  </p>
+                </div>
+                <Link
+                  to="/app/downloads"
+                  className="inline-flex h-8 items-center rounded-full border border-border bg-input/30 px-3 text-sm font-medium hover:bg-input/50"
+                >
+                  View downloads
+                </Link>
+              </div>
+              <DownloadStorageLocation />
+            </div>
           </section>
 
           <section className="space-y-4">

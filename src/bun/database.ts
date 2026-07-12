@@ -11,7 +11,7 @@ export type MediaCacheEntry<T = unknown> = {
   expiresAt: number;
 };
 
-export type DownloadStatus = "queued" | "downloading" | "completed" | "failed";
+export type DownloadStatus = "queued" | "downloading" | "paused" | "completed" | "failed";
 
 export type DownloadRecord = {
   id: string;
@@ -88,7 +88,7 @@ type SyncRow = {
   details: string;
 };
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 export class DatabaseManager {
   private readonly db: Database;
@@ -279,6 +279,10 @@ export class DatabaseManager {
     ).map(mapDownload);
   }
 
+  listDownloadsAll(): DownloadRecord[] {
+    return (this.db.query("SELECT * FROM downloads ORDER BY created_at DESC").all() as DownloadRow[]).map(mapDownload);
+  }
+
   deleteDownload(id: string): void {
     this.db.query("DELETE FROM downloads WHERE id = ?").run(id);
   }
@@ -350,6 +354,7 @@ export class DatabaseManager {
       );
     if (version < 1) this.migration1();
     if (version < 2) this.migration2();
+    if (version < 3) this.migration3();
   }
 
   private migration1(): void {
@@ -410,6 +415,30 @@ export class DatabaseManager {
         CREATE INDEX IF NOT EXISTS sync_status_server_idx ON sync_status(server_id);
       `);
       this.db.run("PRAGMA user_version = 2");
+    })();
+  }
+
+  private migration3(): void {
+    this.db.transaction(() => {
+      this.db.run(`
+        CREATE TABLE downloads_v3 (
+          id TEXT PRIMARY KEY, server_id TEXT NOT NULL, rating_key TEXT NOT NULL,
+          media_type TEXT NOT NULL CHECK(media_type IN ('track', 'album', 'playlist')),
+          title TEXT NOT NULL, file_path TEXT, partial_path TEXT,
+          status TEXT NOT NULL CHECK(status IN ('queued', 'downloading', 'paused', 'completed', 'failed')),
+          bytes_downloaded INTEGER NOT NULL DEFAULT 0, total_bytes INTEGER, error TEXT,
+          metadata TEXT NOT NULL DEFAULT 'null', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+        );
+        INSERT INTO downloads_v3 SELECT id, server_id, rating_key, media_type, title, file_path, partial_path,
+          CASE WHEN status = 'failed' AND error = 'Download paused' THEN 'paused' ELSE status END,
+          bytes_downloaded, total_bytes, CASE WHEN error = 'Download paused' THEN NULL ELSE error END,
+          metadata, created_at, updated_at FROM downloads;
+        DROP TABLE downloads;
+        ALTER TABLE downloads_v3 RENAME TO downloads;
+        CREATE INDEX downloads_server_status_idx ON downloads(server_id, status);
+        CREATE INDEX downloads_server_rating_idx ON downloads(server_id, rating_key);
+      `);
+      this.db.run("PRAGMA user_version = 3");
     })();
   }
 

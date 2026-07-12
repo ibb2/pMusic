@@ -1,5 +1,6 @@
 import {
   createWriteStream,
+  copyFileSync,
   existsSync,
   mkdirSync,
   renameSync,
@@ -9,6 +10,8 @@ import {
 import { basename, extname, join, resolve, sep } from "node:path";
 import { once } from "node:events";
 import type {
+  DownloadActivity,
+  DownloadedStatus,
   DownloadItem,
   DownloadTargetType,
   OfflineStorageStatus,
@@ -55,21 +58,37 @@ type DownloadMetadata = {
   url: string;
   headers?: Record<string, string>;
   completedAt?: number;
+  activityClearedAt?: number;
 };
 
 export class DownloadManager {
   private readonly database: DatabaseManager;
   private readonly resolver: DownloadMediaResolver;
-  private readonly storageDirectory: string;
+  private storageDirectory: string;
   private readonly fetcher: DownloadFetcher;
   private readonly active = new Map<string, AbortController>();
+  private readonly pending = new Set<string>();
+  private readonly maxConcurrent = 3;
 
   constructor(options: DownloadManagerOptions) {
     this.database = options.database;
     this.resolver = options.resolver;
-    this.storageDirectory = resolve(options.storageDirectory);
+    this.storageDirectory = resolve(
+      (this.database.get("downloads.storageDirectory") as string | null) ??
+        options.storageDirectory,
+    );
     this.fetcher = options.fetch ?? globalThis.fetch;
     mkdirSync(this.storageDirectory, { recursive: true });
+    // Network work cannot survive a process restart. Keep partial files and
+    // expose every interrupted item as explicitly resumable.
+    for (const record of this.database.listDownloadsAll()) {
+      if (record.status === "queued" || record.status === "downloading")
+        this.database.upsertDownload({
+          ...record,
+          status: "paused",
+          error: null,
+        });
+    }
   }
 
   async enqueue(
@@ -132,21 +151,42 @@ export class DownloadManager {
     return this.toItem(queued);
   }
 
-  cancel(id: string): DownloadItem {
+  pause(id: string): DownloadItem {
     const record = this.requireRecord(id);
+    if (record.status === "completed" || record.status === "paused")
+      return this.toItem(record);
+    this.pending.delete(id);
     this.active.get(id)?.abort();
     return this.toItem(
       this.database.upsertDownload({
         ...record,
-        status: "failed",
-        error: "Download paused",
+        status: "paused",
+        error: null,
       }),
     );
+  }
+
+  resume(id: string): DownloadItem {
+    const record = this.requireRecord(id);
+    if (record.status !== "paused" && record.status !== "failed")
+      return this.toItem(record);
+    const queued = this.database.upsertDownload({
+      ...record,
+      status: "queued",
+      error: null,
+    });
+    this.start(id);
+    return this.toItem(queued);
+  }
+
+  cancel(id: string): DownloadItem {
+    return this.pause(id);
   }
 
   remove(id: string): void {
     const record = this.requireRecord(id);
     this.active.get(id)?.abort();
+    this.pending.delete(id);
     for (const path of [record.filePath, record.partialPath]) {
       if (path && this.isManagedPath(path)) rmSync(path, { force: true });
     }
@@ -160,8 +200,111 @@ export class DownloadManager {
       .map((record) => this.toItem(record));
   }
 
-  storageStatus(serverId: string): OfflineStorageStatus {
+  activity(serverId: string): DownloadActivity {
+    const items = this.database
+      .listDownloads(serverId)
+      .filter((record) => {
+        const metadata = record.metadata as DownloadMetadata;
+        return (
+          record.status === "queued" ||
+          record.status === "downloading" ||
+          !metadata.activityClearedAt
+        );
+      })
+      .map((record) => this.toItem(record));
+    return {
+      items,
+      activeCount: items.filter((item) =>
+        ["queued", "downloading", "paused"].includes(item.state),
+      ).length,
+      failedCount: items.filter((item) => item.state === "failed").length,
+    };
+  }
+
+  clearActivity(serverId: string, ids?: string[]): void {
+    for (const record of this.database.listDownloads(serverId)) {
+      if (ids && !ids.includes(record.id)) continue;
+      if (record.status === "downloading" || record.status === "queued")
+        continue;
+      this.database.upsertDownload({
+        ...record,
+        metadata: {
+          ...(record.metadata as DownloadMetadata),
+          activityClearedAt: Date.now(),
+        },
+      });
+    }
+  }
+
+  statuses(
+    serverId: string,
+    targets: Array<{ targetType: DownloadTargetType; ratingKey: string }>,
+  ): DownloadedStatus[] {
     const records = this.database.listDownloads(serverId);
+    return targets.map((target) => {
+      const matching = records.filter((record) => {
+        const metadata = record.metadata as DownloadMetadata;
+        return (
+          metadata.targetType === target.targetType &&
+          metadata.targetRatingKey === target.ratingKey
+        );
+      });
+      const completedTracks = matching.filter(
+        (record) => record.status === "completed",
+      ).length;
+      return {
+        ...target,
+        state:
+          completedTracks === 0
+            ? "not-downloaded"
+            : completedTracks === matching.length
+              ? "downloaded"
+              : "partial",
+        completedTracks,
+        totalTracks: matching.length,
+      };
+    });
+  }
+
+  async setStorageDirectory(directory: string): Promise<OfflineStorageStatus> {
+    const next = resolve(directory.trim());
+    if (!directory.trim()) throw new Error("Choose a download directory");
+    if (next === this.storageDirectory) return this.storageStatus("");
+    for (const record of this.database.listDownloadsAll()) {
+      if (record.status === "queued" || record.status === "downloading")
+        this.pause(record.id);
+    }
+    while (this.active.size > 0)
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    mkdirSync(next, { recursive: true });
+    const previous = this.storageDirectory;
+    for (const record of this.database.listDownloadsAll()) {
+      const directoryForServer = join(next, safeSegment(record.serverId));
+      mkdirSync(directoryForServer, { recursive: true });
+      const move = (path: string | null) => {
+        if (!path || !resolve(path).startsWith(`${previous}${sep}`))
+          return path;
+        const destination = join(directoryForServer, basename(path));
+        if (existsSync(path)) copyFileSync(path, destination);
+        return destination;
+      };
+      const filePath = move(record.filePath);
+      const partialPath = move(record.partialPath);
+      this.database.upsertDownload({ ...record, filePath, partialPath });
+      for (const path of [record.filePath, record.partialPath]) {
+        if (path && resolve(path).startsWith(`${previous}${sep}`))
+          rmSync(path, { force: true });
+      }
+    }
+    this.storageDirectory = next;
+    this.database.set("downloads.storageDirectory", next);
+    return this.storageStatus("");
+  }
+
+  storageStatus(serverId: string): OfflineStorageStatus {
+    const records = serverId
+      ? this.database.listDownloads(serverId)
+      : this.database.listDownloadsAll();
     let completedBytes = 0;
     let partialBytes = 0;
     for (const record of records) {
@@ -262,14 +405,13 @@ export class DownloadManager {
       const current = this.requireRecord(id);
       this.database.upsertDownload({
         ...current,
-        status: "failed",
+        status: controller.signal.aborted ? "paused" : "failed",
         bytesDownloaded: fileSize(current.partialPath),
-        error: controller.signal.aborted
-          ? "Download paused"
-          : errorMessage(error),
+        error: controller.signal.aborted ? null : errorMessage(error),
       });
     } finally {
       this.active.delete(id);
+      this.pump();
     }
   }
 
@@ -285,21 +427,31 @@ export class DownloadManager {
   }
 
   private start(id: string): void {
-    void this.run(id).catch((error) => {
-      const current = this.database.getDownload(id);
-      if (current)
-        this.database.upsertDownload({
-          ...current,
-          status: "failed",
-          error: errorMessage(error),
-        });
-    });
+    this.pending.add(id);
+    this.pump();
+  }
+
+  private pump(): void {
+    while (this.active.size < this.maxConcurrent && this.pending.size > 0) {
+      const id = this.pending.values().next().value as string;
+      this.pending.delete(id);
+      const record = this.database.getDownload(id);
+      if (!record || record.status !== "queued") continue;
+      void this.run(id).catch((error) => {
+        const current = this.database.getDownload(id);
+        if (current)
+          this.database.upsertDownload({
+            ...current,
+            status: "failed",
+            error: errorMessage(error),
+          });
+        this.pump();
+      });
+    }
   }
 
   private toItem(record: DownloadRecord): DownloadItem {
     const metadata = record.metadata as DownloadMetadata;
-    const paused =
-      record.status === "failed" && record.error === "Download paused";
     return {
       id: record.id,
       serverId: record.serverId,
@@ -309,10 +461,10 @@ export class DownloadManager {
       title: record.title,
       artist: metadata.artist ?? "",
       album: metadata.album ?? "",
-      state: paused ? "paused" : record.status,
+      state: record.status,
       bytesDownloaded: record.bytesDownloaded,
       bytesTotal: record.totalBytes,
-      error: paused ? null : record.error,
+      error: record.error,
       createdAt: new Date(record.createdAt).toISOString(),
       updatedAt: new Date(record.updatedAt).toISOString(),
       completedAt: metadata.completedAt

@@ -1,6 +1,8 @@
 import type {
   AlbumPageRequest,
   DownloadItem,
+  DownloadActivity,
+  DownloadedStatus,
   DownloadProgress,
   DownloadTargetType,
   LyricsResult,
@@ -47,6 +49,26 @@ export type RoadmapRPCRequests = {
     params: { downloadId: string };
     response: DownloadItem;
   };
+  downloadsPause: {
+    params: { downloadId: string };
+    response: DownloadItem;
+  };
+  downloadsResume: {
+    params: { downloadId: string };
+    response: DownloadItem;
+  };
+  downloadsGetActivity: {
+    params: void;
+    response: DownloadActivity;
+  };
+  downloadsClearActivity: {
+    params: { downloadIds?: string[] };
+    response: void;
+  };
+  downloadsGetStatus: {
+    params: { targets: Array<{ targetType: DownloadTargetType; ratingKey: string }> };
+    response: DownloadedStatus[];
+  };
   downloadsRemove: {
     params: { downloadId: string; deleteFile?: boolean };
     response: void;
@@ -57,6 +79,10 @@ export type RoadmapRPCRequests = {
   };
   offlineGetStorageStatus: {
     params: void;
+    response: OfflineStorageStatus;
+  };
+  offlineSetStorageDirectory: {
+    params: { directory: string };
     response: OfflineStorageStatus;
   };
   syncStart: {
@@ -313,9 +339,15 @@ export type RaynaRPC = {
       downloadsCreate: RoadmapRPCRequests["downloadsCreate"];
       downloadsList: RoadmapRPCRequests["downloadsList"];
       downloadsRetry: RoadmapRPCRequests["downloadsRetry"];
+      downloadsPause: RoadmapRPCRequests["downloadsPause"];
+      downloadsResume: RoadmapRPCRequests["downloadsResume"];
+      downloadsGetActivity: RoadmapRPCRequests["downloadsGetActivity"];
+      downloadsClearActivity: RoadmapRPCRequests["downloadsClearActivity"];
+      downloadsGetStatus: RoadmapRPCRequests["downloadsGetStatus"];
       downloadsRemove: RoadmapRPCRequests["downloadsRemove"];
       downloadsGetProgress: RoadmapRPCRequests["downloadsGetProgress"];
       offlineGetStorageStatus: RoadmapRPCRequests["offlineGetStorageStatus"];
+      offlineSetStorageDirectory: RoadmapRPCRequests["offlineSetStorageDirectory"];
       syncStart: RoadmapRPCRequests["syncStart"];
       syncGetStatus: RoadmapRPCRequests["syncGetStatus"];
       playerGetStatus: {

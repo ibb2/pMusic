@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import BlankImage from "@/assets/512px-Black_colour.jpg";
+import { DownloadStatusIndicator } from "@/components/downloads";
 
 export default function PlaylistCard({ playlist }: { playlist: any }) {
   return (
@@ -11,7 +12,12 @@ export default function PlaylistCard({ playlist }: { playlist: any }) {
       params={{ ratingKey: playlist.ratingKey }}
       className="h-fit"
     >
-      <Card className="flex w-40 shrink-0 justify-center border-0 p-3 shadow-none ring-0 hover:rounded-lg hover:bg-zinc-300/60 bg-transparent dark:hover:bg-zinc-800/60">
+      <Card className="relative flex w-40 shrink-0 justify-center border-0 p-3 shadow-none ring-0 hover:rounded-lg hover:bg-zinc-300/60 bg-transparent dark:hover:bg-zinc-800/60">
+        <DownloadStatusIndicator
+          targetType="playlist"
+          ratingKey={String(playlist.ratingKey)}
+          className="absolute right-4 top-4 z-10"
+        />
         <CardHeader className="p-0 gap-0">
           <img
             src={

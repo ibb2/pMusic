@@ -77,10 +77,16 @@ window.api = {
       rpc.request.downloadsCreate({ targetType, ratingKey }),
     list: (states) => rpc.request.downloadsList({ states }),
     retry: (downloadId) => rpc.request.downloadsRetry({ downloadId }),
+    pause: (downloadId) => rpc.request.downloadsPause({ downloadId }),
+    resume: (downloadId) => rpc.request.downloadsResume({ downloadId }),
+    getActivity: () => rpc.request.downloadsGetActivity(),
+    clearActivity: (downloadIds) => rpc.request.downloadsClearActivity({ downloadIds }),
+    getStatus: (targets) => rpc.request.downloadsGetStatus({ targets }),
     remove: (downloadId) => rpc.request.downloadsRemove({ downloadId }),
     getProgress: (downloadIds) =>
       rpc.request.downloadsGetProgress({ downloadIds }),
     getStorageStatus: () => rpc.request.offlineGetStorageStatus(),
+    setStorageDirectory: (directory) => rpc.request.offlineSetStorageDirectory({ directory }),
   },
   sync: {
     start: () => rpc.request.syncStart(),

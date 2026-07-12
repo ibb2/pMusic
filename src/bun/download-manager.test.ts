@@ -149,6 +149,85 @@ describe("DownloadManager", () => {
     expect(Bun.file(path).size).toBe(0);
     database.close();
   });
+
+  test("persists paused state and hides cleared terminal activity without deleting media", async () => {
+    const { manager, database } = fixture(
+      [track("5", "Pause", "https://plex.test/pause.ogg")],
+      async () => new Response("sound"),
+    );
+    await manager.enqueue("server", "track", "5");
+    const [item] = await waitForDownloads(manager, "server", "completed");
+    const path = database.getDownload(item.id)!.filePath!;
+    manager.clearActivity("server", [item.id]);
+
+    expect(manager.activity("server").items).toHaveLength(0);
+    expect(readFileSync(path, "utf8")).toBe("sound");
+    expect(manager.statuses("server", [{ targetType: "track", ratingKey: "5" }])[0]).toMatchObject({ state: "downloaded", completedTracks: 1 });
+    database.close();
+  });
+
+  test("stores paused downloads as a first-class persisted state", () => {
+    const { manager, database } = fixture([], async () => new Response());
+    database.upsertDownload({
+      id: "paused", serverId: "server", ratingKey: "6", mediaType: "track", title: "Paused",
+      filePath: null, partialPath: null, status: "paused", bytesDownloaded: 12, totalBytes: 20,
+      error: null, metadata: { targetType: "track", targetRatingKey: "6", artist: "Artist", album: "Album", url: "https://plex.test/6" },
+    });
+    expect(manager.list("server")[0]).toMatchObject({ state: "paused", bytesDownloaded: 12 });
+    database.close();
+  });
+
+  test("bounds concurrent transfers and starts queued work as slots free", async () => {
+    const releases: Array<() => void> = [];
+    let started = 0;
+    const tracks = Array.from({ length: 6 }, (_, index) => track(String(index), `Track ${index}`, `https://plex.test/${index}`));
+    const { manager, database } = fixture(tracks, async () => {
+      started += 1;
+      await new Promise<void>((resolve) => releases.push(resolve));
+      return new Response("sound");
+    });
+    await manager.enqueue("server", "album", "album");
+    await Bun.sleep(5);
+    expect(started).toBe(3);
+    releases.shift()?.();
+    await Bun.sleep(10);
+    expect(started).toBe(4);
+    for (const release of releases.splice(0)) release();
+    // Release subsequently scheduled jobs until all finish.
+    for (let attempt = 0; attempt < 10; attempt += 1) { await Bun.sleep(5); for (const release of releases.splice(0)) release(); }
+    database.close();
+  });
+
+  test("normalizes interrupted persisted work to paused after restart", () => {
+    const directory = mkdtempSync(join(tmpdir(), "rayna-restart-"));
+    temporaryDirectories.push(directory);
+    const database = new DatabaseManager({ path: ":memory:" });
+    database.upsertDownload({
+      id: "interrupted", serverId: "server", ratingKey: "7", mediaType: "track", title: "Interrupted",
+      filePath: join(directory, "7.flac"), partialPath: join(directory, "7.flac.partial"), status: "downloading",
+      bytesDownloaded: 4, totalBytes: 10, error: null,
+      metadata: { targetType: "track", targetRatingKey: "7", artist: "Artist", album: "Album", url: "https://plex.test/7" },
+    });
+    const manager = new DownloadManager({ database, resolver: { resolveTracks: async () => [] }, storageDirectory: directory, fetch: async () => new Response() });
+    expect(manager.list("server")[0].state).toBe("paused");
+    database.close();
+  });
+
+  test("moves completed media and persists the chosen storage directory", async () => {
+    const { manager, database } = fixture([track("8", "Move", "https://plex.test/8.flac")], async () => new Response("audio"));
+    await manager.enqueue("server", "track", "8");
+    const [item] = await waitForDownloads(manager, "server", "completed");
+    const previous = database.getDownload(item.id)!.filePath!;
+    const destination = mkdtempSync(join(tmpdir(), "rayna-moved-"));
+    temporaryDirectories.push(destination);
+    await manager.setStorageDirectory(destination);
+    const moved = database.getDownload(item.id)!.filePath!;
+    expect(moved.startsWith(destination)).toBe(true);
+    expect(readFileSync(moved, "utf8")).toBe("audio");
+    expect(Bun.file(previous).size).toBe(0);
+    expect(database.get("downloads.storageDirectory")).toBe(destination);
+    database.close();
+  });
 });
 
 function track(

@@ -13,6 +13,7 @@ import {
   AudioWave01FreeIcons,
   Home02Icon,
   LibraryIcon,
+  Download04Icon,
   MusicNote03Icon,
   Vynil03Icon,
 } from "@hugeicons/core-free-icons";
@@ -111,6 +112,7 @@ const data = {
     { name: "Tracks", url: "/app/library/tracks", icon: AudioWave01FreeIcons },
     { name: "Artists", url: "/app/library/artists", icon: MusicNote03Icon },
     { name: "Playlists", url: "/app/library/playlists", icon: LibraryIcon },
+    { name: "Downloads", url: "/app/downloads", icon: Download04Icon },
     // {
     //   name: "All Music",
     //   url: "#",

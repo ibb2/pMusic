@@ -136,6 +136,20 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
           : items;
       },
       downloadsRetry: ({ downloadId }) => downloads.retry(downloadId),
+      downloadsPause: ({ downloadId }) => downloads.pause(downloadId),
+      downloadsResume: ({ downloadId }) => downloads.resume(downloadId),
+      downloadsGetActivity: async () => {
+        const server = await auth.getUserSelectedServer();
+        return server ? downloads.activity(server.clientIdentifier) : { items: [], activeCount: 0, failedCount: 0 };
+      },
+      downloadsClearActivity: async ({ downloadIds }) => {
+        const server = await auth.getUserSelectedServer();
+        if (server) downloads.clearActivity(server.clientIdentifier, downloadIds);
+      },
+      downloadsGetStatus: async ({ targets }) => {
+        const server = await auth.getUserSelectedServer();
+        return server ? downloads.statuses(server.clientIdentifier, targets) : targets.map((target) => ({ ...target, state: "not-downloaded" as const, completedTracks: 0, totalTracks: 0 }));
+      },
       downloadsRemove: ({ downloadId }) => downloads.remove(downloadId),
       downloadsGetProgress: async ({ downloadIds }) => {
         const server = await auth.getUserSelectedServer();
@@ -158,6 +172,11 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
         const server = await auth.getUserSelectedServer();
         if (!server) return downloads.storageStatus("");
         return downloads.storageStatus(server.clientIdentifier);
+      },
+      offlineSetStorageDirectory: async ({ directory }) => {
+        await downloads.setStorageDirectory(directory);
+        const server = await auth.getUserSelectedServer();
+        return downloads.storageStatus(server?.clientIdentifier ?? "");
       },
       syncStart: async () => {
         const server = await auth.getUserSelectedServer();

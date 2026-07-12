@@ -19,6 +19,7 @@ import {
 } from "../ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { DownloadActivityMenu } from "@/components/downloads/DownloadActivityMenu";
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
@@ -48,9 +49,8 @@ export function TopBar() {
   const { theme, setTheme } = useTheme();
   const { ultraBlur, enabled } = useUltraBlur();
   const hasUltraBlur = !!ultraBlur && enabled;
-  const currentQuery = new URLSearchParams(
-    routerState.location.searchStr,
-  ).get("q") ?? "";
+  const currentQuery =
+    new URLSearchParams(routerState.location.searchStr).get("q") ?? "";
   const [searchQuery, setSearchQuery] = useState(currentQuery);
   const [debouncedQuery, setDebouncedQuery] = useState(currentQuery);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -85,8 +85,7 @@ export function TopBar() {
         : [],
     [autocomplete.data],
   );
-  const showSuggestions =
-    searchFocused && searchQuery.trim().length >= 2;
+  const showSuggestions = searchFocused && searchQuery.trim().length >= 2;
 
   useEffect(() => setActiveSuggestion(-1), [debouncedQuery]);
 
@@ -289,6 +288,7 @@ export function TopBar() {
       </form>
 
       <div className="flex items-center">
+        <DownloadActivityMenu />
         {/* <Link to={'/app/settings'}> */}
         <DropdownMenu>
           <DropdownMenuTrigger

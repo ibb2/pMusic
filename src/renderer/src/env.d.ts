@@ -23,6 +23,8 @@ import type {
   DownloadProgress,
   DownloadState,
   DownloadTargetType,
+  DownloadActivity,
+  DownloadedStatus,
   OfflineStorageStatus,
   SyncStatus,
   LyricsResult,
@@ -102,9 +104,15 @@ declare global {
         ) => Promise<DownloadItem[]>;
         list: (states?: DownloadState[]) => Promise<DownloadItem[]>;
         retry: (downloadId: string) => Promise<DownloadItem>;
+        pause: (downloadId: string) => Promise<DownloadItem>;
+        resume: (downloadId: string) => Promise<DownloadItem>;
+        getActivity: () => Promise<DownloadActivity>;
+        clearActivity: (downloadIds?: string[]) => Promise<void>;
+        getStatus: (targets: Array<{ targetType: DownloadTargetType; ratingKey: string }>) => Promise<DownloadedStatus[]>;
         remove: (downloadId: string) => Promise<void>;
         getProgress: (downloadIds?: string[]) => Promise<DownloadProgress[]>;
         getStorageStatus: () => Promise<OfflineStorageStatus>;
+        setStorageDirectory: (directory: string) => Promise<OfflineStorageStatus>;
       };
       sync: {
         start: () => Promise<SyncStatus>;
