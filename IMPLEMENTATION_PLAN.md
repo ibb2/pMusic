@@ -241,6 +241,31 @@ Completion gate:
 - [ ] Screenshots are current, legible, repository-owned, and safe to publish.
 - [ ] All practical roadmap items are checked only after verification.
 
+## Phase 10 — Library, Download Activity, and Lyrics UX
+
+Owner: Library, downloads, and lyrics sub-agents; integration and verification by primary agent
+
+- [x] Remove redundant page-level search controls from Albums and Tracks while retaining global search.
+- [x] Add filtering and sorting controls to Artists and Playlists.
+- [x] Convert Tracks to TanStack infinite querying with automatic end-of-list fetching.
+- [x] Add a compact, scrollable activity menu immediately before the profile menu.
+- [x] Persist download activity and allow completed or failed activity entries to be cleared without deleting media.
+- [x] Move download management from Settings to a dedicated, grouped Downloads page.
+- [x] Add matching search, status filters, sorting, and removal controls to Downloads.
+- [x] Add a Settings link to Downloads and a configurable download storage location.
+- [x] Add downloaded-state indicators to album, track, and playlist UI.
+- [x] Persist paused downloads and support pause and resume.
+- [x] Limit concurrent transfers and resume queued work as slots become available.
+- [x] Replace the lyrics music-note control with a Lucide microphone control.
+- [x] Make lyrics replace the main route content and restore the previous route when toggled off.
+
+Completion gate:
+
+- [ ] Desktop verification confirms all four library pages expose the intended filters and Tracks automatically loads another page.
+- [ ] Desktop verification confirms activity clearing, pause/resume, grouping, downloaded indicators, and the Settings download controls.
+- [ ] Desktop verification confirms the microphone toggles the full main-content lyrics view and restores the prior route.
+- [x] Automated tests cover paused state, restart normalization, bounded transfers, activity clearing, storage migration, and offline playback routing.
+
 ## Final Definition of Done
 
 - [ ] Albums and Tracks provide complete-library search, sorting, and facets.
