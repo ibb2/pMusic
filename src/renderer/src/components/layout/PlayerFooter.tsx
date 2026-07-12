@@ -250,7 +250,7 @@ export function PlayerFooter({
           size="icon"
           className="text-muted-foreground hover:text-foreground"
           onClick={onToggleLyrics}
-          disabled={!currentTrack}
+          disabled={!lyricsOpen && !currentTrack}
           aria-label={lyricsOpen ? "Close lyrics" : "Open lyrics"}
         >
           <LyricsIcon className="h-4 w-4" />
