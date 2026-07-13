@@ -1,5 +1,12 @@
 import BlankImage from "@/assets/512px-Black_colour.jpg";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -71,41 +78,51 @@ function RouteComponent() {
           </p>
         </div>
         <div className="grid gap-2 md:grid-cols-3">
-          <select
-            aria-label="Filter artists by initial"
-            className="h-9 rounded-md border bg-background px-3 text-sm"
+          <Select
             value={initial}
-            onChange={(event) => setInitial(event.target.value)}
+            onValueChange={(value) => setInitial(value ?? "all")}
           >
-            <option value="all">All artists</option>
-            {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => (
-              <option key={letter} value={letter}>
-                Starts with {letter}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Sort artists"
-            className="h-9 rounded-md border bg-background px-3 text-sm"
+            <SelectTrigger
+              className="w-full"
+              aria-label="Filter artists by initial"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All artists</SelectItem>
+              {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => (
+                <SelectItem key={letter} value={letter}>
+                  Starts with {letter}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
             value={sortField}
-            onChange={(event) =>
-              setSortField(event.target.value as "title" | "dateAdded")
+            onValueChange={(value) =>
+              setSortField(value as "title" | "dateAdded")
             }
           >
-            <option value="title">Name</option>
-            <option value="dateAdded">Date added</option>
-          </select>
-          <select
-            aria-label="Sort direction"
-            className="h-9 rounded-md border bg-background px-3 text-sm"
+            <SelectTrigger className="w-full" aria-label="Sort artists">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="title">Name</SelectItem>
+              <SelectItem value="dateAdded">Date added</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
             value={direction}
-            onChange={(event) =>
-              setDirection(event.target.value as "asc" | "desc")
-            }
+            onValueChange={(value) => setDirection(value as "asc" | "desc")}
           >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
+            <SelectTrigger className="w-full" aria-label="Sort direction">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="asc">Ascending</SelectItem>
+              <SelectItem value="desc">Descending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </header>
 

@@ -1,4 +1,11 @@
 import BlankImage from "@/assets/512px-Black_colour.jpg";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -114,43 +121,51 @@ function RouteComponent() {
           </p>
         </div>
         <div className="grid gap-2 md:grid-cols-3">
-          <select
-            aria-label="Filter playlists by type"
-            className="h-9 rounded-md border bg-background px-3 text-sm"
+          <Select
             value={playlistType}
-            onChange={(event) =>
-              setPlaylistType(event.target.value as "all" | "smart" | "manual")
+            onValueChange={(value) =>
+              setPlaylistType(value as "all" | "smart" | "manual")
             }
           >
-            <option value="all">All playlists</option>
-            <option value="manual">Manual playlists</option>
-            <option value="smart">Smart playlists</option>
-          </select>
-          <select
-            aria-label="Sort playlists"
-            className="h-9 rounded-md border bg-background px-3 text-sm"
+            <SelectTrigger
+              className="w-full"
+              aria-label="Filter playlists by type"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All playlists</SelectItem>
+              <SelectItem value="manual">Manual playlists</SelectItem>
+              <SelectItem value="smart">Smart playlists</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
             value={sortField}
-            onChange={(event) =>
-              setSortField(
-                event.target.value as "title" | "dateAdded" | "duration",
-              )
+            onValueChange={(value) =>
+              setSortField(value as "title" | "dateAdded" | "duration")
             }
           >
-            <option value="title">Title</option>
-            <option value="dateAdded">Date added</option>
-            <option value="duration">Duration</option>
-          </select>
-          <select
-            aria-label="Sort direction"
-            className="h-9 rounded-md border bg-background px-3 text-sm"
+            <SelectTrigger className="w-full" aria-label="Sort playlists">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="title">Title</SelectItem>
+              <SelectItem value="dateAdded">Date added</SelectItem>
+              <SelectItem value="duration">Duration</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
             value={direction}
-            onChange={(event) =>
-              setDirection(event.target.value as "asc" | "desc")
-            }
+            onValueChange={(value) => setDirection(value as "asc" | "desc")}
           >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
+            <SelectTrigger className="w-full" aria-label="Sort direction">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="asc">Ascending</SelectItem>
+              <SelectItem value="desc">Descending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </header>
 
