@@ -20,6 +20,7 @@
     "dev:renderer": "vite --host 127.0.0.1",
     "dev:desktop:live": "RAYNA_RENDERER_URL=http://127.0.0.1:5173 bun run electrobun -- dev",
     "dev": "concurrently -k \"bun run dev:renderer\" \"bun run dev:desktop:live\"",
+    "dev:hmr": "concurrently \"bun run hmr\" \"bun run start\"",
     "dev:desktop": "bun run electrobun -- dev",
     "build:renderer": "vite build",
     "build:desktop": "bun run electrobun -- build",

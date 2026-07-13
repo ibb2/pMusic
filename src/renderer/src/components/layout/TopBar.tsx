@@ -287,7 +287,7 @@ export function TopBar() {
         </div>
       </form>
 
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         <DownloadActivityMenu />
         {/* <Link to={'/app/settings'}> */}
         <DropdownMenu>
