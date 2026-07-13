@@ -1,5 +1,12 @@
 import { AlbumCard } from "@/components/music/albumcard";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { AlbumSortField } from "../../../../../shared/types";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -57,52 +64,68 @@ function AlbumsPage() {
           </p>
         </div>
         <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-          <select
-            aria-label="Filter by artist"
-            className="rounded-md border bg-background px-3 text-sm"
-            value={artistKeys}
-            onChange={(e) => setArtistKeys(e.target.value)}
+          <Select
+            value={artistKeys || "all"}
+            onValueChange={(value) =>
+              setArtistKeys(!value || value === "all" ? "" : value)
+            }
           >
-            <option value="">All artists</option>
-            {artists.map((artist) => (
-              <option key={artist.ratingKey} value={artist.ratingKey}>
-                {artist.title}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Filter by year"
-            className="rounded-md border bg-background px-3 text-sm"
-            value={years}
-            onChange={(e) => setYears(e.target.value)}
+            <SelectTrigger className="w-full" aria-label="Filter by artist">
+              <SelectValue placeholder="All artists" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All artists</SelectItem>
+              {artists.map((artist) => (
+                <SelectItem key={artist.ratingKey} value={artist.ratingKey}>
+                  {artist.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={years || "all"}
+            onValueChange={(value) =>
+              setYears(!value || value === "all" ? "" : value)
+            }
           >
-            <option value="">All years</option>
-            {availableYears.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Sort albums"
-            className="rounded-md border bg-background px-3 text-sm"
+            <SelectTrigger className="w-full" aria-label="Filter by year">
+              <SelectValue placeholder="All years" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All years</SelectItem>
+              {availableYears.map((year) => (
+                <SelectItem key={year} value={String(year)}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
             value={sortField}
-            onChange={(e) => setSortField(e.target.value as AlbumSortField)}
+            onValueChange={(value) => setSortField(value as AlbumSortField)}
           >
-            <option value="title">Title</option>
-            <option value="artist">Artist</option>
-            <option value="year">Year</option>
-            <option value="dateAdded">Date added</option>
-          </select>
-          <select
-            aria-label="Sort direction"
-            className="rounded-md border bg-background px-3 text-sm"
+            <SelectTrigger className="w-full" aria-label="Sort albums">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="title">Title</SelectItem>
+              <SelectItem value="artist">Artist</SelectItem>
+              <SelectItem value="year">Year</SelectItem>
+              <SelectItem value="dateAdded">Date added</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
             value={direction}
-            onChange={(e) => setDirection(e.target.value as "asc" | "desc")}
+            onValueChange={(value) => setDirection(value as "asc" | "desc")}
           >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
+            <SelectTrigger className="w-full" aria-label="Sort direction">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="asc">Ascending</SelectItem>
+              <SelectItem value="desc">Descending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </header>
       {isStale && (
