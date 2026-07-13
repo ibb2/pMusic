@@ -70,7 +70,7 @@ function AlbumsPage() {
               setArtistKeys(!value || value === "all" ? "" : value)
             }
           >
-            <SelectTrigger aria-label="Filter by artist">
+            <SelectTrigger className="w-40" aria-label="Filter by artist">
               <SelectValue placeholder="All artists" />
             </SelectTrigger>
             <SelectContent>
@@ -88,7 +88,7 @@ function AlbumsPage() {
               setYears(!value || value === "all" ? "" : value)
             }
           >
-            <SelectTrigger aria-label="Filter by year">
+            <SelectTrigger className="w-40" aria-label="Filter by year">
               <SelectValue placeholder="All years" />
             </SelectTrigger>
             <SelectContent>
@@ -104,7 +104,7 @@ function AlbumsPage() {
             value={sortField}
             onValueChange={(value) => setSortField(value as AlbumSortField)}
           >
-            <SelectTrigger aria-label="Sort albums">
+            <SelectTrigger className="w-40" aria-label="Sort albums">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -118,7 +118,7 @@ function AlbumsPage() {
             value={direction}
             onValueChange={(value) => setDirection(value as "asc" | "desc")}
           >
-            <SelectTrigger aria-label="Sort direction">
+            <SelectTrigger className="w-40" aria-label="Sort direction">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

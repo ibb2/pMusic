@@ -77,13 +77,13 @@ function RouteComponent() {
             Browse artists across your selected libraries.
           </p>
         </div>
-        <div className="grid gap-2 md:grid-cols-3">
-          <Select
+        <div className="flex flex-row gap-2">
+          {/*<Select
             value={initial}
             onValueChange={(value) => setInitial(value ?? "all")}
           >
             <SelectTrigger
-              className="w-full"
+
               aria-label="Filter artists by initial"
             >
               <SelectValue />
@@ -96,14 +96,14 @@ function RouteComponent() {
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
+          </Select>*/}
           <Select
             value={sortField}
             onValueChange={(value) =>
               setSortField(value as "title" | "dateAdded")
             }
           >
-            <SelectTrigger className="w-full" aria-label="Sort artists">
+            <SelectTrigger className="w-40" aria-label="Sort artists">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -115,7 +115,7 @@ function RouteComponent() {
             value={direction}
             onValueChange={(value) => setDirection(value as "asc" | "desc")}
           >
-            <SelectTrigger className="w-full" aria-label="Sort direction">
+            <SelectTrigger className="w-40" aria-label="Sort direction">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

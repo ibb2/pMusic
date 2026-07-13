@@ -81,14 +81,14 @@ function TracksPage() {
             Play or queue tracks across your selected libraries.
           </p>
         </div>
-        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+        <div className="flex flex-row gap-2">
           <Select
-            value={artistKeys || "all"}
+            value={artistKeys || "all artists"}
             onValueChange={(value) =>
               setArtistKeys(!value || value === "all" ? "" : value)
             }
           >
-            <SelectTrigger className="w-full" aria-label="Filter by artist">
+            <SelectTrigger className="w-40" aria-label="Filter by artist">
               <SelectValue placeholder="All artists" />
             </SelectTrigger>
             <SelectContent>
@@ -101,12 +101,12 @@ function TracksPage() {
             </SelectContent>
           </Select>
           <Select
-            value={albumKeys || "all"}
+            value={albumKeys || "all albums"}
             onValueChange={(value) =>
               setAlbumKeys(!value || value === "all" ? "" : value)
             }
           >
-            <SelectTrigger className="w-full" aria-label="Filter by album">
+            <SelectTrigger className="w-40" aria-label="Filter by album">
               <SelectValue placeholder="All albums" />
             </SelectTrigger>
             <SelectContent>
@@ -122,7 +122,7 @@ function TracksPage() {
             value={sortField}
             onValueChange={(value) => setSortField(value as TrackSortField)}
           >
-            <SelectTrigger className="w-full" aria-label="Sort tracks">
+            <SelectTrigger className="w-40" aria-label="Sort tracks">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -136,7 +136,7 @@ function TracksPage() {
             value={direction}
             onValueChange={(value) => setDirection(value as "asc" | "desc")}
           >
-            <SelectTrigger className="w-full" aria-label="Sort direction">
+            <SelectTrigger className="w-40" aria-label="Sort direction">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

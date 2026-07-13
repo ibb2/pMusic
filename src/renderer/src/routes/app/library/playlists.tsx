@@ -128,7 +128,7 @@ function RouteComponent() {
             }
           >
             <SelectTrigger
-              className="w-full"
+              className="w-40"
               aria-label="Filter playlists by type"
             >
               <SelectValue />
@@ -145,7 +145,7 @@ function RouteComponent() {
               setSortField(value as "title" | "dateAdded" | "duration")
             }
           >
-            <SelectTrigger className="w-full" aria-label="Sort playlists">
+            <SelectTrigger className="w-40" aria-label="Sort playlists">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -158,7 +158,7 @@ function RouteComponent() {
             value={direction}
             onValueChange={(value) => setDirection(value as "asc" | "desc")}
           >
-            <SelectTrigger className="w-full" aria-label="Sort direction">
+            <SelectTrigger className="w-40" aria-label="Sort direction">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
