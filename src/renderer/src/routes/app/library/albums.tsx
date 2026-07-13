@@ -63,14 +63,14 @@ function AlbumsPage() {
             Browse every selected music library.
           </p>
         </div>
-        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+        <div className="flex flex-row gap-2">
           <Select
-            value={artistKeys || "all"}
+            value={artistKeys || "all artists"}
             onValueChange={(value) =>
               setArtistKeys(!value || value === "all" ? "" : value)
             }
           >
-            <SelectTrigger className="w-full" aria-label="Filter by artist">
+            <SelectTrigger aria-label="Filter by artist">
               <SelectValue placeholder="All artists" />
             </SelectTrigger>
             <SelectContent>
@@ -83,12 +83,12 @@ function AlbumsPage() {
             </SelectContent>
           </Select>
           <Select
-            value={years || "all"}
+            value={years || "all years"}
             onValueChange={(value) =>
               setYears(!value || value === "all" ? "" : value)
             }
           >
-            <SelectTrigger className="w-full" aria-label="Filter by year">
+            <SelectTrigger aria-label="Filter by year">
               <SelectValue placeholder="All years" />
             </SelectTrigger>
             <SelectContent>
@@ -104,7 +104,7 @@ function AlbumsPage() {
             value={sortField}
             onValueChange={(value) => setSortField(value as AlbumSortField)}
           >
-            <SelectTrigger className="w-full" aria-label="Sort albums">
+            <SelectTrigger aria-label="Sort albums">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -118,7 +118,7 @@ function AlbumsPage() {
             value={direction}
             onValueChange={(value) => setDirection(value as "asc" | "desc")}
           >
-            <SelectTrigger className="w-full" aria-label="Sort direction">
+            <SelectTrigger aria-label="Sort direction">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
