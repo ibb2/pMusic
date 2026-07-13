@@ -85,7 +85,7 @@ describe("DownloadManager", () => {
       [track("9", "Resume", "https://plex.test/resume.mp3")],
       async (_input, init) => {
         attempt += 1;
-        if (attempt === 1) return new Response("no", { status: 503 });
+        if (attempt <= 2) return new Response("no", { status: 503 });
         resumeRange = new Headers(init?.headers).get("Range");
         return new Response(body.slice(4), {
           status: 206,
@@ -121,7 +121,7 @@ describe("DownloadManager", () => {
       [track("3", "No Resume", "https://plex.test/no-resume.mp3")],
       async () => {
         attempt += 1;
-        return attempt === 1
+        return attempt <= 2
           ? new Response("unavailable", { status: 500 })
           : new Response("replacement", { status: 200 });
       },
@@ -152,6 +152,127 @@ describe("DownloadManager", () => {
 
     expect(database.getDownload(item.id)).toBeNull();
     expect(Bun.file(path).size).toBe(0);
+    database.close();
+  });
+
+  test("fails over to another Plex connection and resumes bytes written before a socket failure", async () => {
+    const requested: Array<{ url: string; range: string | null }> = [];
+    const source = track("failover", "Failover", "https://local.test/a.flac");
+    source.candidates = [
+      { url: "https://local.test/a.flac" },
+      { url: "https://relay.test/a.flac" },
+    ];
+    const { manager, database } = fixture([source], async (input, init) => {
+      const url = String(input);
+      requested.push({
+        url,
+        range: new Headers(init?.headers).get("Range"),
+      });
+      if (url.includes("local.test")) {
+        let reads = 0;
+        return new Response(
+          new ReadableStream({
+            pull(controller) {
+              reads += 1;
+              if (reads === 1)
+                controller.enqueue(new TextEncoder().encode("abcd"));
+              else controller.error(new Error("socket closed"));
+            },
+          }),
+          { status: 200, headers: { "Content-Length": "10" } },
+        );
+      }
+      return new Response("efghij", {
+        status: 206,
+        headers: {
+          "Content-Length": "6",
+          "Content-Range": "bytes 4-9/10",
+        },
+      });
+    });
+
+    await manager.enqueue("server", "track", "failover");
+    const [completed] = await waitForDownloads(manager, "server", "completed");
+
+    expect(completed.bytesDownloaded).toBe(10);
+    expect(requested).toEqual([
+      { url: "https://local.test/a.flac", range: null },
+      { url: "https://relay.test/a.flac", range: "bytes=4-" },
+    ]);
+    expect(
+      readFileSync(database.getDownload(completed.id)!.filePath!, "utf8"),
+    ).toBe("abcdefghij");
+    database.close();
+  });
+
+  test("retries a transient server failure once when only one connection exists", async () => {
+    let attempts = 0;
+    const { manager, database } = fixture(
+      [track("transient", "Transient", "https://plex.test/transient.flac")],
+      async () => {
+        attempts += 1;
+        return attempts === 1
+          ? new Response("later", { status: 503 })
+          : new Response("audio", { status: 200 });
+      },
+    );
+
+    await manager.enqueue("server", "track", "transient");
+    await waitForDownloads(manager, "server", "completed");
+
+    expect(attempts).toBe(2);
+    database.close();
+  });
+
+  test("refreshes connection candidates when resuming a persisted legacy download", async () => {
+    const directory = mkdtempSync(join(tmpdir(), "rayna-refresh-"));
+    temporaryDirectories.push(directory);
+    const database = new DatabaseManager({ path: ":memory:" });
+    database.upsertDownload({
+      id: "legacy",
+      serverId: "server",
+      ratingKey: "legacy-track",
+      mediaType: "playlist",
+      title: "Legacy",
+      filePath: join(directory, "legacy.flac"),
+      partialPath: join(directory, "legacy.flac.partial"),
+      status: "failed",
+      bytesDownloaded: 0,
+      totalBytes: null,
+      error: "socket closed",
+      metadata: {
+        targetType: "playlist",
+        targetRatingKey: "playlist",
+        artist: "Artist",
+        album: "Album",
+        url: "https://dead.test/legacy.flac",
+      },
+    });
+    const refreshed = track(
+      "legacy-track",
+      "Legacy",
+      "https://dead.test/legacy.flac",
+    );
+    refreshed.candidates = [
+      { url: "https://dead.test/legacy.flac" },
+      { url: "https://working.test/legacy.flac" },
+    ];
+    const manager = new DownloadManager({
+      database,
+      resolver: { resolveTracks: async () => [refreshed] },
+      storageDirectory: directory,
+      fetch: async (input) =>
+        String(input).includes("working.test")
+          ? new Response("audio")
+          : new Response("unavailable", { status: 503 }),
+    });
+
+    await manager.resume("legacy");
+    await waitForDownloads(manager, "server", "completed");
+
+    expect(
+      readFileSync(database.getDownload("legacy")!.filePath!, "utf8"),
+    ).toBe("audio");
     database.close();
   });
 

@@ -514,12 +514,12 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
           ? await this.fetchPlaylistItems(ratingKey)
           : await this.fetchMetadataChildren(ratingKey);
     const token = this.getServerToken(server);
-    const connection = this.auth.getConnectionCandidates(
+    const connections = this.auth.getConnectionCandidates(
       "auto",
       server,
       this.activeBaseUrl,
-    )[0];
-    if (!connection)
+    );
+    if (!connections.length)
       throw new Error("No reachable Plex connection is available");
 
     return tracks.map((track) => {
@@ -532,7 +532,10 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
         title: String(track.title || "Untitled track"),
         artist: String(track.originalTitle || track.grandparentTitle || ""),
         album: String(track.parentTitle || ""),
-        url: this.buildPlexUrl(part.key, connection.uri, token),
+        url: this.buildPlexUrl(part.key, connections[0].uri, token),
+        candidates: connections.map((connection) => ({
+          url: this.buildPlexUrl(part.key, connection.uri, token),
+        })),
         fileName: typeof part.file === "string" ? part.file : undefined,
       };
     });

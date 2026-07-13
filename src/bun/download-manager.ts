@@ -27,6 +27,8 @@ export type ResolvedDownloadTrack = {
   /** An authenticated URL for the original Plex media part (not a transcode). */
   url: string;
   headers?: Record<string, string>;
+  /** Ordered authenticated alternatives for the same original media part. */
+  candidates?: Array<{ url: string; headers?: Record<string, string> }>;
   fileName?: string;
 };
 
@@ -59,6 +61,7 @@ type DownloadMetadata = {
   targetTitle?: string;
   url: string;
   headers?: Record<string, string>;
+  candidates?: Array<{ url: string; headers?: Record<string, string> }>;
   completedAt?: number;
   activityClearedAt?: number;
 };
@@ -142,6 +145,7 @@ export class DownloadManager {
           targetTitle: targetTitle?.trim() || undefined,
           url: track.url,
           headers: track.headers,
+          candidates: track.candidates,
         } satisfies DownloadMetadata,
       });
       return record;
@@ -153,8 +157,9 @@ export class DownloadManager {
   }
 
   async retry(id: string): Promise<DownloadItem> {
-    const record = this.requireRecord(id);
+    let record = this.requireRecord(id);
     if (record.status === "completed") return this.toItem(record);
+    record = await this.refreshCandidates(record);
     const queued = this.database.upsertDownload({
       ...record,
       status: "queued",
@@ -179,10 +184,11 @@ export class DownloadManager {
     );
   }
 
-  resume(id: string): DownloadItem {
-    const record = this.requireRecord(id);
+  async resume(id: string): Promise<DownloadItem> {
+    let record = this.requireRecord(id);
     if (record.status !== "paused" && record.status !== "failed")
       return this.toItem(record);
+    record = await this.refreshCandidates(record);
     const queued = this.database.upsertDownload({
       ...record,
       status: "queued",
@@ -339,7 +345,7 @@ export class DownloadManager {
       this.database.relocateDownloads(relocations, next);
     } catch (error) {
       for (const path of copiedPaths) rmSync(path, { force: true });
-      for (const id of resumableIds) this.resume(id);
+      for (const id of resumableIds) void this.resume(id);
       throw error;
     }
     for (const record of records) {
@@ -349,7 +355,7 @@ export class DownloadManager {
       }
     }
     this.storageDirectory = next;
-    for (const id of resumableIds) this.resume(id);
+    for (const id of resumableIds) void this.resume(id);
     return this.storageStatus("");
   }
 
@@ -400,49 +406,94 @@ export class DownloadManager {
       error: null,
     });
     try {
-      const headers = new Headers(metadata.headers);
-      if (offset > 0) headers.set("Range", `bytes=${offset}-`);
-      const response = await this.fetcher(metadata.url, {
-        headers,
-        signal: controller.signal,
-      });
-      if (!response.ok)
-        throw new Error(`Download failed with HTTP ${response.status}`);
-      const resumed = offset > 0 && response.status === 206;
-      const writeOffset = resumed ? offset : 0;
-      if (!response.body) throw new Error("Download response had no body");
-      const responseBytes = numberHeader(
-        response.headers.get("content-length"),
-      );
-      const contentRangeTotal = parseContentRangeTotal(
-        response.headers.get("content-range"),
-      );
-      const totalBytes =
-        contentRangeTotal ??
-        (responseBytes === null ? null : writeOffset + responseBytes);
-      const stream = createWriteStream(partialPath, {
-        flags: writeOffset ? "a" : "w",
-      });
-      const reader = response.body.getReader();
-      let downloaded = writeOffset;
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (!stream.write(value)) await once(stream, "drain");
-          downloaded += value.byteLength;
-          record = this.database.upsertDownload({
-            ...record,
-            bytesDownloaded: downloaded,
-            totalBytes,
+      const candidates = normalizeCandidates(metadata);
+      let lastError: unknown = null;
+      let downloaded = offset;
+      let totalBytes: number | null = record.totalBytes;
+      let completed = false;
+      // A second pass recovers from a short-lived failure even when Plex only
+      // advertises one connection. Each attempt resumes from the bytes that
+      // were durably written by the previous attempt.
+      for (let pass = 0; pass < 2 && !completed; pass += 1) {
+        for (const candidate of candidates) {
+          if (controller.signal.aborted) throw abortError();
+          const attemptOffset = fileSize(partialPath);
+          const attemptController = new AbortController();
+          const abortAttempt = () => attemptController.abort();
+          controller.signal.addEventListener("abort", abortAttempt, {
+            once: true,
           });
+          try {
+            const headers = new Headers(candidate.headers);
+            if (attemptOffset > 0)
+              headers.set("Range", `bytes=${attemptOffset}-`);
+            const response = await fetchWithTimeout(
+              this.fetcher,
+              candidate.url,
+              { headers, signal: attemptController.signal },
+              attemptController,
+            );
+            if (!response.ok) {
+              const error = new Error(
+                `Download failed with HTTP ${response.status}`,
+              );
+              if (!isRetryableStatus(response.status)) throw error;
+              lastError = error;
+              continue;
+            }
+            const resumed = attemptOffset > 0 && response.status === 206;
+            const writeOffset = resumed ? attemptOffset : 0;
+            if (!response.body)
+              throw new Error("Download response had no body");
+            const responseBytes = numberHeader(
+              response.headers.get("content-length"),
+            );
+            const contentRangeTotal = parseContentRangeTotal(
+              response.headers.get("content-range"),
+            );
+            totalBytes =
+              contentRangeTotal ??
+              (responseBytes === null ? null : writeOffset + responseBytes);
+            const stream = createWriteStream(partialPath, {
+              flags: writeOffset ? "a" : "w",
+            });
+            const reader = response.body.getReader();
+            downloaded = writeOffset;
+            try {
+              while (true) {
+                const { done, value } = await readWithTimeout(
+                  reader,
+                  attemptController,
+                );
+                if (done) break;
+                // Wait for the chunk to reach the file descriptor before
+                // requesting more network data. If the socket dies, the next
+                // candidate can therefore resume at the exact durable offset.
+                await writeChunk(stream, value);
+                downloaded += value.byteLength;
+                record = this.database.upsertDownload({
+                  ...record,
+                  bytesDownloaded: downloaded,
+                  totalBytes,
+                });
+              }
+              stream.end();
+              await once(stream, "finish");
+              completed = true;
+              break;
+            } catch (error) {
+              stream.destroy();
+              throw error;
+            }
+          } catch (error) {
+            if (controller.signal.aborted) throw error;
+            lastError = error;
+          } finally {
+            controller.signal.removeEventListener("abort", abortAttempt);
+          }
         }
-        stream.end();
-        await once(stream, "finish");
-      } catch (error) {
-        stream.destroy();
-        throw error;
       }
+      if (!completed) throw lastError ?? new Error("Download failed");
       renameSync(partialPath, filePath);
       this.database.upsertDownload({
         ...record,
@@ -471,6 +522,36 @@ export class DownloadManager {
     const record = this.database.getDownload(id);
     if (!record) throw new Error(`Unknown download: ${id}`);
     return record;
+  }
+
+  private async refreshCandidates(
+    record: DownloadRecord,
+  ): Promise<DownloadRecord> {
+    const metadata = record.metadata as DownloadMetadata;
+    try {
+      const tracks = await this.resolver.resolveTracks({
+        serverId: record.serverId,
+        targetType: metadata.targetType,
+        ratingKey: metadata.targetRatingKey,
+      });
+      const resolved = tracks.find(
+        (track) => track.ratingKey === record.ratingKey,
+      );
+      if (!resolved) return record;
+      return this.database.upsertDownload({
+        ...record,
+        metadata: {
+          ...metadata,
+          url: resolved.url,
+          headers: resolved.headers,
+          candidates: resolved.candidates,
+        },
+      });
+    } catch {
+      // A retry can still succeed through the persisted URL while Plex's
+      // metadata endpoint is temporarily unavailable.
+      return record;
+    }
   }
 
   private isManagedPath(path: string): boolean {
@@ -529,6 +610,80 @@ export class DownloadManager {
         : null,
     };
   }
+}
+
+const DOWNLOAD_STALL_TIMEOUT_MS = 30_000;
+
+function normalizeCandidates(metadata: DownloadMetadata) {
+  const values = metadata.candidates?.length
+    ? metadata.candidates
+    : [{ url: metadata.url, headers: metadata.headers }];
+  return values.filter(
+    (candidate, index) =>
+      candidate.url &&
+      values.findIndex((value) => value.url === candidate.url) === index,
+  );
+}
+
+async function readWithTimeout(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  controller: AbortController,
+) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      reader.read(),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          controller.abort();
+          reject(new Error("Download stalled while waiting for data"));
+        }, DOWNLOAD_STALL_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function fetchWithTimeout(
+  fetcher: DownloadFetcher,
+  url: string,
+  init: RequestInit,
+  controller: AbortController,
+): Promise<Response> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      fetcher(url, init),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          controller.abort();
+          reject(new Error("Download connection timed out"));
+        }, DOWNLOAD_STALL_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+function isRetryableStatus(status: number): boolean {
+  return status >= 500 || status === 408 || status === 425 || status === 429;
+}
+
+function abortError(): Error {
+  const error = new Error("Download aborted");
+  error.name = "AbortError";
+  return error;
+}
+
+function writeChunk(
+  stream: ReturnType<typeof createWriteStream>,
+  value: Uint8Array,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    stream.write(value, (error) => (error ? reject(error) : resolve()));
+  });
 }
 
 function safeSegment(value: string): string {
