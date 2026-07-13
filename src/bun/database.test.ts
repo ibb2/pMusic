@@ -20,46 +20,41 @@ function tempDatabase(): { manager: DatabaseManager; path: string } {
 }
 
 describe("DatabaseManager", () => {
-  test("runs versioned migrations idempotently and preserves existing data", () => {
+  test("initializes the Drizzle schema idempotently and preserves compatible data", () => {
     const { manager, path } = tempDatabase();
     manager.set("playback", { transcodeAudio: true });
     manager.close();
 
     const reopened = new DatabaseManager({ path });
-    expect(reopened.getSchemaVersion()).toBe(3);
+    expect(reopened.getSchemaVersion()).toBe(1);
     expect(reopened.get("playback")).toEqual({ transcodeAudio: true });
     reopened.close();
   });
 
-  test("upgrades the legacy unversioned schema without losing settings or history", () => {
-    const directory = mkdtempSync(join(tmpdir(), "rayna-legacy-"));
+  test("recreates an incompatible pre-release database instead of failing startup", () => {
+    const directory = mkdtempSync(join(tmpdir(), "rayna-incompatible-"));
     cleanup.push(directory);
     const path = join(directory, "rayna.db");
     const legacy = new Database(path);
     legacy.run("CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT)");
-    legacy.run(
-      "CREATE TABLE playback_history (id INTEGER PRIMARY KEY AUTOINCREMENT, track_id TEXT, played_at DATETIME DEFAULT CURRENT_TIMESTAMP)",
-    );
     legacy
       .query("INSERT INTO settings VALUES (?, ?)")
       .run("theme", JSON.stringify("dark"));
-    legacy
-      .query("INSERT INTO playback_history (track_id) VALUES (?)")
-      .run("42");
+    legacy.run("PRAGMA user_version = 3");
     legacy.close();
 
     const manager = new DatabaseManager({ path });
-    expect(manager.getSchemaVersion()).toBe(3);
-    expect(manager.get("theme")).toBe("dark");
+    expect(manager.getSchemaVersion()).toBe(1);
+    expect(manager.get("theme")).toBeNull();
     manager.close();
     const check = new Database(path, { readonly: true });
     expect(
       (
-        check.query("SELECT COUNT(*) AS count FROM playback_history").get() as {
+        check.query("SELECT COUNT(*) AS count FROM settings").get() as {
           count: number;
         }
       ).count,
-    ).toBe(1);
+    ).toBe(0);
     check.close();
   });
 
