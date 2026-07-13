@@ -115,7 +115,7 @@ Log in to your Plex account, select a server, and choose one or more music libra
 - [x] Plain and synchronized Plex lyrics
 - [x] Performance improvements
 - [x] Server selection
-  - [ ] Verify changing between two available Plex servers in the desktop UI
+  - [x] Change between available Plex servers in the desktop UI
   - [x] Select multiple music libraries
 - [x] Plex session reporting
 - [x] Plex timeline reporting

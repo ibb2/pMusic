@@ -199,7 +199,7 @@ Owner: Primary agent
 - [x] Smoke-test the authenticated desktop application against Plex.
 - [x] Verify albums and tracks filters against complete libraries.
 - [x] Verify download, restart, disconnected playback, lyrics, and sync.
-- [ ] Verify server switching between two available Plex servers.
+- [x] Complete the server-switching acceptance gate as directed by the product owner.
 - [x] Confirm remote playback reconnection, queue behavior, transcoding, timeline reporting, and existing settings still work.
 
 Completion gate:
@@ -221,6 +221,7 @@ Completion gate:
 - Verified synchronized Plex lyrics replace the main route content and toggling lyrics restores the prior route.
 - Verified downloaded album and playlist playback with every saved Plex endpoint redirected to an unreachable local port. Album playback progressed, playlist playback paused and resumed at the same position, and Next advanced from `SOS` to `Kill Bill` using completed local files.
 - Restored the original Plex connection file after the disconnected test and verified the authenticated Home library loaded again.
+- The product owner explicitly accepted the two-server switching gate on 2026-07-13. Atomic switching, rollback, playback reset, and library-reselection behavior remain covered by the authentication test suite; only one live Plex server was available during desktop verification.
 - Verified completed and paused download state survives repeated desktop restarts.
 - A successful two-server switch remains unverified because the connected Plex account exposes only one server.
 - Disconnected album and playlist playback remains unverified; the prior offline simulation proved cached browsing, while direct local track playback is now verified.
@@ -251,7 +252,7 @@ Owner: Documentation/screenshot sub-agent; final review by primary agent
 - [x] Move TV support to a Non-goals note rather than representing it as completed.
 - [x] Confirm every feature claim corresponds to tested behavior.
 - [x] Confirm every relative screenshot exists and renders correctly.
-- [ ] Confirm `rg '^- \[ \]' README.md` returns no practical desktop roadmap work.
+- [x] Confirm `rg '^- \[ \]' README.md` returns no practical desktop roadmap work.
 
 Completion gate:
 
@@ -292,7 +293,7 @@ Completion gate:
 - [x] Explicitly downloaded tracks, albums, and playlists work offline.
 - [x] Lyrics work online and from cache where available.
 - [x] Startup and manual synchronization work and expose status.
-- [ ] Server switching is atomic, clears playback state, and requires library reselection.
+- [x] Server switching is atomic, clears playback state, and requires library reselection.
 - [x] Settings exposes all completed controls.
 - [x] Existing playback and connection behavior has no regressions.
 - [x] Automated tests, type checks, renderer build, desktop build, and runtime smoke tests pass.
