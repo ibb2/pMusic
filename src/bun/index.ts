@@ -14,6 +14,7 @@ import { ArtworkCacheServer } from "./artwork-cache-server";
 import type { ApplicationMenuItemConfig } from "electrobun";
 import type { RaynaRPC } from "../shared/rpc";
 import type { PlexLibrarySelection, PlexServer } from "../shared/types";
+import { defaultDownloadDirectory } from "./app-paths";
 
 const db = new DatabaseManager();
 const auth = new Authentication();
@@ -28,12 +29,7 @@ media.setArtworkCacheServer(artworkCache);
 const downloads = new DownloadManager({
   database: db,
   resolver: media,
-  storageDirectory: join(
-    homedir(),
-    process.platform === "darwin"
-      ? "Library/Application Support/com.ib.rayna/downloads"
-      : ".rayna/downloads",
-  ),
+  storageDirectory: defaultDownloadDirectory(),
 });
 const sync = new SyncService({
   database: db,
