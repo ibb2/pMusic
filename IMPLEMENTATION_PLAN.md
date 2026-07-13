@@ -228,7 +228,7 @@ Owner: Documentation/screenshot sub-agent; final review by primary agent
 
 - [x] Create `docs/screenshots/` for repository-owned images.
 - [x] Capture a consistently sized native application window from the authenticated local Plex session.
-- [ ] Capture these states:
+- [x] Capture these states:
   - Home/player overview for the hero image.
   - Albums or Tracks with filters visible.
   - Lyrics or offline downloads.

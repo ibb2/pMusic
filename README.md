@@ -44,6 +44,8 @@ Rayna currently targets macOS, Windows, and Linux desktop builds. The roadmap an
 
 ![Grouped offline downloads](docs/screenshots/downloads.jpg)
 
+![Offline storage and library synchronization settings](docs/screenshots/settings.jpg)
+
 ## Installation
 
 ### Windows
