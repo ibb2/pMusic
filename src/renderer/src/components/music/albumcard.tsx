@@ -7,17 +7,11 @@ import {
   CardTitle,
 } from "../ui/card";
 import BlankImage from "@/assets/512px-Black_colour.jpg";
-import { DownloadStatusIndicator } from "@/components/downloads";
 
 export function AlbumCard({ album }: { album: any }) {
   return (
     <div className="h-fit" key={album.id}>
-      <Card className="relative flex w-40 shrink-0 justify-center border-0 p-3 shadow-none ring-0 hover:rounded-lg hover:bg-zinc-300/60 bg-transparent dark:hover:bg-zinc-800/60">
-        <DownloadStatusIndicator
-          targetType="album"
-          ratingKey={String(album.ratingKey)}
-          className="absolute right-4 top-4 z-10"
-        />
+      <Card className="flex w-40 shrink-0 justify-center border-0 bg-transparent p-3 shadow-none ring-0 hover:rounded-lg hover:bg-zinc-300/60 dark:hover:bg-zinc-800/60">
         <CardHeader className="p-0 gap-0">
           <Link
             to="/app/album/$ratingKey"
