@@ -120,7 +120,7 @@ function RouteComponent() {
             {playlists.length === 1 ? "playlist" : "playlists"}
           </p>
         </div>
-        <div className="grid gap-2 md:grid-cols-3">
+        <div className="flex flex-row gap-2">
           <Select
             value={playlistType}
             onValueChange={(value) =>
