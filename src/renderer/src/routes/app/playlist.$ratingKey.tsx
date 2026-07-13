@@ -49,6 +49,14 @@ function PlaylistPage() {
     return "Error loading playlist" + queryPlaylist.error.message;
 
   const playlist = queryPlaylist.data;
+  if (!playlist) {
+    return (
+      <div className="m-6 rounded-lg border border-dashed p-10 text-center text-muted-foreground">
+        Playlist data is unavailable.
+      </div>
+    );
+  }
+  const tracks = Array.isArray(playlist.tracks) ? playlist.tracks : [];
 
   return (
     <div className="flex min-h-full flex-col p-6 pb-10">
@@ -70,7 +78,7 @@ function PlaylistPage() {
           <div className="flex items-center gap-2 text-sm">
             <span>{dayjs(playlist.addedAt).format("YYYY")}</span>
             <span>•</span>
-            <span>{playlist.leafCount} tracks</span>
+            <span>{playlist.leafCount ?? tracks.length} tracks</span>
           </div>
         </div>
       </div>
@@ -122,7 +130,7 @@ function PlaylistPage() {
           </div>
         </div>
 
-        {playlist.tracks.map((track: any, index: number) => (
+        {tracks.map((track: any, index: number) => (
           <div
             key={track.id}
             className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors"
@@ -200,6 +208,11 @@ function PlaylistPage() {
             </div>
           </div>
         ))}
+        {tracks.length === 0 ? (
+          <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+            This smart playlist currently has no available tracks.
+          </div>
+        ) : null}
       </div>
     </div>
   );
