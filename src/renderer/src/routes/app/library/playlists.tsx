@@ -6,7 +6,6 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelectedServerId } from "@/hooks/use-selected-server-id";
-import { DownloadStatusIndicator } from "@/components/downloads";
 
 dayjs.extend(duration);
 
@@ -192,11 +191,6 @@ function PlaylistCard({ playlist }: { playlist: any }) {
       className="h-fit"
     >
       <div className="relative flex w-40 shrink-0 justify-center rounded-md bg-transparent p-3 hover:bg-zinc-300/60 dark:hover:bg-zinc-800/60">
-        <DownloadStatusIndicator
-          targetType="playlist"
-          ratingKey={String(playlist.ratingKey)}
-          className="absolute right-4 top-4 z-10"
-        />
         <div className="min-w-0">
           <img
             src={image}

@@ -99,13 +99,13 @@ Log in to your Plex account, select a server, and choose one or more music libra
   - [x] Queue albums and playlists
   - [x] Queue individual tracks
   - [x] Display and clear the queue
-- [ ] User-managed offline support
+- [x] User-managed offline support
   - [x] Track, album, and playlist downloads
   - [x] Pause, resume, retry, and remove
   - [x] Dedicated grouped Downloads page
-  - [x] Download activity menu and downloaded-state indicators
+  - [x] Download activity menu and album-detail downloaded state
   - [x] Configurable storage location
-  - [ ] Verify downloaded album and playlist playback while Plex is unreachable
+  - [x] Verify downloaded album and playlist playback while Plex is unreachable
 - [x] Remote playback connection recovery
   - [x] Reconnect through the best available Plex route
   - [x] Preserve the current track, position, and queue after a network change

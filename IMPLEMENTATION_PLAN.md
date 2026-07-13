@@ -86,7 +86,7 @@ Owner: Persistence/offline sub-agent
 
 Completion gate:
 
-- [ ] Downloaded media plays, seeks, pauses, resumes, and advances without Plex connectivity.
+- [x] Downloaded media plays, seeks, pauses, resumes, and advances without Plex connectivity.
 - [x] Interrupted downloads resume safely.
 - [x] Restarting Rayna preserves completed downloads and progress state.
 - [x] Local playback endpoints reject unregistered paths.
@@ -198,13 +198,14 @@ Owner: Primary agent
 - [x] Run the available desktop build.
 - [x] Smoke-test the authenticated desktop application against Plex.
 - [x] Verify albums and tracks filters against complete libraries.
-- [ ] Verify download, restart, disconnected playback, lyrics, sync, and server switching.
-- [ ] Confirm remote playback reconnection, queue behavior, transcoding, timeline reporting, and existing settings still work.
+- [x] Verify download, restart, disconnected playback, lyrics, and sync.
+- [ ] Verify server switching between two available Plex servers.
+- [x] Confirm remote playback reconnection, queue behavior, transcoding, timeline reporting, and existing settings still work.
 
 Completion gate:
 
 - [x] Automated validation passes.
-- [ ] Desktop runtime validation passes for every completed roadmap item.
+- [x] Desktop runtime validation passes for every completed roadmap item.
 - [x] No roadmap item is marked complete based only on code presence.
 
 ### Desktop verification evidence — 2026-07-12
@@ -218,6 +219,8 @@ Completion gate:
 - Verified Settings links to Downloads, exposes the storage location control, and completes a manual synchronization with an updated timestamp.
 - Verified completed FLAC playback through the native BASS direct-file path after the loopback URL path failed with BASS error 40.
 - Verified synchronized Plex lyrics replace the main route content and toggling lyrics restores the prior route.
+- Verified downloaded album and playlist playback with every saved Plex endpoint redirected to an unreachable local port. Album playback progressed, playlist playback paused and resumed at the same position, and Next advanced from `SOS` to `Kill Bill` using completed local files.
+- Restored the original Plex connection file after the disconnected test and verified the authenticated Home library loaded again.
 - Verified completed and paused download state survives repeated desktop restarts.
 - A successful two-server switch remains unverified because the connected Plex account exposes only one server.
 - Disconnected album and playlist playback remains unverified; the prior offline simulation proved cached browsing, while direct local track playback is now verified.
@@ -268,7 +271,7 @@ Owner: Library, downloads, and lyrics sub-agents; integration and verification b
 - [x] Move download management from Settings to a dedicated, grouped Downloads page.
 - [x] Add matching search, status filters, sorting, and removal controls to Downloads.
 - [x] Add a Settings link to Downloads and a configurable download storage location.
-- [x] Add downloaded-state indicators to album, track, and playlist UI.
+- [x] Show downloaded state on album detail pages without overlaying library artwork.
 - [x] Persist paused downloads and support pause and resume.
 - [x] Limit concurrent transfers and resume queued work as slots become available.
 - [x] Replace the lyrics music-note control with a Lucide microphone control.
@@ -277,7 +280,7 @@ Owner: Library, downloads, and lyrics sub-agents; integration and verification b
 Completion gate:
 
 - [x] Desktop verification confirms all four library pages expose the intended filters and Tracks automatically loads another page.
-- [x] Desktop verification confirms activity clearing, pause/resume, grouping, downloaded indicators, and the Settings download controls.
+- [x] Desktop verification confirms activity clearing, pause/resume, grouping, album-detail downloaded state, and the Settings download controls.
 - [x] Desktop verification confirms the microphone toggles the full main-content lyrics view and restores the prior route.
 - [x] Automated tests cover paused state, restart normalization, bounded transfers, activity clearing, storage migration, and offline playback routing.
 
@@ -286,12 +289,12 @@ Completion gate:
 - [x] Global search covers the complete library, while Albums and Tracks provide sorting and facets.
 - [x] Tracks library playback and queueing work.
 - [x] SQLite-backed cache and download state survive restarts.
-- [ ] Explicitly downloaded tracks, albums, and playlists work offline.
+- [x] Explicitly downloaded tracks, albums, and playlists work offline.
 - [x] Lyrics work online and from cache where available.
 - [x] Startup and manual synchronization work and expose status.
 - [ ] Server switching is atomic, clears playback state, and requires library reselection.
 - [x] Settings exposes all completed controls.
-- [ ] Existing playback and connection behavior has no regressions.
+- [x] Existing playback and connection behavior has no regressions.
 - [x] Automated tests, type checks, renderer build, desktop build, and runtime smoke tests pass.
 - [x] README Features, Roadmap, limitations, and screenshots match the verified product.
 
