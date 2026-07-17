@@ -20,6 +20,8 @@ const db = new DatabaseManager();
 const auth = new Authentication();
 const bass = new BassManager();
 const media = new MediaService(auth, bass, db);
+const offlineTestMode = process.env.RAYNA_FORCE_OFFLINE === "1";
+if (offlineTestMode) media.setOffline(true);
 const localPlayback = new LocalPlaybackServer();
 media.setLocalPlaybackServer(localPlayback);
 const artworkCache = new ArtworkCacheServer(
@@ -63,6 +65,8 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
   maxRequestTime: 30_000,
   handlers: {
     requests: {
+      networkSetOffline: ({ offline }) =>
+        media.setOffline(offlineTestMode || offline),
       settingsGetPlayback: () => media.getPlaybackSettings(),
       settingsSetPlayback: ({ settings }) =>
         media.setPlaybackSettings(settings),

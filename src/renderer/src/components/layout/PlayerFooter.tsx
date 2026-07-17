@@ -128,8 +128,8 @@ export function PlayerFooter({
             />
           )}
         </div>
-        <div className="flex flex-col ">
-          {currentTrack?.albumRatingKey && (
+        <div className="flex min-w-0 flex-col">
+          {currentTrack?.albumRatingKey ? (
             <Link
               to={`/app/album/$ratingKey`}
               params={{ ratingKey: currentTrack.albumRatingKey }}
@@ -137,8 +137,12 @@ export function PlayerFooter({
             >
               <span>{currentTrack?.title || ""}</span>
             </Link>
-          )}
-          {currentTrack?.artistRatingKey && (
+          ) : currentTrack ? (
+            <span className="max-w-32 truncate text-sm font-semibold">
+              {currentTrack.title}
+            </span>
+          ) : null}
+          {currentTrack?.artistRatingKey ? (
             <Link
               to={`/app/artist/$ratingKey`}
               params={{ ratingKey: currentTrack.artistRatingKey }}
@@ -146,7 +150,11 @@ export function PlayerFooter({
             >
               <span>{currentTrack?.artist || ""}</span>
             </Link>
-          )}
+          ) : currentTrack ? (
+            <span className="max-w-32 truncate text-xs text-muted-foreground">
+              {currentTrack.artist}
+            </span>
+          ) : null}
         </div>
       </div>
 

@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelectedServerId } from "@/hooks/use-selected-server-id";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 
 dayjs.extend(duration);
 
@@ -24,6 +25,7 @@ const PLAYLIST_BATCH_SIZE = 80;
 
 function RouteComponent() {
   const selectedServer = useSelectedServerId();
+  const online = useOnlineStatus();
   const observerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(PLAYLIST_BATCH_SIZE);
   const [playlistType, setPlaylistType] = useState<"all" | "smart" | "manual">(
@@ -68,6 +70,9 @@ function RouteComponent() {
     [playlists, visibleCount],
   );
   const hasMore = visibleCount < playlists.length;
+  const isStale = playlists.some(
+    (playlist: any) => playlist.freshness === "stale",
+  );
 
   useEffect(() => {
     setVisibleCount(PLAYLIST_BATCH_SIZE);
@@ -168,6 +173,13 @@ function RouteComponent() {
           </Select>
         </div>
       </header>
+
+      {!online || isStale ? (
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+          Showing saved playlists while Plex is offline. Only downloaded music
+          can be played.
+        </p>
+      ) : null}
 
       {playlists.length === 0 ? (
         <div className="mt-4 flex min-h-32 items-center rounded-md border border-dashed border-zinc-300 bg-zinc-50/60 px-6 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400">

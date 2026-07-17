@@ -35,6 +35,9 @@ import type {
 declare global {
   interface Window {
     api: {
+      network: {
+        setOffline: (offline: boolean) => Promise<void>;
+      };
       settings: {
         getPlayback: () => Promise<PlaybackSettings>;
         setPlayback: (
@@ -78,6 +81,8 @@ declare global {
           recentlyPlayed: any[];
           recentlyAdded: any[];
           playlists: any[];
+          freshness: "live" | "fresh" | "stale";
+          cachedAt: string | null;
         }>;
         getTopEight: () => Promise<any[]>;
         getRecentlyPlayedAlbums: () => Promise<any[]>;

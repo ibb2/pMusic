@@ -105,6 +105,39 @@ describe("DatabaseManager", () => {
     manager.close();
   });
 
+  test("finds the newest server-scoped cache entry by key prefix", () => {
+    const { manager } = tempDatabase();
+    manager.setMediaCache({
+      serverId: "server",
+      cacheKey: "albums-complete:v2:first",
+      value: ["old"],
+      updatedAt: 5,
+      expiresAt: 10,
+    });
+    manager.setMediaCache({
+      serverId: "server",
+      cacheKey: "albums-complete:v2:second",
+      value: ["new"],
+      updatedAt: 8,
+      expiresAt: 10,
+    });
+    manager.setMediaCache({
+      serverId: "other",
+      cacheKey: "albums-complete:v2:third",
+      value: ["wrong server"],
+      updatedAt: 9,
+      expiresAt: 10,
+    });
+
+    expect(
+      manager.getLatestMediaCacheByPrefix<string[]>(
+        "server",
+        "albums-complete:v2:",
+      )?.value,
+    ).toEqual(["new"]);
+    manager.close();
+  });
+
   test("persists and queries downloads with server isolation and storage totals", () => {
     const { manager } = tempDatabase();
     const base = {

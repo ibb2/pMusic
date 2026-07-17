@@ -196,6 +196,10 @@ export type SearchResults = {
 export type RaynaRPC = {
   bun: RPCSchema<{
     requests: {
+      networkSetOffline: {
+        params: { offline: boolean };
+        response: void;
+      };
       settingsGetPlayback: {
         params: void;
         response: PlaybackSettings;
@@ -292,6 +296,8 @@ export type RaynaRPC = {
           recentlyPlayed: unknown[];
           recentlyAdded: unknown[];
           playlists: unknown[];
+          freshness: "live" | "fresh" | "stale";
+          cachedAt: string | null;
         };
       };
       mediaGetRecentlyPlayedAlbums: {

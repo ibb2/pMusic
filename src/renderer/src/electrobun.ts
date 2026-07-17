@@ -15,6 +15,10 @@ const rpc = createRPC<RaynaRPC["webview"], RaynaRPC["bun"]>({
 new Electroview({ rpc });
 
 window.api = {
+  network: {
+    setOffline: (offline: boolean) =>
+      rpc.request.networkSetOffline({ offline }),
+  },
   settings: {
     getPlayback: () => rpc.request.settingsGetPlayback(),
     setPlayback: (settings: PlaybackSettingsPatch) =>

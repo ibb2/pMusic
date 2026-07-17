@@ -24,6 +24,10 @@ export type ResolvedDownloadTrack = {
   title: string;
   artist: string;
   album: string;
+  artistRatingKey?: string | null;
+  albumRatingKey?: string | null;
+  duration?: number | null;
+  thumb?: string | null;
   /** An authenticated URL for the original Plex media part (not a transcode). */
   url: string;
   headers?: Record<string, string>;
@@ -58,6 +62,10 @@ type DownloadMetadata = {
   targetRatingKey: string;
   artist: string;
   album: string;
+  artistRatingKey?: string | null;
+  albumRatingKey?: string | null;
+  duration?: number | null;
+  thumb?: string | null;
   targetTitle?: string;
   url: string;
   headers?: Record<string, string>;
@@ -142,6 +150,10 @@ export class DownloadManager {
           targetRatingKey: ratingKey,
           artist: track.artist,
           album: track.album,
+          artistRatingKey: track.artistRatingKey,
+          albumRatingKey: track.albumRatingKey,
+          duration: track.duration,
+          thumb: track.thumb,
           targetTitle: targetTitle?.trim() || undefined,
           url: track.url,
           headers: track.headers,
@@ -263,6 +275,9 @@ export class DownloadManager {
     return targets.map((target) => {
       const matching = records.filter((record) => {
         const metadata = record.metadata as DownloadMetadata;
+        if (target.targetType === "track") {
+          return record.ratingKey === target.ratingKey;
+        }
         return (
           metadata.targetType === target.targetType &&
           metadata.targetRatingKey === target.ratingKey
@@ -277,11 +292,13 @@ export class DownloadManager {
       return {
         ...target,
         state:
-          matching.length === 0 || (completedTracks === 0 && !active)
-            ? "not-downloaded"
-            : completedTracks === matching.length
-              ? "downloaded"
-              : "partial",
+          target.targetType === "track" && completedTracks > 0
+            ? "downloaded"
+            : matching.length === 0 || (completedTracks === 0 && !active)
+              ? "not-downloaded"
+              : completedTracks === matching.length
+                ? "downloaded"
+                : "partial",
         activeState:
           active?.status === "queued" ||
           active?.status === "downloading" ||
@@ -545,6 +562,12 @@ export class DownloadManager {
           url: resolved.url,
           headers: resolved.headers,
           candidates: resolved.candidates,
+          artist: resolved.artist,
+          album: resolved.album,
+          artistRatingKey: resolved.artistRatingKey,
+          albumRatingKey: resolved.albumRatingKey,
+          duration: resolved.duration,
+          thumb: resolved.thumb,
         },
       });
     } catch {

@@ -41,5 +41,11 @@ describe("ArtworkCacheServer", () => {
     );
     expect((await fetch(second)).status).toBe(200);
     expect(requests).toBe(1);
+
+    cache.dispose();
+    const restarted = new ArtworkCacheServer(directory);
+    cleanups.push(() => restarted.dispose());
+    expect((await fetch(restarted.revive(first))).status).toBe(200);
+    expect(requests).toBe(1);
   });
 });

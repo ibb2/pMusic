@@ -13,6 +13,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DownloadButton, downloadsApi } from "@/components/downloads";
 import { useSelectedServerId } from "@/hooks/use-selected-server-id";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 
 export const Route = createFileRoute("/app/library/tracks")({
   component: TracksPage,
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/app/library/tracks")({
 
 function TracksPage() {
   const selectedServer = useSelectedServerId();
+  const online = useOnlineStatus();
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [artistKeys, setArtistKeys] = useState("");
   const [albumKeys, setAlbumKeys] = useState("");
@@ -52,7 +54,26 @@ function TracksPage() {
   });
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = result;
   const tracks = result.data?.pages.flatMap((page) => page.items) ?? [];
+  const trackRatingKeys = tracks.map((track) => track.ratingKey);
+  const downloadStatuses = useQuery({
+    queryKey: [selectedServer.data, "track-download-statuses", trackRatingKeys],
+    queryFn: () =>
+      window.api.downloads.getStatus(
+        trackRatingKeys.map((ratingKey) => ({
+          targetType: "track" as const,
+          ratingKey,
+        })),
+      ),
+    enabled: Boolean(selectedServer.data && trackRatingKeys.length),
+    refetchInterval: 1_000,
+  });
+  const downloadedTracks = new Set(
+    (downloadStatuses.data ?? [])
+      .filter((status) => status.state === "downloaded")
+      .map((status) => status.ratingKey),
+  );
   const isStale = result.data?.pages.some((page) => page.freshness === "stale");
+  const offline = !online || isStale;
   const artists = facets.data?.trackArtists ?? [];
   const albums = facets.data?.trackAlbums ?? [];
 
@@ -166,7 +187,11 @@ function TracksPage() {
         <div className="overflow-hidden rounded-lg border">
           <div className="divide-y">
             {tracks.map((track) => (
-              <TrackRow key={track.ratingKey} track={track} />
+              <TrackRow
+                key={track.ratingKey}
+                track={track}
+                playable={!offline || downloadedTracks.has(track.ratingKey)}
+              />
             ))}
           </div>
         </div>
@@ -194,7 +219,13 @@ function TracksPage() {
   );
 }
 
-function TrackRow({ track }: { track: MediaTrack }) {
+function TrackRow({
+  track,
+  playable,
+}: {
+  track: MediaTrack;
+  playable: boolean;
+}) {
   return (
     <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 p-3 hover:bg-accent/50">
       <img
@@ -232,13 +263,15 @@ function TrackRow({ track }: { track: MediaTrack }) {
       </div>
       <div className="flex gap-2">
         <button
-          className="rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground"
+          className="rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={!playable}
           onClick={() => window.api.player.playTrack(track.ratingKey)}
         >
           Play
         </button>
         <button
-          className="rounded-md border px-3 py-1.5 text-xs"
+          className="rounded-md border px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={!playable}
           onClick={() => window.api.player.queueTrack(track.ratingKey)}
         >
           Queue

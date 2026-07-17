@@ -29,6 +29,7 @@ import type {
 } from "../../shared/rpc";
 import type {
   AlbumPageRequest,
+  CacheFreshness,
   MediaAlbum,
   MediaPage,
   MediaTrack,
@@ -65,7 +66,11 @@ type HomeData = {
   recentlyPlayed: Array<Record<string, any>>;
   recentlyAdded: Array<Record<string, any>>;
   playlists: Array<Record<string, any>>;
+  freshness: CacheFreshness;
+  cachedAt: string | null;
 };
+
+type HomeContent = Omit<HomeData, "freshness" | "cachedAt">;
 
 type UltraBlurVariantUrls = {
   light: string;
@@ -365,6 +370,7 @@ export function createPlexPlaybackIdentity({
 
 export class MediaService implements DownloadMediaResolver, SyncResolver {
   private activeBaseUrl: string | null = null;
+  private forcedOffline = false;
   private readonly cache: CacheService;
   private localPlaybackServer: LocalPlaybackServer | null = null;
   private networkRestored: (() => void) | null = null;
@@ -397,6 +403,11 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
 
   setArtworkCacheServer(server: ArtworkCacheServer): void {
     this.artworkCache = server;
+  }
+
+  setOffline(offline: boolean): void {
+    this.forcedOffline = offline;
+    if (offline) this.activeBaseUrl = null;
   }
 
   async refreshLibrary({
@@ -532,6 +543,17 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
         title: String(track.title || "Untitled track"),
         artist: String(track.originalTitle || track.grandparentTitle || ""),
         album: String(track.parentTitle || ""),
+        artistRatingKey:
+          track.grandparentRatingKey ||
+          this.extractRatingKey(track.grandparentKey),
+        albumRatingKey:
+          track.parentRatingKey || this.extractRatingKey(track.parentKey),
+        duration: Number.isFinite(Number(track.duration))
+          ? Number(track.duration)
+          : null,
+        thumb: this.plexUrl(
+          track.thumb || track.parentThumb || track.grandparentThumb,
+        ),
         url: this.buildPlexUrl(part.key, connections[0].uri, token),
         candidates: connections.map((connection) => ({
           url: this.buildPlexUrl(part.key, connection.uri, token),
@@ -581,11 +603,14 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   async getLibraryFacets(): Promise<LibraryFacets> {
     const server = await this.getSelectedServer();
     const sectionKey = await this.selectedSectionCacheSuffix();
+    const cacheKey = `library-facets:v2:${sectionKey}`;
+    this.reuseLatestScopedCache(server.clientIdentifier, cacheKey);
     const result = await this.cache.readThrough({
       serverId: server.clientIdentifier,
-      key: `library-facets:v2:${sectionKey}`,
+      key: cacheKey,
       ttlMs: 5 * 60 * 1000,
       fetch: async () => {
+        this.assertOnline();
         const [albums, tracks] = await Promise.all([
           this.getCompleteMediaCorpus("albums", "9", (item) =>
             this.mapTypedAlbum(item),
@@ -600,8 +625,9 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
 
     return {
       ...result.value,
-      freshness:
-        result.source === "network"
+      freshness: this.forcedOffline
+        ? "stale"
+        : result.source === "network"
           ? "live"
           : result.isStale
             ? "stale"
@@ -618,21 +644,26 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   ): Promise<MediaPage<T>> {
     const server = await this.getSelectedServer();
     const cacheKey = await this.completeCorpusCacheKey(resource);
+    this.reuseLatestScopedCache(server.clientIdentifier, cacheKey);
     const result = await this.cache.readThrough({
       serverId: server.clientIdentifier,
       key: cacheKey,
       ttlMs: 5 * 60 * 1000,
-      fetch: () => this.fetchCompleteMediaCorpus(type, mapper),
+      fetch: () => {
+        this.assertOnline();
+        return this.fetchCompleteMediaCorpus(type, mapper);
+      },
     });
 
+    const corpus = this.reviveArtwork(result.value);
     const page =
       resource === "albums"
         ? pageAlbumCorpus(
-            result.value as unknown as MediaAlbum[],
+            corpus as unknown as MediaAlbum[],
             request as AlbumPageRequest,
           )
         : pageTrackCorpus(
-            result.value as unknown as MediaTrack[],
+            corpus as unknown as MediaTrack[],
             request as TrackPageRequest,
           );
 
@@ -641,8 +672,9 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
         MediaPage<T>,
         "items" | "nextCursor" | "total"
       >),
-      freshness:
-        result.source === "network"
+      freshness: this.forcedOffline
+        ? "stale"
+        : result.source === "network"
           ? "live"
           : result.isStale
             ? "stale"
@@ -658,22 +690,38 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   ): Promise<T[]> {
     const server = await this.getSelectedServer();
     const cacheKey = await this.completeCorpusCacheKey(resource);
+    this.reuseLatestScopedCache(server.clientIdentifier, cacheKey);
     const result = await this.cache.readThrough({
       serverId: server.clientIdentifier,
       key: cacheKey,
       ttlMs: 5 * 60 * 1000,
-      fetch: () => this.fetchCompleteMediaCorpus(type, mapper),
+      fetch: () => {
+        this.assertOnline();
+        return this.fetchCompleteMediaCorpus(type, mapper);
+      },
     });
-    return result.value;
+    return this.reviveArtwork(result.value);
   }
 
   private async completeCorpusCacheKey(resource: string): Promise<string> {
     return `${resource}-complete-corpus:v2:${await this.selectedSectionCacheSuffix()}`;
   }
 
+  private reuseLatestScopedCache(serverId: string, cacheKey: string): void {
+    if (this.db.getMediaCache(serverId, cacheKey)) return;
+    const prefix = cacheKey.slice(0, cacheKey.lastIndexOf(":") + 1);
+    const fallback = this.db.getLatestMediaCacheByPrefix(serverId, prefix);
+    if (fallback)
+      this.db.setMediaCache({ ...fallback, cacheKey, expiresAt: 0 });
+  }
+
   private async selectedSectionCacheSuffix(): Promise<string> {
-    return (await this.getSelectedMusicSections())
-      .map((section) => section.uuid || section.key)
+    const selected = (await this.auth.getUserSelectedLibraries()) || [];
+    if (!selected.length) return "all";
+    return selected
+      .map((section) =>
+        typeof section === "string" ? section : section.uuid || section.key,
+      )
       .sort()
       .join(",");
   }
@@ -846,17 +894,83 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   }
 
   async getHomeData(): Promise<HomeData> {
-    const [recentlyPlayed, recentlyAdded, playlists] = await Promise.all([
-      this.getRecentlyPlayedAlbums() as Promise<Array<Record<string, any>>>,
-      this.getRecentlyAddedAlbums() as Promise<Array<Record<string, any>>>,
-      this.getPlaylists() as Promise<Array<Record<string, any>>>,
-    ]);
+    const server = await this.getSelectedServer();
+    try {
+      const result = await this.cache.readThrough<HomeContent>({
+        serverId: server.clientIdentifier,
+        key: "home:v1",
+        ttlMs: 5 * 60 * 1000,
+        fetch: async () => {
+          this.assertOnline();
+          const [recentlyPlayed, recentlyAdded, playlists] = await Promise.all([
+            this.getRecentlyPlayedAlbums() as Promise<
+              Array<Record<string, any>>
+            >,
+            this.getRecentlyAddedAlbums() as Promise<
+              Array<Record<string, any>>
+            >,
+            this.getPlaylists() as Promise<Array<Record<string, any>>>,
+          ]);
+          return {
+            topEight: this.buildTopEight(recentlyPlayed, playlists),
+            recentlyPlayed,
+            recentlyAdded,
+            playlists,
+          };
+        },
+      });
+      return {
+        ...this.reviveArtwork(result.value),
+        freshness: this.forcedOffline
+          ? "stale"
+          : result.source === "network"
+            ? "live"
+            : result.isStale
+              ? "stale"
+              : "fresh",
+        cachedAt: result.source === "network" ? null : new Date().toISOString(),
+      };
+    } catch {
+      return this.getOfflineHomeData(server.clientIdentifier);
+    }
+  }
+
+  private getOfflineHomeData(serverId: string): HomeData {
+    const albumsEntry =
+      this.db.getLatestMediaCacheByPrefix<MediaAlbum[]>(
+        serverId,
+        "albums-complete-corpus:v2:",
+      );
+    const playlistsEntry = this.db.getMediaCache<Array<Record<string, any>>>(
+      serverId,
+      "playlists:v1",
+    );
+    const recentlyAdded = this.reviveArtwork(albumsEntry?.value ?? [])
+      .slice()
+      .sort(
+        (left, right) => Number(right.addedAt || 0) - Number(left.addedAt || 0),
+      )
+      .slice(0, 50)
+      .map((album) => ({
+        ...album,
+        id: album.ratingKey,
+        parentRatingKey: album.artistRatingKey,
+      }));
+    const playlists = this.reviveArtwork(playlistsEntry?.value ?? []).map(
+      (playlist) => ({ ...playlist, freshness: "stale" }),
+    );
+    const cachedAt = Math.max(
+      albumsEntry?.updatedAt ?? 0,
+      playlistsEntry?.updatedAt ?? 0,
+    );
 
     return {
-      topEight: this.buildTopEight(recentlyPlayed, playlists),
-      recentlyPlayed,
+      topEight: this.buildTopEight(recentlyAdded, playlists),
+      recentlyPlayed: [],
       recentlyAdded,
       playlists,
+      freshness: "stale",
+      cachedAt: cachedAt ? new Date(cachedAt).toISOString() : null,
     };
   }
 
@@ -891,11 +1005,38 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   }
 
   async getAlbum(ratingKey: string): Promise<unknown> {
-    const album = await this.fetchMetadataItem(ratingKey);
-    const [tracks, ultraBlur] = await Promise.all([
-      this.fetchMetadataChildren(ratingKey),
-      this.getUltraBlur(album.thumb || album.art, `album-${ratingKey}`),
-    ]);
+    const server = await this.getSelectedServer();
+    try {
+      const result = await this.cache.readThrough({
+        serverId: server.clientIdentifier,
+        key: `album-detail:v1:${ratingKey}`,
+        ttlMs: 5 * 60 * 1000,
+        fetch: async () => {
+          this.assertOnline();
+          const album = await this.fetchMetadataItem(ratingKey);
+          const [tracks, ultraBlur] = await Promise.all([
+            this.fetchMetadataChildren(ratingKey),
+            this.getUltraBlur(album.thumb || album.art, `album-${ratingKey}`),
+          ]);
+          return this.mapAlbumDetail(album, tracks, ultraBlur);
+        },
+      });
+      return {
+        ...this.reviveArtwork(result.value),
+        freshness: this.forcedOffline || result.isStale ? "stale" : "live",
+      };
+    } catch (error) {
+      const offline = await this.offlineAlbumDetail(ratingKey);
+      if (offline) return offline;
+      throw error;
+    }
+  }
+
+  private mapAlbumDetail(
+    album: PlexMetadata,
+    tracks: PlexMetadata[],
+    ultraBlur: UltraBlurVariantUrls | null,
+  ): Record<string, unknown> {
     const artistKey =
       album.parentRatingKey || this.extractRatingKey(album.parentKey);
 
@@ -926,6 +1067,67 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
           track.grandparentRatingKey ||
           this.extractRatingKey(track.grandparentKey) ||
           artistKey,
+        ratingKey: track.ratingKey,
+      })),
+    };
+  }
+
+  private async offlineAlbumDetail(
+    ratingKey: string,
+  ): Promise<Record<string, unknown> | null> {
+    const server = await this.getSelectedServer();
+    const suffix = await this.selectedSectionCacheSuffix();
+    const albums = this.reviveArtwork(
+      (
+        this.db.getMediaCache<MediaAlbum[]>(
+          server.clientIdentifier,
+          `albums-complete-corpus:v2:${suffix}`,
+        ) ||
+        this.db.getLatestMediaCacheByPrefix<MediaAlbum[]>(
+          server.clientIdentifier,
+          "albums-complete-corpus:v2:",
+        )
+      )?.value,
+    );
+    const tracks = this.reviveArtwork(
+      (
+        this.db.getMediaCache<MediaTrack[]>(
+          server.clientIdentifier,
+          `tracks-complete-corpus:v2:${suffix}`,
+        ) ||
+        this.db.getLatestMediaCacheByPrefix<MediaTrack[]>(
+          server.clientIdentifier,
+          "tracks-complete-corpus:v2:",
+        )
+      )?.value,
+    );
+    const album = albums?.find((item) => item.ratingKey === ratingKey);
+    if (!album || !tracks) return null;
+    const albumTracks = tracks.filter(
+      (track) => track.albumRatingKey === ratingKey,
+    );
+    return {
+      id: ratingKey,
+      title: album.title,
+      year: album.year,
+      artist: album.artist,
+      artistKey: album.artistRatingKey,
+      ratingKey,
+      leafCount: album.trackCount ?? albumTracks.length,
+      thumb: album.thumb,
+      art: null,
+      ultraBlur: null,
+      freshness: "stale",
+      tracks: albumTracks.map((track) => ({
+        id: track.ratingKey,
+        number: track.index,
+        title: track.title,
+        duration: track.duration,
+        albumThumb: track.thumb || album.thumb,
+        albumTitle: track.album,
+        albumRatingKey: track.albumRatingKey,
+        artistTitle: track.artist,
+        artistRatingKey: track.artistRatingKey,
         ratingKey: track.ratingKey,
       })),
     };
@@ -1219,9 +1421,51 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   }
 
   async getPlaylists(): Promise<unknown[]> {
-    const data = await this.fetchPlex("/playlists", { playlistType: "audio" });
+    const server = await this.getSelectedServer();
+    const result = await this.cache.readThrough({
+      serverId: server.clientIdentifier,
+      key: "playlists:v1",
+      ttlMs: 5 * 60 * 1000,
+      fetch: async () => {
+        this.assertOnline();
+        const data = await this.fetchPlex("/playlists", {
+          playlistType: "audio",
+        });
+        const playlists = data.MediaContainer?.Metadata || [];
+        await this.cachePlaylistDetails(server.clientIdentifier, playlists);
+        return playlists.map((playlist) => this.mapPlaylistSummary(playlist));
+      },
+    });
+    const freshness = this.forcedOffline || result.isStale ? "stale" : "live";
+    return this.reviveArtwork(result.value).map((playlist) => ({
+      ...playlist,
+      freshness,
+    }));
+  }
 
-    return (data.MediaContainer?.Metadata || []).map((playlist) => ({
+  private async cachePlaylistDetails(
+    serverId: string,
+    playlists: PlexMetadata[],
+  ): Promise<void> {
+    const updatedAt = Date.now();
+    await Promise.allSettled(
+      playlists.map(async (playlist) => {
+        const ratingKey = String(playlist.ratingKey || "");
+        if (!ratingKey) return;
+        const tracks = await this.fetchPlaylistItems(ratingKey);
+        this.db.setMediaCache({
+          serverId,
+          cacheKey: `playlist-detail:v1:${ratingKey}`,
+          value: this.mapPlaylistDetail(playlist, tracks),
+          updatedAt,
+          expiresAt: updatedAt + 5 * 60 * 1000,
+        });
+      }),
+    );
+  }
+
+  private mapPlaylistSummary(playlist: PlexMetadata) {
+    return {
       id: playlist.key,
       title: playlist.title,
       addedAt: playlist.addedAt,
@@ -1230,7 +1474,7 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
       smart: playlist.smart,
       icon: playlist.icon,
       duration: playlist.duration,
-    }));
+    };
   }
 
   async search(query: string, limit = 8): Promise<SearchResults> {
@@ -1263,9 +1507,72 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   }
 
   async getPlaylist(ratingKey: string): Promise<unknown> {
-    const playlist = await this.fetchMetadataItem(ratingKey);
-    const tracks = await this.fetchPlaylistItems(ratingKey);
+    const server = await this.getSelectedServer();
+    try {
+      const result = await this.cache.readThrough({
+        serverId: server.clientIdentifier,
+        key: `playlist-detail:v1:${ratingKey}`,
+        ttlMs: 5 * 60 * 1000,
+        fetch: async () => {
+          this.assertOnline();
+          const playlist = await this.fetchMetadataItem(ratingKey);
+          const tracks = await this.fetchPlaylistItems(ratingKey);
+          return this.mapPlaylistDetail(playlist, tracks);
+        },
+      });
+      return {
+        ...this.reviveArtwork(result.value),
+        freshness: this.forcedOffline || result.isStale ? "stale" : "live",
+      };
+    } catch (error) {
+      const offline = await this.offlinePlaylistDetail(ratingKey);
+      if (offline) return offline;
+      throw error;
+    }
+  }
 
+  private async offlinePlaylistDetail(
+    ratingKey: string,
+  ): Promise<Record<string, unknown> | null> {
+    const server = await this.getSelectedServer();
+    const tracks = await this.offlineTracks("playlist", ratingKey);
+    if (!tracks.length) return null;
+    const summary = this.db
+      .getMediaCache<
+        Array<Record<string, any>>
+      >(server.clientIdentifier, "playlists:v1")
+      ?.value.find((playlist) => String(playlist.ratingKey) === ratingKey);
+    return {
+      id: ratingKey,
+      title: summary?.title || "Downloaded playlist",
+      summary: summary?.summary || "Available offline",
+      addedAt: summary?.addedAt,
+      ratingKey,
+      composite: summary?.composite || "",
+      smart: summary?.smart,
+      icon: summary?.icon,
+      duration: summary?.duration,
+      leafCount: tracks.length,
+      freshness: "stale",
+      tracks: tracks.map((track, index) => ({
+        id: track.ratingKey,
+        number: index + 1,
+        title: track.title,
+        duration: track.duration,
+        albumThumb: null,
+        albumTitle: track.parentTitle,
+        albumRatingKey: null,
+        artistTitle: track.originalTitle,
+        artistRatingKey: null,
+        ratingKey: track.ratingKey,
+      })),
+    };
+  }
+
+  private mapPlaylistDetail(
+    playlist: PlexMetadata,
+    tracks: PlexMetadata[],
+  ): Record<string, unknown> {
     return {
       id: playlist.key,
       title: playlist.title,
@@ -1467,6 +1774,11 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   private async fetchTrackWithOfflineFallback(
     ratingKey: string,
   ): Promise<PlexMetadata> {
+    if (this.forcedOffline) {
+      const downloaded = await this.offlineTrackByRatingKey(ratingKey);
+      if (downloaded) return downloaded;
+      throw new Error("This track is not downloaded and cannot play offline");
+    }
     try {
       return await this.fetchMetadataItem(ratingKey);
     } catch (error) {
@@ -1480,6 +1792,13 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     targetType: "album" | "playlist",
     ratingKey: string,
   ): Promise<PlexMetadata[]> {
+    if (this.forcedOffline) {
+      const tracks = await this.offlineTracks(targetType, ratingKey);
+      if (tracks.length) return tracks;
+      throw new Error(
+        `This ${targetType} is not downloaded and cannot play offline`,
+      );
+    }
     try {
       return targetType === "album"
         ? await this.fetchMetadataChildren(ratingKey)
@@ -1496,7 +1815,7 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     targetRatingKey: string,
   ): Promise<PlexMetadata[]> {
     const server = await this.getSelectedServer();
-    return this.db
+    const matching = this.db
       .listDownloads(server.clientIdentifier)
       .filter((record) => {
         const metadata = record.metadata as {
@@ -1504,23 +1823,65 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
           targetRatingKey?: string;
         };
         return (
-          record.status === "completed" &&
           metadata.targetType === targetType &&
           metadata.targetRatingKey === targetRatingKey
         );
-      })
-      .map((record) => {
-        const metadata = record.metadata as {
-          artist?: string;
-          album?: string;
-        };
-        return {
-          ratingKey: record.ratingKey,
-          title: record.title,
-          originalTitle: metadata.artist,
-          parentTitle: metadata.album,
-        };
       });
+    if (
+      !matching.length ||
+      matching.some((record) => record.status !== "completed")
+    )
+      return [];
+    return matching.map((record) => this.downloadedTrackMetadata(record));
+  }
+
+  private async offlineTrackByRatingKey(
+    ratingKey: string,
+  ): Promise<PlexMetadata | null> {
+    const server = await this.getSelectedServer();
+    const record = this.db.getCompletedDownload(
+      server.clientIdentifier,
+      ratingKey,
+    );
+    if (!record) return null;
+    return this.downloadedTrackMetadata(record);
+  }
+
+  private downloadedTrackMetadata(record: {
+    serverId: string;
+    ratingKey: string;
+    title: string;
+    metadata: unknown;
+  }): PlexMetadata {
+    const metadata = record.metadata as {
+      artist?: string;
+      album?: string;
+      artistRatingKey?: string | null;
+      albumRatingKey?: string | null;
+      duration?: number | null;
+      thumb?: string | null;
+    };
+    const cached = this.db
+      .getLatestMediaCacheByPrefix<MediaTrack[]>(
+        record.serverId,
+        "tracks-complete-corpus:v2:",
+      )
+      ?.value.find((track) => track.ratingKey === record.ratingKey);
+    const thumb = metadata.thumb || cached?.thumb || null;
+
+    return {
+      ratingKey: record.ratingKey,
+      title: record.title || cached?.title || "",
+      originalTitle: metadata.artist || cached?.artist || "",
+      grandparentTitle: metadata.artist || cached?.artist || "",
+      parentTitle: metadata.album || cached?.album || "",
+      grandparentRatingKey:
+        metadata.artistRatingKey || cached?.artistRatingKey || "",
+      parentRatingKey:
+        metadata.albumRatingKey || cached?.albumRatingKey || "",
+      duration: metadata.duration ?? cached?.duration ?? undefined,
+      thumb: thumb ? this.reviveArtwork(thumb) : null,
+    };
   }
 
   private async toPlayableTrack(track: PlexMetadata): Promise<PlayableTrack> {
@@ -1531,6 +1892,9 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
       String(track.ratingKey || ""),
     );
     const completedPath = downloaded?.filePath ?? null;
+    if (this.forcedOffline && !completedPath) {
+      throw new Error("This track is not downloaded and cannot play offline");
+    }
     const local =
       completedPath && this.localPlaybackServer
         ? this.localPlaybackServer.register(completedPath)
@@ -1559,7 +1923,7 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
         ratingKey: String(track.ratingKey || ""),
         plexSessionId,
         duration: track.duration,
-        thumb: this.plexUrl(track.thumb),
+        thumb: this.playbackArtwork(track.thumb),
       },
       source,
     };
@@ -1663,6 +2027,7 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     path: string,
     params: Record<string, string> = {},
   ): Promise<PlexResponse> {
+    this.assertOnline();
     const server = await this.getSelectedServer();
     const token = this.getServerToken(server);
     const orderedConnections = this.auth.getConnectionCandidates(
@@ -1758,6 +2123,29 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     return server;
   }
 
+  private assertOnline(): void {
+    if (this.forcedOffline) {
+      throw new Error("Rayna is offline");
+    }
+  }
+
+  private reviveArtwork<T>(value: T): T {
+    if (!this.artworkCache || value === null || value === undefined)
+      return value;
+    if (typeof value === "string") return this.artworkCache.revive(value) as T;
+    if (Array.isArray(value))
+      return value.map((item) => this.reviveArtwork(item)) as T;
+    if (typeof value === "object") {
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+          key,
+          this.reviveArtwork(item),
+        ]),
+      ) as T;
+    }
+    return value;
+  }
+
   private plexUrl(
     path: unknown,
     params: Record<string, string> = {},
@@ -1775,6 +2163,18 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     return server && this.artworkCache
       ? this.artworkCache.register(server.clientIdentifier, remoteUrl)
       : remoteUrl;
+  }
+
+  private playbackArtwork(value: unknown): string | null {
+    if (typeof value !== "string" || !value) return null;
+    try {
+      if (new URL(value).pathname.startsWith("/artwork/")) {
+        return this.reviveArtwork(value);
+      }
+    } catch {
+      // Relative Plex paths are handled below.
+    }
+    return this.plexUrl(value);
   }
 
   private buildPlexUrl(

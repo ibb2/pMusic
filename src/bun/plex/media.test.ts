@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import type { BassManager } from "../bass";
-import type { DatabaseManager } from "../database";
+import { DatabaseManager } from "../database";
+import type { LocalPlaybackServer } from "../local-playback-server";
+import type { ArtworkCacheServer } from "../artwork-cache-server";
 import type Authentication from "./authentication";
 import {
   createAudioTranscodeSource,
@@ -335,6 +337,260 @@ describe("library facets", () => {
       "album-1",
       "album-2",
     ]);
+  });
+});
+
+describe("offline library and playback", () => {
+  const server = {
+    clientIdentifier: "server",
+    accessToken: "token",
+    connections: [{ uri: "http://127.0.0.1:9" }],
+  };
+  const selectedLibrary = { key: "1", uuid: "music", type: "artist" };
+
+  function createOfflineMedia(
+    selectedLibraries = [selectedLibrary],
+    forceOffline = true,
+  ) {
+    const database = new DatabaseManager({ path: ":memory:" });
+    const played: Array<{ track: unknown; source: unknown }> = [];
+    const bass = {
+      setStreamResolver: () => {},
+      playTrack: (trackValue: unknown, source: unknown) =>
+        played.push({ track: trackValue, source }),
+      getPlaybackStatus: () => ({ current_track: null }),
+    } as unknown as BassManager;
+    const auth = {
+      selectedServer: server,
+      plexProduct: "Rayna",
+      plexClientId: "client",
+      plexUserAccessToken: "token",
+      getUserSelectedServer: async () => server,
+      getUserSelectedLibraries: async () => selectedLibraries,
+    } as unknown as Authentication;
+    const media = new MediaService(auth, bass, database);
+    media.setLocalPlaybackServer({
+      register: () => ({ url: "http://127.0.0.1:1234/media/downloaded" }),
+    } as unknown as LocalPlaybackServer);
+    media.setOffline(forceOffline);
+    return { database, media, played };
+  }
+
+  test("browses saved albums, tracks, playlists, and album details offline", async () => {
+    const { database, media } = createOfflineMedia();
+    database.setMediaCache({
+      serverId: "server",
+      cacheKey: "albums-complete-corpus:v2:music",
+      value: [album("a1", "Saved Album", "Artist", "artist", 2024, 1)],
+      updatedAt: 1,
+      expiresAt: 2,
+    });
+    database.setMediaCache({
+      serverId: "server",
+      cacheKey: "tracks-complete-corpus:v2:music",
+      value: [
+        track("t1", "Saved Track", "Artist", "artist", "Saved Album", "a1", 1),
+      ],
+      updatedAt: 1,
+      expiresAt: 2,
+    });
+    database.setMediaCache({
+      serverId: "server",
+      cacheKey: "playlists:v1",
+      value: [{ ratingKey: "p1", title: "Saved Playlist" }],
+      updatedAt: 1,
+      expiresAt: 2,
+    });
+
+    const albums = await media.getAlbumsPage({ pageSize: 40 });
+    const tracks = await media.getTracksPage({ pageSize: 40 });
+    const playlists = (await media.getPlaylists()) as Array<{ title: string }>;
+    const home = await media.getHomeData();
+    const detail = (await media.getAlbum("a1")) as {
+      freshness: string;
+      tracks: Array<{ ratingKey: string }>;
+    };
+
+    expect(albums.items[0]?.title).toBe("Saved Album");
+    expect(albums.freshness).toBe("stale");
+    expect(tracks.items[0]?.title).toBe("Saved Track");
+    expect(tracks.freshness).toBe("stale");
+    expect(playlists[0]?.title).toBe("Saved Playlist");
+    expect(home.freshness).toBe("stale");
+    expect(home.recentlyAdded[0]?.title).toBe("Saved Album");
+    expect(home.playlists[0]?.title).toBe("Saved Playlist");
+    expect(detail.freshness).toBe("stale");
+    expect(detail.tracks.map((item) => item.ratingKey)).toEqual(["t1"]);
+    database.close();
+  });
+
+  test("plays a completed local track and rejects an unavailable track offline", async () => {
+    const { database, media, played } = createOfflineMedia();
+    const cachedTrack = {
+      ...track(
+        "t1",
+        "Downloaded Track",
+        "Artist",
+        "artist",
+        "Saved Album",
+        "a1",
+        1,
+      ),
+      duration: 123_000,
+      thumb: "http://127.0.0.1:9999/artwork/server/cached-cover",
+    };
+    database.setMediaCache({
+      serverId: "server",
+      cacheKey: "tracks-complete-corpus:v2:music",
+      value: [cachedTrack],
+      updatedAt: 1,
+      expiresAt: 2,
+    });
+    media.setArtworkCacheServer({
+      revive: (value: string) => value.replace(":9999", ":8888"),
+    } as unknown as ArtworkCacheServer);
+    database.upsertDownload({
+      id: "download-t1",
+      serverId: "server",
+      ratingKey: "t1",
+      mediaType: "track",
+      title: "Downloaded Track",
+      filePath: "/music/downloaded.flac",
+      partialPath: null,
+      status: "completed",
+      bytesDownloaded: 10,
+      totalBytes: 10,
+      error: null,
+      metadata: {
+        targetType: "album",
+        targetRatingKey: "a1",
+        artist: "Artist",
+      },
+    });
+
+    await media.playTrack("t1");
+    expect(played).toHaveLength(1);
+    expect(played[0]?.track).toMatchObject({
+      title: "Downloaded Track",
+      artist: "Artist",
+      album: "Saved Album",
+      artistRatingKey: "artist",
+      albumRatingKey: "a1",
+      duration: 123_000,
+      thumb: "http://127.0.0.1:8888/artwork/server/cached-cover",
+    });
+    expect(played[0]?.source).toMatchObject({
+      localPath: "/music/downloaded.flac",
+    });
+    await expect(media.playTrack("not-downloaded")).rejects.toThrow(
+      "not downloaded",
+    );
+    database.close();
+  });
+
+  test("reuses the newest saved corpus when no library selection is persisted", async () => {
+    const { database, media } = createOfflineMedia([], false);
+    database.setMediaCache({
+      serverId: "server",
+      cacheKey: "albums-complete-corpus:v2:previous-library-selection",
+      value: [album("a1", "Saved Album", "Artist", "artist", 2024, 1)],
+      updatedAt: 10,
+      expiresAt: 20,
+    });
+
+    const albums = await media.getAlbumsPage({ pageSize: 40 });
+    expect(albums.items[0]?.title).toBe("Saved Album");
+    expect(albums.freshness).toBe("stale");
+    database.close();
+  });
+});
+
+describe("playlist detail caching", () => {
+  test("saves playlist tracks while refreshing the online playlist list", async () => {
+    const database = new DatabaseManager({ path: ":memory:" });
+    const server = {
+      clientIdentifier: "server",
+      accessToken: "token",
+      connections: [{ uri: "https://plex.test" }],
+    };
+    const auth = {
+      selectedServer: server,
+      plexProduct: "Rayna",
+      plexClientId: "client",
+      plexUserAccessToken: "token",
+      getUserSelectedServer: async () => server,
+      getConnectionCandidates: () => server.connections,
+      setLastKnownGoodConnection: () => {},
+    } as unknown as Authentication;
+    const bass = {
+      setStreamResolver: () => {},
+      getPlaybackStatus: () => ({ current_track: null }),
+    } as unknown as BassManager;
+    const media = new MediaService(auth, bass, database);
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      const path = new URL(String(input)).pathname;
+      if (path === "/playlists") {
+        return Response.json({
+          MediaContainer: {
+            Metadata: [
+              {
+                key: "/playlists/p1/items",
+                ratingKey: "p1",
+                title: "Saved Playlist",
+                leafCount: 1,
+              },
+            ],
+          },
+        });
+      }
+      if (path === "/playlists/p1/items") {
+        return Response.json({
+          MediaContainer: {
+            Metadata: [
+              {
+                ratingKey: "t1",
+                title: "Saved Track",
+                duration: 123_000,
+                parentTitle: "Saved Album",
+                parentRatingKey: "a1",
+                grandparentTitle: "Saved Artist",
+                grandparentRatingKey: "artist-1",
+              },
+            ],
+          },
+        });
+      }
+      return new Response(null, { status: 404 });
+    }) as typeof fetch;
+
+    try {
+      const playlists = (await media.getPlaylists()) as Array<{
+        title: string;
+        freshness: string;
+      }>;
+      expect(playlists).toEqual([
+        expect.objectContaining({ title: "Saved Playlist", freshness: "live" }),
+      ]);
+      expect(
+        database.getMediaCache<{ tracks: Array<{ ratingKey: string }> }>(
+          "server",
+          "playlist-detail:v1:p1",
+        )?.value.tracks,
+      ).toEqual([expect.objectContaining({ ratingKey: "t1" })]);
+
+      media.setOffline(true);
+      await expect(media.getPlaylist("p1")).resolves.toEqual(
+        expect.objectContaining({
+          title: "Saved Playlist",
+          freshness: "stale",
+          tracks: [expect.objectContaining({ ratingKey: "t1" })],
+        }),
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+      database.close();
+    }
   });
 });
 

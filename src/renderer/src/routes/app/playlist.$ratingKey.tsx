@@ -14,6 +14,7 @@ import {
   PlusSignIcon,
 } from "@hugeicons/core-free-icons";
 import { DownloadButton, downloadsApi } from "@/components/downloads";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 
 export const Route = createFileRoute("/app/playlist/$ratingKey")({
   component: PlaylistPage,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/app/playlist/$ratingKey")({
 function PlaylistPage() {
   const { ratingKey } = Route.useParams();
   const queryClient = useQueryClient();
+  const online = useOnlineStatus();
 
   const invalidatePlayerQueries = () => {
     queryClient.invalidateQueries({ queryKey: ["playerStatus"] });
@@ -37,6 +39,22 @@ function PlaylistPage() {
   const queryPlaylist = useQuery({
     queryKey: ["playlist", ratingKey],
     queryFn: () => window.api.media.getPlaylist(ratingKey),
+  });
+  const trackRatingKeys = (queryPlaylist.data?.tracks ?? []).map((track: any) =>
+    String(track.ratingKey),
+  );
+  const downloadStatuses = useQuery({
+    queryKey: ["playlist-download-statuses", ratingKey, trackRatingKeys],
+    queryFn: () =>
+      window.api.downloads.getStatus([
+        { targetType: "playlist", ratingKey },
+        ...trackRatingKeys.map((trackRatingKey: string) => ({
+          targetType: "track" as const,
+          ratingKey: trackRatingKey,
+        })),
+      ]),
+    enabled: Boolean(queryPlaylist.data),
+    refetchInterval: 1_000,
   });
 
   if (queryPlaylist.isLoading)
@@ -57,6 +75,14 @@ function PlaylistPage() {
     );
   }
   const tracks = Array.isArray(playlist.tracks) ? playlist.tracks : [];
+  const offline = !online || playlist.freshness === "stale";
+  const playlistDownloaded = downloadStatuses.data?.[0]?.state === "downloaded";
+  const downloadedTracks = new Set(
+    (downloadStatuses.data ?? [])
+      .slice(1)
+      .filter((status) => status.state === "downloaded")
+      .map((status) => status.ratingKey),
+  );
 
   return (
     <div className="flex min-h-full flex-col p-6 pb-10">
@@ -76,17 +102,29 @@ function PlaylistPage() {
             <div>{playlist.summary}</div>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <span>{dayjs(playlist.addedAt).format("YYYY")}</span>
-            <span>•</span>
+            {playlist.addedAt ? (
+              <>
+                <span>{dayjs.unix(playlist.addedAt).format("YYYY")}</span>
+                <span>•</span>
+              </>
+            ) : null}
             <span>{playlist.leafCount ?? tracks.length} tracks</span>
           </div>
         </div>
       </div>
 
+      {playlist.freshness === "stale" ? (
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+          Showing saved playlist data while Plex is offline. Only downloaded
+          music can be played.
+        </p>
+      ) : null}
+
       {/* Controls */}
       <div className="flex items-center gap-3 mb-6">
         <Button
           className="rounded-full h-14 w-14"
+          disabled={offline && !playlistDownloaded}
           onClick={async () => {
             await window.api.player.playPlaylist(ratingKey);
             invalidatePlayerQueries();
@@ -100,6 +138,7 @@ function PlaylistPage() {
         <Button
           variant="ghost"
           size="icon"
+          disabled={offline && !playlistDownloaded}
           onClick={async () => {
             await window.api.player.queuePlaylist(ratingKey);
             invalidatePlayerQueries();
@@ -130,84 +169,91 @@ function PlaylistPage() {
           </div>
         </div>
 
-        {tracks.map((track: any, index: number) => (
-          <div
-            key={track.id}
-            className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors"
-          >
-            <div className="text-center w-8 group-hover:hidden self-center">
-              {index + 1}
-            </div>
-            <button
-              className="hidden group-hover:block"
-              onClick={(event) => {
-                event.stopPropagation();
-                void playTrack(String(track.ratingKey));
-              }}
-              aria-label={`Play ${track.title}`}
+        {tracks.map((track: any, index: number) => {
+          const playable =
+            !offline || downloadedTracks.has(String(track.ratingKey));
+          return (
+            <div
+              key={track.id}
+              className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 transition-colors"
             >
-              <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
-            </button>
-            <img
-              src={track.albumThumb}
-              alt={track.albumTitle}
-              className="w-12 rounded-lg"
-            />
-            <div>
+              <div className="text-center w-8 group-hover:hidden self-center">
+                {index + 1}
+              </div>
               <button
-                className="w-full text-left"
+                className="hidden group-hover:block disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={!playable}
                 onClick={(event) => {
                   event.stopPropagation();
                   void playTrack(String(track.ratingKey));
                 }}
                 aria-label={`Play ${track.title}`}
               >
-                {track.title}
+                <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
               </button>
-              <div className="flex flex-row items-center gap-2">
-                <Link
-                  to={"/app/artist/$ratingKey"}
-                  params={{ ratingKey: track.artistRatingKey }}
-                  onClick={(event) => event.stopPropagation()}
+              <img
+                src={track.albumThumb}
+                alt={track.albumTitle}
+                className="w-12 rounded-lg"
+              />
+              <div>
+                <button
+                  className="w-full text-left disabled:cursor-not-allowed disabled:text-muted-foreground"
+                  disabled={!playable}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void playTrack(String(track.ratingKey));
+                  }}
+                  aria-label={`Play ${track.title}`}
                 >
-                  <div className="text-slate-400 text-sm hover:text-slate-700/50 hover:underline">
-                    {track.artistTitle}
-                  </div>
-                </Link>
-                <div className="pb-1 text-slate-400 ">{"  -  "}</div>
-                <Link
-                  to={"/app/album/$ratingKey"}
-                  params={{ ratingKey: track.albumRatingKey }}
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <div className="text-slate-400 text-sm hover:text-slate-700/50 hover:underline">
-                    {track.albumTitle}
-                  </div>
-                </Link>
+                  {track.title}
+                </button>
+                <div className="flex flex-row items-center gap-2">
+                  <Link
+                    to={"/app/artist/$ratingKey"}
+                    params={{ ratingKey: track.artistRatingKey }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <div className="text-slate-400 text-sm hover:text-slate-700/50 hover:underline">
+                      {track.artistTitle}
+                    </div>
+                  </Link>
+                  <div className="pb-1 text-slate-400 ">{"  -  "}</div>
+                  <Link
+                    to={"/app/album/$ratingKey"}
+                    params={{ ratingKey: track.albumRatingKey }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <div className="text-slate-400 text-sm hover:text-slate-700/50 hover:underline">
+                      {track.albumTitle}
+                    </div>
+                  </Link>
+                </div>
+              </div>
+              <button
+                className="opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-not-allowed disabled:opacity-30"
+                disabled={!playable}
+                onClick={async (event) => {
+                  event.stopPropagation();
+                  await window.api.player.queueTrack(String(track.ratingKey));
+                  invalidatePlayerQueries();
+                }}
+                aria-label={`Queue ${track.title}`}
+              >
+                <HugeiconsIcon icon={PlusSignIcon} />
+              </button>
+              <button
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <HugeiconsIcon icon={FavouriteIcon} />
+              </button>
+              <div className="text-zinc-400 text-sm text-right self-center">
+                {dayjs.duration(track.duration).format("m:ss")}
               </div>
             </div>
-            <button
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={async (event) => {
-                event.stopPropagation();
-                await window.api.player.queueTrack(String(track.ratingKey));
-                invalidatePlayerQueries();
-              }}
-              aria-label={`Queue ${track.title}`}
-            >
-              <HugeiconsIcon icon={PlusSignIcon} />
-            </button>
-            <button
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <HugeiconsIcon icon={FavouriteIcon} />
-            </button>
-            <div className="text-zinc-400 text-sm text-right self-center">
-              {dayjs.duration(track.duration).format("m:ss")}
-            </div>
-          </div>
-        ))}
+          );
+        })}
         {tracks.length === 0 ? (
           <div className="px-4 py-10 text-center text-sm text-muted-foreground">
             This smart playlist currently has no available tracks.

@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { and, desc, eq, lte, sql } from "drizzle-orm";
+import { and, desc, eq, like, lte, sql } from "drizzle-orm";
 import { drizzle, type BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
@@ -129,6 +129,31 @@ export class DatabaseManager {
     const value = safeParse(row.value, CORRUPT_JSON);
     if (value === CORRUPT_JSON) {
       this.deleteMediaCache(serverId, cacheKey);
+      return null;
+    }
+    return { ...row, value: value as T };
+  }
+
+  getLatestMediaCacheByPrefix<T = unknown>(
+    serverId: string,
+    cacheKeyPrefix: string,
+  ): MediaCacheEntry<T> | null {
+    const row = this.db
+      .select()
+      .from(mediaCache)
+      .where(
+        and(
+          eq(mediaCache.serverId, serverId),
+          like(mediaCache.cacheKey, `${cacheKeyPrefix}%`),
+        ),
+      )
+      .orderBy(desc(mediaCache.updatedAt))
+      .limit(1)
+      .get();
+    if (!row) return null;
+    const value = safeParse(row.value, CORRUPT_JSON);
+    if (value === CORRUPT_JSON) {
+      this.deleteMediaCache(serverId, row.cacheKey);
       return null;
     }
     return { ...row, value: value as T };

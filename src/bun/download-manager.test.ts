@@ -329,6 +329,37 @@ describe("DownloadManager", () => {
     database.close();
   });
 
+  test("reports a track as downloaded when it was saved through an album", () => {
+    const { manager, database, directory } = fixture(
+      [],
+      async () => new Response(),
+    );
+    database.upsertDownload({
+      id: "album-track",
+      serverId: "server",
+      ratingKey: "track-1",
+      mediaType: "track",
+      title: "Album Track",
+      filePath: join(directory, "track-1.flac"),
+      partialPath: null,
+      status: "completed",
+      bytesDownloaded: 10,
+      totalBytes: 10,
+      error: null,
+      metadata: {
+        targetType: "album",
+        targetRatingKey: "album-1",
+      },
+    });
+
+    expect(
+      manager.statuses("server", [
+        { targetType: "track", ratingKey: "track-1" },
+      ])[0],
+    ).toMatchObject({ state: "downloaded", completedTracks: 1 });
+    database.close();
+  });
+
   test("does not clear paused activity", () => {
     const { manager, database, directory } = fixture(
       [],
