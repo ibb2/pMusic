@@ -134,6 +134,8 @@ Rayna is a 3<sup>rd</sup>-party music player for Plex, inspired by Spotify. Buil
 - Switch between light, dark, and system theme.
 - Configure playback, offline storage, selected libraries, and synchronization from Settings.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -168,6 +170,9 @@ After install, open Terminal and run:
 ```sh
 xattr -d com.apple.quarantine /Applications/Rayna.app
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 
 <!-- USAGE EXAMPLES -->
 ## Usage
