@@ -77,52 +77,52 @@ Log in to your Plex account, select a server, and choose one or more music libra
 
 - [x] Light and dark themes
 - [x] Volume controls
-- [x] Current repository-owned screenshots
-- [x] Artist pages
-  - [x] Play popular tracks
-  - [x] Browse the artist library
-  - [x] Filter and sort artists
-- [x] Playlist pages
-  - [x] Play and queue an entire playlist
-  - [x] Play and queue individual tracks
-  - [x] Browse, filter, and sort playlists
-- [x] Albums pages
-  - [x] Browse albums
-  - [x] View album details
-  - [x] Complete-library filtering and sorting
-- [x] Tracks page
-  - [x] Browse, play, queue, and download tracks
-  - [x] Complete-library filtering and sorting
-  - [x] Infinite scrolling
-- [x] Global search
-- [x] Queue management
-  - [x] Queue albums and playlists
-  - [x] Queue individual tracks
-  - [x] Display and clear the queue
-- [x] User-managed offline support
-  - [x] Track, album, and playlist downloads
-  - [x] Pause, resume, retry, and remove
-  - [x] Dedicated grouped Downloads page
-  - [x] Download activity menu and album-detail downloaded state
-  - [x] Configurable storage location
-  - [x] Verify downloaded album and playlist playback while Plex is unreachable
-- [x] Remote playback connection recovery
-  - [x] Reconnect through the best available Plex route
-  - [x] Preserve the current track, position, and queue after a network change
-- [x] Multiple music-library support
-- [x] Server-scoped metadata, artwork, and lyrics caching
-- [x] Versioned SQLite database
-- [x] Plain and synchronized Plex lyrics
-- [x] Performance improvements
-- [x] Server selection
-  - [x] Change between available Plex servers in the desktop UI
-  - [x] Select multiple music libraries
-- [x] Plex session reporting
-- [x] Plex timeline reporting
-- [x] Audio transcoding
-- [x] Startup, recovery, and manual synchronization
-- [x] Settings page
-- [x] Previous and next controls
+- [ ] Current repository-owned screenshots
+- [ ] Artist pages
+  - [ ] Play popular tracks
+  - [ ] Browse the artist library
+  - [ ] Filter and sort artists
+- [ ] Playlist pages
+  - [ ] Play and queue an entire playlist
+  - [ ] Play and queue individual tracks
+  - [ ] Browse, filter, and sort playlists
+- [ ] Albums pages
+  - [ ] Browse albums
+  - [ ] View album details
+  - [ ] Complete-library filtering and sorting
+- [ ] Tracks page
+  - [ ] Browse, play, queue, and download tracks
+  - [ ] Complete-library filtering and sorting
+  - [ ] Infinite scrolling
+- [ ] Global search
+- [ ] Queue management
+  - [ ] Queue albums and playlists
+  - [ ] Queue individual tracks
+  - [ ] Display and clear the queue
+- [ ] User-managed offline support
+  - [ ] Track, album, and playlist downloads
+  - [ ] Pause, resume, retry, and remove
+  - [ ] Dedicated grouped Downloads page
+  - [ ] Download activity menu and album-detail downloaded state
+  - [ ] Configurable storage location
+  - [ ] Verify downloaded album and playlist playback while Plex is unreachable
+- [ ] Remote playback connection recovery
+  - [ ] Reconnect through the best available Plex route
+  - [ ] Preserve the current track, position, and queue after a network change
+- [ ] Multiple music-library support
+- [ ] Server-scoped metadata, artwork, and lyrics caching
+- [ ] Versioned SQLite database
+- [ ] Plain and synchronized Plex lyrics
+- [ ] Performance improvements
+- [ ] Server selection
+  - [ ] Change between available Plex servers in the desktop UI
+  - [ ] Select multiple music libraries
+- [ ] Plex session reporting
+- [ ] Plex timeline reporting
+- [ ] Audio transcoding
+- [ ] Startup, recovery, and manual synchronization
+- [ ] Settings page
+- [ ] Previous and next controls
 
 ## Non-goals
 

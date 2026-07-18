@@ -11,6 +11,7 @@ import {
   normalizePlaybackSettings,
   pageAlbumCorpus,
   pageTrackCorpus,
+  selectPopularArtistTracks,
 } from "./media";
 
 describe("Plex audio transcoding", () => {
@@ -340,6 +341,40 @@ describe("library facets", () => {
   });
 });
 
+describe("artist popular tracks", () => {
+  test("filters by artist and ranks tracks by Plex play count", () => {
+    const tracks = [
+      {
+        ...track("t1", "One", "Artist", "artist", "Album", "a1", 30),
+        viewCount: 2,
+      },
+      {
+        ...track("t2", "Two", "Artist", "artist", "Album", "a1", 10),
+        viewCount: 20,
+      },
+      {
+        ...track("t3", "Other", "Other", "other", "Album", "a2", 40),
+        viewCount: 100,
+      },
+    ];
+
+    expect(
+      selectPopularArtistTracks(tracks, "artist").map((item) => item.ratingKey),
+    ).toEqual(["t2", "t1"]);
+  });
+
+  test("falls back to recently added order when cached tracks lack play counts", () => {
+    const tracks = [
+      track("t1", "Older", "Artist", "artist", "Album", "a1", 10),
+      track("t2", "Newer", "Artist", "artist", "Album", "a1", 20),
+    ];
+
+    expect(
+      selectPopularArtistTracks(tracks, "artist").map((item) => item.ratingKey),
+    ).toEqual(["t2", "t1"]);
+  });
+});
+
 describe("offline library and playback", () => {
   const server = {
     clientIdentifier: "server",
@@ -406,6 +441,9 @@ describe("offline library and playback", () => {
     const tracks = await media.getTracksPage({ pageSize: 40 });
     const playlists = (await media.getPlaylists()) as Array<{ title: string }>;
     const home = await media.getHomeData();
+    const popular = (await media.getArtistPopularTracks("artist")) as {
+      tracks: Array<{ ratingKey: string }>;
+    };
     const detail = (await media.getAlbum("a1")) as {
       freshness: string;
       tracks: Array<{ ratingKey: string }>;
@@ -419,6 +457,7 @@ describe("offline library and playback", () => {
     expect(home.freshness).toBe("stale");
     expect(home.recentlyAdded[0]?.title).toBe("Saved Album");
     expect(home.playlists[0]?.title).toBe("Saved Playlist");
+    expect(popular.tracks.map((item) => item.ratingKey)).toEqual(["t1"]);
     expect(detail.freshness).toBe("stale");
     expect(detail.tracks.map((item) => item.ratingKey)).toEqual(["t1"]);
     database.close();

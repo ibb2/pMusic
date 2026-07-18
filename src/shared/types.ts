@@ -128,6 +128,8 @@ export type MediaTrack = {
   disc: number | null;
   thumb: string | null;
   addedAt: number | null;
+  viewCount?: number | null;
+  ratingCount?: number | null;
 };
 
 export type LyricsLine = {

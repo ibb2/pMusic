@@ -5,6 +5,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import { useEffect, useRef } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -17,6 +18,8 @@ import {
   PlusSignIcon,
   PreviousIcon,
 } from "@hugeicons/core-free-icons";
+
+dayjs.extend(duration);
 
 export const Route = createFileRoute("/app/artist/$ratingKey")({
   component: ArtistPage,
@@ -152,22 +155,22 @@ export function ArtistPage() {
           ) : popularTracks.length > 0 ? (
             popularTracks.map((track: any, index: number) => (
               <div
-                key={track.id}
-                className="flex items-center gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors"
+                key={track.ratingKey}
+                className="flex items-center gap-4 px-4 py-3 rounded group first:rounded-tl-lg first:rounded-tr-lg last:rounded-bl-lg last:rounded-br-lg hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors"
               >
                 <div className="text-center w-8 group-hover:hidden">
                   {index + 1}
                 </div>
-                <Button
-                  className="hidden group-hover:block"
+                <button
+                  className="hidden group-hover:block w-8 disabled:cursor-not-allowed disabled:opacity-40"
                   onClick={(event) => {
                     event.stopPropagation();
                     void playTrack(String(track.ratingKey));
                   }}
                   aria-label={`Play ${track.title}`}
                 >
-                  <HugeiconsIcon icon={PlayIcon} className="fill-current" />
-                </Button>
+                  <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
+                </button>
                 <div className="flex-1">
                   <button
                     className="w-full text-left"
@@ -183,11 +186,14 @@ export function ArtistPage() {
                     {Intl.NumberFormat("en-US", {
                       notation: "compact",
                       compactDisplay: "short",
-                    }).format(track.ratingCount ?? 0)}
+                    }).format(track.playCount ?? 0)}{" "}
+                    plays
                   </div>
                 </div>
                 <div className="text-zinc-400 text-sm">
-                  {dayjs.duration(track.duration).format("m:ss")}
+                  {track.duration
+                    ? dayjs.duration(track.duration).format("m:ss")
+                    : "--:--"}
                 </div>
                 <Button
                   variant="ghost"
@@ -202,12 +208,12 @@ export function ArtistPage() {
                 >
                   <HugeiconsIcon icon={PlusSignIcon} />
                 </Button>
-                <Button
+                <button
                   className="opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={(event) => event.stopPropagation()}
                 >
                   <HugeiconsIcon icon={FavouriteIcon} />
-                </Button>
+                </button>
               </div>
             ))
           ) : (

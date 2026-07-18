@@ -136,6 +136,27 @@ export function buildLibraryFacets(
 
 type LocallyPageableMedia = MediaAlbum | MediaTrack;
 
+export function selectPopularArtistTracks(
+  tracks: MediaTrack[],
+  artistRatingKey: string,
+  limit = 10,
+): MediaTrack[] {
+  return tracks
+    .filter((track) => track.artistRatingKey === artistRatingKey)
+    .sort((left, right) => {
+      const popularity =
+        Number(right.viewCount ?? right.ratingCount ?? 0) -
+        Number(left.viewCount ?? left.ratingCount ?? 0);
+      if (popularity !== 0) return popularity;
+
+      const recency = Number(right.addedAt ?? 0) - Number(left.addedAt ?? 0);
+      if (recency !== 0) return recency;
+
+      return compareText(left.title, right.title);
+    })
+    .slice(0, Math.max(0, limit));
+}
+
 /**
  * Apply library controls to a complete, stable media corpus. Plex's advanced
  * filter parameters differ between server versions and agents, so library
@@ -1400,24 +1421,20 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
   }
 
   async getArtistPopularTracks(ratingKey: string): Promise<unknown> {
-    try {
-      const data = await this.fetchPlex(
-        `/library/metadata/${ratingKey}/popularTracks`,
-      );
+    const tracks = await this.getCompleteMediaCorpus("tracks", "10", (track) =>
+      this.mapTrack(track),
+    );
 
-      return {
-        tracks: (data.MediaContainer?.Metadata || []).map((track) => ({
-          id: track.ratingKey,
-          number: track.trackNumber,
-          title: track.title,
-          duration: track.duration,
-          ratingCount: track.ratingCount,
-          ratingKey: track.ratingKey,
-        })),
-      };
-    } catch {
-      return { tracks: [] };
-    }
+    return {
+      tracks: selectPopularArtistTracks(tracks, ratingKey).map((track) => ({
+        id: track.ratingKey,
+        number: track.index,
+        title: track.title,
+        duration: track.duration,
+        playCount: track.viewCount ?? track.ratingCount ?? 0,
+        ratingKey: track.ratingKey,
+      })),
+    };
   }
 
   async getPlaylists(): Promise<unknown[]> {
@@ -2257,6 +2274,12 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
       ),
       addedAt: Number.isFinite(Number(track.addedAt))
         ? Number(track.addedAt)
+        : null,
+      viewCount: Number.isFinite(Number(track.viewCount))
+        ? Number(track.viewCount)
+        : null,
+      ratingCount: Number.isFinite(Number(track.ratingCount))
+        ? Number(track.ratingCount)
         : null,
     };
   }
