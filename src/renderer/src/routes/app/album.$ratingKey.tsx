@@ -4,6 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import {
   Clock01Icon,
   FavouriteIcon,
+  ListStartIcon,
   MoreVerticalIcon,
   PlayIcon,
   PlusSignIcon,
@@ -13,6 +14,16 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useEffect } from "react";
+import { DownloadButton, downloadsApi } from "@/components/downloads";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/app/album/$ratingKey")({
   component: AlbumPage,
@@ -22,6 +33,7 @@ export function AlbumPage() {
   const { ratingKey } = Route.useParams();
   const { setBlur } = usePageUltraBlur(`album-${ratingKey}`);
   const queryClient = useQueryClient();
+  const online = useOnlineStatus();
 
   const invalidatePlayerQueries = () => {
     queryClient.invalidateQueries({ queryKey: ["playerStatus"] });
@@ -37,6 +49,22 @@ export function AlbumPage() {
   const queryAlbum = useQuery({
     queryKey: ["album", ratingKey],
     queryFn: () => window.api.media.getAlbum(ratingKey),
+  });
+  const trackRatingKeys = (queryAlbum.data?.tracks ?? []).map((track: any) =>
+    String(track.ratingKey),
+  );
+  const downloadStatuses = useQuery({
+    queryKey: ["album-download-statuses", ratingKey, trackRatingKeys],
+    queryFn: () =>
+      window.api.downloads.getStatus([
+        { targetType: "album", ratingKey },
+        ...trackRatingKeys.map((trackRatingKey: string) => ({
+          targetType: "track" as const,
+          ratingKey: trackRatingKey,
+        })),
+      ]),
+    enabled: Boolean(queryAlbum.data),
+    refetchInterval: 1_000,
   });
 
   useEffect(() => {
@@ -55,6 +83,14 @@ export function AlbumPage() {
     return "Error loading album" + queryAlbum.error.message;
 
   const album = queryAlbum.data;
+  const offline = !online || album.freshness === "stale";
+  const albumDownloaded = downloadStatuses.data?.[0]?.state === "downloaded";
+  const downloadedTracks = new Set(
+    (downloadStatuses.data ?? [])
+      .slice(1)
+      .filter((status) => status.state === "downloaded")
+      .map((status) => status.ratingKey),
+  );
 
   return (
     <div className="flex min-h-full flex-col p-6">
@@ -94,10 +130,18 @@ export function AlbumPage() {
         </div>
       </div>
 
+      {album.freshness === "stale" ? (
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+          Showing saved album data while Plex is offline. Only downloaded music
+          can be played.
+        </p>
+      ) : null}
+
       {/* Controls */}
       <div className="flex items-center gap-3 mb-6">
         <Button
           className="rounded-full h-14 w-14"
+          disabled={offline && !albumDownloaded}
           onClick={async () => {
             await window.api.player.playAlbum(ratingKey);
             invalidatePlayerQueries();
@@ -108,27 +152,46 @@ export function AlbumPage() {
         <Button variant={"secondary"} size="icon-lg" className="rounded-full">
           <HugeiconsIcon icon={FavouriteIcon} />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={async () => {
-            await window.api.player.queueAlbum(ratingKey);
-            invalidatePlayerQueries();
-          }}
-          aria-label="Queue album"
-        >
-          <HugeiconsIcon icon={PlusSignIcon} />
-        </Button>
-        <Button variant="ghost" size="icon">
-          <HugeiconsIcon icon={MoreVerticalIcon} />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="More album actions"
+              />
+            }
+          >
+            <HugeiconsIcon icon={MoreVerticalIcon} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuGroup>
+              <DropdownMenuItem
+                disabled={offline && !albumDownloaded}
+                onClick={async () => {
+                  await window.api.player.queueAlbum(ratingKey);
+                  invalidatePlayerQueries();
+                }}
+              >
+                <HugeiconsIcon icon={ListStartIcon} data-icon="inline-start" />
+                Add album to queue
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DownloadButton
+          api={downloadsApi}
+          target={{ type: "album", ratingKey, title: album.title }}
+        />
       </div>
 
       {/* Track List */}
       <div className="bg-white/60 dark:bg-slate-300/10 rounded-lg">
-        <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 px-4 py-2 text-sm border-b">
+        <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-4 px-4 py-2 text-sm border-b">
           <div className="w-8 text-center">#</div>
           <div>Title</div>
+          <div></div>
+          <div></div>
           <div></div>
           <div></div>
           <div className="w-16 text-right">
@@ -136,56 +199,86 @@ export function AlbumPage() {
           </div>
         </div>
 
-        {album.tracks.map((track: any, index: number) => (
-          <div
-            key={track.id}
-            className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors"
-          >
-            <div className="text-center w-8 group-hover:hidden">
-              {index + 1}
+        {album.tracks.map((track: any, index: number) => {
+          const downloaded = downloadedTracks.has(String(track.ratingKey));
+          const playable = !offline || downloaded;
+          return (
+            <div
+              key={track.id}
+              className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] items-center gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors"
+            >
+              <div className="text-center w-8 group-hover:hidden">
+                {index + 1}
+              </div>
+              <button
+                className="hidden group-hover:block w-8 disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={!playable}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void playTrack(String(track.ratingKey));
+                }}
+                aria-label={`Play ${track.title}`}
+              >
+                <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
+              </button>
+              <button
+                className="w-full text-left disabled:cursor-not-allowed disabled:text-muted-foreground"
+                disabled={!playable}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void playTrack(String(track.ratingKey));
+                }}
+                aria-label={`Play ${track.title}`}
+              >
+                {track.title}
+              </button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-not-allowed disabled:opacity-30"
+                onClick={(event) => event.stopPropagation()}
+                aria-label={`Add ${track.title}`}
+              >
+                <HugeiconsIcon icon={PlusSignIcon} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(event) => event.stopPropagation()}
+                aria-label={`Favourite ${track.title}`}
+              >
+                <HugeiconsIcon icon={FavouriteIcon} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-not-allowed disabled:opacity-30"
+                disabled={!playable}
+                onClick={async (event) => {
+                  event.stopPropagation();
+                  await window.api.player.queueTrack(String(track.ratingKey));
+                  invalidatePlayerQueries();
+                }}
+                aria-label={`Queue ${track.title}`}
+                title={`Add ${track.title} to queue`}
+              >
+                <HugeiconsIcon icon={ListStartIcon} />
+              </Button>
+              {downloaded ? (
+                <IconCircleCheckFilled
+                  className="size-4 text-emerald-600"
+                  aria-label={`${track.title} downloaded`}
+                />
+              ) : (
+                <span className="size-4" aria-hidden="true" />
+              )}
+              <div className="text-sm w-16 text-right">
+                {dayjs.duration(track.duration).format("m:ss")}
+              </div>
             </div>
-            <button
-              className="hidden group-hover:block w-8"
-              onClick={(event) => {
-                event.stopPropagation();
-                void playTrack(String(track.ratingKey));
-              }}
-              aria-label={`Play ${track.title}`}
-            >
-              <HugeiconsIcon icon={PlayIcon} className="fill-inherit w-8" />
-            </button>
-            <button
-              className="w-full text-left"
-              onClick={(event) => {
-                event.stopPropagation();
-                void playTrack(String(track.ratingKey));
-              }}
-              aria-label={`Play ${track.title}`}
-            >
-              {track.title}
-            </button>
-            <button
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={async (event) => {
-                event.stopPropagation();
-                await window.api.player.queueTrack(String(track.ratingKey));
-                invalidatePlayerQueries();
-              }}
-              aria-label={`Queue ${track.title}`}
-            >
-              <HugeiconsIcon icon={PlusSignIcon} />
-            </button>
-            <button
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <HugeiconsIcon icon={FavouriteIcon} />
-            </button>
-            <div className="text-sm w-16 text-right">
-              {dayjs.duration(track.duration).format("m:ss")}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

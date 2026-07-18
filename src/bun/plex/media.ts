@@ -8,8 +8,17 @@ import type {
   StreamCandidate,
 } from "../bass";
 import type { DatabaseManager } from "../database";
+import { CacheService } from "../cache";
+import type {
+  DownloadMediaResolver,
+  ResolvedDownloadTrack,
+} from "../download-manager";
+import type { LocalPlaybackServer } from "../local-playback-server";
+import type { SyncResolver, LibraryRefreshResult } from "../sync-service";
+import type { ArtworkCacheServer } from "../artwork-cache-server";
 import type Authentication from "./authentication";
 import { selectMusicLibraries } from "./library-selection";
+import { findLyricsStreamKey, parseLyrics } from "./lyrics";
 import type {
   PlaybackSettings,
   PlaybackSettingsPatch,
@@ -18,7 +27,18 @@ import type {
   SearchResult,
   SearchResults,
 } from "../../shared/rpc";
-import type { PlexLibrary, PlexServer } from "../../shared/types";
+import type {
+  AlbumPageRequest,
+  CacheFreshness,
+  MediaAlbum,
+  MediaPage,
+  MediaTrack,
+  PlexLibrary,
+  PlexServer,
+  TrackPageRequest,
+  LyricsResult,
+  LibraryFacets,
+} from "../../shared/types";
 
 type PlexMetadata = Record<string, any>;
 
@@ -46,7 +66,11 @@ type HomeData = {
   recentlyPlayed: Array<Record<string, any>>;
   recentlyAdded: Array<Record<string, any>>;
   playlists: Array<Record<string, any>>;
+  freshness: CacheFreshness;
+  cachedAt: string | null;
 };
+
+type HomeContent = Omit<HomeData, "freshness" | "cachedAt">;
 
 type UltraBlurVariantUrls = {
   light: string;
@@ -64,6 +88,206 @@ type HslColor = {
   s: number;
   l: number;
 };
+
+export function buildLibraryFacets(
+  albums: MediaAlbum[],
+  tracks: MediaTrack[],
+): Omit<LibraryFacets, "freshness" | "cachedAt"> {
+  const options = <T extends { ratingKey: string; title: string }>(
+    entries: T[],
+  ) =>
+    [...new Map(entries.map((entry) => [entry.ratingKey, entry])).values()]
+      .map(({ ratingKey, title }) => ({ ratingKey, title }))
+      .sort((left, right) =>
+        left.title.localeCompare(right.title, undefined, {
+          sensitivity: "base",
+        }),
+      );
+
+  return {
+    albumArtists: options(
+      albums.flatMap((album) =>
+        album.artistRatingKey
+          ? [{ ratingKey: album.artistRatingKey, title: album.artist }]
+          : [],
+      ),
+    ),
+    albumYears: [
+      ...new Set(
+        albums.flatMap((album) => (album.year === null ? [] : [album.year])),
+      ),
+    ].sort((left, right) => right - left),
+    trackArtists: options(
+      tracks.flatMap((track) =>
+        track.artistRatingKey
+          ? [{ ratingKey: track.artistRatingKey, title: track.artist }]
+          : [],
+      ),
+    ),
+    trackAlbums: options(
+      tracks.flatMap((track) =>
+        track.albumRatingKey
+          ? [{ ratingKey: track.albumRatingKey, title: track.album }]
+          : [],
+      ),
+    ),
+  };
+}
+
+type LocallyPageableMedia = MediaAlbum | MediaTrack;
+
+export function selectPopularArtistTracks(
+  tracks: MediaTrack[],
+  artistRatingKey: string,
+  limit = 10,
+): MediaTrack[] {
+  return tracks
+    .filter((track) => track.artistRatingKey === artistRatingKey)
+    .sort((left, right) => {
+      const popularity =
+        Number(right.viewCount ?? right.ratingCount ?? 0) -
+        Number(left.viewCount ?? left.ratingCount ?? 0);
+      if (popularity !== 0) return popularity;
+
+      const recency = Number(right.addedAt ?? 0) - Number(left.addedAt ?? 0);
+      if (recency !== 0) return recency;
+
+      return compareText(left.title, right.title);
+    })
+    .slice(0, Math.max(0, limit));
+}
+
+/**
+ * Apply library controls to a complete, stable media corpus. Plex's advanced
+ * filter parameters differ between server versions and agents, so library
+ * pages deliberately filter and sort locally instead of trusting those
+ * parameters to be honoured by `/library/sections/:key/all`.
+ */
+export function pageAlbumCorpus(
+  corpus: MediaAlbum[],
+  request: AlbumPageRequest,
+): Pick<MediaPage<MediaAlbum>, "items" | "nextCursor" | "total"> {
+  const artistKeys = new Set(request.filters?.artistRatingKeys ?? []);
+  const years = new Set(request.filters?.years ?? []);
+  const query = request.query?.trim().toLocaleLowerCase() ?? "";
+  const filtered = corpus.filter(
+    (album) =>
+      (!query || album.title.toLocaleLowerCase().includes(query)) &&
+      (!artistKeys.size ||
+        (album.artistRatingKey !== null &&
+          artistKeys.has(album.artistRatingKey))) &&
+      (!years.size || (album.year !== null && years.has(album.year))),
+  );
+
+  if (request.sort) {
+    const { field, direction } = request.sort;
+    filtered.sort((left, right) => {
+      const compared =
+        field === "title"
+          ? compareText(left.title, right.title)
+          : field === "artist"
+            ? compareText(left.artist, right.artist)
+            : field === "year"
+              ? compareNullableNumber(left.year, right.year)
+              : compareNullableNumber(left.addedAt, right.addedAt);
+      return (
+        (compared || compareText(left.ratingKey, right.ratingKey)) *
+        (direction === "desc" ? -1 : 1)
+      );
+    });
+  }
+
+  return paginateLocalCorpus(filtered, request);
+}
+
+export function pageTrackCorpus(
+  corpus: MediaTrack[],
+  request: TrackPageRequest,
+): Pick<MediaPage<MediaTrack>, "items" | "nextCursor" | "total"> {
+  const artistKeys = new Set(request.filters?.artistRatingKeys ?? []);
+  const albumKeys = new Set(request.filters?.albumRatingKeys ?? []);
+  const query = request.query?.trim().toLocaleLowerCase() ?? "";
+  const filtered = corpus.filter(
+    (track) =>
+      (!query || track.title.toLocaleLowerCase().includes(query)) &&
+      (!artistKeys.size ||
+        (track.artistRatingKey !== null &&
+          artistKeys.has(track.artistRatingKey))) &&
+      (!albumKeys.size ||
+        (track.albumRatingKey !== null && albumKeys.has(track.albumRatingKey))),
+  );
+
+  if (request.sort) {
+    const { field, direction } = request.sort;
+    filtered.sort((left, right) => {
+      const compared =
+        field === "title"
+          ? compareText(left.title, right.title)
+          : field === "artist"
+            ? compareText(left.artist, right.artist)
+            : field === "album"
+              ? compareText(left.album, right.album)
+              : compareNullableNumber(left.addedAt, right.addedAt);
+      return (
+        (compared || compareText(left.ratingKey, right.ratingKey)) *
+        (direction === "desc" ? -1 : 1)
+      );
+    });
+  }
+
+  return paginateLocalCorpus(filtered, request);
+}
+
+function paginateLocalCorpus<T extends LocallyPageableMedia>(
+  corpus: T[],
+  request: { cursor?: string; pageSize: number },
+): Pick<MediaPage<T>, "items" | "nextCursor" | "total"> {
+  const pageSize = Math.min(Math.max(request.pageSize, 1), 100);
+  const offset = decodeLocalOffset(request.cursor);
+  const nextOffset = Math.min(offset + pageSize, corpus.length);
+  return {
+    items: corpus.slice(offset, nextOffset),
+    nextCursor:
+      nextOffset < corpus.length
+        ? Buffer.from(JSON.stringify({ aggregateOffset: nextOffset })).toString(
+            "base64url",
+          )
+        : null,
+    total: corpus.length,
+  };
+}
+
+function decodeLocalOffset(cursor?: string): number {
+  if (!cursor) return 0;
+  try {
+    const decoded = JSON.parse(Buffer.from(cursor, "base64url").toString()) as {
+      aggregateOffset?: unknown;
+    };
+    return typeof decoded.aggregateOffset === "number" &&
+      Number.isSafeInteger(decoded.aggregateOffset) &&
+      decoded.aggregateOffset >= 0
+      ? decoded.aggregateOffset
+      : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function compareText(left: string, right: string): number {
+  return left.localeCompare(right, undefined, {
+    sensitivity: "base",
+    numeric: true,
+  });
+}
+
+function compareNullableNumber(
+  left: number | null,
+  right: number | null,
+): number {
+  if (left === null) return right === null ? 0 : 1;
+  if (right === null) return -1;
+  return left - right;
+}
 
 const PLEX_REQUEST_TIMEOUT_MS = 8_000;
 
@@ -165,22 +389,199 @@ export function createPlexPlaybackIdentity({
   };
 }
 
-export class MediaService {
+export class MediaService implements DownloadMediaResolver, SyncResolver {
   private activeBaseUrl: string | null = null;
+  private forcedOffline = false;
+  private readonly cache: CacheService;
+  private localPlaybackServer: LocalPlaybackServer | null = null;
+  private networkRestored: (() => void) | null = null;
+  private artworkCache: ArtworkCacheServer | null = null;
 
   constructor(
     private readonly auth: Authentication,
     private readonly bass: BassManager,
     private readonly db: DatabaseManager,
   ) {
+    this.cache = new CacheService(db);
     this.bass.setStreamResolver(
       (source, excludedConnectionUris) =>
         this.resolveStreamCandidates(source, excludedConnectionUris),
       (connectionUri) => {
         this.activeBaseUrl = connectionUri;
         this.auth.setLastKnownGoodConnection(connectionUri);
+        this.networkRestored?.();
       },
     );
+  }
+
+  setLocalPlaybackServer(server: LocalPlaybackServer): void {
+    this.localPlaybackServer = server;
+  }
+
+  setNetworkRestoredCallback(callback: () => void): void {
+    this.networkRestored = callback;
+  }
+
+  setArtworkCacheServer(server: ArtworkCacheServer): void {
+    this.artworkCache = server;
+  }
+
+  setOffline(offline: boolean): void {
+    this.forcedOffline = offline;
+    if (offline) this.activeBaseUrl = null;
+  }
+
+  async refreshLibrary({
+    serverId,
+    libraryKey,
+  }: {
+    serverId: string;
+    libraryKey: string;
+    cursor: string | null;
+  }): Promise<LibraryRefreshResult> {
+    const server = await this.getSelectedServer();
+    if (server.clientIdentifier !== serverId) {
+      throw new Error(
+        "Cannot sync a library from a server that is not selected",
+      );
+    }
+    const data = await this.fetchPlex(`/library/sections/${libraryKey}/all`, {
+      type: "10",
+      "X-Plex-Container-Start": "0",
+      "X-Plex-Container-Size": "100",
+      sort: "updatedAt:desc",
+    });
+    const items = data.MediaContainer?.Metadata || [];
+    this.db.setMediaCache({
+      serverId,
+      cacheKey: `sync-library:${libraryKey}`,
+      value: items.map((item) => this.mapTrack(item)),
+      updatedAt: Date.now(),
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+    return { cursor: null, refreshedItems: items.length };
+  }
+
+  async trackExists({
+    serverId,
+    ratingKey,
+  }: {
+    serverId: string;
+    ratingKey: string;
+  }): Promise<boolean> {
+    const server = await this.getSelectedServer();
+    if (server.clientIdentifier !== serverId) return false;
+    try {
+      await this.fetchMetadataItem(ratingKey);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async getLyrics(ratingKey: string): Promise<LyricsResult> {
+    const server = await this.getSelectedServer();
+    const cacheKey = `lyrics:${ratingKey}`;
+    try {
+      const cached = await this.cache.readThrough({
+        serverId: server.clientIdentifier,
+        key: cacheKey,
+        ttlMs: 24 * 60 * 60 * 1000,
+        fetch: async () => {
+          const metadata = await this.fetchMetadataItem(ratingKey);
+          const streamKey = findLyricsStreamKey(metadata);
+          if (!streamKey) return null;
+          return this.fetchPlexText(streamKey);
+        },
+      });
+      if (cached.value === null)
+        return { status: "unavailable", reason: "not-found" };
+      const parsed = parseLyrics(cached.value);
+      if (!parsed.lines.length)
+        return { status: "unavailable", reason: "not-found" };
+      return {
+        status: "available",
+        lyrics: {
+          ratingKey,
+          ...parsed,
+          freshness:
+            cached.source === "network"
+              ? "live"
+              : cached.isStale
+                ? "stale"
+                : "fresh",
+          cachedAt:
+            cached.source === "network" ? null : new Date().toISOString(),
+        },
+      };
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code === "OFFLINE_UNAVAILABLE"
+      ) {
+        return { status: "unavailable", reason: "offline-not-cached" };
+      }
+      throw error;
+    }
+  }
+
+  async resolveTracks({
+    serverId,
+    targetType,
+    ratingKey,
+  }: {
+    serverId: string;
+    targetType: "track" | "album" | "playlist";
+    ratingKey: string;
+  }): Promise<ResolvedDownloadTrack[]> {
+    const server = await this.getSelectedServer();
+    if (server.clientIdentifier !== serverId) {
+      throw new Error("Downloads can only be created for the selected server");
+    }
+    const tracks =
+      targetType === "track"
+        ? [await this.fetchMetadataItem(ratingKey)]
+        : targetType === "playlist"
+          ? await this.fetchPlaylistItems(ratingKey)
+          : await this.fetchMetadataChildren(ratingKey);
+    const token = this.getServerToken(server);
+    const connections = this.auth.getConnectionCandidates(
+      "auto",
+      server,
+      this.activeBaseUrl,
+    );
+    if (!connections.length)
+      throw new Error("No reachable Plex connection is available");
+
+    return tracks.map((track) => {
+      const part = track.Media?.[0]?.Part?.[0];
+      if (typeof part?.key !== "string" || !part.key) {
+        throw new Error(`Track ${track.ratingKey} has no original media part`);
+      }
+      return {
+        ratingKey: String(track.ratingKey || ""),
+        title: String(track.title || "Untitled track"),
+        artist: String(track.originalTitle || track.grandparentTitle || ""),
+        album: String(track.parentTitle || ""),
+        artistRatingKey:
+          track.grandparentRatingKey ||
+          this.extractRatingKey(track.grandparentKey),
+        albumRatingKey:
+          track.parentRatingKey || this.extractRatingKey(track.parentKey),
+        duration: Number.isFinite(Number(track.duration))
+          ? Number(track.duration)
+          : null,
+        thumb: this.plexUrl(
+          track.thumb || track.parentThumb || track.grandparentThumb,
+        ),
+        url: this.buildPlexUrl(part.key, connections[0].uri, token),
+        candidates: connections.map((connection) => ({
+          url: this.buildPlexUrl(part.key, connection.uri, token),
+        })),
+        fileName: typeof part.file === "string" ? part.file : undefined,
+      };
+    });
   }
 
   getPlaybackSettings(): PlaybackSettings {
@@ -204,33 +605,197 @@ export class MediaService {
     return next;
   }
 
-  async getAlbumsPage(cursor = "", pageSize = 20): Promise<unknown> {
-    const sections = await this.getSelectedMusicSections();
-    let { sectionIndex, offset } = this.decodeCursor(cursor);
-    const initialSectionIndex = sectionIndex;
-    const initialOffset = offset;
-    const albums: PlexMetadata[] = [];
+  async getAlbumsPage(
+    request: AlbumPageRequest,
+  ): Promise<MediaPage<MediaAlbum>> {
+    return this.getCachedMediaPage("albums", request, "9", (item) =>
+      this.mapTypedAlbum(item),
+    );
+  }
 
-    while (albums.length < pageSize && sectionIndex < sections.length) {
+  async getTracksPage(
+    request: TrackPageRequest,
+  ): Promise<MediaPage<MediaTrack>> {
+    return this.getCachedMediaPage("tracks", request, "10", (item) =>
+      this.mapTrack(item),
+    );
+  }
+
+  async getLibraryFacets(): Promise<LibraryFacets> {
+    const server = await this.getSelectedServer();
+    const sectionKey = await this.selectedSectionCacheSuffix();
+    const cacheKey = `library-facets:v2:${sectionKey}`;
+    this.reuseLatestScopedCache(server.clientIdentifier, cacheKey);
+    const result = await this.cache.readThrough({
+      serverId: server.clientIdentifier,
+      key: cacheKey,
+      ttlMs: 5 * 60 * 1000,
+      fetch: async () => {
+        this.assertOnline();
+        const [albums, tracks] = await Promise.all([
+          this.getCompleteMediaCorpus("albums", "9", (item) =>
+            this.mapTypedAlbum(item),
+          ),
+          this.getCompleteMediaCorpus("tracks", "10", (item) =>
+            this.mapTrack(item),
+          ),
+        ]);
+        return buildLibraryFacets(albums, tracks);
+      },
+    });
+
+    return {
+      ...result.value,
+      freshness: this.forcedOffline
+        ? "stale"
+        : result.source === "network"
+          ? "live"
+          : result.isStale
+            ? "stale"
+            : "fresh",
+      cachedAt: result.source === "network" ? null : new Date().toISOString(),
+    };
+  }
+
+  private async getCachedMediaPage<T>(
+    resource: string,
+    request: AlbumPageRequest | TrackPageRequest,
+    type: "9" | "10",
+    mapper: (item: PlexMetadata) => T,
+  ): Promise<MediaPage<T>> {
+    const server = await this.getSelectedServer();
+    const cacheKey = await this.completeCorpusCacheKey(resource);
+    this.reuseLatestScopedCache(server.clientIdentifier, cacheKey);
+    const result = await this.cache.readThrough({
+      serverId: server.clientIdentifier,
+      key: cacheKey,
+      ttlMs: 5 * 60 * 1000,
+      fetch: () => {
+        this.assertOnline();
+        return this.fetchCompleteMediaCorpus(type, mapper);
+      },
+    });
+
+    const corpus = this.reviveArtwork(result.value);
+    const page =
+      resource === "albums"
+        ? pageAlbumCorpus(
+            corpus as unknown as MediaAlbum[],
+            request as AlbumPageRequest,
+          )
+        : pageTrackCorpus(
+            corpus as unknown as MediaTrack[],
+            request as TrackPageRequest,
+          );
+
+    return {
+      ...(page as unknown as Pick<
+        MediaPage<T>,
+        "items" | "nextCursor" | "total"
+      >),
+      freshness: this.forcedOffline
+        ? "stale"
+        : result.source === "network"
+          ? "live"
+          : result.isStale
+            ? "stale"
+            : "fresh",
+      cachedAt: result.source === "network" ? null : new Date().toISOString(),
+    };
+  }
+
+  private async getCompleteMediaCorpus<T>(
+    resource: string,
+    type: "9" | "10",
+    mapper: (item: PlexMetadata) => T,
+  ): Promise<T[]> {
+    const server = await this.getSelectedServer();
+    const cacheKey = await this.completeCorpusCacheKey(resource);
+    this.reuseLatestScopedCache(server.clientIdentifier, cacheKey);
+    const result = await this.cache.readThrough({
+      serverId: server.clientIdentifier,
+      key: cacheKey,
+      ttlMs: 5 * 60 * 1000,
+      fetch: () => {
+        this.assertOnline();
+        return this.fetchCompleteMediaCorpus(type, mapper);
+      },
+    });
+    return this.reviveArtwork(result.value);
+  }
+
+  private async completeCorpusCacheKey(resource: string): Promise<string> {
+    return `${resource}-complete-corpus:v2:${await this.selectedSectionCacheSuffix()}`;
+  }
+
+  private reuseLatestScopedCache(serverId: string, cacheKey: string): void {
+    if (this.db.getMediaCache(serverId, cacheKey)) return;
+    const prefix = cacheKey.slice(0, cacheKey.lastIndexOf(":") + 1);
+    const fallback = this.db.getLatestMediaCacheByPrefix(serverId, prefix);
+    if (fallback)
+      this.db.setMediaCache({ ...fallback, cacheKey, expiresAt: 0 });
+  }
+
+  private async selectedSectionCacheSuffix(): Promise<string> {
+    const selected = (await this.auth.getUserSelectedLibraries()) || [];
+    if (!selected.length) return "all";
+    return selected
+      .map((section) =>
+        typeof section === "string" ? section : section.uuid || section.key,
+      )
+      .sort()
+      .join(",");
+  }
+
+  private async fetchCompleteMediaCorpus<T>(
+    type: "9" | "10",
+    mapper: (item: PlexMetadata) => T,
+  ): Promise<T[]> {
+    const items: T[] = [];
+    let cursor: string | undefined;
+    do {
+      const page = await this.getMediaPage(
+        { cursor, pageSize: 100 },
+        type,
+        mapper,
+      );
+      items.push(...page.items);
+      cursor = page.nextCursor ?? undefined;
+    } while (cursor);
+    return items;
+  }
+
+  private async getMediaPage<T>(
+    request: AlbumPageRequest | TrackPageRequest,
+    type: "9" | "10",
+    mapper: (item: PlexMetadata) => T,
+  ): Promise<MediaPage<T>> {
+    const sections = await this.getSelectedMusicSections();
+    let { sectionIndex, offset } = this.decodeCursor(request.cursor);
+    const items: PlexMetadata[] = [];
+    const pageSize = Math.min(Math.max(request.pageSize, 1), 100);
+    const params = this.mediaPageParams(request, type);
+
+    while (items.length < pageSize && sectionIndex < sections.length) {
       const section = sections[sectionIndex];
       const data = await this.fetchPlex(
         `/library/sections/${section.key}/all`,
         {
-          type: "9",
+          ...params,
           "X-Plex-Container-Start": String(offset),
-          "X-Plex-Container-Size": String(pageSize - albums.length),
+          "X-Plex-Container-Size": String(pageSize - items.length),
         },
       );
-      const albumData = data.MediaContainer?.Metadata || [];
+      const pageItems = data.MediaContainer?.Metadata || [];
 
-      if (albumData.length === 0) {
+      if (pageItems.length === 0) {
         sectionIndex += 1;
         offset = 0;
         continue;
       }
 
-      albums.push(...albumData);
-      offset += albumData.length;
+      items.push(...pageItems);
+      offset += pageItems.length;
 
       const totalSize = data.MediaContainer?.totalSize || 0;
       if (offset >= totalSize) {
@@ -240,20 +805,35 @@ export class MediaService {
     }
 
     return {
-      items: albums.map((album) => this.mapAlbum(album)),
+      items: items.map(mapper),
       nextCursor:
         sectionIndex < sections.length
           ? this.encodeCursor(sectionIndex, offset)
           : null,
-      prevCursor:
-        initialOffset > 0 || initialSectionIndex > 0
-          ? this.encodeCursor(
-              initialSectionIndex,
-              Math.max(0, initialOffset - pageSize),
-            )
-          : null,
-      hasMore: sectionIndex < sections.length,
+      total: null,
+      freshness: "live",
+      cachedAt: null,
     };
+  }
+
+  private mediaPageParams(
+    request: AlbumPageRequest | TrackPageRequest,
+    type: "9" | "10",
+  ): Record<string, string> {
+    const params: Record<string, string> = { type };
+    if (request.query?.trim()) params.title = request.query.trim();
+
+    if (request.sort) {
+      const sortFields: Record<string, string> = {
+        title: "titleSort",
+        artist: "artist.titleSort",
+        album: "album.titleSort",
+        year: "year",
+        dateAdded: "addedAt",
+      };
+      params.sort = `${sortFields[request.sort.field]}:${request.sort.direction}`;
+    }
+    return params;
   }
 
   async getArtistsPage(cursor = "", pageSize = 30): Promise<unknown> {
@@ -335,17 +915,83 @@ export class MediaService {
   }
 
   async getHomeData(): Promise<HomeData> {
-    const [recentlyPlayed, recentlyAdded, playlists] = await Promise.all([
-      this.getRecentlyPlayedAlbums() as Promise<Array<Record<string, any>>>,
-      this.getRecentlyAddedAlbums() as Promise<Array<Record<string, any>>>,
-      this.getPlaylists() as Promise<Array<Record<string, any>>>,
-    ]);
+    const server = await this.getSelectedServer();
+    try {
+      const result = await this.cache.readThrough<HomeContent>({
+        serverId: server.clientIdentifier,
+        key: "home:v1",
+        ttlMs: 5 * 60 * 1000,
+        fetch: async () => {
+          this.assertOnline();
+          const [recentlyPlayed, recentlyAdded, playlists] = await Promise.all([
+            this.getRecentlyPlayedAlbums() as Promise<
+              Array<Record<string, any>>
+            >,
+            this.getRecentlyAddedAlbums() as Promise<
+              Array<Record<string, any>>
+            >,
+            this.getPlaylists() as Promise<Array<Record<string, any>>>,
+          ]);
+          return {
+            topEight: this.buildTopEight(recentlyPlayed, playlists),
+            recentlyPlayed,
+            recentlyAdded,
+            playlists,
+          };
+        },
+      });
+      return {
+        ...this.reviveArtwork(result.value),
+        freshness: this.forcedOffline
+          ? "stale"
+          : result.source === "network"
+            ? "live"
+            : result.isStale
+              ? "stale"
+              : "fresh",
+        cachedAt: result.source === "network" ? null : new Date().toISOString(),
+      };
+    } catch {
+      return this.getOfflineHomeData(server.clientIdentifier);
+    }
+  }
+
+  private getOfflineHomeData(serverId: string): HomeData {
+    const albumsEntry =
+      this.db.getLatestMediaCacheByPrefix<MediaAlbum[]>(
+        serverId,
+        "albums-complete-corpus:v2:",
+      );
+    const playlistsEntry = this.db.getMediaCache<Array<Record<string, any>>>(
+      serverId,
+      "playlists:v1",
+    );
+    const recentlyAdded = this.reviveArtwork(albumsEntry?.value ?? [])
+      .slice()
+      .sort(
+        (left, right) => Number(right.addedAt || 0) - Number(left.addedAt || 0),
+      )
+      .slice(0, 50)
+      .map((album) => ({
+        ...album,
+        id: album.ratingKey,
+        parentRatingKey: album.artistRatingKey,
+      }));
+    const playlists = this.reviveArtwork(playlistsEntry?.value ?? []).map(
+      (playlist) => ({ ...playlist, freshness: "stale" }),
+    );
+    const cachedAt = Math.max(
+      albumsEntry?.updatedAt ?? 0,
+      playlistsEntry?.updatedAt ?? 0,
+    );
 
     return {
-      topEight: this.buildTopEight(recentlyPlayed, playlists),
-      recentlyPlayed,
+      topEight: this.buildTopEight(recentlyAdded, playlists),
+      recentlyPlayed: [],
       recentlyAdded,
       playlists,
+      freshness: "stale",
+      cachedAt: cachedAt ? new Date(cachedAt).toISOString() : null,
     };
   }
 
@@ -380,11 +1026,38 @@ export class MediaService {
   }
 
   async getAlbum(ratingKey: string): Promise<unknown> {
-    const album = await this.fetchMetadataItem(ratingKey);
-    const [tracks, ultraBlur] = await Promise.all([
-      this.fetchMetadataChildren(ratingKey),
-      this.getUltraBlur(album.thumb || album.art, `album-${ratingKey}`),
-    ]);
+    const server = await this.getSelectedServer();
+    try {
+      const result = await this.cache.readThrough({
+        serverId: server.clientIdentifier,
+        key: `album-detail:v1:${ratingKey}`,
+        ttlMs: 5 * 60 * 1000,
+        fetch: async () => {
+          this.assertOnline();
+          const album = await this.fetchMetadataItem(ratingKey);
+          const [tracks, ultraBlur] = await Promise.all([
+            this.fetchMetadataChildren(ratingKey),
+            this.getUltraBlur(album.thumb || album.art, `album-${ratingKey}`),
+          ]);
+          return this.mapAlbumDetail(album, tracks, ultraBlur);
+        },
+      });
+      return {
+        ...this.reviveArtwork(result.value),
+        freshness: this.forcedOffline || result.isStale ? "stale" : "live",
+      };
+    } catch (error) {
+      const offline = await this.offlineAlbumDetail(ratingKey);
+      if (offline) return offline;
+      throw error;
+    }
+  }
+
+  private mapAlbumDetail(
+    album: PlexMetadata,
+    tracks: PlexMetadata[],
+    ultraBlur: UltraBlurVariantUrls | null,
+  ): Record<string, unknown> {
     const artistKey =
       album.parentRatingKey || this.extractRatingKey(album.parentKey);
 
@@ -415,6 +1088,67 @@ export class MediaService {
           track.grandparentRatingKey ||
           this.extractRatingKey(track.grandparentKey) ||
           artistKey,
+        ratingKey: track.ratingKey,
+      })),
+    };
+  }
+
+  private async offlineAlbumDetail(
+    ratingKey: string,
+  ): Promise<Record<string, unknown> | null> {
+    const server = await this.getSelectedServer();
+    const suffix = await this.selectedSectionCacheSuffix();
+    const albums = this.reviveArtwork(
+      (
+        this.db.getMediaCache<MediaAlbum[]>(
+          server.clientIdentifier,
+          `albums-complete-corpus:v2:${suffix}`,
+        ) ||
+        this.db.getLatestMediaCacheByPrefix<MediaAlbum[]>(
+          server.clientIdentifier,
+          "albums-complete-corpus:v2:",
+        )
+      )?.value,
+    );
+    const tracks = this.reviveArtwork(
+      (
+        this.db.getMediaCache<MediaTrack[]>(
+          server.clientIdentifier,
+          `tracks-complete-corpus:v2:${suffix}`,
+        ) ||
+        this.db.getLatestMediaCacheByPrefix<MediaTrack[]>(
+          server.clientIdentifier,
+          "tracks-complete-corpus:v2:",
+        )
+      )?.value,
+    );
+    const album = albums?.find((item) => item.ratingKey === ratingKey);
+    if (!album || !tracks) return null;
+    const albumTracks = tracks.filter(
+      (track) => track.albumRatingKey === ratingKey,
+    );
+    return {
+      id: ratingKey,
+      title: album.title,
+      year: album.year,
+      artist: album.artist,
+      artistKey: album.artistRatingKey,
+      ratingKey,
+      leafCount: album.trackCount ?? albumTracks.length,
+      thumb: album.thumb,
+      art: null,
+      ultraBlur: null,
+      freshness: "stale",
+      tracks: albumTracks.map((track) => ({
+        id: track.ratingKey,
+        number: track.index,
+        title: track.title,
+        duration: track.duration,
+        albumThumb: track.thumb || album.thumb,
+        albumTitle: track.album,
+        albumRatingKey: track.albumRatingKey,
+        artistTitle: track.artist,
+        artistRatingKey: track.artistRatingKey,
         ratingKey: track.ratingKey,
       })),
     };
@@ -687,30 +1421,68 @@ export class MediaService {
   }
 
   async getArtistPopularTracks(ratingKey: string): Promise<unknown> {
-    try {
-      const data = await this.fetchPlex(
-        `/library/metadata/${ratingKey}/popularTracks`,
-      );
+    const tracks = await this.getCompleteMediaCorpus("tracks", "10", (track) =>
+      this.mapTrack(track),
+    );
 
-      return {
-        tracks: (data.MediaContainer?.Metadata || []).map((track) => ({
-          id: track.ratingKey,
-          number: track.trackNumber,
-          title: track.title,
-          duration: track.duration,
-          ratingCount: track.ratingCount,
-          ratingKey: track.ratingKey,
-        })),
-      };
-    } catch {
-      return { tracks: [] };
-    }
+    return {
+      tracks: selectPopularArtistTracks(tracks, ratingKey).map((track) => ({
+        id: track.ratingKey,
+        number: track.index,
+        title: track.title,
+        duration: track.duration,
+        playCount: track.viewCount ?? track.ratingCount ?? 0,
+        ratingKey: track.ratingKey,
+      })),
+    };
   }
 
   async getPlaylists(): Promise<unknown[]> {
-    const data = await this.fetchPlex("/playlists", { playlistType: "audio" });
+    const server = await this.getSelectedServer();
+    const result = await this.cache.readThrough({
+      serverId: server.clientIdentifier,
+      key: "playlists:v1",
+      ttlMs: 5 * 60 * 1000,
+      fetch: async () => {
+        this.assertOnline();
+        const data = await this.fetchPlex("/playlists", {
+          playlistType: "audio",
+        });
+        const playlists = data.MediaContainer?.Metadata || [];
+        await this.cachePlaylistDetails(server.clientIdentifier, playlists);
+        return playlists.map((playlist) => this.mapPlaylistSummary(playlist));
+      },
+    });
+    const freshness = this.forcedOffline || result.isStale ? "stale" : "live";
+    return this.reviveArtwork(result.value).map((playlist) => ({
+      ...playlist,
+      freshness,
+    }));
+  }
 
-    return (data.MediaContainer?.Metadata || []).map((playlist) => ({
+  private async cachePlaylistDetails(
+    serverId: string,
+    playlists: PlexMetadata[],
+  ): Promise<void> {
+    const updatedAt = Date.now();
+    await Promise.allSettled(
+      playlists.map(async (playlist) => {
+        const ratingKey = String(playlist.ratingKey || "");
+        if (!ratingKey) return;
+        const tracks = await this.fetchPlaylistItems(ratingKey);
+        this.db.setMediaCache({
+          serverId,
+          cacheKey: `playlist-detail:v1:${ratingKey}`,
+          value: this.mapPlaylistDetail(playlist, tracks),
+          updatedAt,
+          expiresAt: updatedAt + 5 * 60 * 1000,
+        });
+      }),
+    );
+  }
+
+  private mapPlaylistSummary(playlist: PlexMetadata) {
+    return {
       id: playlist.key,
       title: playlist.title,
       addedAt: playlist.addedAt,
@@ -719,7 +1491,7 @@ export class MediaService {
       smart: playlist.smart,
       icon: playlist.icon,
       duration: playlist.duration,
-    }));
+    };
   }
 
   async search(query: string, limit = 8): Promise<SearchResults> {
@@ -752,9 +1524,72 @@ export class MediaService {
   }
 
   async getPlaylist(ratingKey: string): Promise<unknown> {
-    const playlist = await this.fetchMetadataItem(ratingKey);
-    const tracks = await this.fetchPlaylistItems(ratingKey);
+    const server = await this.getSelectedServer();
+    try {
+      const result = await this.cache.readThrough({
+        serverId: server.clientIdentifier,
+        key: `playlist-detail:v1:${ratingKey}`,
+        ttlMs: 5 * 60 * 1000,
+        fetch: async () => {
+          this.assertOnline();
+          const playlist = await this.fetchMetadataItem(ratingKey);
+          const tracks = await this.fetchPlaylistItems(ratingKey);
+          return this.mapPlaylistDetail(playlist, tracks);
+        },
+      });
+      return {
+        ...this.reviveArtwork(result.value),
+        freshness: this.forcedOffline || result.isStale ? "stale" : "live",
+      };
+    } catch (error) {
+      const offline = await this.offlinePlaylistDetail(ratingKey);
+      if (offline) return offline;
+      throw error;
+    }
+  }
 
+  private async offlinePlaylistDetail(
+    ratingKey: string,
+  ): Promise<Record<string, unknown> | null> {
+    const server = await this.getSelectedServer();
+    const tracks = await this.offlineTracks("playlist", ratingKey);
+    if (!tracks.length) return null;
+    const summary = this.db
+      .getMediaCache<
+        Array<Record<string, any>>
+      >(server.clientIdentifier, "playlists:v1")
+      ?.value.find((playlist) => String(playlist.ratingKey) === ratingKey);
+    return {
+      id: ratingKey,
+      title: summary?.title || "Downloaded playlist",
+      summary: summary?.summary || "Available offline",
+      addedAt: summary?.addedAt,
+      ratingKey,
+      composite: summary?.composite || "",
+      smart: summary?.smart,
+      icon: summary?.icon,
+      duration: summary?.duration,
+      leafCount: tracks.length,
+      freshness: "stale",
+      tracks: tracks.map((track, index) => ({
+        id: track.ratingKey,
+        number: index + 1,
+        title: track.title,
+        duration: track.duration,
+        albumThumb: null,
+        albumTitle: track.parentTitle,
+        albumRatingKey: null,
+        artistTitle: track.originalTitle,
+        artistRatingKey: null,
+        ratingKey: track.ratingKey,
+      })),
+    };
+  }
+
+  private mapPlaylistDetail(
+    playlist: PlexMetadata,
+    tracks: PlexMetadata[],
+  ): Record<string, unknown> {
     return {
       id: playlist.key,
       title: playlist.title,
@@ -785,7 +1620,10 @@ export class MediaService {
   }
 
   async playAlbum(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchMetadataChildren(ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback(
+      "album",
+      ratingKey,
+    );
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
@@ -794,7 +1632,10 @@ export class MediaService {
   }
 
   async playPlaylist(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchPlaylistItems(ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback(
+      "playlist",
+      ratingKey,
+    );
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
@@ -815,7 +1656,7 @@ export class MediaService {
   }
 
   async playTrack(ratingKey: string): Promise<unknown> {
-    const track = await this.fetchMetadataItem(ratingKey);
+    const track = await this.fetchTrackWithOfflineFallback(ratingKey);
     const playableTrack = await this.toPlayableTrack(track);
     this.bass.playTrack(playableTrack.track, playableTrack.source);
     return { status: "playing", track: playableTrack.track.title };
@@ -826,25 +1667,31 @@ export class MediaService {
   }
 
   async queueAlbum(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchMetadataChildren(ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback(
+      "album",
+      ratingKey,
+    );
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
-    this.bass.replaceQueue(playableTracks);
+    this.bass.queueTracks(playableTracks);
     return { status: "queued", count: playableTracks.length };
   }
 
   async queuePlaylist(ratingKey: string): Promise<unknown> {
-    const tracks = await this.fetchPlaylistItems(ratingKey);
+    const tracks = await this.fetchTracksWithOfflineFallback(
+      "playlist",
+      ratingKey,
+    );
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
-    this.bass.replaceQueue(playableTracks);
+    this.bass.queueTracks(playableTracks);
     return { status: "queued", count: playableTracks.length };
   }
 
   async queueTrack(ratingKey: string): Promise<unknown> {
-    const track = await this.fetchMetadataItem(ratingKey);
+    const track = await this.fetchTrackWithOfflineFallback(ratingKey);
     const playableTrack = await this.toPlayableTrack(track);
     this.bass.queueTrack(playableTrack.track, playableTrack.source);
     return { status: "queued", track: playableTrack.track.title };
@@ -853,6 +1700,12 @@ export class MediaService {
   clearQueue(): unknown {
     this.bass.clearQueue();
     return { status: "cleared" };
+  }
+
+  resetForServerChange(): void {
+    this.bass.stop();
+    this.bass.clearQueue();
+    this.activeBaseUrl = null;
   }
 
   private async getAlbumsFromSections({
@@ -935,11 +1788,140 @@ export class MediaService {
     return data.MediaContainer?.Metadata || [];
   }
 
+  private async fetchTrackWithOfflineFallback(
+    ratingKey: string,
+  ): Promise<PlexMetadata> {
+    if (this.forcedOffline) {
+      const downloaded = await this.offlineTrackByRatingKey(ratingKey);
+      if (downloaded) return downloaded;
+      throw new Error("This track is not downloaded and cannot play offline");
+    }
+    try {
+      return await this.fetchMetadataItem(ratingKey);
+    } catch (error) {
+      const tracks = await this.offlineTracks("track", ratingKey);
+      if (tracks[0]) return tracks[0];
+      throw error;
+    }
+  }
+
+  private async fetchTracksWithOfflineFallback(
+    targetType: "album" | "playlist",
+    ratingKey: string,
+  ): Promise<PlexMetadata[]> {
+    if (this.forcedOffline) {
+      const tracks = await this.offlineTracks(targetType, ratingKey);
+      if (tracks.length) return tracks;
+      throw new Error(
+        `This ${targetType} is not downloaded and cannot play offline`,
+      );
+    }
+    try {
+      return targetType === "album"
+        ? await this.fetchMetadataChildren(ratingKey)
+        : await this.fetchPlaylistItems(ratingKey);
+    } catch (error) {
+      const tracks = await this.offlineTracks(targetType, ratingKey);
+      if (tracks.length) return tracks;
+      throw error;
+    }
+  }
+
+  private async offlineTracks(
+    targetType: "track" | "album" | "playlist",
+    targetRatingKey: string,
+  ): Promise<PlexMetadata[]> {
+    const server = await this.getSelectedServer();
+    const matching = this.db
+      .listDownloads(server.clientIdentifier)
+      .filter((record) => {
+        const metadata = record.metadata as {
+          targetType?: string;
+          targetRatingKey?: string;
+        };
+        return (
+          metadata.targetType === targetType &&
+          metadata.targetRatingKey === targetRatingKey
+        );
+      });
+    if (
+      !matching.length ||
+      matching.some((record) => record.status !== "completed")
+    )
+      return [];
+    return matching.map((record) => this.downloadedTrackMetadata(record));
+  }
+
+  private async offlineTrackByRatingKey(
+    ratingKey: string,
+  ): Promise<PlexMetadata | null> {
+    const server = await this.getSelectedServer();
+    const record = this.db.getCompletedDownload(
+      server.clientIdentifier,
+      ratingKey,
+    );
+    if (!record) return null;
+    return this.downloadedTrackMetadata(record);
+  }
+
+  private downloadedTrackMetadata(record: {
+    serverId: string;
+    ratingKey: string;
+    title: string;
+    metadata: unknown;
+  }): PlexMetadata {
+    const metadata = record.metadata as {
+      artist?: string;
+      album?: string;
+      artistRatingKey?: string | null;
+      albumRatingKey?: string | null;
+      duration?: number | null;
+      thumb?: string | null;
+    };
+    const cached = this.db
+      .getLatestMediaCacheByPrefix<MediaTrack[]>(
+        record.serverId,
+        "tracks-complete-corpus:v2:",
+      )
+      ?.value.find((track) => track.ratingKey === record.ratingKey);
+    const thumb = metadata.thumb || cached?.thumb || null;
+
+    return {
+      ratingKey: record.ratingKey,
+      title: record.title || cached?.title || "",
+      originalTitle: metadata.artist || cached?.artist || "",
+      grandparentTitle: metadata.artist || cached?.artist || "",
+      parentTitle: metadata.album || cached?.album || "",
+      grandparentRatingKey:
+        metadata.artistRatingKey || cached?.artistRatingKey || "",
+      parentRatingKey:
+        metadata.albumRatingKey || cached?.albumRatingKey || "",
+      duration: metadata.duration ?? cached?.duration ?? undefined,
+      thumb: thumb ? this.reviveArtwork(thumb) : null,
+    };
+  }
+
   private async toPlayableTrack(track: PlexMetadata): Promise<PlayableTrack> {
     const plexSessionId = randomUUID().replaceAll("-", "");
-    const source = this.getPlaybackSettings().transcodeAudio
-      ? this.transcodeSource(track, plexSessionId)
-      : this.originalFileSource(track, plexSessionId);
+    const server = await this.getSelectedServer();
+    const downloaded = this.db.getCompletedDownload(
+      server.clientIdentifier,
+      String(track.ratingKey || ""),
+    );
+    const completedPath = downloaded?.filePath ?? null;
+    if (this.forcedOffline && !completedPath) {
+      throw new Error("This track is not downloaded and cannot play offline");
+    }
+    const local =
+      completedPath && this.localPlaybackServer
+        ? this.localPlaybackServer.register(completedPath)
+        : null;
+    const source: PlexStreamSource | null =
+      local && completedPath
+        ? { path: local.url, localPath: completedPath }
+        : this.getPlaybackSettings().transcodeAudio
+          ? this.transcodeSource(track, plexSessionId)
+          : this.originalFileSource(track, plexSessionId);
     if (!source)
       throw new Error(
         `Track ${track.ratingKey} does not have a playable stream`,
@@ -958,7 +1940,7 @@ export class MediaService {
         ratingKey: String(track.ratingKey || ""),
         plexSessionId,
         duration: track.duration,
-        thumb: this.plexUrl(track.thumb),
+        thumb: this.playbackArtwork(track.thumb),
       },
       source,
     };
@@ -1025,6 +2007,15 @@ export class MediaService {
     source: PlexStreamSource,
     excludedConnectionUris: ReadonlySet<string>,
   ): StreamCandidate[] {
+    if (source.path.startsWith("http://127.0.0.1:")) {
+      return [
+        {
+          connectionUri: "offline",
+          url: source.path,
+          localPath: source.localPath,
+        },
+      ];
+    }
     const server = this.auth.selectedServer;
     if (!server) return [];
 
@@ -1053,6 +2044,7 @@ export class MediaService {
     path: string,
     params: Record<string, string> = {},
   ): Promise<PlexResponse> {
+    this.assertOnline();
     const server = await this.getSelectedServer();
     const token = this.getServerToken(server);
     const orderedConnections = this.auth.getConnectionCandidates(
@@ -1101,12 +2093,74 @@ export class MediaService {
     );
   }
 
+  private async fetchPlexText(path: string): Promise<string> {
+    const server = await this.getSelectedServer();
+    const token = this.getServerToken(server);
+    const connections = this.auth.getConnectionCandidates(
+      "auto",
+      server,
+      this.activeBaseUrl,
+    );
+    let lastError: unknown = null;
+    for (const connection of connections) {
+      try {
+        const url = new URL(path, connection.uri);
+        url.searchParams.set("X-Plex-Token", token);
+        const response = await fetch(url, {
+          signal: AbortSignal.timeout(PLEX_REQUEST_TIMEOUT_MS),
+          headers: {
+            Accept: "text/plain, application/x-subrip, */*",
+            "X-Plex-Product": this.auth.plexProduct,
+            "X-Plex-Client-Identifier": this.auth.plexClientId,
+          },
+        });
+        if (!response.ok) {
+          lastError = new Error(
+            `Plex lyrics request failed: ${response.status}`,
+          );
+          continue;
+        }
+        this.activeBaseUrl = connection.uri;
+        this.auth.setLastKnownGoodConnection(connection.uri);
+        return response.text();
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw new Error(
+      `Plex lyrics request failed${lastError instanceof Error ? `: ${lastError.message}` : ""}`,
+    );
+  }
+
   private async getSelectedServer(): Promise<PlexServer> {
     const server = await this.auth.getUserSelectedServer();
     if (!server?.connections?.[0]?.uri) {
       throw new Error("No Plex server is selected");
     }
     return server;
+  }
+
+  private assertOnline(): void {
+    if (this.forcedOffline) {
+      throw new Error("Rayna is offline");
+    }
+  }
+
+  private reviveArtwork<T>(value: T): T {
+    if (!this.artworkCache || value === null || value === undefined)
+      return value;
+    if (typeof value === "string") return this.artworkCache.revive(value) as T;
+    if (Array.isArray(value))
+      return value.map((item) => this.reviveArtwork(item)) as T;
+    if (typeof value === "object") {
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+          key,
+          this.reviveArtwork(item),
+        ]),
+      ) as T;
+    }
+    return value;
   }
 
   private plexUrl(
@@ -1122,7 +2176,22 @@ export class MediaService {
     const baseUrl = this.activeBaseUrl || server?.connections?.[0]?.uri;
     if (!baseUrl || !token) return null;
 
-    return this.buildPlexUrl(path, baseUrl, token, params);
+    const remoteUrl = this.buildPlexUrl(path, baseUrl, token, params);
+    return server && this.artworkCache
+      ? this.artworkCache.register(server.clientIdentifier, remoteUrl)
+      : remoteUrl;
+  }
+
+  private playbackArtwork(value: unknown): string | null {
+    if (typeof value !== "string" || !value) return null;
+    try {
+      if (new URL(value).pathname.startsWith("/artwork/")) {
+        return this.reviveArtwork(value);
+      }
+    } catch {
+      // Relative Plex paths are handled below.
+    }
+    return this.plexUrl(value);
   }
 
   private buildPlexUrl(
@@ -1158,6 +2227,63 @@ export class MediaService {
     };
   }
 
+  private mapTypedAlbum(album: PlexMetadata): MediaAlbum {
+    return {
+      ratingKey: String(
+        album.ratingKey || this.extractRatingKey(album.key) || "",
+      ),
+      title: String(album.title || "Untitled album"),
+      artist: String(album.parentTitle || "Unknown artist"),
+      artistRatingKey:
+        album.parentRatingKey || this.extractRatingKey(album.parentKey),
+      year: Number.isFinite(Number(album.year)) ? Number(album.year) : null,
+      thumb: this.plexUrl(album.thumb),
+      trackCount: Number.isFinite(Number(album.leafCount))
+        ? Number(album.leafCount)
+        : null,
+      addedAt: Number.isFinite(Number(album.addedAt))
+        ? Number(album.addedAt)
+        : null,
+    };
+  }
+
+  private mapTrack(track: PlexMetadata): MediaTrack {
+    return {
+      ratingKey: String(
+        track.ratingKey || this.extractRatingKey(track.key) || "",
+      ),
+      title: String(track.title || "Untitled track"),
+      artist: String(
+        track.grandparentTitle || track.originalTitle || "Unknown artist",
+      ),
+      artistRatingKey:
+        track.grandparentRatingKey ||
+        this.extractRatingKey(track.grandparentKey),
+      album: String(track.parentTitle || "Unknown album"),
+      albumRatingKey:
+        track.parentRatingKey || this.extractRatingKey(track.parentKey),
+      duration: Number.isFinite(Number(track.duration))
+        ? Number(track.duration)
+        : null,
+      index: Number.isFinite(Number(track.index)) ? Number(track.index) : null,
+      disc: Number.isFinite(Number(track.parentIndex))
+        ? Number(track.parentIndex)
+        : null,
+      thumb: this.plexUrl(
+        track.thumb || track.parentThumb || track.grandparentThumb,
+      ),
+      addedAt: Number.isFinite(Number(track.addedAt))
+        ? Number(track.addedAt)
+        : null,
+      viewCount: Number.isFinite(Number(track.viewCount))
+        ? Number(track.viewCount)
+        : null,
+      ratingCount: Number.isFinite(Number(track.ratingCount))
+        ? Number(track.ratingCount)
+        : null,
+    };
+  }
+
   private mapArtist(artist: PlexMetadata): Record<string, unknown> {
     return {
       id: artist.key,
@@ -1187,7 +2313,9 @@ export class MediaService {
         : type === "album"
           ? item.parentTitle || "Album"
           : type === "track"
-            ? [item.grandparentTitle, item.parentTitle].filter(Boolean).join(" • ")
+            ? [item.grandparentTitle, item.parentTitle]
+                .filter(Boolean)
+                .join(" • ")
             : "Playlist";
 
     return {
@@ -1195,7 +2323,12 @@ export class MediaService {
       ratingKey,
       title: String(item.title || "Untitled"),
       subtitle: String(subtitle),
-      thumb: this.plexUrl(item.thumb || item.parentThumb || item.grandparentThumb || item.composite),
+      thumb: this.plexUrl(
+        item.thumb ||
+          item.parentThumb ||
+          item.grandparentThumb ||
+          item.composite,
+      ),
     };
   }
 

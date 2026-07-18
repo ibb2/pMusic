@@ -77,6 +77,11 @@ export default function Home() {
 
   return (
     <div className="flex min-h-full min-w-0 flex-col p-6 pb-10">
+      {queryHome.data?.freshness === "stale" ? (
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+          Showing saved home data while Plex is offline.
+        </p>
+      ) : null}
       {/* Quick Access Grid */}
       {topEight.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 mb-8 w-full">

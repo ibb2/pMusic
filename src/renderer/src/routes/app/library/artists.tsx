@@ -1,64 +1,56 @@
 import BlankImage from "@/assets/512px-Black_colour.jpg";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import React, { useEffect, useRef } from "react";
+import { useMemo, useState } from "react";
+import { useSelectedServerId } from "@/hooks/use-selected-server-id";
 
 export const Route = createFileRoute("/app/library/artists")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<HTMLDivElement>(null);
+  const selectedServer = useSelectedServerId();
+  const [sortField, setSortField] = useState<"title" | "dateAdded">("title");
+  const [direction, setDirection] = useState<"asc" | "desc">("asc");
+  const [initial, setInitial] = useState("all");
 
-  const fetchArtists = async ({ pageParam }: { pageParam: string }) => {
-    return window.api.media.getArtistsPage(pageParam || "", 30);
-  };
-
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: ["allArtists"],
-    queryFn: fetchArtists,
-    initialPageParam: "",
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  const { data, error, status } = useQuery({
+    queryKey: [selectedServer.data, "artists", "complete"],
+    queryFn: fetchAllArtists,
+    enabled: Boolean(selectedServer.data),
+    staleTime: 60_000,
   });
 
-  useEffect(() => {
-    if (!containerRef.current || !hasNextPage || isFetching) return;
-
-    const container = containerRef.current;
-    const hasScroll = container.scrollHeight > container.clientHeight;
-
-    if (!hasScroll) {
-      fetchNextPage();
-    }
-  }, [data, hasNextPage, isFetching, fetchNextPage]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage && !isFetching) {
-        fetchNextPage();
-      }
-    });
-
-    const target = observerRef.current;
-    if (target) {
-      observer.observe(target);
-    }
-
-    return () => {
-      if (target) observer.unobserve(target);
-    };
-  }, [hasNextPage, isFetching, fetchNextPage]);
+  const artists = useMemo(() => {
+    return (data ?? [])
+      .filter((artist: any) =>
+        initial === "all"
+          ? true
+          : String(artist.title ?? "")
+              .toLocaleUpperCase()
+              .startsWith(initial),
+      )
+      .sort((left: any, right: any) => {
+        const comparison =
+          sortField === "dateAdded"
+            ? Number(left.addedAt ?? 0) - Number(right.addedAt ?? 0)
+            : String(left.title ?? "").localeCompare(
+                String(right.title ?? ""),
+                undefined,
+                { sensitivity: "base" },
+              );
+        return direction === "asc" ? comparison : -comparison;
+      });
+  }, [data, direction, initial, sortField]);
 
   if (status === "pending") {
     return (
@@ -76,22 +68,68 @@ function RouteComponent() {
     );
   }
 
-  const artists = data.pages.flatMap((group) => group.items);
-
   return (
-    <div ref={containerRef} className="flex min-h-full flex-col px-6">
-      <div className="sticky top-0 z-10 w-full bg-background py-2">
-        <p className="text-2xl font-bold">Artists</p>
-      </div>
+    <div className="flex min-h-full flex-col px-6">
+      <header className="sticky top-0 z-10 space-y-3 bg-background py-3">
+        <div>
+          <h1 className="text-2xl font-bold">Artists</h1>
+          <p className="text-sm text-muted-foreground">
+            Browse artists across your selected libraries.
+          </p>
+        </div>
+        <div className="flex flex-row gap-2">
+          {/*<Select
+            value={initial}
+            onValueChange={(value) => setInitial(value ?? "all")}
+          >
+            <SelectTrigger
+
+              aria-label="Filter artists by initial"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All artists</SelectItem>
+              {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => (
+                <SelectItem key={letter} value={letter}>
+                  Starts with {letter}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>*/}
+          <Select
+            value={sortField}
+            onValueChange={(value) =>
+              setSortField(value as "title" | "dateAdded")
+            }
+          >
+            <SelectTrigger className="w-40" aria-label="Sort artists">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="title">Name</SelectItem>
+              <SelectItem value="dateAdded">Date added</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={direction}
+            onValueChange={(value) => setDirection(value as "asc" | "desc")}
+          >
+            <SelectTrigger className="w-40" aria-label="Sort direction">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="asc">Ascending</SelectItem>
+              <SelectItem value="desc">Descending</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </header>
 
       {artists.length > 0 ? (
         <div className="flex w-full flex-wrap">
-          {data.pages.map((group, i) => (
-            <React.Fragment key={i}>
-              {group.items.map((artist: any) => (
-                <ArtistCard key={artist.id} artist={artist} />
-              ))}
-            </React.Fragment>
+          {artists.map((artist: any) => (
+            <ArtistCard key={artist.ratingKey} artist={artist} />
           ))}
         </div>
       ) : (
@@ -99,14 +137,29 @@ function RouteComponent() {
           No artists found
         </div>
       )}
-
-      <div ref={observerRef} className="flex h-12 items-center justify-center">
-        {isFetching && !isFetchingNextPage ? (
-          <Spinner className="size-4" />
-        ) : null}
-      </div>
     </div>
   );
+}
+
+async function fetchAllArtists(): Promise<any[]> {
+  const artists: any[] = [];
+  let cursor = "";
+  const seenCursors = new Set<string>();
+
+  do {
+    if (seenCursors.has(cursor)) {
+      throw new Error("Artist pagination returned a repeated cursor");
+    }
+    seenCursors.add(cursor);
+    const page = (await window.api.media.getArtistsPage(cursor, 200)) as {
+      items?: any[];
+      nextCursor?: string | null;
+    };
+    artists.push(...(page.items ?? []));
+    cursor = page.nextCursor ?? "";
+  } while (cursor);
+
+  return artists;
 }
 
 function ArtistCard({ artist }: { artist: any }) {

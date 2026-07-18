@@ -24,7 +24,7 @@ const config: ElectrobunConfig = {
   app: {
     name: "Rayna",
     identifier: appIdentifier,
-    version: "0.6.0",
+    version: "1.0.0-preview.1",
     description: "Rayna",
     urlSchemes: ["rayna"],
   },

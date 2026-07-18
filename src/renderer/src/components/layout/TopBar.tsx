@@ -19,6 +19,7 @@ import {
 } from "../ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { DownloadActivityMenu } from "@/components/downloads/DownloadActivityMenu";
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
@@ -32,6 +33,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { SearchResult } from "../../../../shared/rpc";
+import { QueueButton } from "@/components/music/QueueButton";
 import {
   FormEvent,
   KeyboardEvent,
@@ -48,9 +50,8 @@ export function TopBar() {
   const { theme, setTheme } = useTheme();
   const { ultraBlur, enabled } = useUltraBlur();
   const hasUltraBlur = !!ultraBlur && enabled;
-  const currentQuery = new URLSearchParams(
-    routerState.location.searchStr,
-  ).get("q") ?? "";
+  const currentQuery =
+    new URLSearchParams(routerState.location.searchStr).get("q") ?? "";
   const [searchQuery, setSearchQuery] = useState(currentQuery);
   const [debouncedQuery, setDebouncedQuery] = useState(currentQuery);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -85,8 +86,7 @@ export function TopBar() {
         : [],
     [autocomplete.data],
   );
-  const showSuggestions =
-    searchFocused && searchQuery.trim().length >= 2;
+  const showSuggestions = searchFocused && searchQuery.trim().length >= 2;
 
   useEffect(() => setActiveSuggestion(-1), [debouncedQuery]);
 
@@ -244,39 +244,56 @@ export function TopBar() {
                 </div>
               ) : suggestions.length > 0 ? (
                 suggestions.map((suggestion, index) => (
-                  <button
+                  <div
                     key={`${suggestion.type}-${suggestion.ratingKey}`}
-                    type="button"
                     role="option"
                     aria-selected={activeSuggestion === index}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => selectSuggestion(suggestion)}
                     onMouseEnter={() => setActiveSuggestion(index)}
                     className={cn(
                       "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left",
                       activeSuggestion === index && "bg-accent",
                     )}
                   >
-                    {suggestion.thumb ? (
-                      <img
-                        src={suggestion.thumb}
-                        alt=""
-                        className="size-10 shrink-0 rounded-md object-cover"
+                    <button
+                      type="button"
+                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => selectSuggestion(suggestion)}
+                    >
+                      {suggestion.thumb ? (
+                        <img
+                          src={suggestion.thumb}
+                          alt=""
+                          className="size-10 shrink-0 rounded-md object-cover"
+                        />
+                      ) : (
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
+                          <HugeiconsIcon
+                            icon={Search01Icon}
+                            className="size-4"
+                          />
+                        </span>
+                      )}
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium">
+                          {suggestion.title}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {suggestion.subtitle} · {suggestion.type}
+                        </span>
+                      </span>
+                    </button>
+                    {suggestion.type === "track" ? (
+                      <QueueButton
+                        className="-mr-1"
+                        target={{
+                          type: "track",
+                          ratingKey: suggestion.ratingKey,
+                          title: suggestion.title,
+                        }}
                       />
-                    ) : (
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
-                        <HugeiconsIcon icon={Search01Icon} className="size-4" />
-                      </div>
-                    )}
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium">
-                        {suggestion.title}
-                      </span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {suggestion.subtitle} · {suggestion.type}
-                      </span>
-                    </span>
-                  </button>
+                    ) : null}
+                  </div>
                 ))
               ) : debouncedQuery === searchQuery.trim() ? (
                 <div className="px-3 py-2 text-sm text-muted-foreground">
@@ -288,7 +305,8 @@ export function TopBar() {
         </div>
       </form>
 
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
+        <DownloadActivityMenu />
         {/* <Link to={'/app/settings'}> */}
         <DropdownMenu>
           <DropdownMenuTrigger

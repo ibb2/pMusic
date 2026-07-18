@@ -1,22 +1,33 @@
-import { ButtonHTMLAttributes, HTMLProps, forwardRef } from 'react'
+import { ButtonHTMLAttributes, HTMLProps, forwardRef } from "react";
 
-import { cn } from '@/lib/utils'
-import { Surface } from './Surface'
-import { Button, ButtonProps } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
+import { cn } from "@/lib/utils";
+import { Surface } from "./Surface";
+import { Button } from "@/components/ui/button";
+
+type ButtonProps = React.ComponentProps<typeof Button>;
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 export type ToolbarWrapperProps = {
-  shouldShowContent?: boolean
-  isVertical?: boolean
-} & HTMLProps<HTMLDivElement>
+  shouldShowContent?: boolean;
+  isVertical?: boolean;
+} & HTMLProps<HTMLDivElement>;
 
 const ToolbarWrapper = forwardRef<HTMLDivElement, ToolbarWrapperProps>(
-  ({ shouldShowContent = true, children, isVertical = false, className, ...rest }, ref) => {
+  (
+    {
+      shouldShowContent = true,
+      children,
+      isVertical = false,
+      className,
+      ...rest
+    },
+    ref,
+  ) => {
     const toolbarClassName = cn(
-      'text-black inline-flex h-full leading-none gap-0.5',
-      isVertical ? 'flex-col p-2' : 'flex-row p-1 items-center',
-      className
-    )
+      "text-black inline-flex h-full leading-none gap-0.5",
+      isVertical ? "flex-col p-2" : "flex-row p-1 items-center",
+      className,
+    );
 
     return (
       shouldShowContent && (
@@ -24,47 +35,47 @@ const ToolbarWrapper = forwardRef<HTMLDivElement, ToolbarWrapperProps>(
           {children}
         </Surface>
       )
-    )
-  }
-)
+    );
+  },
+);
 
-ToolbarWrapper.displayName = 'Toolbar'
+ToolbarWrapper.displayName = "Toolbar";
 
 export type ToolbarDividerProps = {
-  horizontal?: boolean
-} & HTMLProps<HTMLDivElement>
+  horizontal?: boolean;
+} & HTMLProps<HTMLDivElement>;
 
 const ToolbarDivider = forwardRef<HTMLDivElement, ToolbarDividerProps>(
   ({ horizontal, className, ...rest }, ref) => {
     const dividerClassName = cn(
-      'bg-neutral-200 dark:bg-neutral-800',
+      "bg-neutral-200 dark:bg-neutral-800",
       horizontal
-        ? 'w-full min-w-[1.5rem] h-[1px] my-1 first:mt-0 last:mt-0'
-        : 'h-full min-h-[1.5rem] w-[1px] mx-1 first:ml-0 last:mr-0',
-      className
-    )
+        ? "w-full min-w-[1.5rem] h-[1px] my-1 first:mt-0 last:mt-0"
+        : "h-full min-h-[1.5rem] w-[1px] mx-1 first:ml-0 last:mr-0",
+      className,
+    );
 
-    return <div className={dividerClassName} ref={ref} {...rest} />
-  }
-)
+    return <div className={dividerClassName} ref={ref} {...rest} />;
+  },
+);
 
-ToolbarDivider.displayName = 'Toolbar.Divider'
+ToolbarDivider.displayName = "Toolbar.Divider";
 
 export type ToolbarButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  active?: boolean
-  activeClassName?: string
-  tooltip?: string
-  tooltipShortcut?: string[]
-  buttonSize?: ButtonProps['size']
-  variant?: ButtonProps['variant']
-}
+  active?: boolean;
+  activeClassName?: string;
+  tooltip?: string;
+  tooltipShortcut?: string[];
+  buttonSize?: ButtonProps["size"];
+  variant?: ButtonProps["variant"];
+};
 
 const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
   (
     {
       children,
-      buttonSize = 'icon',
-      variant = 'ghost',
+      buttonSize = "icon",
+      variant = "ghost",
       className,
       tooltip,
       tooltipShortcut,
@@ -72,19 +83,25 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
       activeClassName,
       ...rest
     },
-    ref
+    ref,
   ) => {
     const buttonClass = cn(
-      'gap-1 min-w-[2rem] px-2 w-auto',
-      active && (activeClassName || 'bg-accent text-accent-foreground'),
-      className
-    )
+      "gap-1 min-w-[2rem] px-2 w-auto",
+      active && (activeClassName || "bg-accent text-accent-foreground"),
+      className,
+    );
 
     const content = (
-      <Button className={buttonClass} variant={variant} size={buttonSize} ref={ref} {...rest}>
+      <Button
+        className={buttonClass}
+        variant={variant}
+        size={buttonSize}
+        ref={ref}
+        {...rest}
+      >
         {children}
       </Button>
-    )
+    );
 
     if (tooltip) {
       return (
@@ -95,23 +112,23 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
               <span>{tooltip}</span>
               {tooltipShortcut && (
                 <span className="text-muted-foreground ml-auto text-xs tracking-widest">
-                  {tooltipShortcut.join(' + ')}
+                  {tooltipShortcut.join(" + ")}
                 </span>
               )}
             </div>
           </TooltipContent>
         </Tooltip>
-      )
+      );
     }
 
-    return content
-  }
-)
+    return content;
+  },
+);
 
-ToolbarButton.displayName = 'ToolbarButton'
+ToolbarButton.displayName = "ToolbarButton";
 
 export const Toolbar = {
   Wrapper: ToolbarWrapper,
   Divider: ToolbarDivider,
-  Button: ToolbarButton
-}
+  Button: ToolbarButton,
+};

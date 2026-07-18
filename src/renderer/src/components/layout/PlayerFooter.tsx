@@ -14,7 +14,6 @@ import {
   Repeat1,
   RepeatIcon,
   ShuffleIcon,
-  MusicNote03Icon,
   VolumeHighIcon,
   VolumeLowIcon,
   VolumeMute01Icon,
@@ -25,9 +24,16 @@ import {
 type PlayerFooterProps = {
   queueOpen: boolean;
   onToggleQueue: () => void;
+  lyricsOpen: boolean;
+  onToggleLyrics: () => void;
 };
 
-export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
+export function PlayerFooter({
+  queueOpen,
+  onToggleQueue,
+  lyricsOpen,
+  onToggleLyrics,
+}: PlayerFooterProps) {
   const queryClient = useQueryClient();
   const { data: status, refetch } = useQuery({
     queryKey: ["playerStatus"],
@@ -38,6 +44,7 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
   const [position, setPosition] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
   const [mute, toggleMute] = useState(false);
+  const [preMuteVol, setPreMuteVol] = useState(status?.volume ?? 0.5);
 
   useEffect(() => {
     // Reset position immediately when the track changes to avoid showing old progress
@@ -103,14 +110,21 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
   const handleMute = async () => {
     await window.api.player.setMuted(!mute);
     toggleMute(!mute);
-    refetch();
+
+    if (!mute) {
+      setPreMuteVol(status!.volume)
+      handleVolume(0)
+    } else {
+      handleVolume(preMuteVol)
+    }
+
   };
 
   const currentTrack = status?.current_track;
   const volume = status?.volume ?? 1;
 
   return (
-    <div className="grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] p-2">
+    <div className="relative grid grid-cols-[minmax(auto,0.5fr)_1fr_minmax(auto,0.5fr)] p-2">
       {/* Now Playing Info */}
       <div className="flex flex-row items-center gap-2">
         <div className="h-14 w-14 rounded-md flex items-center justify-center overflow-hidden">
@@ -122,8 +136,8 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
             />
           )}
         </div>
-        <div className="flex flex-col ">
-          {currentTrack?.albumRatingKey && (
+        <div className="flex min-w-0 flex-col">
+          {currentTrack?.albumRatingKey ? (
             <Link
               to={`/app/album/$ratingKey`}
               params={{ ratingKey: currentTrack.albumRatingKey }}
@@ -131,8 +145,12 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
             >
               <span>{currentTrack?.title || ""}</span>
             </Link>
-          )}
-          {currentTrack?.artistRatingKey && (
+          ) : currentTrack ? (
+            <span className="max-w-32 truncate text-sm font-semibold">
+              {currentTrack.title}
+            </span>
+          ) : null}
+          {currentTrack?.artistRatingKey ? (
             <Link
               to={`/app/artist/$ratingKey`}
               params={{ ratingKey: currentTrack.artistRatingKey }}
@@ -140,7 +158,11 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
             >
               <span>{currentTrack?.artist || ""}</span>
             </Link>
-          )}
+          ) : currentTrack ? (
+            <span className="max-w-32 truncate text-xs text-muted-foreground">
+              {currentTrack.artist}
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -240,6 +262,16 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
           <Laptop2 className="h-4 w-4" />
         </Button>*/}
         <Button
+          variant={lyricsOpen ? "secondary" : "ghost"}
+          size="icon"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={onToggleLyrics}
+          disabled={!lyricsOpen && !currentTrack}
+          aria-label={lyricsOpen ? "Close lyrics" : "Open lyrics"}
+        >
+          <LyricsIcon className="h-4 w-4" />
+        </Button>
+        <Button
           variant={queueOpen ? "secondary" : "ghost"}
           size="icon"
           className="text-muted-foreground hover:text-foreground"
@@ -284,6 +316,9 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
               value={volume}
               max={1}
               step={1 / 100}
+              onValueChange={(value) => {
+                handleVolume(value as number);
+              }}
               onValueCommitted={(value) => {
                 handleVolume(value as number);
               }}
@@ -293,5 +328,28 @@ export function PlayerFooter({ queueOpen, onToggleQueue }: PlayerFooterProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** Lucide's MicVocal glyph, kept local so the player does not need another icon runtime. */
+function LyricsIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="m11 7.601-5.994 8.19a1 1 0 0 0 .1 1.298l.817.818a1 1 0 0 0 1.314.087L15.09 12" />
+      <path d="M16.5 21.174C15.5 20.5 14.372 20 13 20c-2.058 0-3.928 2.356-6 2-2.072-.356-2.775-3.369-1.5-4.5" />
+      <circle cx="16" cy="7" r="5" />
+    </svg>
   );
 }

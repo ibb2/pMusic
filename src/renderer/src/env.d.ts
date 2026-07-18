@@ -1,6 +1,10 @@
 /// <reference types="vite/client" />
 
 import type {
+  AlbumPageRequest,
+  MediaAlbum,
+  MediaPage,
+  MediaTrack,
   BassStatus,
   PlaybackSettings,
   PlaybackSettingsPatch,
@@ -14,14 +18,25 @@ import type {
   PlexLibrary,
   PlexLibrarySelection,
   PlexServer,
+  TrackPageRequest,
+  DownloadItem,
+  DownloadProgress,
+  DownloadState,
+  DownloadTargetType,
+  DownloadActivity,
+  DownloadedStatus,
+  OfflineStorageStatus,
+  SyncStatus,
+  LyricsResult,
+  LibraryFacets,
+  ServerChangeResult,
 } from "../../shared/types";
 
 declare global {
   interface Window {
     api: {
-      db: {
-        get: (key: string) => Promise<unknown>;
-        set: (key: string, value: unknown) => Promise<void>;
+      network: {
+        setOffline: (offline: boolean) => Promise<void>;
       };
       settings: {
         getPlayback: () => Promise<PlaybackSettings>;
@@ -44,6 +59,10 @@ declare global {
         getServers: () => Promise<PlexServer[]>;
         getLibraries: () => Promise<PlexLibrary[]>;
         selectServer: (server: PlexServer) => Promise<void>;
+        changeServer: (
+          server: PlexServer,
+          mode?: PlexConnectionMode,
+        ) => Promise<ServerChangeResult>;
         selectLibraries: (libraries: PlexLibrarySelection[]) => Promise<void>;
         resolveServerConnection: (mode?: PlexConnectionMode) => Promise<string>;
         isServerSelected: () => Promise<boolean>;
@@ -62,12 +81,20 @@ declare global {
           recentlyPlayed: any[];
           recentlyAdded: any[];
           playlists: any[];
+          freshness: "live" | "fresh" | "stale";
+          cachedAt: string | null;
         }>;
         getTopEight: () => Promise<any[]>;
         getRecentlyPlayedAlbums: () => Promise<any[]>;
         getRecentlyAddedAlbums: () => Promise<any[]>;
         getPlaylists: () => Promise<any[]>;
-        getAlbumsPage: (cursor: string, pageSize: number) => Promise<any>;
+        getAlbumsPage: (
+          request: AlbumPageRequest,
+        ) => Promise<MediaPage<MediaAlbum>>;
+        getTracksPage: (
+          request: TrackPageRequest,
+        ) => Promise<MediaPage<MediaTrack>>;
+        getLibraryFacets: () => Promise<LibraryFacets>;
         getArtistsPage: (cursor: string, pageSize: number) => Promise<any>;
         getAlbum: (ratingKey: string) => Promise<any>;
         getArtist: (ratingKey: string) => Promise<any>;
@@ -75,6 +102,33 @@ declare global {
         getArtistPopularTracks: (ratingKey: string) => Promise<any>;
         getPlaylist: (ratingKey: string) => Promise<any>;
         search: (query: string, limit?: number) => Promise<SearchResults>;
+        getLyrics: (ratingKey: string) => Promise<LyricsResult>;
+      };
+      downloads: {
+        create: (
+          targetType: DownloadTargetType,
+          ratingKey: string,
+          targetTitle?: string,
+        ) => Promise<DownloadItem[]>;
+        list: (states?: DownloadState[]) => Promise<DownloadItem[]>;
+        retry: (downloadId: string) => Promise<DownloadItem>;
+        pause: (downloadId: string) => Promise<DownloadItem>;
+        resume: (downloadId: string) => Promise<DownloadItem>;
+        getActivity: () => Promise<DownloadActivity>;
+        clearActivity: (downloadIds?: string[]) => Promise<void>;
+        getStatus: (
+          targets: Array<{ targetType: DownloadTargetType; ratingKey: string }>,
+        ) => Promise<DownloadedStatus[]>;
+        remove: (downloadId: string) => Promise<void>;
+        getProgress: (downloadIds?: string[]) => Promise<DownloadProgress[]>;
+        getStorageStatus: () => Promise<OfflineStorageStatus>;
+        setStorageDirectory: (
+          directory: string,
+        ) => Promise<OfflineStorageStatus>;
+      };
+      sync: {
+        start: () => Promise<SyncStatus>;
+        getStatus: () => Promise<SyncStatus>;
       };
       player: {
         getStatus: () => Promise<PlayerStatus>;

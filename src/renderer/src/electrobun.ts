@@ -1,9 +1,11 @@
 import { createRPC, Electroview } from "electrobun/view";
 import type { PlaybackSettingsPatch, RaynaRPC } from "../../shared/rpc";
 import type {
+  AlbumPageRequest,
   PlexConnectionMode,
   PlexLibrarySelection,
   PlexServer,
+  TrackPageRequest,
 } from "../../shared/types";
 
 const rpc = createRPC<RaynaRPC["webview"], RaynaRPC["bun"]>({
@@ -13,9 +15,9 @@ const rpc = createRPC<RaynaRPC["webview"], RaynaRPC["bun"]>({
 new Electroview({ rpc });
 
 window.api = {
-  db: {
-    get: (key: string) => rpc.request.dbGet({ key }),
-    set: (key: string, value: unknown) => rpc.request.dbSet({ key, value }),
+  network: {
+    setOffline: (offline: boolean) =>
+      rpc.request.networkSetOffline({ offline }),
   },
   settings: {
     getPlayback: () => rpc.request.settingsGetPlayback(),
@@ -34,6 +36,8 @@ window.api = {
     getLibraries: () => rpc.request.authGetLibraries(),
     selectServer: (server: PlexServer) =>
       rpc.request.authSelectServer({ server }),
+    changeServer: (server: PlexServer, mode?: PlexConnectionMode) =>
+      rpc.request.authChangeServer({ server, mode }),
     selectLibraries: (libraries: PlexLibrarySelection[]) =>
       rpc.request.authSelectLibraries({ libraries }),
     resolveServerConnection: (mode?: PlexConnectionMode) =>
@@ -54,8 +58,11 @@ window.api = {
     getRecentlyPlayedAlbums: () => rpc.request.mediaGetRecentlyPlayedAlbums(),
     getRecentlyAddedAlbums: () => rpc.request.mediaGetRecentlyAddedAlbums(),
     getPlaylists: () => rpc.request.mediaGetPlaylists(),
-    getAlbumsPage: (cursor: string, pageSize: number) =>
-      rpc.request.mediaGetAlbumsPage({ cursor, pageSize }),
+    getAlbumsPage: (request: AlbumPageRequest) =>
+      rpc.request.mediaGetAlbumsPage(request),
+    getTracksPage: (request: TrackPageRequest) =>
+      rpc.request.mediaGetTracksPage(request),
+    getLibraryFacets: () => rpc.request.mediaGetLibraryFacets(),
     getArtistsPage: (cursor: string, pageSize: number) =>
       rpc.request.mediaGetArtistsPage({ cursor, pageSize }),
     getAlbum: (ratingKey: string) => rpc.request.mediaGetAlbum({ ratingKey }),
@@ -68,6 +75,29 @@ window.api = {
       rpc.request.mediaGetPlaylist({ ratingKey }),
     search: (query: string, limit = 8) =>
       rpc.request.mediaSearch({ query, limit }),
+    getLyrics: (ratingKey: string) => rpc.request.mediaGetLyrics({ ratingKey }),
+  },
+  downloads: {
+    create: (targetType, ratingKey, targetTitle) =>
+      rpc.request.downloadsCreate({ targetType, ratingKey, targetTitle }),
+    list: (states) => rpc.request.downloadsList({ states }),
+    retry: (downloadId) => rpc.request.downloadsRetry({ downloadId }),
+    pause: (downloadId) => rpc.request.downloadsPause({ downloadId }),
+    resume: (downloadId) => rpc.request.downloadsResume({ downloadId }),
+    getActivity: () => rpc.request.downloadsGetActivity(),
+    clearActivity: (downloadIds) =>
+      rpc.request.downloadsClearActivity({ downloadIds }),
+    getStatus: (targets) => rpc.request.downloadsGetStatus({ targets }),
+    remove: (downloadId) => rpc.request.downloadsRemove({ downloadId }),
+    getProgress: (downloadIds) =>
+      rpc.request.downloadsGetProgress({ downloadIds }),
+    getStorageStatus: () => rpc.request.offlineGetStorageStatus(),
+    setStorageDirectory: (directory) =>
+      rpc.request.offlineSetStorageDirectory({ directory }),
+  },
+  sync: {
+    start: () => rpc.request.syncStart(),
+    getStatus: () => rpc.request.syncGetStatus(),
   },
   player: {
     getStatus: () => rpc.request.playerGetStatus(),

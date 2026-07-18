@@ -1,109 +1,342 @@
-# Rayna
+<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+<a id="readme-top"></a>
+<!--
+*** Thanks for checking out the Best-README-Template. If you have a suggestion
+*** that would make this better, please fork the repo and create a pull request
+*** or simply open an issue with the tag "enhancement".
+*** Don't forget to give the project a star!
+*** Thanks again! Now go create something AMAZING! :D
+-->
 
-Rayna is a 3rd party music player client for Plex focusing on the desktop experience - Inspired by Spotify.
 
-> [!IMPORTANT]
-> This is currently completely online only and a major work in progress, now running on Electrobun with a React frontend and BASS-backed playback. No separate backend is required. No support yet for offline usage or any advanced caching.
 
-<img width="1012" height="782" alt="Screenshot 2026-01-07 at 12 36 52 PM" src="https://github.com/user-attachments/assets/29cb7279-5c22-4c53-8b5a-9989f1abff26" />
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
+<!-- [![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![project_license][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url] -->
 
-## Installation
 
-### Windows
 
-> [!IMPORTANT]
-> Windows on Arm is not natively supported.
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/ibb2/Rayna">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  </a>
 
-1. Download the installer
-2. Run the downloaded installer and follow the instructions onscreen.
+<h3 align="center">Rayna</h3>
 
-### MacOS
+  <p align="center">
+    <b>A Plex music player, inspired by Spotify.</b>
+    <br />
+    <!-- <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    &middot;
+    <a href="https://github.com/github_username/repo_name/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    &middot;
+    <a href="https://github.com/github_username/repo_name/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a> -->
+  </p>
+  <span>MacOS, Windows</span>
+</div>
 
-> [!WARNING]
-> All installations on MacOS will need to be whitelisted due to MacOS blocking apps not signed with a paid developer license by default. This is a limitation as I currently do not have a paid Apple developer license.
 
-1. Download the installer.
-2. Open the downloaded .dmg file and drag the application to your Applications folder. You will you get a warning saying "Rayna" is damaged and can't be opened. You should move it to the Bin.
-3. Open your Terminal app
-4. Run the following command:
-   `xattr -d com.apple.quarantine /Applications/Rayna.app`
 
-## Usage/Examples
+<!-- TABLE OF CONTENTS -->
+<!-- <details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details> -->
 
-On install login to you Plex account and select your server[^1], that is all.
+<!-- ABOUT THE PROJECT -->
+## About
+
+![Rayna home screen](images/screenshots/home.png)
+
+<!-- Here's a blank template to get started. To avoid retyping too much info, do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`, `project_license` -->
+
+Rayna is a 3<sup>rd</sup>-party music player for Plex, inspired by Spotify. Built with Electrobun it provides a UI built for the desktop.
+
+
+
+<!-- ### Built With
+
+* [![Next][Next.js]][Next-url]
+* [![React][React.js]][React-url]
+* [![Vue][Vue.js]][Vue-url]
+* [![Angular][Angular.io]][Angular-url]
+* [![Svelte][Svelte.dev]][Svelte-url]
+* [![Laravel][Laravel.com]][Laravel-url]
+* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
+* [![JQuery][JQuery.com]][JQuery-url]
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
 ## Features
 
-- Cross platform (macos, windows, linux)
+#### Library
 
-## Screenshots
+- Browse albums, tracks, artists, and playlists across selected Plex music libraries.
+- Search the library for tracks, albums and artists.
+- Filter and sort every library view.
 
-<img width="1012" height="782" alt="Screenshot 2026-01-07 at 12 36 58 PM" src="https://github.com/user-attachments/assets/15d2f81e-0f02-4646-ad6f-d5bf5ebb2541" />
-<img width="1012" height="782" alt="Screenshot 2026-01-07 at 12 37 08 PM" src="https://github.com/user-attachments/assets/95f0e5ff-3bac-407a-a07d-72e39d60ec7b" />
+#### Playback
 
-## Roadmap
+- Play tracks, albums, artists, and playlists with standard media control (previous, next, seek, etc.).
+- Add individual tracks to the queue or entire albums or playlists.
+- Display Plex lyrics in a full listening view, including synchronized line highlighting[^2].
+- Optionally transcode audio to 320 kbps Opus.
+- Report and view playback sessions in Plex and Tautulli.
+- Recover playback through network loss and change while retaining the current track, position, and queue.
 
-(Probably in order)
+#### Downloads and offline use
 
-- [x] Light/Dark mode
-- [x] Volume Controls
-- [x] Add Screenshots
-- [x] Artist page
+- Download tracks, albums, and playlists.
+- Pause, resume, retry, remove, and monitor downloads from a activity menu.
+- Browse downloads.
+- Change the download location; existing files are moved safely.
+- Synchronize selected libraries at startup, after network recovery, or with **Sync Now**.
+
+#### Server and appearance
+
+- Select Plex music libraries and servers[^3].
+- Switch between light, dark, and system theme.
+- Configure playback, offline storage, selected libraries, and synchronization from Settings.
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+Rayna currently targets macOS and Windows.
+
+This is an example of how you may give instructions on setting up your project locally.
+To get a local copy up and running follow these simple example steps.
+
+### Prerequisites
+
+This is an example of how to list things you need to use the software and how to install them.
+* npm
+  ```sh
+  npm install npm@latest -g
+  ```
+
+### Downloads
+> [!IMPORTANT]
+> Windows on Arm is not natively supported.
+
+> [!WARNING]
+> Current macOS builds are not signed with a paid Apple Developer certificate and will need to be allowed manually.
+
+| Platform | Download |
+| --- | --- |
+| Windows | [Installer (x64)](https://github.com/ibb2/Rayna/releases/latest/download/rayna-windows-installer.exe) |
+| macOS | [DMG (x64, arm64)](https://github.com/edde746/Rayna/releases/latest/download/rayna-macos.dmg)  |
+
+##### Post Install (Macos)
+After install, open Terminal and run:
+
+```sh
+xattr -d com.apple.quarantine /Applications/Rayna.app
+```
+
+<!-- USAGE EXAMPLES -->
+## Usage
+
+<!-- Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources. -->
+
+![Albums view](images/screenshots/album.png)
+![Artist views](images/screenshots/artists.png)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- ROADMAP -->
+ ## Roadmap
+<!--
+- [x] Light and dark themes
+- [x] Volume controls
+- [ ] Current repository-owned screenshots
+- [x] Artist pages
   - [x] Play popular tracks
-  - [x] Artist library page
-- [x] Playlist page
-  - [x] Play entire playlist
-  - [x] Play individual track for playlist
-  - [x] Playlist library page
-- [ ] Albums page
-  - [x] Albums library page
-  - [x] Albums detail page
-  - [ ] Filtering options
-- [ ] Tracks page
-  - [ ] Tracks library page
-  - [ ] Filtering options
-- [x] Search
-- [x] Queue's
-  - [x] Queue Albums
+  - [x] Browse the artist library
+  - [x] Filter and sort artists
+- [x] Playlist pages
+  - [x] Play and queue an entire playlist
+  - [x] Play and queue individual tracks
+  - [x] Browse, filter, and sort playlists
+- [x] Albums pages
+  - [x] Browse albums
+  - [x] View album details
+  - [x] Complete-library filtering and sorting
+- [x] Tracks page
+  - [x] Browse, play, queue, and download tracks
+  - [x] Complete-library filtering and sorting
+  - [x] Infinite scrolling
+- [x] Global search
+- [x] Queue management
+  - [x] Queue albums and playlists
   - [x] Queue individual tracks
-  - [x] Display Queue
-- [ ] Offline support
-- [x] Remote playback connection handling
-  - [x] Reconnect through the best available Plex route when the current connection stops responding
-  - [x] Preserve and resume the current track, position, and queue after a network change
-- [x] Multi-library support
-- [ ] Caching
-- [ ] Database support
-- [ ] Lyrics
-- [x] Performance Improvements
-- [x] Server select
-  - [ ] Change selected server
-  - [x] Select libraries
-- [x] Sessions support
-- [x] Timeline support
-- [x] Transcoding
-- [ ] Sync
-- [ ] TV Support (Probably never happening)
-- [ ] Settings Page
-- [x] Prev and Next functionality
+  - [x] Display and clear the queue
+- [x] User-managed offline support
+  - [x] Track, album, and playlist downloads
+  - [x] Pause, resume, retry, and remove
+  - [x] Dedicated grouped Downloads page
+  - [x] Download activity menu and album-detail downloaded state
+  - [x] Configurable storage location
+  - [x] Verify downloaded album and playlist playback while Plex is unreachable
+- [x] Remote playback connection recovery
+  - [x] Reconnect through the best available Plex route
+  - [x] Preserve the current track, position, and queue after a network change
+- [ ] Multiple music-library support
+- [x] Server-scoped metadata, artwork, and lyrics caching
+- [x] Versioned SQLite database
+- [x] Plain and synchronized Plex lyrics
+- [x] Performance improvements
+- [x] Server selection
+  - [x] Change between available Plex servers in the desktop UI
+  - [x] Select multiple music libraries
+- [x] Plex session reporting
+- [x] Plex timeline reporting
+- [x] Audio transcoding
+- [x] Startup, recovery, and manual synchronization
+- [x] Settings page
+- [x] Previous and next controls -->
 
-## Contributing
+<!-- - [ ] Feature 1
+- [ ] Feature 2
+- [ ] Feature 3
+    - [ ] Nested Feature -->
 
-**Ignore anything written in this section for now**
+See the [open issues](https://github.com/ibb2/Rayna/issues) for a full list of proposed features (and known issues).
 
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-Please make sure to update tests as appropriate. (There are no tests :D)
+<!-- CONTRIBUTING -->
 
-Contributions are always welcome!
+## Contributing 
+<!-- 
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-See `contributing.md` for ways to get started.
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
 
-Please adhere to this project's `code of conduct`.
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Top contributors:
+
+<a href="https://github.com/github_username/repo_name/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=github_username/repo_name" alt="contrib.rocks image" />
+</a> -->
+
+Pull requests are welcome. For major changes, open an issue first to discuss the proposed behavior, and update or add tests for the affected feature.
+
+<!-- See `contributing.md` for local development guidance and follow the repository's code of conduct. -->
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- LICENSE -->
 ## License
 
-## Appendix
+Distributed under the GNU GPLv3 license. See [`LICENSE.txt`](LICENSE.txt) for more information.
 
-[^1]: Only a single server and library is supported currently.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- CONTACT -->
+<!-- ## Contact
+
+Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
+
+Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+ -->
+
+
+<!-- ACKNOWLEDGMENTS -->
+<!-- ## Acknowledgments
+
+* []()
+* []()
+* []() -->
+
+<!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
+
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
+[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
+[forks-url]: https://github.com/github_username/repo_name/network/members
+[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
+[stars-url]: https://github.com/github_username/repo_name/stargazers
+[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
+[issues-url]: https://github.com/github_username/repo_name/issues
+[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
+[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/linkedin_username
+[product-screenshot]: images/screenshot.png
+<!-- Shields.io badges. You can a comprehensive list with many more badges at: https://github.com/inttter/md-badges -->
+[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[Next-url]: https://nextjs.org/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
+[Vue-url]: https://vuejs.org/
+[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
+[Angular-url]: https://angular.io/
+[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
+[Svelte-url]: https://svelte.dev/
+[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
+[Laravel-url]: https://laravel.com
+[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
+[Bootstrap-url]: https://getbootstrap.com
+[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
+[JQuery-url]: https://jquery.com 
+
+
+## Footnotes
+
+[^2]: When timed lyrics are available.
+[^3]: No clue if this works.

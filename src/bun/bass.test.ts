@@ -11,6 +11,79 @@ const opusSource: PlexStreamSource = {
 };
 
 describe("BASS Plex route recovery", () => {
+  test("opens completed offline files directly without URL or network proxy", () => {
+    const fake = new FakeBassLibrary();
+    let proxyCalls = 0;
+    const bass = new BassManager({
+      library: fake.library,
+      streamProxy: {
+        urlFor: () => {
+          proxyCalls += 1;
+          return "http://127.0.0.1:1/unreachable";
+        },
+        dispose() {},
+      } as never,
+      monitorIntervalMs: 0,
+    });
+    const offlineUrl = "http://127.0.0.1:54321/media/offline-track.flac";
+    const localPath = "/offline/music/offline-track.flac";
+    bass.setStreamResolver(() => [
+      { connectionUri: "offline", url: offlineUrl, localPath },
+    ]);
+
+    bass.playTrack(track("offline"), { path: offlineUrl, localPath });
+
+    expect(proxyCalls).toBe(0);
+    expect(fake.createdFiles).toEqual([localPath]);
+    expect(fake.createdUrls).toEqual([]);
+    expect(bass.getPlaybackStatus().is_playing).toBe(true);
+  });
+
+  test("continues to open remote candidates through URL streaming", () => {
+    const fake = new FakeBassLibrary();
+    const { bass } = manager(fake);
+
+    bass.playTrack(track("remote"), source);
+
+    expect(fake.createdFiles).toEqual([]);
+    expect(fake.createdUrls).toHaveLength(1);
+    expect(new URL(fake.createdUrls[0]!).origin).toBe(LOCAL);
+  });
+
+  test("appends tracks and collections without interrupting playback", () => {
+    const fake = new FakeBassLibrary();
+    const { bass } = manager(fake);
+
+    bass.playTrack(track("current"), source);
+    bass.queueTrack(track("single"), source);
+    bass.queueTracks([
+      { track: track("album-1"), source },
+      { track: track("album-2"), source },
+    ]);
+
+    expect(bass.getPlaybackStatus().current_track?.ratingKey).toBe("current");
+    expect(bass.getQueue().tracks.map((item) => item.ratingKey)).toEqual([
+      "single",
+      "album-1",
+      "album-2",
+    ]);
+  });
+
+  test("starts the first queued track when the player is idle", () => {
+    const fake = new FakeBassLibrary();
+    const { bass } = manager(fake);
+
+    bass.queueTracks([
+      { track: track("album-1"), source },
+      { track: track("album-2"), source },
+    ]);
+
+    expect(bass.getPlaybackStatus().current_track?.ratingKey).toBe("album-1");
+    expect(bass.getQueue().tracks.map((item) => item.ratingKey)).toEqual([
+      "album-2",
+    ]);
+  });
+
   test("falls through to a remote route when initial stream creation fails", () => {
     const fake = new FakeBassLibrary();
     fake.setReachable(LOCAL, false);
@@ -208,6 +281,7 @@ class FakeBassLibrary {
   position = 0;
   duration = 180;
   createdUrls: string[] = [];
+  createdFiles: string[] = [];
   private nextHandle = 1;
   private unreachablePaths = new Set<string>();
   private reachable = new Map<string, boolean>([
@@ -233,6 +307,13 @@ class FakeBassLibrary {
           !this.reachable.get(parsed.origin)
         )
           return 0;
+        this.active = 0;
+        this.position = 0;
+        return this.nextHandle++;
+      },
+      BASS_StreamCreateFile: (_memory, value) => {
+        const path = new TextDecoder().decode(value).replace(/\0.*$/, "");
+        this.createdFiles.push(path);
         this.active = 0;
         this.position = 0;
         return this.nextHandle++;

@@ -1,9 +1,110 @@
 import type {
+  AlbumPageRequest,
+  DownloadItem,
+  DownloadActivity,
+  DownloadedStatus,
+  DownloadProgress,
+  DownloadTargetType,
+  LyricsResult,
+  LibraryFacets,
+  MediaAlbum,
+  MediaPage,
+  MediaTrack,
+  OfflineStorageStatus,
   PlexConnectionMode,
   PlexLibrary,
   PlexLibrarySelection,
   PlexServer,
+  ServerChangeResult,
+  SyncStatus,
+  TrackPageRequest,
 } from "./types";
+
+/**
+ * Typed request contracts for roadmap features. These are kept separate from
+ * `RaynaRPC` until their Bun handlers land, allowing each implementation phase
+ * to opt in without weakening the existing RPC handler exhaustiveness check.
+ */
+export type RoadmapRPCRequests = {
+  mediaGetFilteredAlbumsPage: {
+    params: AlbumPageRequest;
+    response: MediaPage<MediaAlbum>;
+  };
+  mediaGetTracksPage: {
+    params: TrackPageRequest;
+    response: MediaPage<MediaTrack>;
+  };
+  mediaGetLyrics: {
+    params: { ratingKey: string };
+    response: LyricsResult;
+  };
+  downloadsCreate: {
+    params: {
+      targetType: DownloadTargetType;
+      ratingKey: string;
+      targetTitle?: string;
+    };
+    response: DownloadItem[];
+  };
+  downloadsList: {
+    params: { states?: DownloadItem["state"][] };
+    response: DownloadItem[];
+  };
+  downloadsRetry: {
+    params: { downloadId: string };
+    response: DownloadItem;
+  };
+  downloadsPause: {
+    params: { downloadId: string };
+    response: DownloadItem;
+  };
+  downloadsResume: {
+    params: { downloadId: string };
+    response: DownloadItem;
+  };
+  downloadsGetActivity: {
+    params: void;
+    response: DownloadActivity;
+  };
+  downloadsClearActivity: {
+    params: { downloadIds?: string[] };
+    response: void;
+  };
+  downloadsGetStatus: {
+    params: {
+      targets: Array<{ targetType: DownloadTargetType; ratingKey: string }>;
+    };
+    response: DownloadedStatus[];
+  };
+  downloadsRemove: {
+    params: { downloadId: string; deleteFile?: boolean };
+    response: void;
+  };
+  downloadsGetProgress: {
+    params: { downloadIds?: string[] };
+    response: DownloadProgress[];
+  };
+  offlineGetStorageStatus: {
+    params: void;
+    response: OfflineStorageStatus;
+  };
+  offlineSetStorageDirectory: {
+    params: { directory: string };
+    response: OfflineStorageStatus;
+  };
+  syncStart: {
+    params: void;
+    response: SyncStatus;
+  };
+  syncGetStatus: {
+    params: void;
+    response: SyncStatus;
+  };
+  authChangeServer: {
+    params: { server: PlexServer; mode?: PlexConnectionMode };
+    response: ServerChangeResult;
+  };
+};
 
 type RPCSchema<
   I extends {
@@ -95,12 +196,8 @@ export type SearchResults = {
 export type RaynaRPC = {
   bun: RPCSchema<{
     requests: {
-      dbGet: {
-        params: { key: string };
-        response: unknown;
-      };
-      dbSet: {
-        params: { key: string; value: unknown };
+      networkSetOffline: {
+        params: { offline: boolean };
         response: void;
       };
       settingsGetPlayback: {
@@ -151,6 +248,7 @@ export type RaynaRPC = {
         params: { server: PlexServer };
         response: void;
       };
+      authChangeServer: RoadmapRPCRequests["authChangeServer"];
       authSelectLibraries: {
         params: { libraries: PlexLibrarySelection[] };
         response: void;
@@ -198,6 +296,8 @@ export type RaynaRPC = {
           recentlyPlayed: unknown[];
           recentlyAdded: unknown[];
           playlists: unknown[];
+          freshness: "live" | "fresh" | "stale";
+          cachedAt: string | null;
         };
       };
       mediaGetRecentlyPlayedAlbums: {
@@ -213,8 +313,16 @@ export type RaynaRPC = {
         response: unknown[];
       };
       mediaGetAlbumsPage: {
-        params: { cursor?: string; pageSize: number };
-        response: unknown;
+        params: AlbumPageRequest;
+        response: MediaPage<MediaAlbum>;
+      };
+      mediaGetTracksPage: {
+        params: TrackPageRequest;
+        response: MediaPage<MediaTrack>;
+      };
+      mediaGetLibraryFacets: {
+        params: void;
+        response: LibraryFacets;
       };
       mediaGetArtistsPage: {
         params: { cursor?: string; pageSize: number };
@@ -244,6 +352,21 @@ export type RaynaRPC = {
         params: { query: string; limit?: number };
         response: SearchResults;
       };
+      mediaGetLyrics: RoadmapRPCRequests["mediaGetLyrics"];
+      downloadsCreate: RoadmapRPCRequests["downloadsCreate"];
+      downloadsList: RoadmapRPCRequests["downloadsList"];
+      downloadsRetry: RoadmapRPCRequests["downloadsRetry"];
+      downloadsPause: RoadmapRPCRequests["downloadsPause"];
+      downloadsResume: RoadmapRPCRequests["downloadsResume"];
+      downloadsGetActivity: RoadmapRPCRequests["downloadsGetActivity"];
+      downloadsClearActivity: RoadmapRPCRequests["downloadsClearActivity"];
+      downloadsGetStatus: RoadmapRPCRequests["downloadsGetStatus"];
+      downloadsRemove: RoadmapRPCRequests["downloadsRemove"];
+      downloadsGetProgress: RoadmapRPCRequests["downloadsGetProgress"];
+      offlineGetStorageStatus: RoadmapRPCRequests["offlineGetStorageStatus"];
+      offlineSetStorageDirectory: RoadmapRPCRequests["offlineSetStorageDirectory"];
+      syncStart: RoadmapRPCRequests["syncStart"];
+      syncGetStatus: RoadmapRPCRequests["syncGetStatus"];
       playerGetStatus: {
         params: void;
         response: PlayerStatus;

@@ -26,11 +26,15 @@ const DEFAULT_STALL_TIMEOUT_MS = 8_000;
 export type PlexStreamSource = {
   path: string;
   params?: Record<string, string>;
+  /** Bun-only local path used for completed offline media. */
+  localPath?: string;
 };
 
 export type StreamCandidate = {
   url: string;
   connectionUri: string;
+  /** Bun-only local path; never sent through renderer RPC. */
+  localPath?: string;
 };
 
 export type PlayableTrack = {
@@ -101,6 +105,13 @@ export type BassLibrary = {
       flags: number,
       downloadProc: null,
       user: null,
+    ) => number;
+    BASS_StreamCreateFile: (
+      memory: boolean,
+      file: Uint8Array,
+      offset: bigint,
+      length: bigint,
+      flags: number,
     ) => number;
     BASS_StreamFree: (handle: number) => boolean;
     BASS_ChannelPlay: (handle: number, restart: boolean) => boolean;
@@ -249,13 +260,17 @@ export class BassManager {
   }
 
   queueTrack(track: PlayerTrack, source: PlexStreamSource): void {
-    const item = { track, source };
+    this.queueTracks([{ track, source }]);
+  }
+
+  queueTracks(tracks: PlayableTrack[]): void {
+    if (tracks.length === 0) return;
     if (!this.currentTrack && !this.streamHandle) {
-      this.playTracks([item]);
+      this.playTracks(tracks);
       return;
     }
 
-    this.queue.unshift(item);
+    this.queue.push(...tracks);
   }
 
   replaceQueue(tracks: PlayableTrack[]): void {
@@ -523,6 +538,16 @@ export class BassManager {
           ],
           returns: FFIType.u32,
         },
+        BASS_StreamCreateFile: {
+          args: [
+            FFIType.bool,
+            FFIType.cstring,
+            FFIType.u64,
+            FFIType.u64,
+            FFIType.u32,
+          ],
+          returns: FFIType.u32,
+        },
         BASS_StreamFree: {
           args: [FFIType.u32],
           returns: FFIType.bool,
@@ -733,18 +758,31 @@ export class BassManager {
     for (const candidate of candidates) {
       if (excludedConnectionUris.has(candidate.connectionUri)) continue;
 
-      const handle = this.library.symbols.BASS_StreamCreateURL(
-        this.toCString(
-          this.streamProxy?.urlFor(candidate.url) ?? candidate.url,
-        ),
-        0,
-        0,
-        null,
-        null,
-      );
+      const streamCreateOperation = candidate.localPath
+        ? "BASS_StreamCreateFile"
+        : "BASS_StreamCreateURL";
+      const handle = candidate.localPath
+        ? this.library.symbols.BASS_StreamCreateFile(
+            false,
+            this.toCString(candidate.localPath),
+            0n,
+            0n,
+            0,
+          )
+        : this.library.symbols.BASS_StreamCreateURL(
+            this.toCString(
+              candidate.connectionUri === "offline"
+                ? candidate.url
+                : (this.streamProxy?.urlFor(candidate.url) ?? candidate.url),
+            ),
+            0,
+            0,
+            null,
+            null,
+          );
 
       if (!handle) {
-        lastCandidateError = `BASS_StreamCreateURL error ${this.library.symbols.BASS_ErrorGetCode()}`;
+        lastCandidateError = `${streamCreateOperation} error ${this.library.symbols.BASS_ErrorGetCode()}`;
         excludedConnectionUris.add(candidate.connectionUri);
         continue;
       }

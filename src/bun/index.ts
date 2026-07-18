@@ -4,14 +4,56 @@ import { DatabaseManager } from "./database";
 import Authentication from "./plex/authentication";
 import { MediaService } from "./plex/media";
 import { PlexTimelineReporter } from "./plex/timeline";
+import { DownloadManager } from "./download-manager";
+import { LocalPlaybackServer } from "./local-playback-server";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { SyncService } from "./sync-service";
+import { selectMusicLibraries } from "./plex/library-selection";
+import { ArtworkCacheServer } from "./artwork-cache-server";
 import type { ApplicationMenuItemConfig } from "electrobun";
 import type { RaynaRPC } from "../shared/rpc";
 import type { PlexLibrarySelection, PlexServer } from "../shared/types";
+import { defaultDownloadDirectory } from "./app-paths";
 
 const db = new DatabaseManager();
 const auth = new Authentication();
 const bass = new BassManager();
 const media = new MediaService(auth, bass, db);
+const offlineTestMode = process.env.RAYNA_FORCE_OFFLINE === "1";
+if (offlineTestMode) media.setOffline(true);
+const localPlayback = new LocalPlaybackServer();
+media.setLocalPlaybackServer(localPlayback);
+const artworkCache = new ArtworkCacheServer(
+  join(homedir(), ".rayna", "artwork-cache"),
+);
+media.setArtworkCacheServer(artworkCache);
+const downloads = new DownloadManager({
+  database: db,
+  resolver: media,
+  storageDirectory: defaultDownloadDirectory(),
+});
+const sync = new SyncService({
+  database: db,
+  resolver: media,
+  selectedLibraries: async (serverId) => {
+    const server = await auth.getUserSelectedServer();
+    if (server?.clientIdentifier !== serverId) return [];
+    const libraries = await auth.getLibraries();
+    const selected = (await auth.getUserSelectedLibraries()) || [];
+    return selectMusicLibraries(libraries, selected).map(
+      (library) => library.key,
+    );
+  },
+});
+media.setNetworkRestoredCallback(() => {
+  void auth.getUserSelectedServer().then((server) => {
+    if (server) void sync.networkRestored(server.clientIdentifier);
+  });
+});
+void auth.getUserSelectedServer().then((server) => {
+  if (server) void sync.startup(server.clientIdentifier);
+});
 const timeline = new PlexTimelineReporter(auth, bass, () =>
   media.getPlaybackSettings(),
 );
@@ -23,8 +65,8 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
   maxRequestTime: 30_000,
   handlers: {
     requests: {
-      dbGet: ({ key }) => db.get(key),
-      dbSet: ({ key, value }) => db.set(key, value),
+      networkSetOffline: ({ offline }) =>
+        media.setOffline(offlineTestMode || offline),
       settingsGetPlayback: () => media.getPlaybackSettings(),
       settingsSetPlayback: ({ settings }) =>
         media.setPlaybackSettings(settings),
@@ -43,6 +85,8 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       authGetLibraries: () => auth.getLibraries(),
       authSelectServer: ({ server }: { server: PlexServer }) =>
         auth.selectServer(server),
+      authChangeServer: ({ server, mode }) =>
+        auth.changeServer(server, mode, () => media.resetForServerChange()),
       authSelectLibraries: ({
         libraries,
       }: {
@@ -62,8 +106,9 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
       mediaGetRecentlyPlayedAlbums: () => media.getRecentlyPlayedAlbums(),
       mediaGetRecentlyAddedAlbums: () => media.getRecentlyAddedAlbums(),
       mediaGetPlaylists: () => media.getPlaylists(),
-      mediaGetAlbumsPage: ({ cursor, pageSize }) =>
-        media.getAlbumsPage(cursor, pageSize),
+      mediaGetAlbumsPage: (request) => media.getAlbumsPage(request),
+      mediaGetTracksPage: (request) => media.getTracksPage(request),
+      mediaGetLibraryFacets: () => media.getLibraryFacets(),
       mediaGetArtistsPage: ({ cursor, pageSize }) =>
         media.getArtistsPage(cursor, pageSize),
       mediaGetAlbum: ({ ratingKey }) => media.getAlbum(ratingKey),
@@ -73,6 +118,100 @@ const rpc = BrowserView.defineRPC<RaynaRPC>({
         media.getArtistPopularTracks(ratingKey),
       mediaGetPlaylist: ({ ratingKey }) => media.getPlaylist(ratingKey),
       mediaSearch: ({ query, limit }) => media.search(query, limit),
+      mediaGetLyrics: ({ ratingKey }) => media.getLyrics(ratingKey),
+      downloadsCreate: async ({ targetType, ratingKey, targetTitle }) => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) throw new Error("Select a Plex server before downloading");
+        return downloads.enqueue(
+          server.clientIdentifier,
+          targetType,
+          ratingKey,
+          targetTitle,
+        );
+      },
+      downloadsList: async ({ states }) => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) return [];
+        const items = downloads.list(server.clientIdentifier);
+        return states?.length
+          ? items.filter((item) => states.includes(item.state))
+          : items;
+      },
+      downloadsRetry: ({ downloadId }) => downloads.retry(downloadId),
+      downloadsPause: ({ downloadId }) => downloads.pause(downloadId),
+      downloadsResume: ({ downloadId }) => downloads.resume(downloadId),
+      downloadsGetActivity: async () => {
+        const server = await auth.getUserSelectedServer();
+        return server
+          ? downloads.activity(server.clientIdentifier)
+          : { items: [], activeCount: 0, failedCount: 0 };
+      },
+      downloadsClearActivity: async ({ downloadIds }) => {
+        const server = await auth.getUserSelectedServer();
+        if (server)
+          downloads.clearActivity(server.clientIdentifier, downloadIds);
+      },
+      downloadsGetStatus: async ({ targets }) => {
+        const server = await auth.getUserSelectedServer();
+        return server
+          ? downloads.statuses(server.clientIdentifier, targets)
+          : targets.map((target) => ({
+              ...target,
+              state: "not-downloaded" as const,
+              activeState: null,
+              completedTracks: 0,
+              totalTracks: 0,
+            }));
+      },
+      downloadsRemove: ({ downloadId }) => downloads.remove(downloadId),
+      downloadsGetProgress: async ({ downloadIds }) => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) return [];
+        return downloads
+          .list(server.clientIdentifier)
+          .filter((item) => !downloadIds || downloadIds.includes(item.id))
+          .map(
+            ({ id, state, bytesDownloaded, bytesTotal, error, updatedAt }) => ({
+              id,
+              state,
+              bytesDownloaded,
+              bytesTotal,
+              error,
+              updatedAt,
+            }),
+          );
+      },
+      offlineGetStorageStatus: async () => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) return downloads.storageStatus("");
+        return downloads.storageStatus(server.clientIdentifier);
+      },
+      offlineSetStorageDirectory: async ({ directory }) => {
+        await downloads.setStorageDirectory(directory);
+        const server = await auth.getUserSelectedServer();
+        return downloads.storageStatus(server?.clientIdentifier ?? "");
+      },
+      syncStart: async () => {
+        const server = await auth.getUserSelectedServer();
+        if (!server) throw new Error("Select a Plex server before syncing");
+        return sync.manual(server.clientIdentifier);
+      },
+      syncGetStatus: async () => {
+        const server = await auth.getUserSelectedServer();
+        return server
+          ? sync.getStatus(server.clientIdentifier)
+          : {
+              serverId: null,
+              state: "idle" as const,
+              trigger: null,
+              startedAt: null,
+              completedAt: null,
+              refreshedLibraries: 0,
+              failedLibraries: 0,
+              reconciledDownloads: 0,
+              error: null,
+            };
+      },
       playerGetStatus: () => bass.getPlaybackStatus(),
       playerGetQueue: () => media.getQueue(),
       playerPlayAlbum: ({ ratingKey }) => media.playAlbum(ratingKey),
@@ -221,6 +360,8 @@ function extractUrl(event: unknown): string | null {
 }
 
 function shutdown(): void {
+  artworkCache.dispose();
+  localPlayback.dispose();
   bass.free();
   timeline.dispose();
   Utils.quit();

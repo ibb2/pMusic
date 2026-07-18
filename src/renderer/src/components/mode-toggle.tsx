@@ -1,45 +1,45 @@
-import { useTheme } from '@/components/theme-provider'
-import { useMemo } from 'react'
-import { Toolbar } from './ui/Toolbar'
-import { Icon } from './ui/Icon'
+import { useTheme } from "@/components/theme-provider";
+import { useMemo } from "react";
+import { Toolbar } from "./ui/Toolbar";
+import { IconMoon, IconSun, IconDeviceDesktop } from "@tabler/icons-react";
 
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
 
   const lightTheme = useMemo(() => {
-    return () => setTheme('light')
-  }, [setTheme])
+    return () => setTheme("light");
+  }, [setTheme]);
 
   const darkTheme = useMemo(() => {
-    return () => setTheme('dark')
-  }, [setTheme])
+    return () => setTheme("dark");
+  }, [setTheme]);
   return (
     <div className="flex flex-row items-center justify-between">
       <div className="flex flex-row items-center gap-1">
         <div className="flex items-center justify-around gap-1 bg-black/5 dark:bg-white/5 rounded-lg">
           <Toolbar.Button
             onClick={lightTheme}
-            active={theme === 'light'}
+            active={theme === "light"}
             activeClassName="bg-black/5 dark:bg-white/5"
             className="m-1 mr-0 h-6"
           >
-            <Icon name="Sun" className="size-3" />
+            <IconSun className="size-3" />
           </Toolbar.Button>
           <Toolbar.Button
             onClick={darkTheme}
-            active={theme === 'dark'}
+            active={theme === "dark"}
             activeClassName="bg-black/5 dark:bg-white/5"
             className="m-1 ml-0 h-6"
           >
-            <Icon name="Moon" className="size-3" />
+            <IconMoon className="size-3" />
           </Toolbar.Button>
         </div>
         <Toolbar.Button
-          onClick={() => setTheme('system')}
-          active={theme === 'system'}
+          onClick={() => setTheme("system")}
+          active={theme === "system"}
           className="hover:bg-black/5 dark:hover:bg-white/5 h-8"
         >
-          <Icon name="Monitor" className="size-3" />
+          <IconDeviceDesktop className="size-3" />
         </Toolbar.Button>
       </div>
       {/* <DropdownMenu>
@@ -57,5 +57,5 @@ export function ModeToggle() {
         </DropdownMenuContent>
       </DropdownMenu> */}
     </div>
-  )
+  );
 }
