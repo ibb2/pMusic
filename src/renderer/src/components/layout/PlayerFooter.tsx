@@ -44,6 +44,7 @@ export function PlayerFooter({
   const [position, setPosition] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
   const [mute, toggleMute] = useState(false);
+  const [preMuteVol, setPreMuteVol] = useState(status?.volume ?? 0.5);
 
   useEffect(() => {
     // Reset position immediately when the track changes to avoid showing old progress
@@ -109,7 +110,14 @@ export function PlayerFooter({
   const handleMute = async () => {
     await window.api.player.setMuted(!mute);
     toggleMute(!mute);
-    refetch();
+
+    if (!mute) {
+      setPreMuteVol(status!.volume)
+      handleVolume(0)
+    } else {
+      handleVolume(preMuteVol)
+    }
+
   };
 
   const currentTrack = status?.current_track;
@@ -308,6 +316,9 @@ export function PlayerFooter({
               value={volume}
               max={1}
               step={1 / 100}
+              onValueChange={(value) => {
+                handleVolume(value as number);
+              }}
               onValueCommitted={(value) => {
                 handleVolume(value as number);
               }}
