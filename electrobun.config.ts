@@ -42,7 +42,9 @@ const config: ElectrobunConfig = {
     },
     watch: ["src/bun", "src/shared", "src/renderer", "vendor/bass"],
     mac: {
+      codesign: true,
       createDmg: true,
+      notarize: false,
       icons: "resources/Rayna-New.icon",
       bundleCEF: true,
       entitlements: {
