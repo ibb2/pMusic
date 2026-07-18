@@ -2,8 +2,8 @@ name: Build Application
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    # tags:
+    #   - "v*.*.*"
 
 permissions:
   contents: write
@@ -16,9 +16,11 @@ jobs:
           - os: windows-latest
             artifact-extension: exe
             release-file: rayna-windows-installer.exe
+            codesign-identity: ""
           - os: macos-latest
             artifact-extension: dmg
             release-file: rayna-macos.dmg
+            codesign-identity: "-"
 
     runs-on: ${{ matrix.os }}
 
