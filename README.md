@@ -243,8 +243,8 @@ See the [open issues](https://github.com/ibb2/Rayna/issues) for a full list of p
 
 <!-- CONTRIBUTING -->
 
-## Contributing 
-<!-- 
+## Contributing
+<!--
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
@@ -274,7 +274,7 @@ Pull requests are welcome. For major changes, open an issue first to discuss the
 <!-- LICENSE -->
 ## License
 
-Distributed under the GNU GPLv3 license. See [`LICENSE.txt`](LICENSE.txt) for more information.
+Distributed under the zlib license. See [`LICENSE.txt`](LICENSE.txt) for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -333,7 +333,7 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 [Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
 [Bootstrap-url]: https://getbootstrap.com
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
+[JQuery-url]: https://jquery.com
 
 
 ## Footnotes
