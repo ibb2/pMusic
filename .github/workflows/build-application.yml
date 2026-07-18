@@ -14,8 +14,8 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            artifact-extension: exe
-            release-file: rayna-windows-installer.exe
+            artifact-extension: zip
+            release-file: rayna-windows-installer.zip
             codesign-identity: ""
           - os: macos-latest
             artifact-extension: dmg
