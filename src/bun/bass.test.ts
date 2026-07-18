@@ -50,6 +50,40 @@ describe("BASS Plex route recovery", () => {
     expect(new URL(fake.createdUrls[0]!).origin).toBe(LOCAL);
   });
 
+  test("appends tracks and collections without interrupting playback", () => {
+    const fake = new FakeBassLibrary();
+    const { bass } = manager(fake);
+
+    bass.playTrack(track("current"), source);
+    bass.queueTrack(track("single"), source);
+    bass.queueTracks([
+      { track: track("album-1"), source },
+      { track: track("album-2"), source },
+    ]);
+
+    expect(bass.getPlaybackStatus().current_track?.ratingKey).toBe("current");
+    expect(bass.getQueue().tracks.map((item) => item.ratingKey)).toEqual([
+      "single",
+      "album-1",
+      "album-2",
+    ]);
+  });
+
+  test("starts the first queued track when the player is idle", () => {
+    const fake = new FakeBassLibrary();
+    const { bass } = manager(fake);
+
+    bass.queueTracks([
+      { track: track("album-1"), source },
+      { track: track("album-2"), source },
+    ]);
+
+    expect(bass.getPlaybackStatus().current_track?.ratingKey).toBe("album-1");
+    expect(bass.getQueue().tracks.map((item) => item.ratingKey)).toEqual([
+      "album-2",
+    ]);
+  });
+
   test("falls through to a remote route when initial stream creation fails", () => {
     const fake = new FakeBassLibrary();
     fake.setReachable(LOCAL, false);

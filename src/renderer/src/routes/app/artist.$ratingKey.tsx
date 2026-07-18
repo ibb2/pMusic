@@ -11,6 +11,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   DiscIcon,
   FavouriteIcon,
+  ListStartIcon,
   MoreVerticalIcon,
   MusicNote03Icon,
   NextIcon,
@@ -199,21 +200,34 @@ export function ArtistPage() {
                   variant="ghost"
                   size="icon"
                   className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(event) => event.stopPropagation()}
+                  aria-label={`Add ${track.title}`}
+                >
+                  <HugeiconsIcon icon={PlusSignIcon} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(event) => event.stopPropagation()}
+                  aria-label={`Favourite ${track.title}`}
+                >
+                  <HugeiconsIcon icon={FavouriteIcon} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={async (event) => {
                     event.stopPropagation();
                     await window.api.player.queueTrack(String(track.ratingKey));
                     invalidatePlayerQueries();
                   }}
                   aria-label={`Queue ${track.title}`}
+                  title={`Add ${track.title} to queue`}
                 >
-                  <HugeiconsIcon icon={PlusSignIcon} />
+                  <HugeiconsIcon icon={ListStartIcon} />
                 </Button>
-                <button
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <HugeiconsIcon icon={FavouriteIcon} />
-                </button>
               </div>
             ))
           ) : (

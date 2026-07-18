@@ -260,13 +260,17 @@ export class BassManager {
   }
 
   queueTrack(track: PlayerTrack, source: PlexStreamSource): void {
-    const item = { track, source };
+    this.queueTracks([{ track, source }]);
+  }
+
+  queueTracks(tracks: PlayableTrack[]): void {
+    if (tracks.length === 0) return;
     if (!this.currentTrack && !this.streamHandle) {
-      this.playTracks([item]);
+      this.playTracks(tracks);
       return;
     }
 
-    this.queue.unshift(item);
+    this.queue.push(...tracks);
   }
 
   replaceQueue(tracks: PlayableTrack[]): void {

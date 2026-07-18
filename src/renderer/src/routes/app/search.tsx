@@ -4,6 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import type { SearchResult, SearchResults } from "../../../../shared/rpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { QueueButton } from "@/components/music/QueueButton";
 
 export const Route = createFileRoute("/app/search")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -20,33 +21,53 @@ function SearchPage() {
     enabled: q.trim().length > 0,
   });
 
-  if (!q.trim()) return <SearchMessage text="Enter a search above to find music." />;
+  if (!q.trim())
+    return <SearchMessage text="Enter a search above to find music." />;
   if (query.isLoading)
-    return <div className="flex h-full items-center justify-center"><Spinner className="size-8" /></div>;
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Spinner className="size-8" />
+      </div>
+    );
   if (query.isError)
     return <SearchMessage text={`Search failed: ${query.error.message}`} />;
 
   const results = query.data;
-  const hasResults = results && Object.values(results).some((items) => items.length > 0);
+  const hasResults =
+    results && Object.values(results).some((items) => items.length > 0);
   if (!hasResults) return <SearchMessage text={`No results for “${q}”`} />;
 
   return (
     <div className="flex min-h-full flex-col gap-8 p-6 pb-10">
       <h1 className="text-2xl font-bold">Search results for “{q}”</h1>
-      {(["artists", "albums", "tracks", "playlists"] as const).map((section) => (
-        <ResultSection key={section} title={capitalize(section)} items={results[section]} />
-      ))}
+      {(["artists", "albums", "tracks", "playlists"] as const).map(
+        (section) => (
+          <ResultSection
+            key={section}
+            title={capitalize(section)}
+            items={results[section]}
+          />
+        ),
+      )}
     </div>
   );
 }
 
-function ResultSection({ title, items }: { title: string; items: SearchResult[] }) {
+function ResultSection({
+  title,
+  items,
+}: {
+  title: string;
+  items: SearchResult[];
+}) {
   if (!items.length) return null;
   return (
     <section>
       <h2 className="mb-3 text-xl font-semibold">{title}</h2>
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => <ResultItem key={`${item.type}-${item.ratingKey}`} item={item} />)}
+        {items.map((item) => (
+          <ResultItem key={`${item.type}-${item.ratingKey}`} item={item} />
+        ))}
       </div>
     </section>
   );
@@ -55,18 +76,64 @@ function ResultSection({ title, items }: { title: string; items: SearchResult[] 
 function ResultItem({ item }: { item: SearchResult }) {
   const content = (
     <div className="flex min-w-0 items-center gap-3 rounded-lg p-2 text-left hover:bg-muted">
-      <img src={item.thumb || BlankImage} alt="" className="size-14 shrink-0 rounded-md object-cover" />
-      <div className="min-w-0"><div className="truncate font-medium">{item.title}</div><div className="truncate text-sm text-muted-foreground">{item.subtitle}</div></div>
+      <img
+        src={item.thumb || BlankImage}
+        alt=""
+        className="size-14 shrink-0 rounded-md object-cover"
+      />
+      <div className="min-w-0">
+        <div className="truncate font-medium">{item.title}</div>
+        <div className="truncate text-sm text-muted-foreground">
+          {item.subtitle}
+        </div>
+      </div>
     </div>
   );
   if (item.type === "track")
-    return <Button variant="ghost" className="h-auto justify-start p-0" onClick={() => window.api.player.playTrack(item.ratingKey)}>{content}</Button>;
-  const to = item.type === "artist" ? "/app/artist/$ratingKey" : item.type === "album" ? "/app/album/$ratingKey" : "/app/playlist/$ratingKey";
-  return <Link to={to} params={{ ratingKey: item.ratingKey }}>{content}</Link>;
+    return (
+      <div className="flex min-w-0 items-center gap-1 rounded-lg hover:bg-muted">
+        <Button
+          variant="ghost"
+          className="h-auto min-w-0 flex-1 justify-start p-0 hover:bg-transparent"
+          onClick={() => window.api.player.playTrack(item.ratingKey)}
+        >
+          {content}
+        </Button>
+        <QueueButton
+          className="mr-2"
+          target={{
+            type: "track",
+            ratingKey: item.ratingKey,
+            title: item.title,
+          }}
+        />
+      </div>
+    );
+  const to =
+    item.type === "artist"
+      ? "/app/artist/$ratingKey"
+      : item.type === "album"
+        ? "/app/album/$ratingKey"
+        : "/app/playlist/$ratingKey";
+  return (
+    <div className="flex min-w-0 items-center gap-1 rounded-lg hover:bg-muted">
+      <Link
+        className="min-w-0 flex-1"
+        to={to}
+        params={{ ratingKey: item.ratingKey }}
+      >
+        {content}
+      </Link>
+    </div>
+  );
 }
 
 function SearchMessage({ text }: { text: string }) {
-  return <div className="flex h-full items-center justify-center p-6 text-muted-foreground">{text}</div>;
+  return (
+    <div className="flex h-full items-center justify-center p-6 text-muted-foreground">
+      {text}
+    </div>
+  );
 }
 
 function capitalize(value: keyof SearchResults): string {

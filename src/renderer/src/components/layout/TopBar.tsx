@@ -33,6 +33,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { SearchResult } from "../../../../shared/rpc";
+import { QueueButton } from "@/components/music/QueueButton";
 import {
   FormEvent,
   KeyboardEvent,
@@ -243,39 +244,56 @@ export function TopBar() {
                 </div>
               ) : suggestions.length > 0 ? (
                 suggestions.map((suggestion, index) => (
-                  <button
+                  <div
                     key={`${suggestion.type}-${suggestion.ratingKey}`}
-                    type="button"
                     role="option"
                     aria-selected={activeSuggestion === index}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => selectSuggestion(suggestion)}
                     onMouseEnter={() => setActiveSuggestion(index)}
                     className={cn(
                       "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left",
                       activeSuggestion === index && "bg-accent",
                     )}
                   >
-                    {suggestion.thumb ? (
-                      <img
-                        src={suggestion.thumb}
-                        alt=""
-                        className="size-10 shrink-0 rounded-md object-cover"
+                    <button
+                      type="button"
+                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => selectSuggestion(suggestion)}
+                    >
+                      {suggestion.thumb ? (
+                        <img
+                          src={suggestion.thumb}
+                          alt=""
+                          className="size-10 shrink-0 rounded-md object-cover"
+                        />
+                      ) : (
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
+                          <HugeiconsIcon
+                            icon={Search01Icon}
+                            className="size-4"
+                          />
+                        </span>
+                      )}
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium">
+                          {suggestion.title}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {suggestion.subtitle} · {suggestion.type}
+                        </span>
+                      </span>
+                    </button>
+                    {suggestion.type === "track" ? (
+                      <QueueButton
+                        className="-mr-1"
+                        target={{
+                          type: "track",
+                          ratingKey: suggestion.ratingKey,
+                          title: suggestion.title,
+                        }}
                       />
-                    ) : (
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
-                        <HugeiconsIcon icon={Search01Icon} className="size-4" />
-                      </div>
-                    )}
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium">
-                        {suggestion.title}
-                      </span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {suggestion.subtitle} · {suggestion.type}
-                      </span>
-                    </span>
-                  </button>
+                    ) : null}
+                  </div>
                 ))
               ) : debouncedQuery === searchQuery.trim() ? (
                 <div className="px-3 py-2 text-sm text-muted-foreground">

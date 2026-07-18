@@ -4,6 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import {
   Clock01Icon,
   FavouriteIcon,
+  ListStartIcon,
   MoreVerticalIcon,
   PlayIcon,
   PlusSignIcon,
@@ -16,6 +17,13 @@ import { useEffect } from "react";
 import { DownloadButton, downloadsApi } from "@/components/downloads";
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/app/album/$ratingKey")({
   component: AlbumPage,
@@ -144,21 +152,33 @@ export function AlbumPage() {
         <Button variant={"secondary"} size="icon-lg" className="rounded-full">
           <HugeiconsIcon icon={FavouriteIcon} />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          disabled={offline && !albumDownloaded}
-          onClick={async () => {
-            await window.api.player.queueAlbum(ratingKey);
-            invalidatePlayerQueries();
-          }}
-          aria-label="Queue album"
-        >
-          <HugeiconsIcon icon={PlusSignIcon} />
-        </Button>
-        <Button variant="ghost" size="icon">
-          <HugeiconsIcon icon={MoreVerticalIcon} />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="More album actions"
+              />
+            }
+          >
+            <HugeiconsIcon icon={MoreVerticalIcon} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuGroup>
+              <DropdownMenuItem
+                disabled={offline && !albumDownloaded}
+                onClick={async () => {
+                  await window.api.player.queueAlbum(ratingKey);
+                  invalidatePlayerQueries();
+                }}
+              >
+                <HugeiconsIcon icon={ListStartIcon} data-icon="inline-start" />
+                Add album to queue
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <DownloadButton
           api={downloadsApi}
           target={{ type: "album", ratingKey, title: album.title }}
@@ -167,9 +187,10 @@ export function AlbumPage() {
 
       {/* Track List */}
       <div className="bg-white/60 dark:bg-slate-300/10 rounded-lg">
-        <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-4 px-4 py-2 text-sm border-b">
+        <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-4 px-4 py-2 text-sm border-b">
           <div className="w-8 text-center">#</div>
           <div>Title</div>
+          <div></div>
           <div></div>
           <div></div>
           <div></div>
@@ -184,7 +205,7 @@ export function AlbumPage() {
           return (
             <div
               key={track.id}
-              className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] items-center gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors"
+              className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] items-center gap-4 px-4 py-3 rounded group hover:bg-slate-200/50 dark:hover:bg-slate-200/50 transition-colors"
             >
               <div className="text-center w-8 group-hover:hidden">
                 {index + 1}
@@ -211,7 +232,27 @@ export function AlbumPage() {
               >
                 {track.title}
               </button>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
+                className="opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-not-allowed disabled:opacity-30"
+                onClick={(event) => event.stopPropagation()}
+                aria-label={`Add ${track.title}`}
+              >
+                <HugeiconsIcon icon={PlusSignIcon} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(event) => event.stopPropagation()}
+                aria-label={`Favourite ${track.title}`}
+              >
+                <HugeiconsIcon icon={FavouriteIcon} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 className="opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-not-allowed disabled:opacity-30"
                 disabled={!playable}
                 onClick={async (event) => {
@@ -220,15 +261,10 @@ export function AlbumPage() {
                   invalidatePlayerQueries();
                 }}
                 aria-label={`Queue ${track.title}`}
+                title={`Add ${track.title} to queue`}
               >
-                <HugeiconsIcon icon={PlusSignIcon} />
-              </button>
-              <button
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <HugeiconsIcon icon={FavouriteIcon} />
-              </button>
+                <HugeiconsIcon icon={ListStartIcon} />
+              </Button>
               {downloaded ? (
                 <IconCircleCheckFilled
                   className="size-4 text-emerald-600"

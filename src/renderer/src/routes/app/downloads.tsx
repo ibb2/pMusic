@@ -34,6 +34,7 @@ import type {
   DownloadTargetType,
 } from "../../../../shared/types";
 import { useSelectedServerId } from "@/hooks/use-selected-server-id";
+import { QueueButton } from "@/components/music/QueueButton";
 
 export const Route = createFileRoute("/app/downloads")({
   component: DownloadsPage,
@@ -192,7 +193,7 @@ function DownloadsPage() {
                       </CardDescription>
                     </div>
                   </CollapsibleTrigger>
-                  <CardAction>
+                  <CardAction className="flex items-center gap-1">
                     <Button
                       size="sm"
                       variant="outline"
@@ -208,11 +209,22 @@ function DownloadsPage() {
                       {group.items.map((item) => (
                         <div
                           key={item.id}
-                          className="flex justify-between gap-4 py-2 text-sm"
+                          className="flex items-center justify-between gap-4 py-2 text-sm"
                         >
                           <span className="truncate">{item.title}</span>
-                          <span className="shrink-0 text-muted-foreground">
-                            {formatBytes(item.bytesDownloaded)}
+                          <span className="flex shrink-0 items-center gap-2">
+                            <span className="text-muted-foreground">
+                              {formatBytes(item.bytesDownloaded)}
+                            </span>
+                            <QueueButton
+                              allowOffline
+                              disabled={item.state !== "completed"}
+                              target={{
+                                type: "track",
+                                ratingKey: item.trackRatingKey,
+                                title: item.title,
+                              }}
+                            />
                           </span>
                         </div>
                       ))}

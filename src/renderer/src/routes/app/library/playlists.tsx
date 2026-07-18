@@ -211,28 +211,36 @@ function PlaylistCard({ playlist }: { playlist: any }) {
     : "0hr 0min";
 
   return (
-    <Link
-      to="/app/playlist/$ratingKey"
-      params={{ ratingKey: playlist.ratingKey }}
-      preload="intent"
-      className="h-fit"
-    >
+    <div className="h-fit">
       <div className="relative flex w-40 shrink-0 justify-center rounded-md bg-transparent p-3 hover:bg-zinc-300/60 dark:hover:bg-zinc-800/60">
         <div className="min-w-0">
-          <img
-            src={image}
-            alt={playlist.title}
-            className="mb-1.5 aspect-square w-full rounded-lg object-cover"
-            loading="lazy"
-          />
-          <p className="mb-0.5 truncate text-sm leading-tight hover:underline">
-            {playlist.title}
-          </p>
+          <Link
+            to="/app/playlist/$ratingKey"
+            params={{ ratingKey: playlist.ratingKey }}
+            preload="intent"
+          >
+            <img
+              src={image}
+              alt={playlist.title}
+              className="mb-1.5 aspect-square w-full rounded-lg object-cover"
+              loading="lazy"
+            />
+          </Link>
+          <Link
+            to="/app/playlist/$ratingKey"
+            params={{ ratingKey: playlist.ratingKey }}
+            preload="intent"
+            className="min-w-0"
+          >
+            <p className="truncate text-sm leading-tight hover:underline">
+              {playlist.title}
+            </p>
+          </Link>
           <p className="truncate text-xs leading-tight text-black/80 dark:text-muted-foreground">
             {playlist.smart ? "Smart playlist" : "Playlist"} · {length}
           </p>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

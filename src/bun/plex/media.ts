@@ -1674,7 +1674,7 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
-    this.bass.replaceQueue(playableTracks);
+    this.bass.queueTracks(playableTracks);
     return { status: "queued", count: playableTracks.length };
   }
 
@@ -1686,7 +1686,7 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
     const playableTracks = await Promise.all(
       tracks.map((track) => this.toPlayableTrack(track)),
     );
-    this.bass.replaceQueue(playableTracks);
+    this.bass.queueTracks(playableTracks);
     return { status: "queued", count: playableTracks.length };
   }
 

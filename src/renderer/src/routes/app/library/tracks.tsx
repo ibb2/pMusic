@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DownloadButton, downloadsApi } from "@/components/downloads";
 import { useSelectedServerId } from "@/hooks/use-selected-server-id";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { QueueButton } from "@/components/music/QueueButton";
 
 export const Route = createFileRoute("/app/library/tracks")({
   component: TracksPage,
@@ -269,13 +270,17 @@ function TrackRow({
         >
           Play
         </button>
-        <button
-          className="rounded-md border px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-40"
+        <QueueButton
+          showLabel
+          allowOffline={playable}
+          className="rounded-md border"
           disabled={!playable}
-          onClick={() => window.api.player.queueTrack(track.ratingKey)}
-        >
-          Queue
-        </button>
+          target={{
+            type: "track",
+            ratingKey: track.ratingKey,
+            title: track.title,
+          }}
+        />
         <DownloadButton
           compact
           api={downloadsApi}
