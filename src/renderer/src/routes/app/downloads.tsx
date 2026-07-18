@@ -1,5 +1,18 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,6 +24,8 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { IconDownload, IconTrash } from "@tabler/icons-react";
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useState } from "react";
 import type {
   DownloadGroup,
@@ -148,45 +163,64 @@ function DownloadsPage() {
       ) : (
         <div className="grid gap-3">
           {groups.map((group) => (
-            <section
+            <Collapsible
               key={`${group.targetType}-${group.targetRatingKey}`}
-              className="rounded-xl border bg-card p-4"
+              defaultOpen={false}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h2 className="truncate font-semibold">{group.title}</h2>
-                    <Badge variant="outline" className="capitalize">
-                      {group.targetType}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {group.artist} · {group.items.length}{" "}
-                    {group.items.length === 1 ? "track" : "tracks"}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => void remove(group)}
-                >
-                  <IconTrash /> Remove
-                </Button>
-              </div>
-              <div className="mt-3 divide-y">
-                {group.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between gap-4 py-2 text-sm"
+              <Card size="sm" className="gap-0">
+                <CardHeader className="flex flex-row items-start justify-between gap-4">
+                  <CollapsibleTrigger
+                    className="group flex min-w-0 flex-1 items-start gap-3 text-left"
+                    aria-label={`Toggle ${group.title} downloads`}
                   >
-                    <span className="truncate">{item.title}</span>
-                    <span className="shrink-0 text-muted-foreground">
-                      {formatBytes(item.bytesDownloaded)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
+                    <HugeiconsIcon
+                      icon={ArrowDown01Icon}
+                      className="mt-0.5 shrink-0 transition-transform group-data-[open]:rotate-180"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="truncate">
+                          {group.title}
+                        </CardTitle>
+                        <Badge variant="outline" className="capitalize">
+                          {group.targetType}
+                        </Badge>
+                      </div>
+                      <CardDescription>
+                        {group.artist} · {group.items.length}{" "}
+                        {group.items.length === 1 ? "track" : "tracks"}
+                      </CardDescription>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CardAction>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void remove(group)}
+                    >
+                      <IconTrash data-icon="inline-start" /> Remove
+                    </Button>
+                  </CardAction>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="pt-3">
+                    <div className="divide-y">
+                      {group.items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex justify-between gap-4 py-2 text-sm"
+                        >
+                          <span className="truncate">{item.title}</span>
+                          <span className="shrink-0 text-muted-foreground">
+                            {formatBytes(item.bytesDownloaded)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           ))}
         </div>
       )}
