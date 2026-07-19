@@ -53,6 +53,10 @@ jobs:
 
           mv "$artifact" "$target"
 
+      - name: Remove ad-hoc signature from macOS DMG
+        if: runner.os == 'macOS'
+        run: codesign --remove-signature dist/rayna-macos.dmg
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
