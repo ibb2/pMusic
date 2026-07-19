@@ -162,7 +162,7 @@ This is an example of how to list things you need to use the software and how to
 | Platform | Download |
 | --- | --- |
 | Windows | [Installer (x64)](https://github.com/ibb2/Rayna/releases/latest/download/rayna-windows-installer.zip) |
-| macOS | [DMG (x64, arm64)](https://github.com/edde746/Rayna/releases/latest/download/rayna-macos.dmg)  |
+| macOS | [DMG (x64, arm64)](https://github.com/ibb2/Rayna/releases/latest/download/rayna-macos.dmg)  |
 
 ##### Post Install (Macos)
 After install, open Terminal and run:
