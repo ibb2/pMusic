@@ -53,9 +53,20 @@ jobs:
 
           mv "$artifact" "$target"
 
-      - name: Remove ad-hoc signature from macOS DMG
+      - name: Re-encode macOS DMG without outer signature
         if: runner.os == 'macOS'
-        run: codesign --remove-signature dist/rayna-macos.dmg
+        shell: bash
+        run: |
+          signed_dmg="dist/rayna-macos.dmg"
+          unsigned_dmg="dist/rayna-macos-unsigned.dmg"
+
+          diskutil image create from --format ULFO "$signed_dmg" "$unsigned_dmg"
+          mv "$unsigned_dmg" "$signed_dmg"
+
+          if codesign -d "$signed_dmg" >/dev/null 2>&1; then
+            echo "The release DMG still has an outer code signature" >&2
+            exit 1
+          fi
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
