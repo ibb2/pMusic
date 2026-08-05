@@ -18,7 +18,12 @@ import type { SyncResolver, LibraryRefreshResult } from "../sync-service";
 import type { ArtworkCacheServer } from "../artwork-cache-server";
 import type Authentication from "./authentication";
 import { selectMusicLibraries } from "./library-selection";
-import { findLyricsStreamKey, parseLyrics } from "./lyrics";
+import {
+  findLyricsStreamKeys,
+  parseLyrics,
+  selectLyricsCandidate,
+  type LyricsCandidate,
+} from "./lyrics";
 import type {
   PlaybackSettings,
   PlaybackSettingsPatch,
@@ -481,7 +486,7 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
 
   async getLyrics(ratingKey: string): Promise<LyricsResult> {
     const server = await this.getSelectedServer();
-    const cacheKey = `lyrics:${ratingKey}`;
+    const cacheKey = `lyrics:v2:${ratingKey}`;
     try {
       const cached = await this.cache.readThrough({
         serverId: server.clientIdentifier,
@@ -489,9 +494,24 @@ export class MediaService implements DownloadMediaResolver, SyncResolver {
         ttlMs: 24 * 60 * 60 * 1000,
         fetch: async () => {
           const metadata = await this.fetchMetadataItem(ratingKey);
-          const streamKey = findLyricsStreamKey(metadata);
-          if (!streamKey) return null;
-          return this.fetchPlexText(streamKey);
+          const streamKeys = findLyricsStreamKeys(metadata);
+          if (!streamKeys.length) return null;
+
+          const candidates: LyricsCandidate[] = [];
+          for (const streamKey of streamKeys) {
+            try {
+              const text = await this.fetchPlexText(streamKey);
+              candidates.push({ text, parsed: parseLyrics(text) });
+            } catch {
+              // One unavailable lyric stream should not hide another Plex
+              // stream for the same track.
+            }
+          }
+
+          return (
+            selectLyricsCandidate(candidates, Number(metadata.duration))
+              ?.text ?? null
+          );
         },
       });
       if (cached.value === null)

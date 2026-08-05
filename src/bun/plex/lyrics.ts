@@ -1,11 +1,19 @@
 import type { LyricsLine } from "../../shared/types";
 
 const TIMESTAMP = /\[(\d{1,3}):(\d{2})(?:[.:](\d{1,3}))?\]/;
+const MAX_LYRICS_END_OVERFLOW_MS = 10_000;
 
-export function parseLyrics(input: string): {
+export type ParsedLyrics = {
   format: "plain" | "lrc";
   lines: LyricsLine[];
-} {
+};
+
+export type LyricsCandidate = {
+  text: string;
+  parsed: ParsedLyrics;
+};
+
+export function parseLyrics(input: string): ParsedLyrics {
   const normalized = input
     .replace(/^\uFEFF/, "")
     .replaceAll("\r\n", "\n")
@@ -45,19 +53,61 @@ export function parseLyrics(input: string): {
   return { format: timed ? "lrc" : "plain", lines };
 }
 
-export function findLyricsStreamKey(
-  metadata: Record<string, any>,
-): string | null {
+export function findLyricsStreamKeys(metadata: Record<string, any>): string[] {
   const streams = (metadata.Media || []).flatMap((media: Record<string, any>) =>
     (media.Part || []).flatMap(
       (part: Record<string, any>) => part.Stream || [],
     ),
   );
-  const stream = streams.find(
-    (candidate: Record<string, any>) =>
-      Number(candidate.streamType) === 4 &&
-      typeof candidate.key === "string" &&
-      candidate.key,
+  return streams
+    .filter(
+      (candidate: Record<string, any>) =>
+        Number(candidate.streamType) === 4 &&
+        typeof candidate.key === "string" &&
+        candidate.key,
+    )
+    .map((candidate: Record<string, any>) => candidate.key);
+}
+
+export function findLyricsStreamKey(
+  metadata: Record<string, any>,
+): string | null {
+  return findLyricsStreamKeys(metadata)[0] || null;
+}
+
+export function selectLyricsCandidate(
+  candidates: LyricsCandidate[],
+  trackDurationMs: number | null | undefined,
+): LyricsCandidate | null {
+  const usable = candidates.filter(
+    (candidate) => candidate.parsed.lines.length,
   );
-  return stream?.key || null;
+  if (!usable.length) return null;
+
+  if (!trackDurationMs || !Number.isFinite(trackDurationMs)) {
+    return usable[0] || null;
+  }
+
+  const timed = usable.filter((candidate) => candidate.parsed.format === "lrc");
+  if (!timed.length) return usable[0] || null;
+
+  const durationMatched = timed.find(
+    (candidate) =>
+      lastTimestampMs(candidate.parsed.lines) <=
+      trackDurationMs + MAX_LYRICS_END_OVERFLOW_MS,
+  );
+  if (durationMatched) return durationMatched;
+
+  // Do not show a clearly incompatible timed lyric source when Plex also
+  // returned an untimed fallback. A wrong release is worse than no sync.
+  return (
+    usable.find((candidate) => candidate.parsed.format === "plain") || null
+  );
+}
+
+function lastTimestampMs(lines: LyricsLine[]): number {
+  return lines.reduce(
+    (latest, line) => Math.max(latest, line.startTimeMs ?? 0),
+    0,
+  );
 }
