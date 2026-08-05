@@ -40,7 +40,9 @@ describe("BASS stream proxy", () => {
     const proxy = new BassStreamProxy();
     runningProxies.push(proxy);
     const target = `http://127.0.0.1:${upstream.port}/audio.flac?X-Plex-Token=fixture-token`;
-    const response = await fetch(proxy.urlFor(target), {
+    const proxyUrl = proxy.urlFor(target);
+    expect(new URL(proxyUrl).pathname).toEndWith(".flac");
+    const response = await fetch(proxyUrl, {
       headers: { Range: "bytes=2-4" },
     });
 

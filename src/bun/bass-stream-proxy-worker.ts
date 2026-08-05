@@ -53,7 +53,10 @@ self.onmessage = (event: MessageEvent) => {
 };
 
 async function handle(request: Request): Promise<Response> {
-  const id = new URL(request.url).pathname.slice(1);
+  const id = new URL(request.url).pathname.match(
+    /^\/([0-9a-f-]+)(?:\.[a-z0-9]+)?$/i,
+  )?.[1];
+  if (!id) return new Response("Not found", { status: 404 });
   const targetUrl = targets.get(id);
   if (!targetUrl) return new Response("Not found", { status: 404 });
 

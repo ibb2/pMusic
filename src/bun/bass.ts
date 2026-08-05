@@ -761,7 +761,7 @@ export class BassManager {
       const streamCreateOperation = candidate.localPath
         ? "BASS_StreamCreateFile"
         : "BASS_StreamCreateURL";
-      const handle = candidate.localPath
+      let handle = candidate.localPath
         ? this.library.symbols.BASS_StreamCreateFile(
             false,
             this.toCString(candidate.localPath),
@@ -769,20 +769,24 @@ export class BassManager {
             0n,
             0,
           )
-        : this.library.symbols.BASS_StreamCreateURL(
-            this.toCString(
-              candidate.connectionUri === "offline"
-                ? candidate.url
-                : (this.streamProxy?.urlFor(candidate.url) ?? candidate.url),
-            ),
+        : 0;
+
+      if (!candidate.localPath) {
+        for (const url of this.playbackUrls(candidate)) {
+          handle = this.library.symbols.BASS_StreamCreateURL(
+            this.toCString(url),
             0,
             0,
             null,
             null,
           );
+          if (handle) break;
+          lastCandidateError = `${streamCreateOperation} error ${this.library.symbols.BASS_ErrorGetCode()}`;
+        }
+      }
 
       if (!handle) {
-        lastCandidateError = `${streamCreateOperation} error ${this.library.symbols.BASS_ErrorGetCode()}`;
+        lastCandidateError ??= `${streamCreateOperation} error ${this.library.symbols.BASS_ErrorGetCode()}`;
         excludedConnectionUris.add(candidate.connectionUri);
         continue;
       }
@@ -833,6 +837,17 @@ export class BassManager {
         : "No reachable Plex audio stream was found",
     );
     return false;
+  }
+
+  private playbackUrls(candidate: StreamCandidate): string[] {
+    if (candidate.connectionUri === "offline" || !this.streamProxy) {
+      return [candidate.url];
+    }
+
+    const proxied = this.streamProxy.urlFor(candidate.url);
+    return hasAudioExtension(candidate.url)
+      ? [candidate.url, proxied]
+      : [proxied];
   }
 
   private recoverCurrentPlayback(): void {
@@ -1100,5 +1115,13 @@ export class BassManager {
       (version >>> 8) & 0xff,
       version & 0xff,
     ].join(".");
+  }
+}
+
+function hasAudioExtension(url: string): boolean {
+  try {
+    return /\.(?:aac|flac|m4a|mp3|ogg|opus|wav)$/i.test(new URL(url).pathname);
+  } catch {
+    return false;
   }
 }

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { extname } from "node:path";
 
 const WORKER_START_TIMEOUT_MS = 5_000;
 const TARGET_REGISTRATION_TIMEOUT_MS = 2_000;
@@ -36,7 +37,7 @@ export class BassStreamProxy {
       this.idsByTarget.set(targetUrl, id);
       this.registerTarget(id, targetUrl);
     }
-    return `http://127.0.0.1:${this.port}/${id}`;
+    return `http://127.0.0.1:${this.port}/${id}${formatExtension(targetUrl)}`;
   }
 
   dispose(): void {
@@ -61,4 +62,9 @@ export class BassStreamProxy {
       throw new Error("BASS stream proxy target registration timed out");
     }
   }
+}
+
+function formatExtension(targetUrl: string): string {
+  const extension = extname(new URL(targetUrl).pathname).toLowerCase();
+  return /^\.[a-z0-9]{1,10}$/.test(extension) ? extension : "";
 }

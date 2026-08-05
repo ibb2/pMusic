@@ -50,6 +50,46 @@ describe("BASS Plex route recovery", () => {
     expect(new URL(fake.createdUrls[0]!).origin).toBe(LOCAL);
   });
 
+  test("prefers direct audio URLs so native streams remain seekable", () => {
+    const fake = new FakeBassLibrary();
+    const target = `${LOCAL}/library/parts/1/file.flac`;
+    const bass = new BassManager({
+      library: fake.library,
+      streamProxy: {
+        urlFor: () => "http://proxy.test/stream.flac",
+        dispose() {},
+      } as never,
+      monitorIntervalMs: 0,
+    });
+    bass.setStreamResolver(() => [{ connectionUri: LOCAL, url: target }]);
+
+    bass.playTrack(track("seekable"), source);
+
+    expect(fake.createdUrls).toEqual([target]);
+  });
+
+  test("falls back to the proxy when a direct audio URL cannot open", () => {
+    const fake = new FakeBassLibrary();
+    fake.setReachable(LOCAL, false);
+    fake.setReachable("http://proxy.test", true);
+    const target = `${LOCAL}/library/parts/1/file.flac`;
+    const proxied = "http://proxy.test/stream.flac";
+    const bass = new BassManager({
+      library: fake.library,
+      streamProxy: {
+        urlFor: () => proxied,
+        dispose() {},
+      } as never,
+      monitorIntervalMs: 0,
+    });
+    bass.setStreamResolver(() => [{ connectionUri: LOCAL, url: target }]);
+
+    bass.playTrack(track("fallback"), source);
+
+    expect(fake.createdUrls).toEqual([target, proxied]);
+    expect(bass.getPlaybackStatus().current_track?.ratingKey).toBe("fallback");
+  });
+
   test("appends tracks and collections without interrupting playback", () => {
     const fake = new FakeBassLibrary();
     const { bass } = manager(fake);

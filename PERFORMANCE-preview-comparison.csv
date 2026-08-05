@@ -1,0 +1,16 @@
+category,metric,version,value,unit,sample_count,measurement_basis
+Responsiveness,Cold launch to first window,0.5.4-alpha.2,1772,ms,1,Computer Use from fully terminated app
+Responsiveness,Cold launch to first window,1.0.0-preview.1,1843,ms,1,Computer Use from fully terminated app
+Responsiveness,Cold launch to usable Home,0.5.4-alpha.2,2490,ms,1,Search field and populated Home visible
+Responsiveness,Cold launch to usable Home,1.0.0-preview.1,1843,ms,1,Search field and populated Home visible
+Responsiveness,Warm route median,0.5.4-alpha.2,767,ms,4,Home and Albums route-ready timings
+Responsiveness,Warm route median,1.0.0-preview.1,801,ms,9,Steady Home and Albums route-ready timings excluding first-route warm-up
+Resources,Settled idle CPU,0.5.4-alpha.2,2.74,percent,5,Aggregate process CPU across five one-second samples
+Resources,Settled idle CPU,1.0.0-preview.1,1.14,percent,5,Aggregate process CPU across five one-second samples with Rayna visible and macOS unlocked
+Resources,Settled idle RSS,0.5.4-alpha.2,574.06,MiB,5,Aggregate process RSS across five one-second samples
+Resources,Settled idle RSS,1.0.0-preview.1,351.55,MiB,5,Aggregate process RSS across five one-second samples with Rayna visible and macOS unlocked
+Package,DMG file size,0.5.4-alpha.2,201207228,bytes,1,Rayna 0.5.4 Alpha 2.dmg
+Package,DMG file size,1.0.0-preview.1,145773568,bytes,1,Rayna MacOS.dmg
+Package,Installed app logical file size,0.5.4-alpha.2,547097303,bytes,1,Summed logical file sizes; matched old installed baseline
+Package,Installed app logical file size,1.0.0-preview.1,397757664,bytes,1,Summed logical file sizes after first launch
+Package,DMG embedded app logical file size,1.0.0-preview.1,145933197,bytes,1,Summed logical file sizes before first launch expansion
